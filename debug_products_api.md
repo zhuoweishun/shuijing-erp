@@ -19,7 +19,7 @@ GET /api/products 返回 "获取产品列表失败" 错误
 ### 1. 检查products表数据
 ```sql
 -- 登录MySQL
-mysql -h 127.0.0.1 -P 3307 -u erp_user -p
+mysql -h 127.0.0.1 -P 3306 -u erp_user -p
 
 -- 使用数据库
 USE shuijing_erp;
