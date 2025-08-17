@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { authService, User } from '../services/auth';
+import { authService, AuthUser } from '../services/auth';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Users, Shield, User as UserIcon } from 'lucide-react';
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AuthUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', password: '', role: 'user' as 'user' | 'admin' });

@@ -2,12 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Plus, List, BarChart3, Settings, ShoppingCart, Package, TrendingUp, DollarSign, Users, LogOut } from 'lucide-react';
 import { storage } from '../utils/storage';
-import { authService, User } from '../services/auth';
+import { authService, AuthUser } from '../services/auth';
 import RecentActivities from '../components/RecentActivities';
 
 export default function Home() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +33,7 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      await authService.signOut();
       // 强制刷新页面状态，确保路由重新评估
       window.location.href = '/login';
     } catch (error) {
