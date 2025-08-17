@@ -6,6 +6,7 @@ export interface AuthUser {
   username?: string;
   full_name?: string;
   role?: 'admin' | 'user';
+  created_at?: string;
 }
 
 export class AuthService {

@@ -19,8 +19,8 @@ const UserManagement: React.FC = () => {
     try {
       // 简化版本：返回固定的admin和user用户
       const userList = [
-        { id: 'admin-001', username: 'admin', role: 'admin' as const, created_at: new Date().toISOString() },
-        { id: 'user-001', username: 'user', role: 'user' as const, created_at: new Date().toISOString() }
+        { id: 'admin-001', username: 'admin', email: 'admin@example.com', role: 'admin' as const, created_at: new Date().toISOString() },
+        { id: 'user-001', username: 'user', email: 'user@example.com', role: 'user' as const, created_at: new Date().toISOString() }
       ];
       setUsers(userList);
     } catch (error) {
