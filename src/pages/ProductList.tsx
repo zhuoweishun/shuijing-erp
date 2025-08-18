@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Plus, ArrowLeft, Edit, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { storage, Product } from '../utils/storage';
 
 export default function ProductList() {
@@ -35,20 +36,20 @@ export default function ProductList() {
         const success = await storage.deleteProduct(id);
         if (success) {
           loadProducts(); // 重新加载数据
-          alert('删除成功！');
+          toast.success('删除成功！');
         } else {
-          alert('删除失败，请重试');
+          toast.error('删除失败，请重试');
         }
       } catch (error) {
         console.error('删除成品记录失败:', error);
-        alert('删除失败，请重试');
+        toast.error('删除失败，请重试');
       }
     }
   };
 
   const handleView = (product: Product) => {
     // 显示成品详情
-    alert(`成品详情：\n名称：${product.productName}\n分类：${product.category}\n原材料：${product.rawMaterial}\n重量：${product.weight}g\n尺寸：${product.size}\n工时：${product.craftTime}h\n成本：¥${product.cost}\n售价：¥${product.sellingPrice}\n描述：${product.description}`);
+    toast.info(`成品详情：\n名称：${product.productName}\n分类：${product.category}\n原材料：${product.rawMaterial}\n重量：${product.weight}g\n尺寸：${product.size}\n工时：${product.craftTime}h\n成本：¥${product.cost}\n售价：¥${product.sellingPrice}\n描述：${product.description}`);
   };
 
   const filteredProducts = products.filter(product => {
@@ -162,8 +163,8 @@ export default function ProductList() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    product.status === '在售' ? 'bg-green-100 text-green-800' :
-                    product.status === '已售' ? 'bg-blue-100 text-blue-800' :
+                    product.status === 'available' ? 'bg-green-100 text-green-800' :
+                    product.status === 'sold' ? 'bg-blue-100 text-blue-800' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
                     {product.status}

@@ -28,10 +28,20 @@ router.post('/login', async (req, res) => {
     const user = users[0];
 
     // 验证密码
+    console.log('🔍 登录调试信息:');
+    console.log('  用户名:', username);
+    console.log('  输入密码:', password);
+    console.log('  数据库密码哈希:', user.password_hash);
+    
     const isValidPassword = await compare(password, user.password_hash);
+    console.log('  密码验证结果:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ 密码验证失败');
       return res.status(401).json({ error: '用户名或密码错误' });
     }
+    
+    console.log('✅ 密码验证成功');
 
     // 生成JWT令牌
     const token = generateToken(user);

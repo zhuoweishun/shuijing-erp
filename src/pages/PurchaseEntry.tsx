@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Save, ArrowLeft, Camera, Zap, Images, ChevronDown, Settings } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import { storage, Purchase } from '../utils/storage';
-import { PurchaseService } from '../lib/supabaseService';
+import { purchasesAPI } from '../lib/apiService';
 import { authService } from '../services/auth';
 import { createAIService, getGlobalAIConfig, AIRecognitionResult } from '../services/aiService';
 
@@ -57,7 +58,8 @@ export default function PurchaseEntry() {
         // 防止API调用失败导致组件无法渲染
         let supplierList = [];
         try {
-          supplierList = await PurchaseService.getUniqueSuppliers();
+          const response = await purchasesAPI.getSuppliers();
+          supplierList = response.suppliers || [];
         } catch (apiError) {
           console.error('获取供应商列表API调用失败:', apiError);
           // 使用空数组作为后备
@@ -290,7 +292,7 @@ export default function PurchaseEntry() {
   // AI识别处理函数
   const handleRecognize = async () => {
     if (!formData.naturalLanguage.trim()) {
-      alert('请先输入自然语言描述');
+      toast.error('请先输入自然语言描述');
       return;
     }
 
@@ -301,7 +303,7 @@ export default function PurchaseEntry() {
       
       // 检查AI配置
       if (!currentConfig.apiKey) {
-        alert('AI服务配置错误，请联系管理员');
+        toast.error('AI服务配置错误，请联系管理员');
         setIsAIProcessing(false);
         return;
       }
@@ -324,13 +326,12 @@ export default function PurchaseEntry() {
           supplier: result.supplier || ''
         }));
         
-        alert('AI识别完成！请检查并确认识别结果。');
+        toast.success('AI识别完成！请检查并确认识别结果。');
       } else {
-        alert('识别失败，AI返回结果为空');
+        toast.error('识别失败，AI返回结果为空');
       }
     } catch (error) {
-      console.error('AI识别失败:', error);
-      alert(`AI识别失败: ${error.message || '请检查网络连接或稍后重试'}`);
+      toast.error(`AI识别失败: ${error.message || '请检查网络连接或稍后重试'}`);
     } finally {
       setIsAIProcessing(false);
     }
@@ -339,7 +340,6 @@ export default function PurchaseEntry() {
   const handleSave = async () => {
     // 防重复提交
     if (isSaving) {
-      console.log('正在保存中，忽略重复点击');
       return;
     }
     
@@ -358,8 +358,7 @@ export default function PurchaseEntry() {
       
       performSave();
     } catch (error) {
-      console.error('保存失败:', error);
-      alert('保存失败，请重试');
+      toast.error('保存失败，请重试');
     }
   };
   
@@ -424,27 +423,19 @@ export default function PurchaseEntry() {
     setIsSaving(true);
     
     try {
-      console.log('=== 开始保存采购数据 ===');
-      console.log('当前表单数据:', JSON.stringify(formData, null, 2));
-      
       // 验证必填字段
       if (!formData.productName.trim()) {
-        console.error('验证失败: 产品名称为空');
-        alert('请输入产品名称');
+        toast.error('请输入产品名称');
         return;
       }
       if (!formData.weight || parseFloat(formData.weight) <= 0) {
-        console.error('验证失败: 重量无效', formData.weight);
-        alert('请输入有效的重量');
+        toast.error('请输入有效的重量');
         return;
       }
       if (!formData.unitPrice || parseFloat(formData.unitPrice) <= 0) {
-        console.error('验证失败: 克价无效', formData.unitPrice);
-        alert('请输入有效的克价');
+        toast.error('请输入有效的克价');
         return;
       }
-
-      console.log('表单验证通过');
 
       // 计算单珠价格和估算珠子数量
       let beadPrice = 0;
@@ -453,24 +444,20 @@ export default function PurchaseEntry() {
         const size = parseFloat(formData.size);
         const quantity = parseInt(formData.quantity) || 1;
         
-        console.log('计算珠子数据:', { size, quantity });
-        
         // 计算估算珠子数量
         estimatedBeadCount = calculateEstimatedBeadCount(size, quantity);
-        console.log('估算珠子数量:', estimatedBeadCount);
         
         // 计算单珠价格（需要总价）
         if (formData.totalPrice) {
           const totalPrice = parseFloat(formData.totalPrice);
           beadPrice = calculateBeadPrice(size, totalPrice, quantity);
-          console.log('单珠价格:', beadPrice);
         }
       }
 
       // 获取当前用户信息
       const currentUser = await authService.getCurrentUser();
       if (!currentUser) {
-        alert('用户未登录，请先登录');
+        toast.error('用户未登录，请先登录');
         return;
       }
 
@@ -494,60 +481,24 @@ export default function PurchaseEntry() {
         userId: currentUser.id
       };
 
-      console.log('=== 准备保存的数据 ===');
-      console.log('保存的数据:', JSON.stringify(purchaseData, null, 2));
-
-      // 检查认证状态
-      console.log('检查认证状态...');
-      console.log('当前用户:', currentUser);
-      
-      if (!currentUser) {
-        console.error('用户未登录');
-        alert('用户未登录，请先登录');
-        return;
-      }
-      
-      // 修复Supabase会话状态不一致问题
-      console.log('🔧 检查并修复Supabase会话状态...');
-      try {
-        // 简化版本：不需要会话修复
-        const fixResult = { success: false, message: '简化版本不支持会话修复' };
-        console.log('会话修复结果:', fixResult);
-        
-        if (!fixResult.success) {
-          console.warn('⚠️ 会话修复失败，但继续尝试保存:', fixResult.message);
-        }
-      } catch (sessionError) {
-        console.warn('⚠️ 会话修复过程异常，但继续尝试保存:', sessionError);
-      }
-
       if (isEditing && editData) {
-        // 更新现有记录 - 强制使用云端
-        console.log('🌐 强制云端更新现有记录, ID:', editData.id);
-        const result = await storage.updatePurchase(editData.id, purchaseData);
-        console.log('✅ 云端更新结果:', result);
-        alert('采购记录已成功更新到云端！');
+        // 更新现有记录
+        await storage.updatePurchase(editData.id, purchaseData);
+        toast.success('采购记录已成功更新！');
       } else {
-        // 创建新记录 - 强制使用云端
-        console.log('🌐 强制云端创建新记录...');
-        const result = await storage.savePurchase(purchaseData);
-        console.log('✅ 云端保存结果:', result);
-        alert('采购记录已成功保存到云端！');
+        // 创建新记录
+        await storage.savePurchase(purchaseData);
+        toast.success('采购记录已成功保存！');
       }
       
-      console.log('保存完成，准备跳转到列表页');
       navigate('/purchase/list');
     } catch (error) {
-      console.error('=== 保存失败 ===');
-      console.error('错误详情:', error);
-      console.error('错误堆栈:', error.stack);
-      
       // 简化的错误处理
       const { ErrorHandler } = await import('../utils/errorHandler');
       const errorMessage = ErrorHandler.getUserMessage(error);
       
       // 显示用户友好的错误信息
-      alert(errorMessage);
+      toast.error(errorMessage);
       
       // 如果是认证相关错误，提示用户重新登录
       if (error.message && (error.message.includes('auth') || error.message.includes('session') || error.message.includes('token'))) {
@@ -654,7 +605,7 @@ export default function PurchaseEntry() {
               onFocus={(e) => handleInputFocus(9, e)}
               onBlur={handleInputBlur}
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="例如：在张三家买的紫水晶，大小是10，重量50克，A级品相，单价15元"
+              placeholder="例如：在某供应商处购买的水晶，大小是10，重量50克，A级品相，单价15元"
               style={{ height: '80px' }}
             />
             <div className="flex gap-2">

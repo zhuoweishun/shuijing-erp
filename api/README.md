@@ -58,7 +58,7 @@ cp .env.example .env
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=erp_user
-DB_PASSWORD=your_password
+DB_PASSWORD=erp123456
 DB_NAME=shuijing_erp
 ```
 
@@ -96,7 +96,7 @@ NODE_ENV=production
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=erp_user
-DB_PASSWORD=your_database_password
+DB_PASSWORD=erp123456
 DB_NAME=shuijing_erp
 FRONTEND_URL=http://your-domain.com
 ```

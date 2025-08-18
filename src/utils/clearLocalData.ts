@@ -5,8 +5,6 @@ export class LocalDataCleaner {
    * 清除所有本地存储的数据
    */
   static clearAllLocalData(): void {
-    console.log('🗑️ 开始清除所有本地存储数据...');
-    
     try {
       // 清除localStorage中的所有相关数据
       const localStorageKeys = [
@@ -48,7 +46,7 @@ export class LocalDataCleaner {
       // 清除IndexedDB（如果有的话）
       this.clearIndexedDB();
       
-      console.log('🎉 所有本地存储数据已清除完毕');
+
       
     } catch (error) {
       console.error('❌ 清除本地存储数据时出错:', error);
@@ -70,7 +68,7 @@ export class LocalDataCleaner {
             console.log(`✅ 已清除IndexedDB: ${dbName}`);
           };
           deleteRequest.onerror = () => {
-            console.log(`⚠️ IndexedDB ${dbName} 不存在或已清除`);
+            // IndexedDB不存在或已清除
           };
         });
       }
@@ -96,7 +94,6 @@ export class LocalDataCleaner {
     
     keysToCheck.forEach(key => {
       if (localStorage.getItem(key) || sessionStorage.getItem(key)) {
-        console.warn(`⚠️ 发现残留的本地数据: ${key}`);
         hasLocalData = true;
       }
     });
@@ -123,9 +120,6 @@ export class LocalDataCleaner {
     }, 1000);
   }
 }
-
-// 立即执行清除操作
-LocalDataCleaner.clearAllLocalData();
 
 // 导出供其他模块使用
 export default LocalDataCleaner;

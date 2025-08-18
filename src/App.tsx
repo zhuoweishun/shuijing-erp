@@ -3,66 +3,35 @@ import { Toaster } from 'sonner';
 import { useEffect, useState } from 'react';
 import { authService } from './services/auth';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from "@/pages/Login";
-import Home from "@/pages/Home";
-import PurchaseEntry from "@/pages/PurchaseEntry";
-
-import PurchaseList from "@/pages/PurchaseList";
-import ProductEntry from "@/pages/ProductEntry";
-import ProductList from "@/pages/ProductList";
-import Statistics from "@/pages/Statistics";
-import Settings from "@/pages/Settings";
-import UserManagement from "@/pages/UserManagement";
-import Debug from "@/pages/Debug";
-
+import NetworkDiagnostic from './components/NetworkDiagnostic';
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import PurchaseEntry from "./pages/PurchaseEntry";
+import PurchaseList from "./pages/PurchaseList";
+import ProductEntry from "./pages/ProductEntry";
+import ProductList from "./pages/ProductList";
+import Statistics from "./pages/Statistics";
+import Settings from "./pages/Settings";
+import UserManagement from "./pages/UserManagement";
+import Debug from "./pages/Debug";
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null表示正在检查
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 检查认证状态的异步函数
-  const checkAuthStatus = async () => {
-    try {
-      const authenticated = await authService.isAuthenticated();
-      setIsAuthenticated(authenticated);
-    } catch (error) {
-      console.error('检查认证状态失败:', error);
-      setIsAuthenticated(false);
-    } finally {
+  useEffect(() => {
+    // 使用AuthService的onAuthStateChange方法监听认证状态
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      setCurrentUser(user);
       setIsLoading(false);
-    }
-  };
+    });
 
-  // 在应用启动时初始化
-  useEffect(() => {
-    const initialize = async () => {
-      // 初始化默认管理员账户
-      // 简化版本：不需要初始化默认管理员，使用固定的admin/user账户
-        console.log('使用简化的权限系统，admin和user账户已内置');
-      // 检查认证状态
-      await checkAuthStatus();
-    };
-    
-    initialize();
-  }, []);
-  
-  // 监听登录状态变化
-  useEffect(() => {
-    const checkAuth = async () => {
-      const authenticated = await authService.isAuthenticated();
-      setIsAuthenticated(authenticated);
-    };
-    
-    // 监听存储变化
-    window.addEventListener('storage', checkAuth);
-    
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
+    return unsubscribe;
   }, []);
 
-  // 显示加载状态
-  if (isLoading || isAuthenticated === null) {
+  const isAuthenticated = currentUser !== null;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -76,12 +45,10 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* 登录页面 */}
         <Route path="/login" element={
           isAuthenticated ? <Navigate to="/" replace /> : <Login />
         } />
         
-        {/* 受保护的路由 */}
         <Route path="/" element={
           <ProtectedRoute>
             <Home />
@@ -124,26 +91,21 @@ export default function App() {
           </ProtectedRoute>
         } />
         
-        {/* 仅管理员可访问的用户管理页面 */}
         <Route path="/users" element={
           <ProtectedRoute requireAdmin={true}>
             <UserManagement />
           </ProtectedRoute>
         } />
         
-        {/* 调试页面 */}
         <Route path="/debug" element={<Debug />} />
         
-
-        
-        {/* 默认重定向 */}
         <Route path="*" element={
           isAuthenticated ? <Navigate to="/" replace /> : <Navigate to="/login" replace />
         } />
       </Routes>
       
-      {/* Toast通知组件 */}
       <Toaster position="top-center" richColors />
+      <NetworkDiagnostic />
     </Router>
   );
 }

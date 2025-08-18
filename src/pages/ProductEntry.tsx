@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Save, ArrowLeft } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import PhotoCapture from '../components/PhotoCapture';
 import VoiceInput from '../components/VoiceInput';
 import { storage } from '../utils/storage';
 
 export default function ProductEntry() {
-  // Trigger hot reload
   const navigate = useNavigate();
   const location = useLocation();
   const editData = location.state?.editData;
@@ -60,23 +60,23 @@ export default function ProductEntry() {
     try {
       // 验证必填字段
       if (!formData.productName.trim()) {
-        alert('请输入成品名称');
+        toast.error('请输入成品名称');
         return;
       }
       if (!formData.category) {
-        alert('请选择产品分类');
+        toast.error('请选择产品分类');
         return;
       }
       if (!formData.weight || parseFloat(formData.weight) <= 0) {
-        alert('请输入有效的重量');
+        toast.error('请输入有效的重量');
         return;
       }
       if (!formData.cost || parseFloat(formData.cost) <= 0) {
-        alert('请输入有效的成本');
+        toast.error('请输入有效的成本');
         return;
       }
       if (!formData.sellingPrice || parseFloat(formData.sellingPrice) <= 0) {
-        alert('请输入有效的售价');
+        toast.error('请输入有效的售价');
         return;
       }
 
@@ -91,7 +91,7 @@ export default function ProductEntry() {
         cost: parseFloat(formData.cost),
         sellingPrice: parseFloat(formData.sellingPrice),
         description: formData.description.trim(),
-        status: formData.status,
+        status: formData.status as 'available' | 'sold' | 'reserved',
         photos: formData.photos
       };
 
@@ -99,20 +99,19 @@ export default function ProductEntry() {
         // 更新现有记录
         const result = await storage.updateProduct(editData.id, productData);
         if (result) {
-          alert('成品记录更新成功！');
+          toast.success('成品记录更新成功！');
           navigate('/product/list');
         } else {
-          alert('更新失败，请重试');
+          toast.error('更新失败，请重试');
         }
       } else {
         // 创建新记录
         await storage.saveProduct(productData);
-        alert('成品记录保存成功！');
+        toast.success('成品记录保存成功！');
         navigate('/product/list');
       }
     } catch (error) {
-      console.error(isEditing ? '更新失败:' : '保存失败:', error);
-      alert(isEditing ? '更新失败，请重试' : '保存失败，请重试');
+      toast.error(isEditing ? '更新失败，请重试' : '保存失败，请重试');
     }
   };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Download, Upload, Database, User, Bell, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { storage } from '../utils/storage';
 import * as XLSX from 'xlsx';
 import { getDefaultAIConfig, AIServiceConfig, saveGlobalAIConfig, getGlobalAIConfig } from '../services/aiService';
@@ -96,10 +97,10 @@ export default function Settings() {
       // 使用aiService的保存函数
       saveGlobalAIConfig(newConfig);
       
-      alert(`AI服务已设置为${provider === 'doubao' ? '豆包AI' : '通义千问'}`);
+      toast.success(`AI服务已设置为${provider === 'doubao' ? '豆包AI' : '通义千问'}`);
     } catch (error) {
       console.error('保存AI配置失败:', error);
-      alert('保存AI配置失败');
+      toast.error('保存AI配置失败');
     }
   };
 
@@ -115,7 +116,15 @@ export default function Settings() {
 
   const handleExportData = async () => {
     try {
-      const data = await storage.exportData();
+      const [purchases, products] = await Promise.all([
+        storage.getPurchases(),
+        storage.getProducts()
+      ]);
+      const data = {
+        purchases,
+        products,
+        exportTime: new Date().toISOString()
+      };
       
       // 创建工作簿
       const workbook = XLSX.utils.book_new();
@@ -157,10 +166,10 @@ export default function Settings() {
       // 导出Excel文件
       const fileName = `水晶销售数据_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
-      alert('Excel数据导出成功！');
+      toast.success('Excel数据导出成功！');
     } catch (error) {
       console.error('导出失败:', error);
-      alert('导出失败，请重试');
+      toast.error('导出失败，请重试');
     }
   };
 
@@ -217,13 +226,12 @@ export default function Settings() {
               }));
             }
             
-            // 注意：当前系统只支持Supabase云端存储，不支持本地导入
-            // 如需导入数据，请通过Supabase控制台直接操作数据库
-            alert('当前系统已升级为云端存储模式，暂不支持Excel导入功能。\n如需导入数据，请联系管理员通过Supabase控制台操作。');
+            // 注意：当前系统使用本地MySQL数据库
+            toast.info('当前系统使用本地MySQL数据库，暂不支持Excel导入功能。\n如需导入数据，请联系管理员通过数据库管理工具操作。');
             await loadSystemInfo();
           } catch (error) {
             console.error('导入失败:', error);
-            alert('导入失败，请检查Excel文件格式');
+            toast.error('导入失败，请检查Excel文件格式');
           }
         };
         reader.readAsArrayBuffer(file);
@@ -234,14 +242,22 @@ export default function Settings() {
 
   const handleBackupData = async () => {
     try {
-      const data = await storage.exportData();
+      const [purchases, products] = await Promise.all([
+        storage.getPurchases(),
+        storage.getProducts()
+      ]);
+      const data = {
+        purchases,
+        products,
+        exportTime: new Date().toISOString()
+      };
       localStorage.setItem('dataBackup', JSON.stringify(data));
       localStorage.setItem('lastBackupTime', new Date().toISOString());
       await loadSystemInfo();
-      alert('数据备份成功！');
+      toast.success('数据备份成功！');
     } catch (error) {
       console.error('备份失败:', error);
-      alert('备份失败，请重试');
+      toast.error('备份失败，请重试');
     }
   };
 

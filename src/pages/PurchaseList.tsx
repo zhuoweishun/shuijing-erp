@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, Filter, Plus, ArrowLeft, Edit, Trash2, Eye, ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
+import { Search, Filter, Plus, ArrowLeft, Edit, Trash2, Eye, ZoomIn, ZoomOut, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { storage, Purchase } from '../utils/storage';
 import { authService } from '../services/auth';
-import { supabase } from '../lib/supabase';
+import { purchasesAPI } from '../lib/apiService';
+import Empty from '../components/Empty';
+// 使用本地MySQL API
 
 
 export default function PurchaseList() {
@@ -65,23 +68,30 @@ export default function PurchaseList() {
 
   const loadPurchases = async () => {
     try {
-      console.log('开始加载采购数据');
       setIsLoading(true);
       setLoadingProgress(0);
       
       // 立即设置进度到50%
       setLoadingProgress(50);
       
-      // 直接加载数据，无延迟
-      const data = await storage.getPurchases();
+      // 尝试从API获取数据
+       try {
+         const response = await purchasesAPI.getPurchases();
+         if (response.purchases) {
+           setPurchases(response.purchases);
+           setDataSource({ source: 'cloud', reason: '数据已加载' });
+           setLoadingProgress(100);
+           return;
+         }
+       } catch (apiError) {
+         console.warn('API获取失败，尝试本地数据:', apiError);
+       }
       
-      // 立即设置进度到100%
+      // 如果API失败，使用本地数据
+      const localData = await storage.getPurchases();
+      setPurchases(localData);
+      setDataSource({ source: 'local', reason: '使用本地数据' });
       setLoadingProgress(100);
-      
-      setPurchases(data);
-      setDataSource({ source: 'cloud', reason: '数据已加载' });
-      
-      console.log('✅ 采购数据加载成功，共', data.length, '条记录');
     } catch (error: any) {
       console.error('❌ 加载采购数据失败:', error);
       setPurchases([]);
@@ -94,23 +104,19 @@ export default function PurchaseList() {
 
   // 移除预加载逻辑以提升性能
 
-  const testSupabaseConnection = async () => {
-    try {
-      // 测试连接
-      const isConnected = await storage.testSupabaseConnection();
-      
-      if (isConnected) {
-        alert('✅ Supabase连接成功！数据将保存到云端数据库。');
-        // 重新加载数据
-        await loadPurchases();
-      } else {
-        alert('❌ Supabase连接失败，请检查配置。');
-      }
-    } catch (error) {
-      console.error('测试连接失败:', error);
-      alert('❌ 测试连接时发生错误：' + error.message);
-    }
-  };
+  const testApiConnection = async () => {
+     try {
+       const response = await purchasesAPI.getPurchases();
+       if (response.purchases) {
+         toast.success('API连接成功！数据将保存到本地数据库。');
+         await loadPurchases();
+       } else {
+         toast.error('API连接失败，请检查服务器状态。');
+       }
+     } catch (error) {
+       toast.error('测试连接时发生错误：' + (error as Error).message);
+     }
+   };
 
   const handleEdit = useCallback((purchase: Purchase) => {
     // 导航到编辑页面，传递数据
@@ -120,20 +126,17 @@ export default function PurchaseList() {
   const handleDelete = useCallback(async (id: string) => {
     if (window.confirm('确定要删除这条采购记录吗？')) {
       try {
-        console.log('开始删除采购记录:', id);
         const success = await storage.deletePurchase(id);
-        console.log('删除结果:', success);
         
         if (success) {
           // 立即从本地状态中移除，避免重新加载
           setPurchases(prev => prev.filter(p => p.id !== id));
-          alert('删除成功！');
+          toast.success('删除成功！');
         } else {
-          alert('删除失败，请重试');
+          toast.error('删除失败，请重试');
         }
       } catch (error) {
-        console.error('删除采购记录失败:', error);
-        alert('删除失败：' + (error as Error).message);
+        toast.error('删除失败：' + (error as Error).message);
       }
     }
   }, []);
@@ -319,8 +322,7 @@ export default function PurchaseList() {
                       <label className="text-sm font-medium text-gray-500">录入人</label>
                       <p className="text-gray-900 font-medium">
                         {selectedPurchase.createdBy || 
-                         selectedPurchase.user_profiles?.full_name || 
-                         selectedPurchase.user_profiles?.username || 
+                         selectedPurchase.createdBy || 
                          '未知用户'}
                       </p>
                     </div>
@@ -410,7 +412,7 @@ export default function PurchaseList() {
             </button>
             
             <button
-              onClick={testSupabaseConnection}
+              onClick={testApiConnection}
               className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
             >
               测试连接
@@ -448,7 +450,7 @@ export default function PurchaseList() {
                   )}
                 </div>
                 <button
-                  onClick={testSupabaseConnection}
+                  onClick={testApiConnection}
                   className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
                 >
                   测试连接

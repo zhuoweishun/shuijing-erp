@@ -38,7 +38,7 @@ export const ensureValidUUID = (userId: string): string => {
   
   console.warn('⚠️ 用户ID格式无效，生成新的UUID:', userId);
   const newUUID = generateUUID();
-  console.log('✅ 新生成的用户ID:', newUUID);
+
   return newUUID;
 };
 

@@ -5,8 +5,11 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: '.',
+  publicDir: 'public',
   build: {
     sourcemap: 'hidden',
+    outDir: 'dist',
   },
   server: {
     host: '0.0.0.0', // 允许外部访问

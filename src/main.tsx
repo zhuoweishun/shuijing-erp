@@ -3,8 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// 强制清除所有本地存储数据，确保只使用云端数据
-import './utils/clearLocalData'
+// 本地存储清理工具已移除自动执行，避免影响正常使用
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -74,7 +74,7 @@ class AIService {
 请理解水晶行业的专业知识和口语化表达：
 
 1. 产品类型识别：
-   - 水晶类：紫水晶、黄水晶、白水晶、粉水晶、绿幽灵等
+   - 水晶类：各种水晶类型
    - 其他宝石：玛瑙、琥珀、翡翠等
    - 产品形式：手串、项链、吊坠、原石等
 
@@ -104,7 +104,7 @@ class AIService {
 6. 供应商识别（重要：保留完整店铺名称）：
    - "阿牛水晶买的" → supplier: "阿牛水晶"
    - "王五珠宝买的" → supplier: "王五珠宝"
-   - "张三玉器买的" → supplier: "张三玉器"
+   - "某供应商买的" → supplier: "某供应商"
    - "李四首饰买的" → supplier: "李四首饰"
    - "在某某水晶店" → supplier: "某某水晶店"
    - **重要：必须保留完整的店铺名称，包括"水晶"、"珠宝"、"玉器"、"首饰"等后缀**
@@ -146,9 +146,7 @@ class AIService {
       throw new Error('豆包AI API Key未配置');
     }
 
-    console.log('=== 豆包AI API调用开始 ===');
-    console.log('API Key长度:', this.config.apiKey.length);
-    console.log('提示词长度:', prompt.length);
+
 
     const requestBody = {
       model: this.config.model || DOUBAO_CONFIG.model,
@@ -163,7 +161,6 @@ class AIService {
     };
     
     try {
-      console.log('发送请求到豆包AI...');
       const response = await fetch(`${DOUBAO_CONFIG.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -174,7 +171,7 @@ class AIService {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('豆包AI响应状态:', response.status);
+
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -183,7 +180,6 @@ class AIService {
       }
 
       const data = await response.json();
-      console.log('豆包AI返回数据:', data);
       
       const content = data.choices?.[0]?.message?.content;
       
@@ -192,7 +188,7 @@ class AIService {
         throw new Error('豆包AI返回内容为空');
       }
       
-      console.log('豆包AI识别结果:', content);
+
       return this.parseAIResponse(content);
     } catch (error) {
       console.error('豆包AI API调用失败:', error);

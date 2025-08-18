@@ -1,6 +1,71 @@
-// API服务 - 替换Supabase的API调用
+// API服务 - 本地MySQL数据库API调用
+import { getBestAPIBaseURL, getDeviceType, getNetworkInfo } from '../utils/networkUtils';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// 动态获取API基础URL
+let API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+let isInitialized = false;
+let lastInitTime = 0;
+const REINIT_INTERVAL = 30000; // 30秒重新初始化间隔
+
+// 初始化API配置
+async function initializeAPI(forceRefresh = false) {
+  const now = Date.now();
+  
+  // 如果已初始化且未强制刷新且在时间间隔内，直接返回
+  if (isInitialized && !forceRefresh && (now - lastInitTime) < REINIT_INTERVAL) {
+    return;
+  }
+  
+  try {
+    const deviceType = getDeviceType();
+    const networkInfo = getNetworkInfo();
+    
+    console.log(`📱 设备类型: ${deviceType}`);
+    console.log(`🌐 网络状态:`, networkInfo);
+    console.log(`🔄 API${forceRefresh ? '强制' : ''}初始化开始...`);
+    
+    // 动态获取最佳API地址
+    const newAPIURL = await getBestAPIBaseURL();
+    
+    // 如果API地址发生变化，记录日志
+    if (API_BASE_URL !== newAPIURL) {
+      console.log(`🔄 API地址变更: ${API_BASE_URL} -> ${newAPIURL}`);
+    }
+    
+    API_BASE_URL = newAPIURL;
+    isInitialized = true;
+    lastInitTime = now;
+    
+    console.log(`🔗 API地址已设置: ${API_BASE_URL}`);
+  } catch (error) {
+    console.error('❌ API初始化失败:', error);
+    // 使用默认地址
+    const fallback = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    if (API_BASE_URL !== fallback) {
+      console.log(`🔄 使用默认API地址: ${fallback}`);
+      API_BASE_URL = fallback;
+    }
+  }
+}
+
+// 获取当前API基础URL
+export function getAPIBaseURL(): string {
+  return API_BASE_URL;
+}
+
+// 强制刷新API地址
+export async function refreshAPIAddress(): Promise<string> {
+  console.log('🔄 强制刷新API地址...');
+  await initializeAPI(true);
+  return API_BASE_URL;
+}
+
+// 重置API初始化状态（用于调试）
+export function resetAPIInitialization(): void {
+  isInitialized = false;
+  lastInitTime = 0;
+  console.log('🔄 API初始化状态已重置');
+}
 
 // 获取认证token
 function getAuthToken(): string | null {
@@ -22,7 +87,14 @@ async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  // 确保API已初始化
+  await initializeAPI();
+  
   const token = getAuthToken();
+  
+  // 创建超时控制器
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
   
   const config: RequestInit = {
     headers: {
@@ -31,10 +103,12 @@ async function apiRequest<T>(
       ...options.headers,
     },
     ...options,
+    signal: controller.signal,
   };
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    clearTimeout(timeoutId); // 清理超时定时器
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: '请求失败' }));
@@ -43,7 +117,18 @@ async function apiRequest<T>(
 
     return await response.json();
   } catch (error) {
+    clearTimeout(timeoutId); // 确保在错误情况下也清理定时器
     console.error('API请求错误:', error);
+    
+    // 提供更友好的错误信息
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('网络连接失败，请检查网络设置或API服务器状态');
+    }
+    
+    if (error.name === 'AbortError') {
+      throw new Error('请求超时，请检查网络连接');
+    }
+    
     throw error;
   }
 }
@@ -408,4 +493,32 @@ export const uploadAPI = {
   },
 };
 
+// 通用API服务
+export const apiService = {
+  async get<T>(endpoint: string): Promise<T> {
+    return await apiRequest<T>(endpoint);
+  },
+
+  async post<T>(endpoint: string, data: any): Promise<T> {
+    return await apiRequest<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async put<T>(endpoint: string, data: any): Promise<T> {
+    return await apiRequest<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return await apiRequest<T>(endpoint, {
+      method: 'DELETE',
+    });
+  },
+};
+
 export { getAuthToken, setAuthToken, clearAuthToken };
+export default apiService;
