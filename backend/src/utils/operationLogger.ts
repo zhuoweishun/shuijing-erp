@@ -1,0 +1,348 @@
+// 操作日志记录工具
+import { PrismaClient } from '@prisma/client'
+import { logger } from './logger.js'
+
+const prisma = new PrismaClient()
+
+// 操作类型枚举
+export enum OperationType {
+  // 用户操作
+  USER_LOGIN = 'USER_LOGIN',
+  USER_LOGOUT = 'USER_LOGOUT',
+  USER_CREATE = 'USER_CREATE',
+  USER_UPDATE = 'USER_UPDATE',
+  USER_DELETE = 'USER_DELETE',
+  
+  // 采购操作
+  PURCHASE_CREATE = 'PURCHASE_CREATE',
+  PURCHASE_UPDATE = 'PURCHASE_UPDATE',
+  PURCHASE_DELETE = 'PURCHASE_DELETE',
+  PURCHASE_VIEW = 'PURCHASE_VIEW',
+  
+  // 供应商操作
+  SUPPLIER_CREATE = 'SUPPLIER_CREATE',
+  SUPPLIER_UPDATE = 'SUPPLIER_UPDATE',
+  SUPPLIER_DELETE = 'SUPPLIER_DELETE',
+  
+  // 库存操作
+  INVENTORY_VIEW = 'INVENTORY_VIEW',
+  INVENTORY_EXPORT = 'INVENTORY_EXPORT',
+  INVENTORY_UPDATE = 'INVENTORY_UPDATE',
+  
+  // 系统操作
+  SYSTEM_BACKUP = 'SYSTEM_BACKUP',
+  SYSTEM_RESTORE = 'SYSTEM_RESTORE',
+  SYSTEM_CONFIG_UPDATE = 'SYSTEM_CONFIG_UPDATE',
+  
+  // AI操作
+  AI_CHAT = 'AI_CHAT',
+  AI_INSIGHTS = 'AI_INSIGHTS',
+  AI_RECOGNITION = 'AI_RECOGNITION',
+  
+  // 文件操作
+  FILE_UPLOAD = 'FILE_UPLOAD',
+  FILE_DELETE = 'FILE_DELETE'
+}
+
+// 操作日志接口
+export interface OperationLogData {
+  userId: string
+  operation: OperationType
+  resourceType?: string // 资源类型（如 'purchase', 'supplier'）
+  resourceId?: string   // 资源ID
+  details?: any         // 操作详情
+  changedFields?: Record<string, { from: any; to: any }> // 变更字段
+  ipAddress?: string    // IP地址
+  userAgent?: string    // 用户代理
+  metadata?: any        // 额外元数据
+}
+
+// 操作日志记录器类
+export class OperationLogger {
+  /**
+   * 记录操作日志
+   */
+  static async log(data: OperationLogData): Promise<void> {
+    try {
+      // 记录到数据库（如果是采购相关操作且有resourceId）
+      if (data.resourceType === 'purchase' && data.resourceId) {
+        await prisma.editLog.create({
+          data: {
+            purchaseId: data.resourceId,
+            userId: data.userId,
+            action: data.operation,
+            details: data.details ? JSON.stringify(data.details) : null,
+            changedFields: data.changedFields ? JSON.stringify(data.changedFields) : undefined
+          }
+        })
+      }
+      
+      // 记录到文件日志
+      logger.info('操作日志', {
+        userId: data.userId,
+        operation: data.operation,
+        resourceType: data.resourceType,
+        resourceId: data.resourceId,
+        details: data.details,
+        changedFields: data.changedFields,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        metadata: data.metadata,
+        timestamp: new Date().toISOString()
+      })
+      
+    } catch (error) {
+      logger.error('记录操作日志失败:', {
+        error: (error as Error).message,
+        data
+      })
+    }
+  }
+  
+  /**
+   * 记录用户登录
+   */
+  static async logUserLogin(userId: string, ipAddress?: string, userAgent?: string): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.USER_LOGIN,
+      ipAddress,
+      userAgent,
+      details: {
+        loginTime: new Date().toISOString()
+      }
+    })
+  }
+  
+  /**
+   * 记录用户登出
+   */
+  static async logUserLogout(userId: string, ipAddress?: string): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.USER_LOGOUT,
+      ipAddress,
+      details: {
+        logoutTime: new Date().toISOString()
+      }
+    })
+  }
+  
+  /**
+   * 记录采购创建
+   */
+  static async logPurchaseCreate(
+    userId: string, 
+    purchaseId: string, 
+    purchaseData: any,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.PURCHASE_CREATE,
+      resourceType: 'purchase',
+      resourceId: purchaseId,
+      ipAddress,
+      details: {
+        productName: purchaseData.productName,
+        productType: purchaseData.productType,
+        totalPrice: purchaseData.totalPrice,
+        supplierName: purchaseData.supplier?.name
+      }
+    })
+  }
+  
+  /**
+   * 记录采购更新
+   */
+  static async logPurchaseUpdate(
+    userId: string,
+    purchaseId: string,
+    changedFields: Record<string, { from: any; to: any }>,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.PURCHASE_UPDATE,
+      resourceType: 'purchase',
+      resourceId: purchaseId,
+      changedFields,
+      ipAddress,
+      details: {
+        fieldsChanged: Object.keys(changedFields),
+        changeCount: Object.keys(changedFields).length
+      }
+    })
+  }
+  
+  /**
+   * 记录供应商创建
+   */
+  static async logSupplierCreate(
+    userId: string,
+    supplierId: string,
+    supplierData: any,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.SUPPLIER_CREATE,
+      resourceType: 'supplier',
+      resourceId: supplierId,
+      ipAddress,
+      details: {
+        supplierName: supplierData.name,
+        contact: supplierData.contact,
+        phone: supplierData.phone
+      }
+    })
+  }
+  
+  /**
+   * 记录库存查看
+   */
+  static async logInventoryView(
+    userId: string,
+    viewType: string,
+    filters?: any,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.INVENTORY_VIEW,
+      resourceType: 'inventory',
+      ipAddress,
+      details: {
+        viewType,
+        filters,
+        timestamp: new Date().toISOString()
+      }
+    })
+  }
+  
+  /**
+   * 记录库存导出
+   */
+  static async logInventoryExport(
+    userId: string,
+    exportType: string,
+    recordCount: number,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: OperationType.INVENTORY_EXPORT,
+      resourceType: 'inventory',
+      ipAddress,
+      details: {
+        exportType,
+        recordCount,
+        exportTime: new Date().toISOString()
+      }
+    })
+  }
+  
+  /**
+   * 记录AI操作
+   */
+  static async logAIOperation(
+    userId: string,
+    aiOperation: OperationType,
+    details: any,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation: aiOperation,
+      resourceType: 'ai',
+      ipAddress,
+      details
+    })
+  }
+  
+  /**
+   * 记录文件操作
+   */
+  static async logFileOperation(
+    userId: string,
+    operation: OperationType.FILE_UPLOAD | OperationType.FILE_DELETE,
+    fileName: string,
+    fileSize?: number,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      operation,
+      resourceType: 'file',
+      ipAddress,
+      details: {
+        fileName,
+        fileSize,
+        timestamp: new Date().toISOString()
+      }
+    })
+  }
+  
+  /**
+   * 获取用户操作日志
+   */
+  static async getUserOperationLogs(
+    _userId: string,
+    _limit: number = 50,
+    _offset: number = 0
+  ): Promise<any[]> {
+    try {
+      // 这里可以从数据库或日志文件中查询
+      // 暂时返回空数组，实际实现需要根据具体需求
+      return []
+    } catch (error) {
+      logger.error('获取用户操作日志失败:', error)
+      return []
+    }
+  }
+  
+  /**
+   * 获取资源操作日志
+   */
+  static async getResourceOperationLogs(
+    resourceType: string,
+    resourceId: string,
+    limit: number = 50
+  ): Promise<any[]> {
+    try {
+      if (resourceType === 'purchase') {
+        const logs = await prisma.editLog.findMany({
+          where: { purchaseId: resourceId },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                username: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' },
+          take: limit
+        })
+        
+        return logs.map(log => ({
+          id: log.id,
+          operation: log.action,
+          user: log.user,
+          details: log.details ? JSON.parse(log.details as string) : null,
+          changedFields: log.changedFields ? JSON.parse(log.changedFields as string) : null,
+          createdAt: log.createdAt
+        }))
+      }
+      
+      return []
+    } catch (error) {
+      logger.error('获取资源操作日志失败:', error)
+      return []
+    }
+  }
+}
+
+// 导出默认实例
+export default OperationLogger
