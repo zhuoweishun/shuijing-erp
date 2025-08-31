@@ -1,0 +1,421 @@
+/* 移动端优化样式 */
+
+/* 触摸友好的按钮（苹果极简风格） */
+.btn-mobile {
+  @apply min-h-[44px] min-w-[44px] px-4 py-3 font-medium rounded-lg transition-all duration-200;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 14px; /* 电脑端14px */
+}
+
+@media (max-width: 768px) {
+  .btn-mobile {
+    font-size: 17px; /* 手机端17px，防止缩放 */
+  }
+}
+
+.btn-mobile:active {
+  transform: scale(0.98);
+}
+
+.btn-mobile-primary {
+  @apply btn-mobile bg-gray-800 text-white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.btn-mobile-primary:hover {
+  @apply bg-gray-900;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-mobile-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-mobile-secondary {
+  @apply btn-mobile bg-gray-100 text-gray-700 border border-gray-200;
+}
+
+.btn-mobile-secondary:hover {
+  @apply bg-gray-200 border-gray-300;
+}
+
+.btn-mobile-danger {
+  @apply btn-mobile bg-red-600 text-white;
+}
+
+.btn-mobile-danger:hover {
+  @apply bg-red-700;
+}
+
+/* 移动端表单输入 */
+.input-mobile {
+  @apply w-full min-h-[44px] px-4 py-3 text-base border border-gray-200 rounded-xl;
+  @apply focus:ring-2 focus:ring-crystal-500 focus:border-transparent;
+  @apply transition-all duration-200;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  font-size: 16px; /* 防止iOS缩放 */
+}
+
+.input-mobile:focus {
+  @apply shadow-lg;
+}
+
+/* 移动端选择框 */
+.select-mobile {
+  @apply input-mobile appearance-none bg-white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* 移动端文本域 */
+.textarea-mobile {
+  @apply input-mobile resize-none;
+  min-height: 120px;
+}
+
+/* 移动端卡片 */
+.card-mobile {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+  @apply transition-all duration-200;
+}
+
+.card-mobile:active {
+  @apply shadow-md;
+  transform: scale(0.995);
+}
+
+.card-mobile-clickable {
+  @apply card-mobile cursor-pointer;
+  touch-action: manipulation;
+}
+
+.card-mobile-clickable:hover {
+  @apply shadow-lg border-crystal-200;
+}
+
+/* 移动端网格布局 */
+.grid-mobile-1 {
+  @apply grid grid-cols-1 gap-4;
+}
+
+.grid-mobile-2 {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.grid-mobile-auto {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* 移动端间距 */
+.space-mobile {
+  @apply space-y-4;
+}
+
+.space-mobile-lg {
+  @apply space-y-6;
+}
+
+.space-mobile-sm {
+  @apply space-y-2;
+}
+
+.space-mobile-xs {
+  @apply space-y-1;
+}
+
+.gap-mobile {
+  @apply gap-4;
+}
+
+.gap-mobile-xs {
+  @apply gap-1;
+}
+
+.p-mobile {
+  @apply p-4;
+}
+
+/* 移动端字体 */
+.text-mobile-title {
+  @apply text-xl sm:text-2xl font-bold text-gray-900;
+}
+
+.text-mobile-subtitle {
+  @apply text-lg sm:text-xl font-semibold text-gray-800;
+}
+
+.text-mobile-body {
+  @apply text-base text-gray-700;
+}
+
+.text-mobile-caption {
+  @apply text-sm text-gray-600;
+}
+
+.text-mobile-small {
+  @apply text-xs text-gray-500;
+}
+
+/* 移动端表格替代布局 */
+.table-mobile-card {
+  @apply card-mobile space-y-3;
+}
+
+.table-mobile-row {
+  @apply flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0;
+}
+
+.table-mobile-label {
+  @apply text-sm font-medium text-gray-600;
+}
+
+.table-mobile-value {
+  @apply text-sm text-gray-900 text-right;
+}
+
+/* 移动端导航 */
+.nav-mobile {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50;
+  @apply flex items-center justify-around py-2;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-mobile-item {
+  @apply flex flex-col items-center justify-center min-h-[48px] px-2 py-1;
+  @apply text-xs font-medium text-gray-600 transition-colors duration-200;
+  touch-action: manipulation;
+}
+
+.nav-mobile-item.active {
+  @apply text-crystal-600;
+}
+
+.nav-mobile-item:active {
+  @apply bg-gray-100 rounded-lg;
+}
+
+/* 移动端模态框 */
+.modal-mobile {
+  @apply fixed inset-0 z-50 flex items-end sm:items-center justify-center;
+}
+
+.modal-mobile-backdrop {
+  @apply absolute inset-0 bg-black bg-opacity-50;
+}
+
+.modal-mobile-content {
+  @apply relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg;
+  @apply max-h-[90vh] overflow-y-auto;
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
+.modal-mobile-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.modal-mobile-body {
+  @apply p-4;
+}
+
+.modal-mobile-footer {
+  @apply flex space-x-3 p-4 border-t border-gray-200;
+}
+
+/* 移动端表单标签和错误提示 */
+.label-mobile {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.label-mobile-required::after {
+  content: ' *';
+  @apply text-red-500;
+}
+
+.form-error-mobile {
+  @apply mt-1 text-sm text-red-600 flex items-center;
+}
+
+/* 移动端徽章 */
+.badge-mobile {
+  @apply px-2 py-1 text-sm font-medium rounded;
+}
+
+/* 触摸反馈 */
+.touch-feedback {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-feedback:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* 移动端表格容器 */
+.table-container-mobile {
+  @apply overflow-x-auto;
+}
+
+.table-mobile {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.table-mobile th {
+  @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table-mobile td {
+  @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900;
+}
+
+/* 移动端状态样式 */
+.loading-state-mobile {
+  @apply flex flex-col items-center justify-center py-8 text-center;
+}
+
+.empty-state-mobile {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+/* 移动端加载状态 */
+.loading-mobile {
+  @apply flex flex-col items-center justify-center py-12 space-y-4;
+}
+
+.loading-mobile-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-crystal-500;
+}
+
+.loading-mobile-text {
+  @apply text-mobile-caption;
+}
+
+/* 移动端错误状态 */
+.error-mobile {
+  @apply bg-red-50 border border-red-200 rounded-xl p-4;
+}
+
+.error-mobile-text {
+  @apply text-sm text-red-600;
+}
+
+/* 移动端成功状态 */
+.success-mobile {
+  @apply bg-green-50 border border-green-200 rounded-xl p-4;
+}
+
+.success-mobile-text {
+  @apply text-sm text-green-600;
+}
+
+/* 移动端警告状态 */
+.warning-mobile {
+  @apply bg-yellow-50 border border-yellow-200 rounded-xl p-4;
+}
+
+.warning-mobile-text {
+  @apply text-sm text-yellow-600;
+}
+
+/* 移动端滑动手势 */
+.swipe-mobile {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 移动端安全区域 */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 移动端隐藏滚动条 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 移动端触摸反馈增强 */
+.touch-feedback-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.touch-feedback-ripple:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+/* 移动端优化的滚动 */
+.scroll-mobile {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* 移动端表单验证增强 */
+.form-error-mobile svg {
+  @apply h-4 w-4 mr-1 flex-shrink-0;
+}
+
+/* 移动端分割线 */
+.divider-mobile {
+  @apply border-t border-gray-200 my-4;
+}
+
+/* 移动端徽章 */
+.badge-mobile {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-mobile-primary {
+  @apply badge-mobile bg-crystal-100 text-crystal-800;
+}
+
+.badge-mobile-secondary {
+  @apply badge-mobile bg-gray-100 text-gray-800;
+}
+
+.badge-mobile-success {
+  @apply badge-mobile bg-green-100 text-green-800;
+}
+
+.badge-mobile-warning {
+  @apply badge-mobile bg-yellow-100 text-yellow-800;
+}
+
+.badge-mobile-danger {
+  @apply badge-mobile bg-red-100 text-red-800;
+}

@@ -1,0 +1,233 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String?  @unique
+  password    String
+  role        UserRole @default(EMPLOYEE)
+  name        String
+  phone       String?
+  avatar      String?
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  purchases         Purchase[]
+  products          Product[]
+  lastEditedPurchases Purchase[] @relation("PurchaseLastEditedBy")
+  editLogs          EditLog[]
+  
+  @@map("users")
+}
+
+// 用户角色枚举
+enum UserRole {
+  BOSS     // 老板
+  EMPLOYEE // 员工
+}
+
+// 供应商表
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String   @unique // 供应商名称必须唯一
+  contact     String?
+  phone       String?
+  email       String?
+  address     String?
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  purchases   Purchase[]
+  
+  @@map("suppliers")
+}
+
+// 采购表
+model Purchase {
+  id                    String        @id @default(cuid())
+  purchaseCode         String        @unique // 采购编号 CG+YYYYMMDD+6位序号
+  productName          String        // 珠子名称（如：白水晶、紫水晶等）
+  quantity             Int?          // 采购数量（串数），整数
+  minStockAlert        Int?          // 最低预警颗数
+  pricePerGram         Decimal?      @db.Decimal(10, 1) // 克价，精度1位小数
+  unitPrice            Decimal?      @db.Decimal(10, 1) // 每串单价
+  totalPrice           Decimal?      @db.Decimal(10, 1) // 总价，精度1位小数
+  weight               Decimal?      @db.Decimal(10, 1) // 重量（克），精度1位小数
+  beadDiameter         Decimal?      @db.Decimal(10, 1) // 单珠直径（毫米），散珠和手串必填
+  beadsPerString       Int?          // 每串珠子数量（自动计算：Math.floor(160/直径)）
+  totalBeads           Int?          // 总颗数（自动计算：串数×每串颗数）
+  pricePerBead         Decimal?      @db.Decimal(10, 4) // 每颗单价，精度4位小数
+  pricePerPiece        Decimal?      @db.Decimal(10, 4) // 每片/每件单价，精度4位小数
+  quality              Quality?      // 品相等级
+  productType          ProductType   @default(BRACELET) // 产品类型，默认为手串（兼容现有数据）
+  unitType             UnitType      @default(STRINGS) // 计量单位，默认为条（兼容现有数据）
+  specification        Decimal?      @db.Decimal(10, 1) // 规格：散珠直径/饰品配件使用边规格/成品平均直径
+  pieceCount           Int?          // 数量：散珠颗数/饰品配件片数/成品件数
+  purchaseDate         DateTime      // 采购日期（自动生成）
+  naturalLanguageInput String?       @db.Text // 自然语言输入（AI识别源）
+  photos               Json          // 产品图片URL数组（必填）
+  notes                String?       @db.Text // 备注信息
+  aiRecognitionResult  Json?         // AI自然语言识别结果
+  status               PurchaseStatus @default(PENDING)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  // 关联关系
+  supplierId      String?
+  supplier        Supplier?     @relation(fields: [supplierId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  lastEditedById  String?
+  lastEditedBy    User?         @relation("PurchaseLastEditedBy", fields: [lastEditedById], references: [id])
+  editLogs        EditLog[]
+  materialUsages  MaterialUsage[]
+  
+  @@map("purchases")
+}
+
+// 采购状态枚举
+enum PurchaseStatus {
+  PENDING    // 待处理
+  CONFIRMED  // 已确认
+  DELIVERED  // 已交付
+  CANCELLED  // 已取消
+}
+
+// 品相等级枚举
+enum Quality {
+  AA  // AA级
+  A   // A级
+  AB  // AB级
+  B   // B级
+  C   // C级
+}
+
+// 产品类型枚举
+enum ProductType {
+  LOOSE_BEADS    // 散珠
+  BRACELET       // 手串
+  ACCESSORIES    // 饰品配件
+  FINISHED       // 成品
+}
+
+// 计量单位枚举
+enum UnitType {
+  PIECES         // 颗（散珠）
+  STRINGS        // 条（手串）
+  SLICES         // 片（饰品配件）
+  ITEMS          // 件（成品）
+}
+
+// 成品表
+model Product {
+  id          String        @id @default(cuid())
+  productCode String?       // 成品编号 FP+YYYYMMDD+3位序号
+  name        String
+  description String?       @db.Text
+  category    String?
+  quantity    Int           @default(0)
+  unit        String
+  unitPrice   Decimal       @db.Decimal(10, 2)
+  totalValue  Decimal       @db.Decimal(10, 2)
+  status      ProductStatus @default(IN_STOCK)
+  location    String?
+  notes       String?       @db.Text
+  images      String?       @db.Text // JSON格式存储图片URL数组
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // 关联关系
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  materialUsages MaterialUsage[]
+  
+  @@map("products")
+}
+
+// 成品状态枚举
+enum ProductStatus {
+  IN_STOCK    // 有库存
+  LOW_STOCK   // 库存不足
+  OUT_OF_STOCK // 无库存
+  DISCONTINUED // 已停产
+}
+
+// 系统配置表
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_configs")
+}
+
+// 编辑日志表
+model EditLog {
+  id            String   @id @default(cuid())
+  purchaseId    String
+  userId        String
+  action        String
+  details       String?  @db.Text
+  changedFields Json?
+  createdAt     DateTime @default(now())
+  
+  // 关联关系
+  purchase      Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("edit_logs")
+}
+
+// 原材料使用记录表
+model MaterialUsage {
+  id                 String   @id @default(cuid())
+  purchaseId         String   // 采购记录ID
+  productId          String   // 成品ID
+  quantityUsedBeads  Int      @default(0) // 使用的珠子颗数（散珠、手串）
+  quantityUsedPieces Int      @default(0) // 使用的片/件数量（饰品配件、成品）
+  unitCost           Decimal? @db.Decimal(10, 4) // 单位成本（每颗/每片/每件）
+  totalCost          Decimal? @db.Decimal(10, 2) // 该原材料的总成本
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  // 关联关系
+  purchase           Purchase @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  
+  @@map("material_usage")
+}
+
+// 操作日志表
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  resource  String
+  resourceId String?
+  details   String?  @db.Text
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  @@map("audit_logs")
+}
