@@ -14,6 +14,7 @@ import { purchaseApi, supplierApi, fixImageUrl } from '../services/api'
 import { Purchase } from '../types'
 import PermissionWrapper from './PermissionWrapper'
 import { toast } from 'sonner'
+import { formatPurchaseCode } from '../utils/fieldConverter'
 
 interface PurchaseDetailModalProps {
   isOpen: boolean
@@ -821,7 +822,7 @@ export default function PurchaseDetailModal({
               <div>
                 <h3 className="text-lg font-medium text-gray-900">采购详情</h3>
                 {purchase && (
-                  <p className="text-sm text-gray-500">{purchase.purchase_code}</p>
+                  <p className="text-sm text-gray-500">{purchase.purchase_code || formatPurchaseCode(purchase.id)}</p>
                 )}
               </div>
             </div>
@@ -1572,7 +1573,7 @@ export default function PurchaseDetailModal({
                     产品：{purchase?.product_name}
                   </p>
                   <p className="text-sm text-red-600">
-                    采购编号：{purchase?.purchase_code}
+                    采购编号：{purchase ? (purchase.purchase_code || formatPurchaseCode(purchase.id)) : ''}
                   </p>
                 </div>
                 <p className="text-sm text-red-600 mt-2 font-medium">

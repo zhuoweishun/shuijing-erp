@@ -26,13 +26,24 @@ const getFirstPhotoUrl = (photos: any): string | null => {
   
   let photoArray: string[] = []
   
-  // 如果是字符串，尝试解析为JSON
+  // 如果是字符串
   if (typeof photos === 'string') {
+    // 如果字符串以http开头，直接作为URL返回
+    if (photos.startsWith('http')) {
+      return fixImageUrl(photos)
+    }
+    // 否则尝试解析为JSON
     try {
-      photoArray = JSON.parse(photos)
+      const parsed = JSON.parse(photos)
+      if (Array.isArray(parsed)) {
+        photoArray = parsed
+      } else {
+        // 如果解析出来不是数组，可能是单个URL字符串
+        return typeof parsed === 'string' ? fixImageUrl(parsed) : null
+      }
     } catch (e) {
-      console.error('解析photos JSON失败:', e)
-      return null
+      // JSON解析失败，可能是普通字符串，尝试直接作为URL使用
+      return photos.trim() ? fixImageUrl(photos) : null
     }
   } else if (Array.isArray(photos)) {
     photoArray = photos
@@ -40,7 +51,14 @@ const getFirstPhotoUrl = (photos: any): string | null => {
     return null
   }
   
-  return photoArray.length > 0 ? fixImageUrl(photoArray[0]) : null
+  // 从数组中找到第一个有效的字符串URL
+  for (const photo of photoArray) {
+    if (photo && typeof photo === 'string' && photo.trim()) {
+      return fixImageUrl(photo)
+    }
+  }
+  
+  return null
 }
 
 
@@ -67,6 +85,7 @@ interface PurchaseListState {
   }
   filters: {
     search: string
+    purchaseCodeSearch: string
     quality: string[]
     startDate: string
     endDate: string
@@ -167,6 +186,7 @@ export default function PurchaseList() {
     },
     filters: {
       search: '',
+      purchaseCodeSearch: '', // 采购编号搜索
       quality: ['AA', 'A', 'AB', 'B', 'C', 'UNKNOWN'], // 默认全选状态
       supplier: [] as string[], // 将在获取供应商数据后设置为全选
       product_types: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'], // 全选状态
@@ -189,7 +209,7 @@ export default function PurchaseList() {
     },
     sorting: { purchase_date: 'desc' }, // 默认按采购日期降序排列
     columnFilters: {
-      purchaseCode: { visible: false, type: 'sort' }, // 采购编号：排序功能
+      purchaseCode: { visible: false, type: 'search' }, // 采购编号：搜索功能
       productName: { visible: false, type: 'search' }, // 产品名称：搜索功能
       product_type: { visible: false, type: 'multiSelect' }, // 产品类型：多选功能
       specification: { visible: false, type: 'sortAndRange' }, // 规格：排序和范围筛选
@@ -260,6 +280,7 @@ export default function PurchaseList() {
       
       // 构建筛选参数
       if (filters.search) params.search = filters.search
+      if (filters.purchaseCodeSearch) params.purchase_code_search = filters.purchaseCodeSearch
       // 品相筛选：支持多选，将'UNKNOWN'映射为null
       // 只有当品相数组不为空时才发送quality参数
       if (filters.quality !== undefined && filters.quality.length > 0) {
@@ -434,6 +455,7 @@ export default function PurchaseList() {
     const new_state = {
       filters: {
         search: '',
+        purchaseCodeSearch: '',
         quality: [] as string[],
         supplier: [],
         product_types: [],
@@ -806,9 +828,17 @@ export default function PurchaseList() {
                   <input
                     type="text"
                     placeholder={`搜索${title}...`}
-                    value={state.filters.search}
+                    value={column === 'purchaseCode' ? state.filters.purchaseCodeSearch : 
+                           column === 'productName' ? state.filters.search : ''}
                     onChange={(e) => {
-                      const newFilters = { ...state.filters, search: e.target.value }
+                      let newFilters;
+                      if (column === 'purchaseCode') {
+                        newFilters = { ...state.filters, purchaseCodeSearch: e.target.value }
+                      } else if (column === 'productName') {
+                        newFilters = { ...state.filters, search: e.target.value }
+                      } else {
+                        return;
+                      }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
@@ -830,10 +860,18 @@ export default function PurchaseList() {
                   >
                     应用
                   </button>
-                  {state.filters.search && (
+                  {((column === 'purchaseCode' && state.filters.purchaseCodeSearch) || 
+                    (column === 'productName' && state.filters.search)) && (
                     <button
                       onClick={() => {
-                        const newFilters = { ...state.filters, search: '' }
+                        let newFilters;
+                        if (column === 'purchaseCode') {
+                          newFilters = { ...state.filters, purchaseCodeSearch: '' }
+                        } else if (column === 'productName') {
+                          newFilters = { ...state.filters, search: '' }
+                        } else {
+                          return;
+                        }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
@@ -1693,7 +1731,8 @@ export default function PurchaseList() {
   }
 
   const renderPagination = () => {
-    if (state.pagination.total_pages <= 1 && state.pagination.total <= state.pagination.limit) return null
+    // 只有在没有数据时才不显示分页组件
+    if (state.pagination.total === 0) return null
     
     return (
       <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
@@ -1717,23 +1756,25 @@ export default function PurchaseList() {
               </select>
             </div>
           </div>
-          {/* 手机端分页按钮 */}
-          <div className="flex justify-between">
-            <button
-              onClick={() => handlePageChange(state.pagination.page - 1)}
-              disabled={state.pagination.page <= 1}
-              className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              上一页
-            </button>
-            <button
-              onClick={() => handlePageChange(state.pagination.page + 1)}
-              disabled={state.pagination.page >= state.pagination.total_pages}
-              className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              下一页
-            </button>
-          </div>
+          {/* 手机端分页按钮 - 只有在多页时才显示 */}
+          {state.pagination.total_pages > 1 && (
+            <div className="flex justify-between">
+              <button
+                onClick={() => handlePageChange(state.pagination.page - 1)}
+                disabled={state.pagination.page <= 1}
+                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                上一页
+              </button>
+              <button
+                onClick={() => handlePageChange(state.pagination.page + 1)}
+                disabled={state.pagination.page >= state.pagination.total_pages}
+                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                下一页
+              </button>
+            </div>
+          )}
         </div>
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div className="flex items-center space-x-4">
@@ -1758,42 +1799,45 @@ export default function PurchaseList() {
               </select>
             </div>
           </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button
-                onClick={() => handlePageChange(state.pagination.page - 1)}
-                disabled={state.pagination.page <= 1}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              {Array.from({ length: Math.min(5, state.pagination.total_pages) }, (_, i) => {
-                const page = i + 1
-                return (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      page === state.pagination.page
-                        ? 'z-10 bg-gray-50 border-gray-500 text-gray-600'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              })}
-              
-              <button
-                onClick={() => handlePageChange(state.pagination.page + 1)}
-                disabled={state.pagination.page >= state.pagination.total_pages}
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </nav>
-          </div>
+          {/* 分页按钮 - 只有在多页时才显示 */}
+          {state.pagination.total_pages > 1 && (
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button
+                  onClick={() => handlePageChange(state.pagination.page - 1)}
+                  disabled={state.pagination.page <= 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                
+                {Array.from({ length: Math.min(5, state.pagination.total_pages) }, (_, i) => {
+                  const page = i + 1
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        page === state.pagination.page
+                          ? 'z-10 bg-gray-50 border-gray-500 text-gray-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                })}
+                
+                <button
+                  onClick={() => handlePageChange(state.pagination.page + 1)}
+                  disabled={state.pagination.page >= state.pagination.total_pages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
       </div>
     )

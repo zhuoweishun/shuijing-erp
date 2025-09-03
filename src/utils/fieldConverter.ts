@@ -5,24 +5,39 @@
  */
 
 /**
- * 将UUID格式的purchase_id转换为用户友好的CG开头编号
- * @param purchaseId UUID格式的采购ID
+ * 将purchase_id转换为用户友好的CG开头编号
+ * @param purchaseId 采购ID（可以是string或number类型）
  * @returns CG开头的用户友好编号
  */
-export function formatPurchaseCode(purchaseId: string): string {
+export function formatPurchaseCode(purchaseId: string | number): string {
   if (!purchaseId) return '';
   
-  // 从UUID中提取数字和字母，生成6位编号
-  const cleanId = purchaseId.replace(/[^a-zA-Z0-9]/g, '');
-  const hash = cleanId.slice(-6).toUpperCase();
+  const idStr = purchaseId.toString();
   
-  // 获取当前日期作为前缀
-  const now = new Date();
-  const year = now.getFullYear().toString().slice(-2);
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
+  // 如果是UUID字符串，生成6位数字编号
+  if (idStr.length > 10 && idStr.includes('cmf')) {
+    // 从UUID字符串生成哈希值，然后转换为6位数字
+    let hash = 0;
+    for (let i = 0; i < idStr.length; i++) {
+      const char = idStr.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 转换为32位整数
+    }
+    // 取绝对值并限制为6位数字
+    const numericCode = Math.abs(hash) % 1000000;
+    const paddedCode = numericCode.toString().padStart(6, '0');
+    return `CG${paddedCode}`;
+  }
   
-  return `CG${year}${month}${day}${hash}`;
+  // 如果是数字ID，按原逻辑处理
+  const numericId = parseInt(idStr, 10);
+  if (!isNaN(numericId)) {
+    const paddedId = numericId.toString().padStart(6, '0');
+    return `CG${paddedId}`;
+  }
+  
+  // 如果都不是，返回空字符串
+  return '';
 }
 
 /**

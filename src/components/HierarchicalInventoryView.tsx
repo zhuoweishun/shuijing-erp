@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Package, AlertTriangle, Eye, Boxes, Expand, Minimize2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
+import { formatPurchaseCode } from '../utils/fieldConverter'
 
 // 层级式库存数据类型
 interface HierarchicalInventoryData {
@@ -33,6 +34,7 @@ interface QualityData {
 
 interface BatchData {
   purchase_id: number
+  purchase_code?: string
   product_name: string
   product_type: string
   purchase_date: string
@@ -550,6 +552,12 @@ export default function HierarchicalInventoryView({
                                                     <span className={`truncate ml-1 ${
                                                       isMobile ? 'text-mobile-small' : 'text-xs'
                                                     }`}>{batch.supplier_name}</span>
+                                                  </div>
+                                                  <div className="flex justify-between">
+                                                    <span className={isMobile ? 'text-mobile-small' : 'text-xs'}>CG编号:</span>
+                                                    <span className={`truncate ml-1 ${
+                                                      isMobile ? 'text-mobile-small' : 'text-xs'
+                                                    }`}>{batch.purchase_code || formatPurchaseCode(batch.purchase_id)}</span>
                                                   </div>
                                                   {user?.role === 'BOSS' && batch.price_per_unit && (
                                                     <div className="flex justify-between">

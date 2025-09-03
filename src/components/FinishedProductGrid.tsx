@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, Package, Ruler, DollarSign, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { inventoryApi } from '../services/api'
+import { inventoryApi, fixImageUrl } from '../services/api'
 import { useAuth } from '@/hooks/useAuth'
+import { formatPurchaseCode } from '../utils/fieldConverter'
 
 // 成品数据类型定义
 interface FinishedProduct {
   purchase_id: string
+  purchase_code?: string
   product_name: string
   specification: number
   piece_count: number
@@ -246,7 +248,7 @@ export default function FinishedProductGrid({
             >
               {product.photos && product.photos.length > 0 ? (
                 <img
-                  src={product.photos[0]}
+                  src={fixImageUrl(product.photos[0])}
                   alt={product.product_name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
                   onError={handleImageError}
@@ -338,8 +340,14 @@ export default function FinishedProductGrid({
 
       {/* 详情弹窗 */}
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedProduct(null)}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -367,43 +375,54 @@ export default function FinishedProductGrid({
                   )}
                 </div>
                 
-                <div>
-                  <div className="text-sm text-gray-500 mb-2">规格信息</div>
-                  <div className="flex items-center space-x-2">
-                    <Ruler className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-700">{selectedProduct.specification}mm</span>
+                {/* 规格信息和品相等级在同一行 */}
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="text-sm text-gray-500 mb-2">规格信息</div>
+                    <div className="flex items-center space-x-2">
+                      <Ruler className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-700">{selectedProduct.specification}mm</span>
+                    </div>
                   </div>
+                  {selectedProduct.quality && (
+                    <div className="flex-1">
+                      <div className="text-sm text-gray-500 mb-2">品相等级</div>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQualityColor(selectedProduct.quality)}`}>
+                        {formatQuality(selectedProduct.quality)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
-                {selectedProduct.quality && (
-                  <div>
-                    <div className="text-sm text-gray-500 mb-2">品相等级</div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQualityColor(selectedProduct.quality)}`}>
-                      {formatQuality(selectedProduct.quality)}
-                    </span>
-                  </div>
-                )}
-                
                 <div>
-                  <div className="text-sm text-gray-500 mb-2">产品信息</div>
+                  <div className="text-sm text-gray-500 mb-2">批次信息</div>
                   <div className="text-sm text-gray-700 p-3 bg-gray-50 rounded">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="font-medium text-gray-700">颗数:</span>
-                        <span className="ml-1">{selectedProduct.piece_count}颗</span>
+                        <span className="font-medium text-gray-700">CG编号:</span>
+                        <span className="ml-1">{selectedProduct.purchase_code || formatPurchaseCode(selectedProduct.purchase_id)}</span>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">供应商:</span>
                         <span className="ml-1">{selectedProduct.supplier_name || '未知'}</span>
                       </div>
                       <div>
+                        <span className="font-medium text-gray-700">规格:</span>
+                        <span className="ml-1">{selectedProduct.specification || '-'}mm</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">库存:</span>
+                        <span className="ml-1">{(selectedProduct as any).original_quantity || selectedProduct.piece_count} 件</span>
+                      </div>
+                      <div>
                         <span className="font-medium text-gray-700">采购日期:</span>
                         <span className="ml-1">{new Date(selectedProduct.purchase_date).toLocaleDateString()}</span>
                       </div>
-                      {user?.role === 'BOSS' && selectedProduct.total_price && (
+
+                      {user?.role === 'BOSS' && selectedProduct.price_per_unit && (
                         <div>
-                          <span className="font-medium text-gray-700">总价:</span>
-                          <span className="ml-1">¥{selectedProduct.total_price.toFixed(2)}</span>
+                          <span className="font-medium text-gray-700">件单价:</span>
+                          <span className="ml-1">¥{selectedProduct.price_per_unit.toFixed(2)}</span>
                         </div>
                       )}
                     </div>
@@ -417,11 +436,11 @@ export default function FinishedProductGrid({
                       {selectedProduct.photos.slice(0, 4).map((photo, index) => (
                         <img
                           key={index}
-                          src={photo}
+                          src={fixImageUrl(photo)}
                           alt={`${selectedProduct.product_name} ${index + 1}`}
                           className="w-full max-w-full h-auto object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                           onError={handleImageError}
-                          onClick={() => window.open(photo, '_blank')}
+                          onClick={() => window.open(fixImageUrl(photo), '_blank')}
                         />
                       ))}
                     </div>

@@ -12,6 +12,7 @@ import PurchaseEntry from './pages/PurchaseEntry'
 import PurchaseList from './pages/PurchaseList'
 import ProductEntry from './pages/ProductEntry'
 import ProductList from './pages/ProductList'
+import SalesList from './pages/SalesList'
 import InventoryList from './pages/InventoryList'
 import SupplierManagement from './pages/SupplierManagement'
 import UserManagement from './pages/UserManagement'
@@ -99,6 +100,14 @@ function AppContent() {
               <ProtectedRoute>
                 <Layout>
                   <ProductList />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/sales-list" element={
+              <ProtectedRoute>
+                <Layout>
+                  <SalesList />
                 </Layout>
               </ProtectedRoute>
             } />

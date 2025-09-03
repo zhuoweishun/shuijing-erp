@@ -34,11 +34,17 @@ export const COMPLETE_FIELD_MAPPINGS = {
   isActive: 'is_active',
   isDeleted: 'is_deleted',
   
+  // 成品表特殊字段映射（数据库字段 -> API字段）
+  // name: 'product_name', // 注释掉这个通用映射，避免影响supplier.name
+  productCode: 'product_code',
+  unitPrice: 'selling_price',
+  totalValue: 'total_value',
+  images: 'photos',
+  
   // 用户相关
   userId: 'user_id',
   username: 'username',
   email: 'email',
-  name: 'name',
   phone: 'phone',
   role: 'role',
   avatar: 'avatar',
@@ -65,7 +71,6 @@ export const COMPLETE_FIELD_MAPPINGS = {
   pricePerGram: 'price_per_gram',
   pricePerBead: 'price_per_bead',
   pricePerPiece: 'price_per_piece',
-  unitPrice: 'unit_price',
   totalPrice: 'total_price',
   totalCost: 'total_cost',
   totalValue: 'total_value',
@@ -121,6 +126,17 @@ export const COMPLETE_FIELD_MAPPINGS = {
   destroyedAt: 'destroyed_at',
   restoredMaterials: 'restored_materials',
   
+  // SKU相关
+  skuId: 'sku_id',
+  skuCode: 'sku_code',
+  skuName: 'sku_name',
+  materialSignatureHash: 'material_signature_hash',
+  materialSignature: 'material_signature',
+  unitPrice: 'unit_price',
+  materialCost: 'material_cost',
+  laborCost: 'labor_cost',
+  craftCost: 'craft_cost',
+  
   // 分页相关
   totalCount: 'total_count',
   totalPages: 'total_pages',
@@ -142,7 +158,7 @@ export const REVERSE_FIELD_MAPPINGS = Object.fromEntries(
 const NUMERIC_FIELDS = [
   'pricePerGram', 'price_per_gram',
   'totalPrice', 'total_price',
-  'unitPrice', 'unit_price',
+  'unitPrice', 'unit_price', 'selling_price',
   'pricePerBead', 'price_per_bead',
   'pricePerPiece', 'price_per_piece',
   'weight',
@@ -154,6 +170,7 @@ const NUMERIC_FIELDS = [
   'totalBeads', 'total_beads',
   'minStockAlert', 'min_stock_alert',
   'totalCost', 'total_cost',
+  'totalValue', 'total_value',
   'profit',
   'profitMargin', 'profit_margin'
 ];
@@ -289,6 +306,74 @@ export function convertToApiFormat<T = any>(obj: T): any {
       converted[snakeKey] = convertNumericField(key, value);
     }
   });
+
+  // 成品数据特殊处理：添加缺失的字段
+  if (converted.id && (converted.product_name || converted.name)) {
+    // 确保product_code字段存在
+    if (!converted.product_code && converted.productCode) {
+      converted.product_code = converted.productCode;
+    }
+    
+    // 添加缺失的specification字段（优先从materialUsages中计算平均规格）
+    if (!converted.specification) {
+      // 如果有materialUsages数据，从中计算平均规格
+      if (converted.material_usages && Array.isArray(converted.material_usages) && converted.material_usages.length > 0) {
+        const specifications = converted.material_usages
+          .map((usage: any) => {
+            // 优先使用purchase中的beadDiameter，然后是specification
+            const purchase = usage.purchase;
+            if (purchase) {
+              return purchase.bead_diameter || purchase.specification;
+            }
+            return null;
+          })
+          .filter((spec: any) => spec !== null && spec !== undefined);
+        
+        if (specifications.length > 0) {
+          // 计算平均规格
+          const avgSpec = specifications.reduce((sum: number, spec: any) => sum + Number(spec), 0) / specifications.length;
+          converted.specification = `${avgSpec.toFixed(1)}mm`;
+        } else {
+          // 如果没有规格数据，使用unit作为备选
+          converted.specification = converted.unit || converted.description || converted.category || null;
+        }
+      } else {
+        // 如果没有materialUsages数据，使用unit作为备选
+        converted.specification = converted.unit || converted.description || converted.category || null;
+      }
+    }
+    
+    // 计算利润率（如果有销售价格和总成本）
+    if (!converted.profit_margin && converted.selling_price && converted.total_value) {
+      const sellingPrice = Number(converted.selling_price) || 0;
+      const totalCost = Number(converted.total_value) || 0;
+      if (sellingPrice > 0 && totalCost > 0) {
+        converted.profit_margin = ((sellingPrice - totalCost) / sellingPrice * 100);
+      }
+    }
+    
+    // 处理图片字段 - 修复双重嵌套JSON数组问题
+    if (converted.images && !converted.photos) {
+      try {
+        let parsedImages = typeof converted.images === 'string' ? JSON.parse(converted.images) : converted.images;
+        
+        // 处理双重嵌套数组：[["url"]] -> ["url"]
+        if (Array.isArray(parsedImages) && parsedImages.length > 0 && Array.isArray(parsedImages[0])) {
+          parsedImages = parsedImages[0];
+        }
+        
+        // 确保结果是数组
+        if (!Array.isArray(parsedImages)) {
+          parsedImages = [parsedImages];
+        }
+        
+        // 过滤掉无效的URL
+         converted.photos = parsedImages.filter(url => url && typeof url === 'string' && url.trim());
+       } catch (e) {
+        converted.photos = [];
+      }
+    }
+  }
 
   return converted;
 }

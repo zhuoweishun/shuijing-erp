@@ -6,15 +6,100 @@ import { convertToApiFormat, validateFieldNaming } from '../utils/fieldConverter
 
 import { handleApiError, handleNetworkError, handleTimeoutError, ErrorType } from './errorHandler'
 
-// 修复图片URL协议问题和IP地址更新
+// 动态获取本机局域网IP地址
+const getLocalNetworkIP = (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    // 尝试通过WebRTC获取本机IP
+    const pc = new RTCPeerConnection({ iceServers: [] })
+    pc.createDataChannel('')
+    
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        const candidate = event.candidate.candidate
+        const ipMatch = candidate.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/)
+        if (ipMatch && ipMatch[1]) {
+          const ip = ipMatch[1]
+          // 只返回局域网IP
+          if (ip.startsWith('192.168.') || ip.startsWith('10.') || 
+              (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31)) {
+            pc.close()
+            resolve(ip)
+            return
+          }
+        }
+      }
+    }
+    
+    pc.createOffer().then(offer => pc.setLocalDescription(offer))
+    
+    // 超时处理
+    setTimeout(() => {
+      pc.close()
+      resolve(null)
+    }, 2000)
+  })
+}
+
+// 缓存本机IP地址
+let cachedLocalIP: string | null = null
+let ipDetectionPromise: Promise<string | null> | null = null
+
+// 异步获取并缓存本机IP
+const ensureLocalIP = async (): Promise<string | null> => {
+  if (cachedLocalIP) return cachedLocalIP
+  
+  if (!ipDetectionPromise) {
+    ipDetectionPromise = getLocalNetworkIP().then(ip => {
+      if (ip) {
+        cachedLocalIP = ip
+        localStorage.setItem('cached_local_ip', ip)
+        console.log(`🌐 检测到本机局域网IP: ${ip}`)
+      }
+      return ip
+    })
+  }
+  
+  return ipDetectionPromise
+}
+
+// 修复图片URL协议问题和IP地址更新（增强版）
 export const fixImageUrl = (url: string): string => {
-  if (!url) return url
+  // 类型检查：确保url是字符串类型
+  if (!url || typeof url !== 'string') return url || ''
   
   // 如果是相对路径，直接返回
   if (!url.startsWith('http')) return url
   
   // 获取当前主机名
   const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
+  
+  // 处理生产环境域名在本地开发时的转换
+  if (url.includes('api.dorblecapital.com')) {
+    // 在开发环境中，绝对不使用公域URL
+    if (import.meta.env.MODE === 'development' || import.meta.env.DEV) {
+      // 优先使用缓存的局域网IP
+      const cachedIP = localStorage.getItem('cached_local_ip')
+      
+      if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
+        const newUrl = url.replace(/https?:\/\/api\.dorblecapital\.com/g, `http://${cachedIP}:3001`)
+        console.log(`🔄 [开发环境] 生产环境图片URL已转换为局域网: ${url} -> ${newUrl}`)
+        return newUrl
+      }
+      // 如果当前是局域网IP，直接使用
+      else if (currentHostname.startsWith('192.168.') || currentHostname.startsWith('10.') || 
+               (currentHostname.startsWith('172.') && parseInt(currentHostname.split('.')[1]) >= 16 && parseInt(currentHostname.split('.')[1]) <= 31)) {
+        const newUrl = url.replace(/https?:\/\/api\.dorblecapital\.com/g, `http://${currentHostname}:3001`)
+        console.log(`🔄 [开发环境] 生产环境图片URL已转换为局域网: ${url} -> ${newUrl}`)
+        return newUrl
+      }
+      // 最后才使用localhost（手机无法访问）
+      else {
+        const newUrl = url.replace(/https?:\/\/api\.dorblecapital\.com/g, 'http://localhost:3001')
+        console.log(`⚠️ [开发环境] 使用localhost（手机无法访问）: ${url} -> ${newUrl}`)
+        return newUrl
+      }
+    }
+  }
   
   // 提取URL中的IP地址
   const urlMatch = url.match(/https?:\/\/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):3001/)
@@ -27,15 +112,15 @@ export const fixImageUrl = (url: string): string => {
       if (currentHostname.startsWith('192.168.') || currentHostname.startsWith('10.') || 
           (currentHostname.startsWith('172.') && parseInt(currentHostname.split('.')[1]) >= 16 && parseInt(currentHostname.split('.')[1]) <= 31)) {
         const newUrl = url.replace(new RegExp(`https?://${urlIP.replace(/\./g, '\\.')}:3001`, 'g'), `http://${currentHostname}:3001`)
-        console.log(`🔄 图片URL已更新: ${url} -> ${newUrl}`)
+        console.log(`🔄 图片URL已更新为当前局域网IP: ${url} -> ${newUrl}`)
         return newUrl
       }
-      // 如果当前是localhost，尝试使用缓存的IP
+      // 如果当前是localhost，优先使用缓存的局域网IP
       else if (currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-        const cachedIP = localStorage.getItem('cached_local_ip') || localStorage.getItem('last_working_ip')
-        if (cachedIP && cachedIP !== urlIP) {
+        const cachedIP = localStorage.getItem('cached_local_ip')
+        if (cachedIP && cachedIP !== urlIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
           const newUrl = url.replace(new RegExp(`https?://${urlIP.replace(/\./g, '\\.')}:3001`, 'g'), `http://${cachedIP}:3001`)
-          console.log(`🔄 图片URL已更新: ${url} -> ${newUrl}`)
+          console.log(`🔄 图片URL已更新为缓存的局域网IP: ${url} -> ${newUrl}`)
           return newUrl
         }
       }
@@ -52,6 +137,14 @@ export const fixImageUrl = (url: string): string => {
   }
   
   return url
+}
+
+// 初始化IP检测（在页面加载时自动执行）
+if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
+  // 延迟执行，避免阻塞页面加载
+  setTimeout(() => {
+    ensureLocalIP().catch(console.error)
+  }, 1000)
 }
 
 
@@ -977,13 +1070,77 @@ export const finishedProductApi = {
       material_id: string
       product_name: string
       description?: string
-      specification?: string
+      specification?: string | number
       labor_cost: number
       craft_cost: number
       selling_price: number
       photos?: string[]
     }[]
   }) => apiClient.post('/finished-products/batch', data),
+}
+
+// SKU管理API
+export const skuApi = {
+  // 获取SKU列表
+  list: (params?: {
+    page?: number
+    limit?: number
+    search?: string
+    status?: ('ACTIVE' | 'INACTIVE')[]
+    price_min?: number
+    price_max?: number
+    profit_margin_min?: number
+    profit_margin_max?: number
+    sort_by?: string
+    sort_order?: 'asc' | 'desc'
+  }) => apiClient.get(`/skus${buildQueryString(params)}`),
+  
+  // 获取SKU详情
+  get: (id: string) => apiClient.get(`/skus/${id}`),
+  
+  // 销售SKU
+  sell: (id: string, data: {
+    quantity: number
+    buyer_info?: string
+    sales_channel?: string
+    notes?: string
+  }) => apiClient.post(`/skus/${id}/sell`, data),
+  
+  // 销毁SKU
+  destroy: (id: string, data: {
+    quantity: number
+    reason: string
+    return_to_material: boolean
+  }) => apiClient.post(`/skus/${id}/destroy`, data),
+  
+  // 调整SKU库存
+  adjust: (id: string, data: {
+    type: 'increase' | 'decrease'
+    quantity: number
+    reason: string
+    cost_adjustment?: number
+  }) => apiClient.post(`/skus/${id}/adjust`, data),
+  
+  // 获取SKU库存变更历史
+  getHistory: (id: string, params?: {
+    page?: number
+    limit?: number
+    type?: string
+    operator?: string
+    date_range?: string
+  }) => apiClient.get(`/skus/${id}/history${buildQueryString(params)}`),
+  
+  // 获取SKU溯源信息
+  getTraces: (id: string) => apiClient.get(`/skus/${id}/traces`),
+  
+  // 获取SKU统计信息
+  getStats: () => apiClient.get('/skus/stats/overview'),
+  
+  // 批量操作
+  batchUpdate: (data: {
+    sku_ids: string[]
+    operation: 'activate' | 'deactivate' | 'delete'
+  }) => apiClient.post('/skus/batch', data),
 }
 
 // 导出getApiUrl函数

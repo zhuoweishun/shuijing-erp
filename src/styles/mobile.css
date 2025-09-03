@@ -1,5 +1,21 @@
 /* 移动端优化样式 */
 
+/* 确保文字水平显示，但排除SVG元素 */
+*:not(svg):not(svg *) {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr !important;
+}
+
+/* 确保图表容器正确显示 */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-layer {
+  writing-mode: initial !important;
+  text-orientation: initial !important;
+  direction: initial !important;
+}
+
 /* 触摸友好的按钮（苹果极简风格） */
 .btn-mobile {
   @apply min-h-[44px] min-w-[44px] px-4 py-3 font-medium rounded-lg transition-all duration-200;

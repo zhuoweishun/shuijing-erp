@@ -252,6 +252,7 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     const inventoryQuery = `
       SELECT 
         p.id as purchase_id,
+        p.purchaseCode as purchase_code,
         p.productName as product_name,
         p.productType as product_type,
         p.unitType as unit_type,
@@ -429,6 +430,7 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
 
       level3.batches.push({
         purchase_id: item.purchase_id,
+        purchase_code: item.purchase_code,
         product_name: item.product_name,
         product_type: item.product_type,
         purchase_date: item.purchase_date,
@@ -1150,6 +1152,7 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
     const finishedProductsQuery = `
       SELECT 
         p.id as purchase_id,
+        p.purchaseCode as purchase_code,
         p.productName as product_name,
         p.specification,
         p.pieceCount as piece_count,
@@ -1223,9 +1226,9 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
     const convertedProducts = (products as any[]).map(item => {
       const converted = { ...item }
       
-      // 转换BigInt字段
+      // 转换BigInt字段（但不转换purchase_id，因为它是字符串UUID）
       const bigIntFields = [
-        'purchase_id', 'specification', 'piece_count', 'original_quantity',
+        'specification', 'piece_count', 'original_quantity',
         'used_quantity', 'remaining_quantity', 'is_low_stock'
       ]
       
@@ -1234,6 +1237,9 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
           converted[field] = Number(converted[field])
         }
       })
+      
+      // purchase_id保持原始字符串格式，不进行数字转换
+      // 因为它是UUID字符串，转换为Number会变成NaN
       
       // 转换价格字段
       const priceFields = ['price_per_unit', 'total_price']
@@ -1265,6 +1271,18 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
       totalPages,
       currentPage: pageNum
     })
+    
+    console.log('🔍 [成品卡片查询] 原始查询数据（前3个）:', (products as any[]).slice(0, 3).map(item => ({
+      purchase_id: item.purchase_id,
+      product_name: item.product_name,
+      purchase_id_type: typeof item.purchase_id
+    })))
+    
+    console.log('🔍 [成品卡片查询] 转换后数据（前3个）:', convertedProducts.slice(0, 3).map(item => ({
+      purchase_id: item.purchase_id,
+      product_name: item.product_name,
+      purchase_id_type: typeof item.purchase_id
+    })))
 
     res.json({
       success: true,
@@ -1469,7 +1487,7 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
       total_quantity: totalQuantity,
       top_products_count: topProducts.length,
       others_count: convertedProducts.length - topProducts.length,
-      distribution: pieChartData
+      top_products: pieChartData
     }
     
     console.log('📊 [产品分布] 响应数据:', responseData)
@@ -1542,15 +1560,36 @@ router.get('/consumption-analysis', authenticateToken, asyncHandler(async (req, 
         p.specification,
         p.quality,
         s.name as supplier_name,
-        SUM(mu.quantityUsedBeads) as total_consumed,
+        SUM(
+          CASE 
+            WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+            WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+            ELSE 0
+          END
+        ) as total_consumed,
         COUNT(mu.id) as consumption_count,
-        AVG(mu.quantityUsedBeads) as avg_consumption,
+        AVG(
+          CASE 
+            WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+            WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+            ELSE 0
+          END
+        ) as avg_consumption,
         MAX(mu.createdAt) as last_consumption_date,
-        MIN(mu.createdAt) as first_consumption_date
+        MIN(mu.createdAt) as first_consumption_date,
+        CASE 
+          WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN '颗'
+          WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN '件'
+          ELSE '个'
+        END as unit_type
       FROM material_usage mu
       INNER JOIN purchases p ON mu.purchaseId = p.id
       LEFT JOIN suppliers s ON p.supplierId = s.id
       WHERE 1=1 ${timeCondition}
+        AND (
+          (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND mu.quantityUsedBeads > 0) OR
+          (p.productType IN ('ACCESSORIES', 'FINISHED') AND mu.quantityUsedPieces > 0)
+        )
       GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification, p.quality, s.name
       ORDER BY total_consumed DESC
       LIMIT ?
@@ -1576,8 +1615,8 @@ router.get('/consumption-analysis', authenticateToken, asyncHandler(async (req, 
     })
 
     // 计算总体统计
-    const totalConsumption = convertedData.reduce((sum, item) => sum + item.total_consumed, 0)
-    const totalConsumptionCount = convertedData.reduce((sum, item) => sum + item.consumption_count, 0)
+    const totalConsumption = convertedData.reduce((sum, item) => sum + Number(item.total_consumed), 0)
+    const totalConsumptionCount = convertedData.reduce((sum, item) => sum + Number(item.consumption_count), 0)
 
     const responseData = {
       time_range,
@@ -1653,25 +1692,7 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
              ELSE '未知'
            END as price_range,
           COUNT(*) as count
-        FROM (
-          SELECT 
-            p.productType as product_type,
-            CASE 
-              WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN p.pricePerBead
-              WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN p.pricePerPiece
-              ELSE p.pricePerGram
-            END as calculated_price
-          FROM purchases p
-          WHERE p.status IN ('ACTIVE', 'PENDING') 
-            AND p.totalPrice IS NOT NULL 
-            AND p.totalPrice > 0
-            AND (
-              (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND (p.totalBeads IS NOT NULL AND p.totalBeads > 0 OR p.pieceCount IS NOT NULL AND p.pieceCount > 0)) OR
-              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR
-              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)
-            )
-            ${productTypeCondition}
-        ) as price_data
+        FROM (          SELECT             p.productType as product_type,            CASE               WHEN p.productType = 'LOOSE_BEADS' AND p.totalBeads > 0 THEN p.totalPrice / p.totalBeads              WHEN p.productType = 'BRACELET' AND p.quantity > 0 THEN p.totalPrice / p.quantity              WHEN p.productType = 'ACCESSORIES' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.totalPrice IS NOT NULL             AND p.totalPrice > 0            AND (              (p.productType = 'LOOSE_BEADS' AND p.totalBeads IS NOT NULL AND p.totalBeads > 0) OR              (p.productType = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)            )            ${productTypeCondition}        ) as price_data
         WHERE calculated_price IS NOT NULL
         GROUP BY price_range
         ORDER BY 

@@ -8,6 +8,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { inventoryApi } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
 // 产品类型映射
 const PRODUCT_TYPE_MAP = {
@@ -71,6 +72,7 @@ interface PriceDistributionData {
 
 export default function ProductPriceDistributionChart() {
   const { user } = useAuth()
+  const { isMobile } = useDeviceDetection()
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<PriceDistributionData | null>(null)
   const [productType, setProductType] = useState<string>('LOOSE_BEADS')
@@ -163,11 +165,11 @@ export default function ProductPriceDistributionChart() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-center py-12">
-          <div className="flex items-center space-x-3">
-            <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />
-            <span className="text-gray-600">加载价格分布数据中...</span>
+      <div className={isMobile ? 'p-mobile' : 'p-6'}>
+        <div className={`flex items-center justify-center ${isMobile ? 'py-8' : 'py-12'}`}>
+          <div className={`flex items-center ${isMobile ? 'space-x-2' : 'space-x-3'}`}>
+            <RefreshCw className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} animate-spin text-blue-500`} />
+            <span className={`text-gray-600 ${isMobile ? 'text-mobile-caption' : ''}`}>加载价格分布数据中...</span>
           </div>
         </div>
       </div>
@@ -176,25 +178,25 @@ export default function ProductPriceDistributionChart() {
 
   if (!data || (priceType === 'unit_price' ? !data.price_ranges?.length : !data.top_price_products?.length)) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <DollarSign className="h-6 w-6 text-green-500" />
-            <h3 className="text-lg font-semibold text-gray-900">
+      <div className={isMobile ? 'p-mobile' : 'p-6'}>
+        <div className={`flex items-center ${isMobile ? 'flex-col space-y-3' : 'justify-between'} mb-6`}>
+          <div className={`flex items-center ${isMobile ? 'space-x-2' : 'space-x-3'}`}>
+            <DollarSign className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-green-500`} />
+            <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900`}>
               {priceType === 'unit_price' ? '单价区间分布' : '总价分布 - 前10名'}
             </h3>
           </div>
           <button
             onClick={fetchPriceDistribution}
-            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className={isMobile ? 'btn-mobile-primary w-full' : 'px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm'}
           >
             重新加载
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Package className="h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">暂无价格数据</h3>
-          <p className="text-gray-600 text-center max-w-md">
+        <div className={`flex flex-col items-center justify-center ${isMobile ? 'py-8' : 'py-12'}`}>
+          <Package className={`${isMobile ? 'h-10 w-10' : 'h-12 w-12'} text-gray-400 mb-4`} />
+          <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-medium text-gray-900 mb-2`}>暂无价格数据</h3>
+          <p className={`text-gray-600 text-center max-w-md ${isMobile ? 'text-mobile-body px-2' : ''}`}>
             当前筛选条件下没有找到价格数据，请尝试切换产品类型或价格维度。
           </p>
         </div>
@@ -226,24 +228,24 @@ export default function ProductPriceDistributionChart() {
       }) || []
 
   return (
-    <div className="p-6">
+    <div className={isMobile ? 'p-mobile' : 'p-6'}>
       {/* 标题 */}
-      <div className="flex items-center space-x-3 mb-6">
-        <DollarSign className="h-6 w-6 text-green-500" />
-        <h3 className="text-lg font-semibold text-gray-900">
+      <div className={`flex items-center ${isMobile ? 'space-x-2' : 'space-x-3'} mb-6`}>
+        <DollarSign className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-green-500`} />
+        <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900`}>
             {priceType === 'unit_price' ? '单价区间分布' : '总价分布 - 前10名'}
           </h3>
       </div>
 
       {/* 产品类型和价格维度切换 */}
       <div className="mb-4">
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className={`flex flex-wrap ${isMobile ? 'gap-mobile-xs' : 'gap-2'} items-center`}>
           {/* 产品类型按钮 */}
           {Object.entries(PRODUCT_TYPE_MAP).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setProductType(key)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
                 productType === key
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -254,12 +256,12 @@ export default function ProductPriceDistributionChart() {
           ))}
           
           {/* 分隔线 */}
-          <div className="h-6 w-px bg-gray-300 mx-2"></div>
+          {!isMobile && <div className="h-6 w-px bg-gray-300 mx-2"></div>}
           
           {/* 价格维度按钮 */}
           <button
             onClick={() => setPriceType('unit_price')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+            className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
               priceType === 'unit_price'
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -269,7 +271,7 @@ export default function ProductPriceDistributionChart() {
           </button>
           <button
             onClick={() => setPriceType('total_price')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+            className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
               priceType === 'total_price'
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -280,27 +282,26 @@ export default function ProductPriceDistributionChart() {
         </div>
       </div>
 
-
-
-
-
       {/* 价格分布饼图 */}
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+      <div className={isMobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: isMobile ? '256px' : '256px' }}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+          <PieChart width={isMobile ? 300 : 400} height={isMobile ? 256 : 256}>
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, value, percent }) => 
+              label={isMobile ? false : ({ name, value, percent }) => 
                 priceType === 'unit_price' 
                   ? `${name}: ${value}个 (${((percent || 0) * 100).toFixed(1)}%)`
                   : `${name}: ${formatPrice(value)} (${((percent || 0) * 100).toFixed(1)}%)`
               }
-              outerRadius={80}
+              outerRadius={isMobile ? 70 : 80}
+              innerRadius={isMobile ? 20 : 0}
               fill="#8884d8"
               dataKey="value"
+              stroke="#fff"
+              strokeWidth={2}
             >
               {chartData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

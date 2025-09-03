@@ -30,6 +30,8 @@ model User {
   products          Product[]
   lastEditedPurchases Purchase[] @relation("PurchaseLastEditedBy")
   editLogs          EditLog[]
+  createdSkus       ProductSku[]
+  skuInventoryLogs  SkuInventoryLog[]
   
   @@map("users")
 }
@@ -146,12 +148,16 @@ model Product {
   unit        String
   unitPrice   Decimal       @db.Decimal(10, 2)
   totalValue  Decimal       @db.Decimal(10, 2)
-  status      ProductStatus @default(IN_STOCK)
+  status      ProductStatus @default(AVAILABLE)
   location    String?
   notes       String?       @db.Text
   images      String?       @db.Text // JSON格式存储图片URL数组
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  // SKU关联
+  skuId       String?       // SKU ID
+  sku         ProductSku?   @relation(fields: [skuId], references: [id])
 
   // 关联关系
   userId      String
@@ -163,10 +169,10 @@ model Product {
 
 // 成品状态枚举
 enum ProductStatus {
-  IN_STOCK    // 有库存
-  LOW_STOCK   // 库存不足
-  OUT_OF_STOCK // 无库存
-  DISCONTINUED // 已停产
+  MAKING      // 制作中
+  AVAILABLE   // 可售
+  SOLD        // 已售出
+  OFFLINE     // 下架
 }
 
 // 系统配置表
@@ -215,6 +221,86 @@ model MaterialUsage {
   product            Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   
   @@map("material_usage")
+}
+
+// SKU表
+model ProductSku {
+  id                    String   @id @default(cuid())
+  skuCode               String   @unique // SKU编号 SKU+YYYYMMDD+3位序号
+  skuName               String   // SKU名称
+  materialSignatureHash String   // 原材料标识哈希值
+  materialSignature     Json     // 原材料标识JSON
+  totalQuantity         Int      @default(0) // 总数量
+  availableQuantity     Int      @default(0) // 可售数量
+  unitPrice             Decimal  @db.Decimal(10, 2) // 单价
+  totalValue            Decimal  @db.Decimal(10, 2) // 总价值
+  photos                Json?    // 图片URL数组
+  description           String?  @db.Text // 描述
+  specification         String?  // 规格
+  materialCost          Decimal? @db.Decimal(10, 2) // 原材料成本
+  laborCost             Decimal? @db.Decimal(10, 2) // 人工成本
+  craftCost             Decimal? @db.Decimal(10, 2) // 工艺成本
+  totalCost             Decimal? @db.Decimal(10, 2) // 总成本
+  sellingPrice          Decimal  @db.Decimal(10, 2) // 销售价格
+  profitMargin          Decimal? @db.Decimal(5, 2) // 利润率
+  status                SkuStatus @default(ACTIVE) // SKU状态
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // 关联关系
+  createdBy             String
+  creator               User     @relation(fields: [createdBy], references: [id])
+  products              Product[] // 关联的成品
+  inventoryLogs         SkuInventoryLog[] // 库存变更日志
+  
+  @@index([materialSignatureHash])
+  @@index([skuCode])
+  @@index([status])
+  @@map("product_skus")
+}
+
+// SKU状态枚举
+enum SkuStatus {
+  ACTIVE    // 活跃
+  INACTIVE  // 停用
+}
+
+// SKU库存变更日志表
+model SkuInventoryLog {
+  id              String   @id @default(cuid())
+  skuId           String   // SKU ID
+  action          SkuAction // 操作类型
+  quantityChange  Int      // 数量变化
+  quantityBefore  Int      // 变更前数量
+  quantityAfter   Int      // 变更后数量
+  referenceType   ReferenceType // 引用类型
+  referenceId     String?  // 引用ID
+  notes           String?  @db.Text // 备注
+  createdAt       DateTime @default(now())
+  
+  // 关联关系
+  sku             ProductSku @relation(fields: [skuId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  @@index([skuId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("sku_inventory_logs")
+}
+
+// SKU操作类型枚举
+enum SkuAction {
+  CREATE  // 创建
+  SELL    // 销售
+  ADJUST  // 调整
+}
+
+// 引用类型枚举
+enum ReferenceType {
+  PRODUCT // 成品
+  SALE    // 销售
+  MANUAL  // 手动
 }
 
 // 操作日志表

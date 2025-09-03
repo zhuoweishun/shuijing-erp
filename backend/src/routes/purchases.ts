@@ -117,6 +117,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     page = 1, 
     limit = 10, 
     search, 
+    purchase_code_search,
     quality, 
     startDate, 
     endDate, 
@@ -151,6 +152,13 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   if (search) {
     where.productName = {
       contains: search as string
+    }
+  }
+  
+  // 采购编号搜索
+  if (purchase_code_search) {
+    where.purchaseCode = {
+      contains: purchase_code_search as string
     }
   }
   

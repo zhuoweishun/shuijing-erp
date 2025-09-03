@@ -111,10 +111,10 @@ export default function Home() {
       permission: 'product:create'
     },
     {
-      id: 'product-list',
+      id: 'sales-list',
       label: '销售列表',
       icon: Package,
-      action: () => navigate('/product-list'),
+      action: () => navigate('/sales-list'),
       permission: 'product:read'
     },
     {

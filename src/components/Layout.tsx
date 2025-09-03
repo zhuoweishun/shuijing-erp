@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { usePermission } from '../hooks/useAuth'
+import NetworkInfo from './NetworkInfo'
 
 
 
@@ -56,7 +57,7 @@ const navItems: NavItem[] = [
     icon: Gem
   },
   {
-    path: '/product-list',
+    path: '/sales-list',
     label: '销售列表',
     icon: Boxes
   },
@@ -200,8 +201,12 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </nav>
 
-          {/* 底部用户信息（移动端） */}
-          <div className="absolute bottom-4 left-4 right-4">
+          {/* 底部信息区域 */}
+          <div className="absolute bottom-4 left-4 right-4 space-y-3">
+            {/* 网络信息组件 */}
+            <NetworkInfo className="text-xs" />
+            
+            {/* 用户信息（移动端） */}
             <div className="rounded-xl bg-gray-100 p-3">
               <div className="text-sm font-medium text-gray-900">
                 {user?.real_name}

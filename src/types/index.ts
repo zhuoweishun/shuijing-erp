@@ -477,18 +477,28 @@ export interface CostCalculationRequest {
 
 // 成本计算响应
 export interface CostCalculationResponse {
-  cost_breakdown: {
+  // 直接字段（用于前端直接访问）
+  material_cost: number
+  labor_cost: number
+  craft_cost: number
+  total_cost: number
+  suggested_price?: number
+  profit_margin?: number
+  profit_amount?: number
+  
+  // 嵌套结构（保持向后兼容）
+  cost_breakdown?: {
     material_cost: number
     labor_cost: number
     craft_cost: number
     total_cost: number
   }
-  pricing_suggestion: {
+  pricing_suggestion?: {
     suggested_price: number
     profit_margin: number
     profit_amount: number
   }
-  material_details: {
+  material_details?: {
     purchase_id: string
     product_name: string
     quantity_used: number
@@ -500,6 +510,7 @@ export interface CostCalculationResponse {
 // 可用原材料
 export interface AvailableMaterial {
   purchase_id: string
+  purchase_code?: string
   product_name: string
   product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
   bead_diameter?: number
@@ -567,7 +578,7 @@ export interface BatchProductInfo {
   material_id: string                           // 对应的原材料ID
   product_name: string                         // 成品名称
   description: string                          // 成品描述
-  specification: string                        // 规格
+  specification: string | number               // 规格
   labor_cost: number                          // 人工成本
   craft_cost: number                          // 工艺成本
   selling_price: number                       // 销售价格
@@ -583,7 +594,7 @@ export interface BatchProductCreateRequest {
     material_id: string
     product_name: string
     description?: string
-    specification?: string
+    specification?: string | number
     labor_cost: number
     craft_cost: number
     selling_price: number
@@ -612,6 +623,199 @@ export interface BatchProductCreateResponse {
   }[]
 }
 
+// SKU系统相关类型（按照文档规范定义）
+export interface SkuItem {
+  id: string
+  sku_code: string
+  sku_name: string
+  material_signature_hash: string
+  total_quantity: number
+  available_quantity: number
+  photos?: string[]
+  specification?: string
+  material_cost?: number
+  labor_cost?: number
+  craft_cost?: number
+  total_cost?: number
+  selling_price: number
+  unit_price?: number
+  total_value?: number
+  profit_margin?: number
+  created_at: string
+  last_sale_date?: string
+  created_by: string
+  updated_at?: string
+  status?: 'ACTIVE' | 'INACTIVE'
+  description?: string
+  material_traces?: MaterialTrace[]
+  // 兼容字段（用于向后兼容）
+  sku_id?: string
+  sku_number?: string
+}
+
+// SKU原材料溯源信息
+export interface MaterialTrace {
+  material_id: string
+  material_name: string
+  quantity_used: number
+  unit: string
+  cost_per_unit: number
+  supplier: string
+  batch_number: string
+}
+
+// SKU溯源节点信息
+export interface TraceNode {
+  id: string
+  type: 'material'
+  name: string
+  description: string
+  timestamp: string
+  operator: string
+  location: string
+  status: 'completed' | 'in_progress' | 'pending'
+  details: {
+    supplier: string
+    batch_number: string
+    quantity: string
+    quality_grade: string
+    diameter: string
+    purchase_price: string
+  }
+  materials: MaterialTrace[]
+}
+
+// SKU溯源响应数据
+export interface SkuTraceResponse {
+  success: boolean
+  message: string
+  data: {
+    sku_info: {
+      id: string
+      sku_code: string
+      sku_name: string
+      specification?: string
+    }
+    traces: TraceNode[]
+  }
+}
+
+// SKU库存变更日志
+export interface SkuInventoryLog {
+  log_id: string
+  sku_id: string
+  operation_type: 'create' | 'sell' | 'destroy' | 'adjust_increase' | 'adjust_decrease'
+  quantity_change: number
+  quantity_before: number
+  quantity_after: number
+  unit_price: number
+  total_amount: number
+  operator_id: string
+  operator_name: string
+  reason: string
+  notes?: string
+  created_at: string
+}
+
+// SKU列表查询参数
+export interface SkuListParams {
+  page?: number
+  limit?: number
+  search?: string
+  status?: 'ACTIVE' | 'INACTIVE'
+  price_min?: number
+  price_max?: number
+  profit_margin_min?: number
+  profit_margin_max?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+// SKU销售确认数据
+export interface SellData {
+  quantity: number
+  buyer_info?: string
+  sale_channel?: string
+  notes?: string
+}
+
+// SKU销毁操作数据
+export interface DestroyData {
+  quantity: number
+  reason: string
+  return_to_material: boolean
+}
+
+// SKU库存调整数据
+export interface AdjustData {
+  type: 'increase' | 'decrease'
+  quantity: number
+  reason: string
+  cost_adjustment?: number
+}
+
+// SKU操作历史查询参数
+export interface HistoryParams {
+  page?: number
+  limit?: number
+  action?: string
+}
+
+// SKU权限控制
+export interface SkuPermissions {
+  canViewPrice: boolean
+  canSell: boolean
+  canDestroy: boolean
+  canAdjust: boolean
+  canViewTrace: boolean
+}
+
+// SKU API响应类型
+export interface SkuListResponse {
+  success: boolean
+  message: string
+  data: {
+    skus: SkuItem[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+    }
+  }
+}
+
+export interface SkuDetailResponse {
+  success: boolean
+  message: string
+  data: {
+    sku: SkuItem
+    material_traces: MaterialTrace[]
+    purchase_list: {
+      id: string
+      product_name: string
+      supplier: string
+      purchase_date: string
+      total_price: number
+      remaining_quantity: number
+    }[]
+  }
+}
+
+export interface SkuHistoryResponse {
+  success: boolean
+  message: string
+  data: {
+    logs: SkuInventoryLog[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      total_pages: number
+    }
+  }
+}
+
 // 全局窗口类型扩展
 declare global {
   interface Window {
@@ -619,5 +823,10 @@ declare global {
     __PUBLIC_IP__?: string
     __API_DOMAIN__?: string
     NETWORK_CONFIG?: NetworkConfig
+    tempFilterPosition?: {
+      column: string
+      top: number
+      left: number
+    }
   }
 }

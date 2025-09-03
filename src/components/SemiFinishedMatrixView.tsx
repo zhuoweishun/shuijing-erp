@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { Package, AlertTriangle, TrendingUp, ToggleRight, Filter, Search, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
+import { formatPurchaseCode } from '../utils/fieldConverter'
 import Portal from './Portal'
 
 // 半成品库存矩阵数据类型
@@ -34,6 +35,7 @@ interface QualityData {
 
 interface BatchData {
   purchase_id: number
+  purchase_code?: string
   product_name: string
   product_type: string
   purchase_date: string
@@ -42,6 +44,7 @@ interface BatchData {
   used_quantity: number
   remaining_quantity: number
   price_per_unit: number | null
+  price_per_bead: number | null
   price_per_gram: number | null
   photos?: string[]
   specification?: number
@@ -224,7 +227,15 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
           const qualityPriceData: { [quality: string]: { totalPrice: number, totalQuantity: number } } = {}
           
           cell.batches.forEach(batch => {
-            const price = batch.price_per_unit || batch.price_per_gram || 0
+            // 根据产品类型选择合适的价格字段
+            let price = 0
+            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+              // 散珠和手串优先使用price_per_bead
+              price = batch.price_per_bead || batch.price_per_unit || batch.price_per_gram || 0
+            } else {
+              // 其他产品类型使用原有逻辑
+              price = batch.price_per_unit || batch.price_per_gram || 0
+            }
             if (price > 0) {
               // 从批次数据中获取品相信息
               const batchQuality = formatQuality(
@@ -353,7 +364,15 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
           const sizePriceData: { [sizeKey: string]: { totalPrice: number, totalQuantity: number } } = {}
           
           cell.batches.forEach(batch => {
-            const price = batch.price_per_unit || batch.price_per_gram || 0
+            // 根据产品类型选择合适的价格字段
+            let price = 0
+            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+              // 散珠和手串优先使用price_per_bead
+              price = batch.price_per_bead || batch.price_per_unit || batch.price_per_gram || 0
+            } else {
+              // 其他产品类型使用原有逻辑
+              price = batch.price_per_unit || batch.price_per_gram || 0
+            }
             if (price > 0) {
               totalPrice += price * batch.remaining_quantity
               totalQuantity += batch.remaining_quantity
@@ -873,8 +892,14 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
 
       {/* 详情弹窗 */}
       {selectedCell && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedCell(null)}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -909,6 +934,8 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
                         </div>
                       )}
                 </div>
+                
+
                 
                 <div>
                   <div className="text-sm text-gray-500 mb-2">{viewMode === 'size' ? '品相分布' : '尺寸分布'}</div>
@@ -954,6 +981,10 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
                       <div key={index} className="text-xs text-gray-600 p-3 bg-gray-50 rounded">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
+                            <span className="font-medium text-gray-700">CG编号:</span>
+                            <span className="ml-1">{batch.purchase_code || formatPurchaseCode(batch.purchase_id)}</span>
+                          </div>
+                          <div>
                             <span className="font-medium text-gray-700">供应商:</span>
                             <span className="ml-1">{batch.supplier_name}</span>
                           </div>
@@ -963,7 +994,7 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
                           </div>
                           <div>
                             <span className="font-medium text-gray-700">库存:</span>
-                            <span className="ml-1">{batch.remaining_quantity} {
+                            <span className="ml-1">{batch.original_quantity} {
                               selectedCell.productType === 'LOOSE_BEADS' ? '颗' :
                               selectedCell.productType === 'BRACELET' ? '颗' :
                               selectedCell.productType === 'ACCESSORIES' ? '片' : '件'
@@ -979,16 +1010,25 @@ export default function SemiFinishedMatrixView({ data, loading, onCellClick }: P
                               <span className="ml-1">{batch.piece_count}颗</span>
                             </div>
                           )}
-                          {user?.role === 'BOSS' && batch.price_per_unit && (
-                            <div>
-                              <span className="font-medium text-gray-700">{
-                                selectedCell.productType === 'LOOSE_BEADS' ? '颗单价:' :
-                                selectedCell.productType === 'BRACELET' ? '颗单价:' :
-                                selectedCell.productType === 'ACCESSORIES' ? '片单价:' : '件单价:'
-                              }</span>
-                              <span className="ml-1">¥{batch.price_per_unit.toFixed(2)}</span>
-                            </div>
-                          )}
+                          {user?.role === 'BOSS' && (() => {
+                            // 根据产品类型选择合适的价格字段
+                            let price = 0
+                            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+                              price = batch.price_per_bead || batch.price_per_unit || batch.price_per_gram || 0
+                            } else {
+                              price = batch.price_per_unit || batch.price_per_gram || 0
+                            }
+                            return price > 0 ? (
+                              <div>
+                                <span className="font-medium text-gray-700">{
+                                  selectedCell.productType === 'LOOSE_BEADS' ? '颗单价:' :
+                                  selectedCell.productType === 'BRACELET' ? '颗单价:' :
+                                  selectedCell.productType === 'ACCESSORIES' ? '片单价:' : '件单价:'
+                                }</span>
+                                <span className="ml-1">¥{price.toFixed(2)}</span>
+                              </div>
+                            ) : null
+                          })()}
                         </div>
                       </div>
                     ))}

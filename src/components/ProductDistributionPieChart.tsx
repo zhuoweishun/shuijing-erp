@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { inventoryApi } from '../services/api'
+import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
 // 产品类型配置
 const PRODUCT_TYPES = [
@@ -16,7 +17,7 @@ interface ProductDistributionData {
   total_quantity: number
   top_products_count: number
   others_count: number
-  distribution: {
+  top_products: {
     name: string
     value: number
     percentage: string
@@ -31,6 +32,7 @@ interface ChartDataItem {
 }
 
 const ProductDistributionPieChart: React.FC = () => {
+  const { isMobile } = useDeviceDetection()
   const [selectedType, setSelectedType] = useState<ProductType>('LOOSE_BEADS')
   const [loading, setLoading] = useState(false)
   const [chartData, setChartData] = useState<ChartDataItem[]>([])
@@ -49,11 +51,11 @@ const ProductDistributionPieChart: React.FC = () => {
         const typeConfig = PRODUCT_TYPES.find(t => t.key === productType)
         const baseColor = typeConfig?.color || '#3B82F6'
         
-        const chartItems: ChartDataItem[] = (response.data as ProductDistributionData).distribution.map((item: any, index: number) => ({
+        const chartItems: ChartDataItem[] = (response.data as ProductDistributionData).top_products.map((item: any, index: number) => ({
           name: item.name,
           value: item.value,
           percentage: parseFloat(item.percentage),
-          color: item.name === '其他' ? '#cccccc' : generateColor(baseColor, index, (response.data as ProductDistributionData).distribution.length)
+          color: item.name === '其他' ? '#cccccc' : generateColor(baseColor, index, (response.data as ProductDistributionData).top_products.length)
         }))
         
         setChartData(chartItems)
@@ -112,72 +114,79 @@ const ProductDistributionPieChart: React.FC = () => {
   }, [selectedType])
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          产品库存分布 - 前10名
-        </h3>
-        
-        {/* 产品类型切换按钮 */}
-        <div className="flex flex-wrap gap-2">
-          {PRODUCT_TYPES.map((type) => (
-            <button
-              key={type.key}
-              onClick={() => setSelectedType(type.key)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                selectedType === type.key
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {type.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-gray-600 text-sm">加载中...</span>
-        </div>
-      ) : chartData.length > 0 ? (
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ payload }) => `${payload.percentage}%`}
+    <div className={isMobile ? '' : 'bg-white rounded-lg shadow-sm border border-gray-200 p-6'}>
+      <div className={isMobile ? '' : ''}>
+        <div className="mb-4">
+          <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900 mb-3`}>
+            产品库存分布 - 前10名
+          </h3>
+          
+          {/* 产品类型切换按钮 */}
+          <div className={`flex flex-wrap ${isMobile ? 'gap-mobile-xs' : 'gap-2'}`}>
+            {PRODUCT_TYPES.map((type) => (
+              <button
+                key={type.key}
+                onClick={() => setSelectedType(type.key)}
+                className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
+                  selectedType === type.key
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                {chartData.map((item, index) => (
-                  <Cell key={`cell-${index}`} fill={item.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                wrapperStyle={{ fontSize: '12px' }}
-                formatter={(value) => (
-                  <span className="text-xs text-gray-700">
-                    {value.length > 8 ? `${value.slice(0, 8)}...` : value}
-                  </span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          <div className="text-center">
-            <p className="text-sm mb-1">暂无数据</p>
-            <p className="text-xs">当前产品类型下没有库存数据</p>
+                {type.label}
+              </button>
+            ))}
           </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'}`}>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+            <span className={`ml-2 text-gray-600 ${isMobile ? 'text-mobile-caption' : 'text-sm'}`}>加载中...</span>
+          </div>
+        ) : chartData.length > 0 ? (
+          <div className={isMobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: isMobile ? '256px' : '256px' }}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+              <PieChart width={isMobile ? 300 : 400} height={isMobile ? 256 : 256}>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={isMobile ? 70 : 80}
+                  innerRadius={isMobile ? 20 : 0}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={isMobile ? false : ({ payload }) => `${payload.percentage}%`}
+                  stroke="#fff"
+                  strokeWidth={2}
+                >
+                  {chartData.map((item, index) => (
+                    <Cell key={`cell-${index}`} fill={item.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                {!isMobile && (
+                  <Legend 
+                    wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                    formatter={(value) => (
+                      <span className="text-xs text-gray-700">
+                        {value.length > 8 ? `${value.slice(0, 8)}...` : value}
+                      </span>
+                    )}
+                  />
+                )}
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'} text-gray-500`}>
+            <div className="text-center">
+              <p className={isMobile ? 'text-mobile-caption mb-1' : 'text-sm mb-1'}>暂无数据</p>
+              <p className={isMobile ? 'text-mobile-small' : 'text-xs'}>当前产品类型下没有库存数据</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
