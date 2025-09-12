@@ -1,0 +1,719 @@
+{
+  "timestamp": "2025-09-12T21:36:33.175342",
+  "total_fixes": 141,
+  "total_errors": 0,
+  "fixes_by_type": {
+    "interface_syntax_fix": 48,
+    "camel_to_snake_fix": 64,
+    "import_statement_fix": 1,
+    "jsx_self_closing_fix": 28
+  },
+  "fixes_applied": [
+    {
+      "file": "src\\jest.d.ts",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\vite-env.d.ts",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\buserData\\b -> user_data"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\main.tsx",
+      "type": "import_statement_fix",
+      "description": "修复导入语句问题"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bresponseData\\b -> response_data"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bupdateData\\b -> update_data"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bresponseData\\b -> response_data"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bsetData\\b -> set_data"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bsetData\\b -> set_data"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\NetworkInfo.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\PermissionWrapper.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\Portal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bsetData\\b -> set_data"
+    },
+    {
+      "file": "src\\components\\ProductTypeTab.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bupdateData\\b -> update_data"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bupdateData\\b -> update_data"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bisLoading\\b -> is_loading"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\buserData\\b -> user_data"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bresponseData\\b -> response_data"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bformData\\b -> form_data"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\brequestData\\b -> request_data"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "interface_syntax_fix",
+      "description": "修复interface语法问题"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonClose\\b -> on_close"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSuccess\\b -> on_success"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonError\\b -> on_error"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "camel_to_snake_fix",
+      "description": "修复驼峰命名: \\bonSubmit\\b -> on_submit"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "jsx_self_closing_fix",
+      "description": "修复JSX自闭合标签格式"
+    }
+  ],
+  "errors_found": []
+}

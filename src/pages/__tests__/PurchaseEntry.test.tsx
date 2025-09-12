@@ -42,13 +42,13 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 // 模拟数据
 const mockSuppliers = [
-  { id: '1', name: '测试供应商1', isActive: true },
-  { id: '2', name: '测试供应商2', isActive: true }
+  { id: '1', name: '测试供应商1', is_active: true },
+  { id: '2', name: '测试供应商2', is_active: true }
 ];
 
 const mockBossUser = {
        id: 1,
-       username: 'boss',
+       user_name: 'boss',
        real_name: 'Boss User',
        name: 'boss',
        role: 'BOSS' as const,
@@ -60,7 +60,7 @@ const mockBossUser = {
 
 const mockEmployeeUser = {
   id: 2,
-  username: 'employee',
+  user_name: 'employee',
   real_name: 'Employee User',
   name: 'employee',
   role: 'EMPLOYEE' as const,
@@ -103,9 +103,9 @@ describe('PurchaseEntry 组件测试', () => {
       });
 
       // 验证供应商输入框存在
-      const supplierInput = screen.getByLabelText(/供应商名称/);
-      expect(supplierInput).toBeInTheDocument();
-      expect(supplierInput).not.toBeDisabled();
+      const supplier_input = screen.getByLabelText(/供应商名称/);
+      expect(supplier_input).toBeInTheDocument();
+      expect(supplier_input).not.toBeDisabled();
     });
 
     test('EMPLOYEE角色应该看到权限不足提示', async () => {
@@ -254,11 +254,11 @@ describe('PurchaseEntry 组件测试', () => {
         </TestWrapper>
       );
 
-      const supplierInput = screen.getByLabelText(/供应商名称/);
+      const supplier_input = screen.getByLabelText(/供应商名称/);
       
       // 点击输入框触发下拉列表
-      fireEvent.focus(supplierInput);
-      await userEvent.type(supplierInput, '测试');
+      fireEvent.focus(supplier_input);
+      await userEvent.type(supplier_input, '测试');
 
       await waitFor(() => {
         expect(screen.getByText('测试供应商1')).toBeInTheDocument();
@@ -273,11 +273,11 @@ describe('PurchaseEntry 组件测试', () => {
         </TestWrapper>
       );
 
-      const supplierInput = screen.getByLabelText(/供应商名称/);
+      const supplier_input = screen.getByLabelText(/供应商名称/);
       
       // 触发下拉列表
-      fireEvent.focus(supplierInput);
-      await userEvent.type(supplierInput, '测试');
+      fireEvent.focus(supplier_input);
+      await userEvent.type(supplier_input, '测试');
 
       await waitFor(() => {
         expect(screen.getByText('测试供应商1')).toBeInTheDocument();
@@ -287,7 +287,7 @@ describe('PurchaseEntry 组件测试', () => {
       fireEvent.click(screen.getByText('测试供应商1'));
 
       await waitFor(() => {
-        expect(supplierInput).toHaveValue('测试供应商1');
+        expect(supplier_input).toHaveValue('测试供应商1');
       });
     });
 
@@ -298,13 +298,13 @@ describe('PurchaseEntry 组件测试', () => {
         </TestWrapper>
       );
 
-      const supplierInput = screen.getByLabelText(/供应商名称/);
+      const supplier_input = screen.getByLabelText(/供应商名称/);
       
       // 输入新供应商名称
-      await userEvent.type(supplierInput, '新供应商名称');
+      await userEvent.type(supplier_input, '新供应商名称');
       
       // 触发失焦事件（模拟创建新供应商）
-      fireEvent.blur(supplierInput);
+      fireEvent.blur(supplier_input);
 
       await waitFor(() => {
         expect(mockApiClient.post).toHaveBeenCalledWith('/suppliers', {
@@ -368,12 +368,12 @@ describe('PurchaseEntry 组件测试', () => {
       );
 
       // 填写表单
-      const supplierInput = screen.getByLabelText(/供应商名称/);
+      const supplier_input = screen.getByLabelText(/供应商名称/);
       const productNameInput = screen.getByLabelText(/产品名称/);
       const quantityInput = screen.getByLabelText(/数量/);
       const priceInput = screen.getByLabelText(/单价/);
 
-      await userEvent.type(supplierInput, '测试供应商1');
+      await userEvent.type(supplier_input, '测试供应商1');
       await userEvent.type(productNameInput, '测试产品');
       await userEvent.type(quantityInput, '100');
       await userEvent.type(priceInput, '10.5');

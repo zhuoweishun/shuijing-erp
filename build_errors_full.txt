@@ -1,0 +1,1199 @@
+﻿
+> crystal-erp-frontend@1.0.0 build
+> tsc -b && vite build
+
+src/components/AccessoriesProductGrid.tsx(44,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/AccessoriesProductGrid.tsx(51,7): error TS2304: Cannot find name 'set_loading'.
+src/components/AccessoriesProductGrid.tsx(90,16): error TS2304: Cannot find name 'set_loading'.
+src/components/AccessoriesProductGrid.tsx(173,38): error TS2304: Cannot find name 'lowStockOnly'.
+src/components/AccessoriesProductGrid.tsx(173,52): error TS2304: Cannot find name 'specificationMin'.
+src/components/AccessoriesProductGrid.tsx(173,70): error TS2304: Cannot find name 'specificationMax'.
+src/components/AccessoriesProductGrid.tsx(178,22): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/AccessoriesProductGrid.tsx(431,64): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/AccessoriesProductGrid.tsx(433,65): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/AccessoriesProductGrid.tsx(435,64): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/CustomerCreateModal.tsx(28,3): error TS6133: 'is_open' is declared but its value is never read.
+src/components/CustomerCreateModal.tsx(139,8): error TS2304: Cannot find name 'isOpen'.
+src/components/CustomerCreateModal.tsx(171,15): error TS2322: Type '{ type: "text"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; className: string; placeholder: string; max_length: number; }' is not assignable to type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'. Did you mean 'maxLength'?
+src/components/CustomerCreateModal.tsx(192,15): error TS2322: Type '{ type: "tel"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; className: string; placeholder: string; max_length: number; }' is not assignable to type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'. Did you mean 'maxLength'?
+src/components/CustomerCreateModal.tsx(213,15): error TS2322: Type '{ type: "text"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; className: string; placeholder: string; max_length: number; }' is not assignable to type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'. Did you mean 'maxLength'?
+src/components/CustomerCreateModal.tsx(232,15): error TS2322: Type '{ type: "text"; value: string | undefined; onChange: (e: ChangeEvent<HTMLInputElement>) => void; className: string; placeholder: string; max_length: number; }' is not assignable to type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>'. Did you mean 'maxLength'?
+src/components/CustomerCreateModal.tsx(262,15): error TS2322: Type '{ value: string | undefined; onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void; className: string; placeholder: string; rows: number; max_length: number; }' is not assignable to type 'DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>'. Did you mean 'maxLength'?
+src/components/CustomerDetailModal.tsx(249,32): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/CustomerDetailModal.tsx(249,58): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/CustomerDetailModal.tsx(283,11): error TS6133: 'days_since_last_purchase' is declared but its value is never read.
+src/components/CustomerDetailModal.tsx(283,54): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/CustomerDetailModal.tsx(283,80): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/CustomerDetailModal.tsx(287,9): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(287,75): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(289,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(289,80): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(291,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(291,79): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(293,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/components/CustomerDetailModal.tsx(347,10): error TS6133: 'refundLoading' is declared but its value is never read.
+src/components/CustomerDetailModal.tsx(543,43): error TS2551: Property 'add_note' does not exist on type '{ list: (params?: { page?: number | undefined; limit?: number | undefined; search?: string | undefined; customer_type?: "ACTIVE" | "INACTIVE" | "NEW" | "REPEAT" | "VIP" | undefined; sort?: "asc" | ... 1 more ... | undefined; sort_by?: "created_at" | ... 4 more ... | undefined; } | undefined) => Promise<...>; ... 13 ...'. Did you mean 'addNote'?
+src/components/CustomerDetailModal.tsx(577,43): error TS2551: Property 'refund_purchase' does not exist on type '{ list: (params?: { page?: number | undefined; limit?: number | undefined; search?: string | undefined; customer_type?: "ACTIVE" | "INACTIVE" | "NEW" | "REPEAT" | "VIP" | undefined; sort?: "asc" | ... 1 more ... | undefined; sort_by?: "created_at" | ... 4 more ... | undefined; } | undefined) => Promise<...>; ... 13 ...'. Did you mean 'refundPurchase'?
+src/components/CustomerDetailModal.tsx(638,9): error TS6133: 'customer_labels' is declared but its value is never read.
+src/components/CustomerDetailModal.tsx(655,20): error TS2304: Cannot find name 'customerLabels'.
+src/components/CustomerDetailModal.tsx(670,20): error TS2304: Cannot find name 'customerLabels'.
+src/components/CustomerDetailModal.tsx(1111,23): error TS2304: Cannot find name 'selected_purchase'.
+src/components/CustomerDetailModal.tsx(1115,22): error TS2304: Cannot find name 'refund_loading'.
+src/components/CustomerRefundModal.tsx(22,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/CustomerRefundModal.tsx(26,10): error TS6133: 'refundLoading' is declared but its value is never read.
+src/components/CustomerRefundModal.tsx(33,7): error TS2304: Cannot find name 'set_loading'.
+src/components/CustomerRefundModal.tsx(35,30): error TS2304: Cannot find name 'customerApi'.
+src/components/CustomerRefundModal.tsx(42,28): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/CustomerRefundModal.tsx(49,16): error TS2304: Cannot find name 'set_loading'.
+src/components/CustomerRefundModal.tsx(65,43): error TS2551: Property 'refund_purchase' does not exist on type '{ list: (params?: { page?: number | undefined; limit?: number | undefined; search?: string | undefined; customer_type?: "ACTIVE" | "INACTIVE" | "NEW" | "REPEAT" | "VIP" | undefined; sort?: "asc" | ... 1 more ... | undefined; sort_by?: "created_at" | ... 4 more ... | undefined; } | undefined) => Promise<...>; ... 13 ...'. Did you mean 'refundPurchase'?
+src/components/CustomerRefundModal.tsx(101,7): error TS2304: Cannot find name 'isOpen'.
+src/components/CustomerRefundModal.tsx(111,8): error TS2304: Cannot find name 'isOpen'.
+src/components/CustomerRefundModal.tsx(160,24): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/CustomerRefundModal.tsx(172,65): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/CustomerRefundModal.tsx(176,26): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/CustomerRefundModal.tsx(302,21): error TS2304: Cannot find name 'selected_purchase'.
+src/components/CustomerRefundModal.tsx(303,20): error TS2304: Cannot find name 'refund_loading'.
+src/components/FinancialRecordModal.tsx(14,48): error TS6133: 'is_open' is declared but its value is never read.
+src/components/FinancialRecordModal.tsx(50,15): error TS2304: Cannot find name 'isOpen'.
+src/components/FinancialRecordModal.tsx(68,15): error TS2304: Cannot find name 'financialApi'.
+src/components/FinancialRecordModal.tsx(71,29): error TS2551: Property 'create_record' does not exist on type '{ get_records: (params?: { page?: number | undefined; limit?: number | undefined; record_type?: "INCOME" | "EXPENSE" | "REFUND" | "LOSS" | undefined; reference_type?: "REFUND" | "PURCHASE" | "SALE" | "MANUAL" | undefined; ... 5 more ...; sort_by?: string | undefined; } | undefined) => Promise<...>; ... 7 more ...; g...'. Did you mean 'createRecord'?
+src/components/FinancialRecordModal.tsx(88,8): error TS2304: Cannot find name 'isOpen'.
+src/components/FinancialReports.tsx(3,1): error TS6133: 'financial_api' is declared but its value is never read.
+src/components/FinancialReports.tsx(24,37): error TS2551: Property 'get_full_year' does not exist on type 'Date'. Did you mean 'getFullYear'?
+src/components/FinancialReports.tsx(24,65): error TS2551: Property 'get_month' does not exist on type 'Date'. Did you mean 'getMonth'?
+src/components/FinancialReports.tsx(37,30): error TS2304: Cannot find name 'financialApi'.
+src/components/FinancialReports.tsx(90,23): error TS2551: Property 'create_object_u_r_l' does not exist on type '{ new (url: string | URL, base?: string | URL | undefined): URL; prototype: URL; canParse(url: string | URL, base?: string | URL | undefined): boolean; createObjectURL(obj: Blob | MediaSource): string; parse(url: string | URL, base?: string | ... 1 more ... | undefined): URL | null; revokeObjectURL(url: string): voi...'. Did you mean 'createObjectURL'?
+src/components/FinancialReports.tsx(144,20): error TS2304: Cannot find name 'report_type'.
+src/components/FinishedProductGrid.tsx(40,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/FinishedProductGrid.tsx(47,7): error TS2304: Cannot find name 'set_loading'.
+src/components/FinishedProductGrid.tsx(83,16): error TS2304: Cannot find name 'set_loading'.
+src/components/FinishedProductGrid.tsx(100,38): error TS2304: Cannot find name 'lowStockOnly'.
+src/components/FinishedProductGrid.tsx(100,52): error TS2304: Cannot find name 'specificationMin'.
+src/components/FinishedProductGrid.tsx(100,70): error TS2304: Cannot find name 'specificationMax'.
+src/components/InventoryConsumptionChart.tsx(44,11): error TS2339: Property 'is_mobile' does not exist on type '{ isMobile: boolean; screenWidth: number; screenHeight: number; get_device_info: () => { isMobile: boolean; isTablet: boolean; isDesktop: boolean; screenWidth: number; screenHeight: number; devicePixelRatio: number; user_agent: any; touchSupport: boolean; maxTouchPoints: number; }; detectDevice: () => { ...; }; }'.
+src/components/InventoryConsumptionChart.tsx(47,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/InventoryConsumptionChart.tsx(48,20): error TS6133: 'setViewMode' is declared but its value is never read.
+src/components/InventoryConsumptionChart.tsx(51,72): error TS2304: Cannot find name 'set_loading'.
+src/components/InventoryConsumptionChart.tsx(67,16): error TS2304: Cannot find name 'set_loading'.
+src/components/InventoryConsumptionChart.tsx(140,30): error TS2304: Cannot find name 'set_view_mode'.
+src/components/InventoryConsumptionChart.tsx(150,30): error TS2304: Cannot find name 'set_view_mode'.
+src/components/InventoryDashboard.tsx(8,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/InventoryDashboard.tsx(74,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/InventoryDashboard.tsx(74,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/InventoryDashboard.tsx(75,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/InventoryDashboard.tsx(81,7): error TS2304: Cannot find name 'set_loading'.
+src/components/InventoryDashboard.tsx(95,16): error TS2304: Cannot find name 'set_loading'.
+src/components/InventoryDashboard.tsx(116,59): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(117,46): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(118,36): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(119,45): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(127,68): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(128,32): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(129,27): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(130,66): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(135,22): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(144,21): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(145,23): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(147,46): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(148,48): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(149,38): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(150,31): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(155,24): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(160,38): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(168,25): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(170,27): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(175,27): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(181,25): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryDashboard.tsx(186,25): error TS2304: Cannot find name 'isMobile'.
+src/components/InventoryPieChart.tsx(3,1): error TS6133: 'inventory_api' is declared but its value is never read.
+src/components/InventoryPieChart.tsx(40,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/InventoryPieChart.tsx(45,5): error TS2304: Cannot find name 'set_loading'.
+src/components/InventoryPieChart.tsx(47,30): error TS2304: Cannot find name 'inventoryApi'.
+src/components/InventoryPieChart.tsx(57,36): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/InventoryPieChart.tsx(110,16): error TS2304: Cannot find name 'set_loading'.
+src/components/Layout.tsx(191,23): error TS6133: 'is_active' is declared but its value is never read.
+src/components/Layout.tsx(201,25): error TS2552: Cannot find name 'isActive'. Did you mean 'is_active'?
+src/components/MobileForm.tsx(3,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/MobileForm.tsx(13,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/MobileForm.tsx(13,25): error TS2552: Cannot find name 'useDeviceDetection'. Did you mean 'use_device_detection'?
+src/components/MobileForm.tsx(18,37): error TS2552: Cannot find name 'isMobile'. Did you mean 'is_mobile'?
+src/components/MobileForm.tsx(50,3): error TS6133: 'onChange' is declared but its value is never read.
+src/components/MobileForm.tsx(51,3): error TS6133: 'onBlur' is declared but its value is never read.
+src/components/MobileForm.tsx(56,3): error TS6133: 'autoComplete' is declared but its value is never read.
+src/components/MobileForm.tsx(57,3): error TS6133: 'inputMode' is declared but its value is never read.
+src/components/MobileForm.tsx(59,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/MobileForm.tsx(59,25): error TS2552: Cannot find name 'useDeviceDetection'. Did you mean 'use_device_detection'?
+src/components/MobileForm.tsx(70,19): error TS2552: Cannot find name 'on_change'. Did you mean 'onChange'?
+src/components/MobileForm.tsx(71,17): error TS2552: Cannot find name 'on_blur'. Did you mean 'onBlur'?
+src/components/MobileForm.tsx(76,23): error TS2304: Cannot find name 'auto_complete'.
+src/components/MobileForm.tsx(77,20): error TS2304: Cannot find name 'input_mode'.
+src/components/MobileForm.tsx(80,21): error TS2304: Cannot find name 'isMobile'.
+src/components/MobileForm.tsx(110,3): error TS6133: 'onChange' is declared but its value is never read.
+src/components/MobileForm.tsx(122,19): error TS2304: Cannot find name 'on_change'.
+src/components/MobileForm.tsx(164,3): error TS6133: 'onChange' is declared but its value is never read.
+src/components/MobileForm.tsx(169,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/MobileForm.tsx(169,25): error TS2552: Cannot find name 'useDeviceDetection'. Did you mean 'use_device_detection'?
+src/components/MobileForm.tsx(179,19): error TS2304: Cannot find name 'on_change'.
+src/components/MobileForm.tsx(182,9): error TS2322: Type '{ placeholder: string | undefined; value: string | undefined; onChange: any; rows: number; disabled: boolean; max_length: number | undefined; className: string; style: { fontSize: string; minHeight: string; }; }' is not assignable to type 'DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>'.
+  Property 'max_length' does not exist on type 'DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>'. Did you mean 'maxLength'?
+src/components/MobileForm.tsx(185,21): error TS2304: Cannot find name 'isMobile'.
+src/components/MobileForm.tsx(186,22): error TS2304: Cannot find name 'isMobile'.
+src/components/MobileForm.tsx(226,3): error TS6133: 'onClick' is declared but its value is never read.
+src/components/MobileForm.tsx(248,16): error TS2552: Cannot find name 'on_click'. Did you mean 'onClick'?
+src/components/MobileTable.tsx(3,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/MobileTable.tsx(47,3): error TS6133: 'emptyText' is declared but its value is never read.
+src/components/MobileTable.tsx(52,3): error TS6133: 'searchPlaceholder' is declared but its value is never read.
+src/components/MobileTable.tsx(56,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/MobileTable.tsx(56,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/MobileTable.tsx(57,10): error TS6133: 'searchValue' is declared but its value is never read.
+src/components/MobileTable.tsx(76,33): error TS2304: Cannot find name 'expanded_rows'.
+src/components/MobileTable.tsx(82,21): error TS2345: Argument of type 'Set<unknown>' is not assignable to parameter of type 'SetStateAction<Set<string>>'.
+  Type 'Set<unknown>' is not assignable to type 'Set<string>'.
+    Type 'unknown' is not assignable to type 'string'.
+src/components/MobileTable.tsx(90,60): error TS2304: Cannot find name 'empty_text'.
+src/components/MobileTable.tsx(103,18): error TS2551: Property 'hide_on_mobile' does not exist on type 'TableColumn'. Did you mean 'hideOnMobile'?
+src/components/MobileTable.tsx(108,18): error TS2551: Property 'hide_on_mobile' does not exist on type 'TableColumn'. Did you mean 'hideOnMobile'?
+src/components/MobileTable.tsx(113,18): error TS2551: Property 'hide_on_mobile' does not exist on type 'TableColumn'. Did you mean 'hideOnMobile'?
+src/components/MobileTable.tsx(126,42): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(127,30): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(150,44): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(151,32): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(197,48): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(198,36): error TS2551: Property 'mobile_render' does not exist on type 'TableColumn'. Did you mean 'mobileRender'?
+src/components/MobileTable.tsx(227,55): error TS2551: Property 'hide_on_mobile' does not exist on type 'TableColumn'. Did you mean 'hideOnMobile'?
+src/components/MobileTable.tsx(227,74): error TS2304: Cannot find name 'isMobile'.
+src/components/MobileTable.tsx(249,20): error TS2304: Cannot find name 'empty_text'.
+src/components/MobileTable.tsx(296,28): error TS2304: Cannot find name 'search_placeholder'.
+src/components/MobileTable.tsx(297,22): error TS2304: Cannot find name 'search_value'.
+src/components/MobileTable.tsx(313,9): error TS2304: Cannot find name 'isMobile'.
+src/components/MobileTable.tsx(335,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/Portal.tsx(18,36): error TS2551: Property 'get_element_by_id' does not exist on type 'Document'. Did you mean 'getElementById'?
+src/components/ProductDistributionPieChart.tsx(35,11): error TS2339: Property 'is_mobile' does not exist on type '{ isMobile: boolean; screenWidth: number; screenHeight: number; get_device_info: () => { isMobile: boolean; isTablet: boolean; isDesktop: boolean; screenWidth: number; screenHeight: number; devicePixelRatio: number; user_agent: any; touchSupport: boolean; maxTouchPoints: number; }; detectDevice: () => { ...; }; }'.
+src/components/ProductDistributionPieChart.tsx(95,27): error TS6133: 'base_color' is declared but its value is never read.
+src/components/ProductDistributionPieChart.tsx(95,62): error TS6133: 'total' is declared but its value is never read.
+src/components/ProductPriceDistributionChart.tsx(9,1): error TS6133: 'inventory_api' is declared but its value is never read.
+src/components/ProductPriceDistributionChart.tsx(11,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/ProductPriceDistributionChart.tsx(75,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/ProductPriceDistributionChart.tsx(75,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/ProductPriceDistributionChart.tsx(76,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/ProductPriceDistributionChart.tsx(82,47): error TS2304: Cannot find name 'set_loading'.
+src/components/ProductPriceDistributionChart.tsx(84,30): error TS2304: Cannot find name 'inventoryApi'.
+src/components/ProductPriceDistributionChart.tsx(86,21): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(101,16): error TS2304: Cannot find name 'set_loading'.
+src/components/ProductPriceDistributionChart.tsx(128,11): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(166,23): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(167,61): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(168,48): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(169,38): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(170,47): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(177,17): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(179,23): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(180,46): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(181,48): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(182,39): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(183,31): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(184,16): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(189,24): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(194,70): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(195,34): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(196,29): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(197,63): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(206,21): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(229,21): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(231,44): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(232,35): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(233,27): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(234,12): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(240,43): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(246,29): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(257,13): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(262,27): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(263,15): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(272,27): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(273,15): error TS2304: Cannot find name 'price_type'.
+src/components/ProductPriceDistributionChart.tsx(284,23): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(284,78): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(286,28): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(286,58): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(292,22): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(297,28): error TS2304: Cannot find name 'isMobile'.
+src/components/ProductPriceDistributionChart.tsx(298,28): error TS2304: Cannot find name 'isMobile'.
+src/components/PurchaseDetailModal.tsx(41,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/PurchaseDetailModal.tsx(60,55): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/PurchaseDetailModal.tsx(64,26): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/PurchaseDetailModal.tsx(74,28): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/PurchaseDetailModal.tsx(90,7): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(93,30): error TS2304: Cannot find name 'purchaseApi'.
+src/components/PurchaseDetailModal.tsx(110,21): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/PurchaseDetailModal.tsx(111,35): error TS18048: 'purchaseData.photos' is possibly 'undefined'.
+src/components/PurchaseDetailModal.tsx(117,39): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(118,37): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(119,32): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(131,16): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(148,7): error TS2304: Cannot find name 'isOpen'.
+src/components/PurchaseDetailModal.tsx(148,15): error TS2304: Cannot find name 'purchaseId'.
+src/components/PurchaseDetailModal.tsx(152,21): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(195,9): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(298,9): error TS6133: 'original_quantity' is declared but its value is never read.
+src/components/PurchaseDetailModal.tsx(335,49): error TS2304: Cannot find name 'originalQuantity'.
+src/components/PurchaseDetailModal.tsx(360,74): error TS2304: Cannot find name 'quantity_changed'.
+src/components/PurchaseDetailModal.tsx(382,50): error TS2304: Cannot find name 'quantity_changed'.
+src/components/PurchaseDetailModal.tsx(388,47): error TS2304: Cannot find name 'quantity_changed'.
+src/components/PurchaseDetailModal.tsx(429,52): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(430,65): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(431,73): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(442,9): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(452,7): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(563,13): error TS2304: Cannot find name 'on_save'.
+src/components/PurchaseDetailModal.tsx(564,11): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/components/PurchaseDetailModal.tsx(591,16): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(599,7): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(601,30): error TS2304: Cannot find name 'purchaseApi'.
+src/components/PurchaseDetailModal.tsx(608,13): error TS2304: Cannot find name 'on_delete'.
+src/components/PurchaseDetailModal.tsx(609,11): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/components/PurchaseDetailModal.tsx(638,16): error TS2304: Cannot find name 'set_loading'.
+src/components/PurchaseDetailModal.tsx(645,33): error TS2551: Property 'to_locale_date_string' does not exist on type 'Date'. Did you mean 'toLocaleDateString'?
+src/components/PurchaseDetailModal.tsx(658,25): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(668,43): error TS6133: 'Label' is declared but its value is never read.
+src/components/PurchaseDetailModal.tsx(669,10): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(699,38): error TS2304: Cannot find name 'pieceCountValue'.
+src/components/PurchaseDetailModal.tsx(738,35): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/PurchaseDetailModal.tsx(825,20): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(957,36): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(959,72): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(969,36): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(971,69): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(981,36): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(983,63): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1007,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1021,30): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1023,67): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1030,28): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1044,26): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1050,26): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1067,26): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1069,62): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1219,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1221,68): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1225,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1238,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1240,65): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1244,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1257,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1259,59): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/PurchaseDetailModal.tsx(1263,32): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1289,36): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1306,36): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1317,45): error TS6133: 'current_quantity' is declared but its value is never read.
+src/components/PurchaseDetailModal.tsx(1323,50): error TS2304: Cannot find name 'currentQuantity'.
+src/components/PurchaseDetailModal.tsx(1324,48): error TS2304: Cannot find name 'currentQuantity'.
+src/components/PurchaseDetailModal.tsx(1331,34): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1344,45): error TS6133: 'current_quantity' is declared but its value is never read.
+src/components/PurchaseDetailModal.tsx(1346,65): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1349,72): error TS2304: Cannot find name 'currentQuantity'.
+src/components/PurchaseDetailModal.tsx(1350,68): error TS2304: Cannot find name 'currentQuantity'.
+src/components/PurchaseDetailModal.tsx(1378,65): error TS2304: Cannot find name 'is_edit_mode'.
+src/components/PurchaseDetailModal.tsx(1425,76): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1425,97): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1433,33): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1433,54): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1438,58): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1440,72): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/components/PurchaseDetailModal.tsx(1454,56): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/PurchaseDetailModal.tsx(1454,85): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/PurchaseDetailModal.tsx(1460,48): error TS18046: 'logs' is of type 'unknown'.
+src/components/PurchaseDetailModal.tsx(1464,66): error TS2551: Property 'to_locale_string' does not exist on type 'Date'. Did you mean 'toLocaleString'?
+src/components/PurchaseDetailModal.tsx(1475,53): error TS18046: 'logs' is of type 'unknown'.
+src/components/PurchaseDetailModal.tsx(1475,72): error TS18046: 'logs' is of type 'unknown'.
+src/components/PurchaseDetailModal.tsx(1476,35): error TS18046: 'logs' is of type 'unknown'.
+src/components/PurchaseDetailModal.tsx(1488,49): error TS2551: Property 'editLogs' does not exist on type 'Purchase'. Did you mean 'edit_logs'?
+src/components/PurchaseDetailModal.tsx(1489,70): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/components/RefundConfirmModal.tsx(30,3): error TS6133: 'is_open' is declared but its value is never read.
+src/components/RefundConfirmModal.tsx(98,8): error TS2304: Cannot find name 'isOpen'.
+src/components/ReverseSaleModal.tsx(12,10): error TS6133: 'customer_api' is declared but its value is never read.
+src/components/ReverseSaleModal.tsx(68,30): error TS2304: Cannot find name 'customerApi'.
+src/components/ReverseSaleModal.tsx(108,7): error TS2304: Cannot find name 'isOpen'.
+src/components/ReverseSaleModal.tsx(122,7): error TS2304: Cannot find name 'isOpen'.
+src/components/ReverseSaleModal.tsx(197,8): error TS2304: Cannot find name 'isOpen'.
+src/components/ReverseSaleModal.tsx(324,44): error TS2551: Property 'next_element_sibling' does not exist on type 'HTMLImageElement'. Did you mean 'nextElementSibling'?
+src/components/ReverseSaleModal.tsx(392,19): error TS2322: Type '{ sku: SkuItem; sale_source: "CUSTOMER_PAGE"; customer: Customer; onSubmit: (sellData: SellData) => Promise<void>; onCancel: () => void; loading: boolean; }' is not assignable to type 'IntrinsicAttributes & SkuSellFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuSellFormProps'. Did you mean 'on_submit'?
+src/components/SalesDetailModal.tsx(30,19): error TS6133: 'setLoading' is declared but its value is never read.
+src/components/SalesDetailModal.tsx(56,48): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(59,7): error TS2304: Cannot find name 'set_loading'.
+src/components/SalesDetailModal.tsx(62,55): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(81,16): error TS2304: Cannot find name 'set_loading'.
+src/components/SalesDetailModal.tsx(87,10): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(104,58): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(123,10): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(126,51): error TS2551: Property 'mark_as_sold' does not exist on type '{ get_materials: (params?: { search?: string | undefined; material_types?: string[] | undefined; available_only?: boolean | undefined; min_quantity?: number | undefined; } | undefined) => Promise<...>; ... 7 more ...; batchCreate: (data: { ...; }) => Promise<...>; }'. Did you mean 'markAsSold'?
+src/components/SalesDetailModal.tsx(126,64): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(142,10): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(145,58): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(208,20): error TS2304: Cannot find name 'productId'.
+src/components/SalesDetailModal.tsx(212,7): error TS2304: Cannot find name 'isOpen'.
+src/components/SalesDetailModal.tsx(219,8): error TS2304: Cannot find name 'isOpen'.
+src/components/SalesDetailModal.tsx(249,34): error TS2304: Cannot find name 'productId'.
+src/components/SemiFinishedMatrixView.tsx(4,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(111,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(111,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/SemiFinishedMatrixView.tsx(113,20): error TS6133: 'setViewMode' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(129,44): error TS2551: Property 'get_bounding_client_rect' does not exist on type 'HTMLButtonElement'. Did you mean 'getBoundingClientRect'?
+src/components/SemiFinishedMatrixView.tsx(139,9): error TS2304: Cannot find name 'show_product_filter'.
+src/components/SemiFinishedMatrixView.tsx(174,24): error TS2551: Property 'for_each' does not exist on type 'SemiFinishedMatrixData[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(174,33): error TS7006: Parameter 'productTypeData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(175,9): error TS2304: Cannot find name 'product_typeData'.
+src/components/SemiFinishedMatrixView.tsx(175,50): error TS7006: Parameter 'specData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(178,39): error TS7006: Parameter 'qualityData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(179,42): error TS7006: Parameter 'batch' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(199,29): error TS2304: Cannot find name 'product_typeData'.
+src/components/SemiFinishedMatrixView.tsx(227,29): error TS2551: Property 'for_each' does not exist on type '{ [size: string]: MatrixCell; }[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(227,38): error TS6133: 'productRow' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(227,38): error TS7006: Parameter 'productRow' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(228,23): error TS2304: Cannot find name 'product_row'.
+src/components/SemiFinishedMatrixView.tsx(228,36): error TS2551: Property 'for_each' does not exist on type 'unknown[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(228,45): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(231,33): error TS7006: Parameter 'batch' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(265,44): error TS2551: Property 'for_each' does not exist on type '[string, { total_price: number; total_quantity: number; }][]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(265,55): error TS7031: Binding element 'quality' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(265,64): error TS7031: Binding element 'data' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(280,65): error TS2551: Property 'locale_compare' does not exist on type 'string'. Did you mean 'localeCompare'?
+src/components/SemiFinishedMatrixView.tsx(290,24): error TS2551: Property 'for_each' does not exist on type 'SemiFinishedMatrixData[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(290,33): error TS7006: Parameter 'productTypeData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(291,9): error TS2304: Cannot find name 'product_typeData'.
+src/components/SemiFinishedMatrixView.tsx(291,50): error TS7006: Parameter 'specData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(292,39): error TS7006: Parameter 'qualityData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(296,42): error TS7006: Parameter 'batch' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(316,29): error TS2304: Cannot find name 'product_typeData'.
+src/components/SemiFinishedMatrixView.tsx(343,20): error TS2551: Property 'for_each' does not exist on type 'Set<string>'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(343,29): error TS7006: Parameter 'product_name' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(348,27): error TS2551: Property 'for_each' does not exist on type 'string[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(348,36): error TS7006: Parameter 'quality' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(369,29): error TS2551: Property 'for_each' does not exist on type '{ [quality: string]: MatrixCell; }[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(369,38): error TS6133: 'productRow' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(369,38): error TS7006: Parameter 'productRow' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(370,23): error TS2304: Cannot find name 'product_row'.
+src/components/SemiFinishedMatrixView.tsx(370,36): error TS2551: Property 'for_each' does not exist on type 'unknown[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(370,45): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(375,33): error TS7006: Parameter 'batch' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(412,41): error TS2551: Property 'for_each' does not exist on type '[string, { total_price: number; total_quantity: number; }][]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(412,52): error TS7031: Binding element 'sizeKey' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(412,61): error TS7031: Binding element 'data' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(424,65): error TS2551: Property 'locale_compare' does not exist on type 'string'. Did you mean 'localeCompare'?
+src/components/SemiFinishedMatrixView.tsx(432,10): error TS2551: Property 'for_each' does not exist on type 'SemiFinishedMatrixData[]'. Did you mean 'forEach'?
+src/components/SemiFinishedMatrixView.tsx(432,19): error TS6133: 'productTypeData' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(432,19): error TS7006: Parameter 'productTypeData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(433,7): error TS2304: Cannot find name 'product_typeData'.
+src/components/SemiFinishedMatrixView.tsx(433,48): error TS7006: Parameter 'specData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(434,37): error TS7006: Parameter 'qualityData' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(435,40): error TS7006: Parameter 'batch' implicitly has an 'any' type.
+src/components/SemiFinishedMatrixView.tsx(443,47): error TS2551: Property 'locale_compare' does not exist on type 'string'. Did you mean 'localeCompare'?
+src/components/SemiFinishedMatrixView.tsx(453,14): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(453,53): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(478,12): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(478,55): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(489,22): error TS2304: Cannot find name 'temp_search_keyword'.
+src/components/SemiFinishedMatrixView.tsx(490,25): error TS2304: Cannot find name 'temp_selected_products'.
+src/components/SemiFinishedMatrixView.tsx(541,32): error TS2304: Cannot find name 'set_view_mode'.
+src/components/SemiFinishedMatrixView.tsx(595,36): error TS6133: 'productRow' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(596,27): error TS2571: Object is of type 'unknown'.
+src/components/SemiFinishedMatrixView.tsx(596,41): error TS2304: Cannot find name 'product_row'.
+src/components/SemiFinishedMatrixView.tsx(596,76): error TS18046: 'sum' is of type 'unknown'.
+src/components/SemiFinishedMatrixView.tsx(596,90): error TS18046: 'cell' is of type 'unknown'.
+src/components/SemiFinishedMatrixView.tsx(605,36): error TS6133: 'productRow' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(606,41): error TS2304: Cannot find name 'product_row'.
+src/components/SemiFinishedMatrixView.tsx(606,69): error TS18046: 'cell' is of type 'unknown'.
+src/components/SemiFinishedMatrixView.tsx(616,44): error TS2304: Cannot find name 'isMobile'.
+src/components/SemiFinishedMatrixView.tsx(629,50): error TS2304: Cannot find name 'search_keyword'.
+src/components/SemiFinishedMatrixView.tsx(630,53): error TS2304: Cannot find name 'selected_products'.
+src/components/SemiFinishedMatrixView.tsx(670,42): error TS2304: Cannot find name 'temp_search_keyword'.
+src/components/SemiFinishedMatrixView.tsx(685,108): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(685,151): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(704,56): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(704,99): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SemiFinishedMatrixView.tsx(705,55): error TS6133: 'filterIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(706,73): error TS2304: Cannot find name 'filter_index'.
+src/components/SemiFinishedMatrixView.tsx(741,50): error TS6133: 'headerIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(742,53): error TS2304: Cannot find name 'header_index'.
+src/components/SemiFinishedMatrixView.tsx(747,57): error TS6133: 'headerIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(748,59): error TS2304: Cannot find name 'header_index'.
+src/components/SemiFinishedMatrixView.tsx(756,56): error TS6133: 'rowIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(757,45): error TS2304: Cannot find name 'row_index'.
+src/components/SemiFinishedMatrixView.tsx(764,52): error TS6133: 'cellIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(769,63): error TS2304: Cannot find name 'cell_index'.
+src/components/SemiFinishedMatrixView.tsx(776,61): error TS2304: Cannot find name 'cell_index'.
+src/components/SemiFinishedMatrixView.tsx(787,19): error TS2551: Property 'current_target' does not exist on type 'MouseEvent<HTMLDivElement, MouseEvent>'. Did you mean 'currentTarget'?
+src/components/SemiFinishedMatrixView.tsx(792,19): error TS2551: Property 'current_target' does not exist on type 'MouseEvent<HTMLDivElement, MouseEvent>'. Did you mean 'currentTarget'?
+src/components/SemiFinishedMatrixView.tsx(810,50): error TS2551: Property 'index_of' does not exist on type 'string[]'. Did you mean 'indexOf'?
+src/components/SemiFinishedMatrixView.tsx(810,70): error TS2551: Property 'index_of' does not exist on type 'string[]'. Did you mean 'indexOf'?
+src/components/SemiFinishedMatrixView.tsx(833,59): error TS6133: 'cellIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(838,66): error TS2304: Cannot find name 'cell_index'.
+src/components/SemiFinishedMatrixView.tsx(845,64): error TS2304: Cannot find name 'cell_index'.
+src/components/SemiFinishedMatrixView.tsx(856,35): error TS2551: Property 'current_target' does not exist on type 'MouseEvent<HTMLDivElement, MouseEvent>'. Did you mean 'currentTarget'?
+src/components/SemiFinishedMatrixView.tsx(861,35): error TS2551: Property 'current_target' does not exist on type 'MouseEvent<HTMLDivElement, MouseEvent>'. Did you mean 'currentTarget'?
+src/components/SemiFinishedMatrixView.tsx(946,103): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SemiFinishedMatrixView.tsx(959,93): error TS6133: 'distIndex' is declared but its value is never read.
+src/components/SemiFinishedMatrixView.tsx(960,48): error TS2304: Cannot find name 'dist_index'.
+src/components/SemiFinishedMatrixView.tsx(985,103): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SemiFinishedMatrixView.tsx(1021,83): error TS2551: Property 'to_locale_date_string' does not exist on type 'Date'. Did you mean 'toLocaleDateString'?
+src/components/SemiFinishedMatrixView.tsx(1048,64): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SkuAdjustForm.tsx(62,24): error TS2551: Property 'is_integer' does not exist on type 'NumberConstructor'. Did you mean 'isInteger'?
+src/components/SkuAdjustForm.tsx(77,17): error TS2551: Property 'cost_adjustment' does not exist on type 'FormErrors'. Did you mean 'costAdjustment'?
+src/components/SkuAdjustForm.tsx(127,9): error TS6133: 'unit_cost' is declared but its value is never read.
+src/components/SkuAdjustForm.tsx(131,30): error TS2304: Cannot find name 'unitCost'.
+src/components/SkuAdjustForm.tsx(136,27): error TS2304: Cannot find name 'unitCost'.
+src/components/SkuAdjustForm.tsx(143,11): error TS6133: 'new_quantity' is declared but its value is never read.
+src/components/SkuAdjustForm.tsx(146,9): error TS2304: Cannot find name 'newQuantity'.
+src/components/SkuAdjustForm.tsx(147,27): error TS2304: Cannot find name 'newQuantity'.
+src/components/SkuAdjustForm.tsx(161,62): error TS2304: Cannot find name 'unitCost'.
+src/components/SkuAdjustForm.tsx(162,62): error TS2304: Cannot find name 'unitCost'.
+src/components/SkuAdjustForm.tsx(297,52): error TS2345: Argument of type '"costAdjustment"' is not assignable to parameter of type 'keyof FormState'.
+src/components/SkuAdjustForm.tsx(299,26): error TS2551: Property 'cost_adjustment' does not exist on type 'FormErrors'. Did you mean 'costAdjustment'?
+src/components/SkuAdjustForm.tsx(308,21): error TS2551: Property 'cost_adjustment' does not exist on type 'FormErrors'. Did you mean 'costAdjustment'?
+src/components/SkuAdjustForm.tsx(311,25): error TS2551: Property 'cost_adjustment' does not exist on type 'FormErrors'. Did you mean 'costAdjustment'?
+src/components/SkuAdjustForm.tsx(315,37): error TS2304: Cannot find name 'unitCost'.
+src/components/SkuControlModal.tsx(336,56): error TS2304: Cannot find name 'price_form'.
+src/components/SkuControlModal.tsx(386,54): error TS2304: Cannot find name 'price_form'.
+src/components/SkuControlModal.tsx(431,59): error TS2304: Cannot find name 'status_form'.
+src/components/SkuControlModal.tsx(447,59): error TS2304: Cannot find name 'status_form'.
+src/components/SkuControlModal.tsx(466,55): error TS2304: Cannot find name 'status_form'.
+src/components/SkuControlModal.tsx(504,29): error TS2304: Cannot find name 'logs_loading'.
+src/components/SkuControlModal.tsx(522,56): error TS2304: Cannot find name 'logs_error'.
+src/components/SkuDestroyForm.tsx(132,24): error TS2551: Property 'is_integer' does not exist on type 'NumberConstructor'. Did you mean 'isInteger'?
+src/components/SkuDestroyForm.tsx(195,9): error TS2367: This comparison appears to be unintentional because the types 'keyof FormState' and '"returnToMaterial"' have no overlap.
+src/components/SkuDestroyForm.tsx(420,51): error TS2345: Argument of type '"returnToMaterial"' is not assignable to parameter of type 'keyof FormState'.
+src/components/SkuDestroyForm.tsx(434,51): error TS2345: Argument of type '"returnToMaterial"' is not assignable to parameter of type 'keyof FormState'.
+src/components/SkuDestroyForm.tsx(543,46): error TS2551: Property 'unit_cost' does not exist on type 'SkuMaterialInfo'. Did you mean 'unitCost'?
+src/components/SkuDestroyForm.tsx(543,68): error TS2551: Property 'unit_cost' does not exist on type 'SkuMaterialInfo'. Did you mean 'unitCost'?
+src/components/SkuDestroyForm.tsx(544,62): error TS2551: Property 'unit_cost' does not exist on type 'SkuMaterialInfo'. Did you mean 'unitCost'?
+src/components/SkuDetailModal.tsx(108,19): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/SkuDetailModal.tsx(116,22): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/components/SkuDetailModal.tsx(226,7): error TS2304: Cannot find name 'isOpen'.
+src/components/SkuDetailModal.tsx(228,8): error TS2304: Cannot find name 'isOpen'.
+src/components/SkuDetailModal.tsx(286,31): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/components/SkuDetailModal.tsx(377,36): error TS2551: Property 'can_view_trace' does not exist on type 'SkuPermissions'. Did you mean 'canViewTrace'?
+src/components/SkuDetailModal.tsx(448,64): error TS2551: Property 'can_view_trace' does not exist on type 'SkuPermissions'. Did you mean 'canViewTrace'?
+src/components/SkuDetailModal.tsx(467,19): error TS2322: Type '{ sku: SkuItem; onSubmit: (data: any) => void; onCancel: () => void; }' is not assignable to type 'IntrinsicAttributes & SkuSellFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuSellFormProps'. Did you mean 'on_submit'?
+src/components/SkuDetailModal.tsx(467,30): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/SkuDetailModal.tsx(475,19): error TS2322: Type '{ sku: SkuItem; onSubmit: (data: any) => void; onCancel: () => void; }' is not assignable to type 'IntrinsicAttributes & SkuDestroyFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuDestroyFormProps'. Did you mean 'on_submit'?
+src/components/SkuDetailModal.tsx(475,30): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/SkuDetailModal.tsx(483,19): error TS2322: Type '{ sku: SkuItem; onSubmit: (data: any) => void; onCancel: () => void; }' is not assignable to type 'IntrinsicAttributes & SkuAdjustFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuAdjustFormProps'. Did you mean 'on_submit'?
+src/components/SkuDetailModal.tsx(483,30): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/SkuHistoryView.tsx(74,17): error TS6133: 'operation_type' is declared but its value is never read.
+src/components/SkuHistoryView.tsx(77,17): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(80,17): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(84,19): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(86,19): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(90,17): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(93,17): error TS2304: Cannot find name 'operationType'.
+src/components/SkuHistoryView.tsx(99,15): error TS18004: No value exists in scope for the shorthand property 'operationType'. Either declare one or provide an initializer.
+src/components/SkuHistoryView.tsx(134,24): error TS2304: Cannot find name 'history_data'.
+src/components/SkuHistoryView.tsx(139,64): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SkuHistoryView.tsx(140,57): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SkuHistoryView.tsx(141,70): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/components/SkuHistoryView.tsx(162,37): error TS2551: Property 'get_full_year' does not exist on type 'Date'. Did you mean 'getFullYear'?
+src/components/SkuHistoryView.tsx(162,58): error TS2551: Property 'get_month' does not exist on type 'Date'. Did you mean 'getMonth'?
+src/components/SkuHistoryView.tsx(162,75): error TS2551: Property 'get_date' does not exist on type 'Date'. Did you mean 'getDate'?
+src/components/SkuHistoryView.tsx(165,37): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/components/SkuHistoryView.tsx(168,37): error TS2551: Property 'get_full_year' does not exist on type 'Date'. Did you mean 'getFullYear'?
+src/components/SkuHistoryView.tsx(168,58): error TS2551: Property 'get_month' does not exist on type 'Date'. Did you mean 'getMonth'?
+src/components/SkuHistoryView.tsx(416,30): error TS2304: Cannot find name 'set_current_page'.
+src/components/SkuHistoryView.tsx(416,47): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/SkuHistoryView.tsx(428,30): error TS2304: Cannot find name 'set_current_page'.
+src/components/SkuHistoryView.tsx(428,47): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/SkuRestockForm.tsx(31,13): error TS6133: 'network_config' is declared but its value is never read.
+src/components/SkuRestockForm.tsx(32,39): error TS2304: Cannot find name 'networkConfig'.
+src/components/SkuRestockForm.tsx(63,7): error TS2304: Cannot find name 'isOpen'.
+src/components/SkuRestockForm.tsx(83,13): error TS6133: 'network_config' is declared but its value is never read.
+src/components/SkuRestockForm.tsx(84,39): error TS2304: Cannot find name 'networkConfig'.
+src/components/SkuRestockForm.tsx(90,30): error TS2304: Cannot find name 'form_data'.
+src/components/SkuRestockForm.tsx(115,11): error TS6133: 'material_cost' is declared but its value is never read.
+src/components/SkuRestockForm.tsx(116,51): error TS2551: Property 'quantity_needed_per_sku' does not exist on type 'RestockMaterial'. Did you mean 'quantityNeededPerSku'?
+src/components/SkuRestockForm.tsx(119,12): error TS2304: Cannot find name 'materialCost'.
+src/components/SkuRestockForm.tsx(122,8): error TS2304: Cannot find name 'isOpen'.
+src/components/SkuRestockForm.tsx(238,39): error TS2551: Property 'quantity_needed_per_sku' does not exist on type 'RestockMaterial'. Did you mean 'quantityNeededPerSku'?
+src/components/SkuRestockForm.tsx(244,39): error TS2551: Property 'is_sufficient' does not exist on type 'RestockMaterial'. Did you mean 'isSufficient'?
+src/components/SkuRestockForm.tsx(263,23): error TS2322: Type '{ children: Element[]; on_submit: (e: FormEvent<Element>) => Promise<void>; }' is not assignable to type 'DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>'.
+  Property 'on_submit' does not exist on type 'DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>'. Did you mean 'onSubmit'?
+src/components/SkuRestockForm.tsx(273,57): error TS2304: Cannot find name 'form_data'.
+src/components/SkuRestockForm.tsx(287,73): error TS2551: Property 'quantity_needed_per_sku' does not exist on type 'RestockMaterial'. Did you mean 'quantityNeededPerSku'?
+src/components/SkuRestockForm.tsx(288,33): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SkuRestockForm.tsx(294,74): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SkuRestockForm.tsx(300,74): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/components/SkuSellForm.tsx(72,24): error TS2551: Property 'is_integer' does not exist on type 'NumberConstructor'. Did you mean 'isInteger'?
+src/components/SkuSellForm.tsx(133,16): error TS2551: Property 'customer_address' does not exist on type 'FormErrors'. Did you mean 'customerAddress'?
+src/components/SkuSellForm.tsx(267,50): error TS2345: Argument of type '"customerAddress"' is not assignable to parameter of type 'keyof FormState'.
+src/components/SkuSellForm.tsx(269,24): error TS2551: Property 'customer_address' does not exist on type 'FormErrors'. Did you mean 'customerAddress'?
+src/components/SkuSellForm.tsx(275,21): error TS2551: Property 'customer_address' does not exist on type 'FormErrors'. Did you mean 'customerAddress'?
+src/components/SkuSellForm.tsx(278,25): error TS2551: Property 'customer_address' does not exist on type 'FormErrors'. Did you mean 'customerAddress'?
+src/components/SkuTraceView.tsx(11,45): error TS6133: 'loading' is declared but its value is never read.
+src/components/SkuTraceView.tsx(16,10): error TS6133: 'is_loading' is declared but its value is never read.
+src/components/SkuTraceView.tsx(52,33): error TS2304: Cannot find name 'expanded_materials'.
+src/components/SkuTraceView.tsx(58,26): error TS2345: Argument of type 'Set<unknown>' is not assignable to parameter of type 'SetStateAction<Set<string>>'.
+  Type 'Set<unknown>' is not assignable to type 'Set<string>'.
+    Type 'unknown' is not assignable to type 'string'.
+src/components/SkuTraceView.tsx(77,7): error TS2304: Cannot find name 'isLoading'.
+src/components/TotalPriceInput.tsx(3,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/components/TotalPriceInput.tsx(33,34): error TS2304: Cannot find name 'useDeviceDetection'.
+src/components/TransactionLog.tsx(71,10): error TS6133: 'showFilters' is declared but its value is never read.
+src/components/TransactionLog.tsx(71,23): error TS6133: 'setShowFilters' is declared but its value is never read.
+src/components/TransactionLog.tsx(274,28): error TS2304: Cannot find name 'set_show_filters'.
+src/components/TransactionLog.tsx(274,46): error TS2304: Cannot find name 'show_filters'.
+src/components/TransactionLog.tsx(278,14): error TS2304: Cannot find name 'show_filters'.
+src/components/TransactionLog.tsx(324,10): error TS2304: Cannot find name 'show_filters'.
+src/hooks/__tests__/useAuth.test.tsx(1,10): error TS2724: '"@testing-library/react"' has no exported member named 'render_hook'. Did you mean 'renderHook'?
+src/hooks/__tests__/useAuth.test.tsx(1,10): error TS6133: 'render_hook' is declared but its value is never read.
+src/hooks/__tests__/useAuth.test.tsx(16,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/hooks/__tests__/useAuth.test.tsx(37,10): error TS2551: Property 'clear_all_mocks' does not exist on type 'typeof jest'. Did you mean 'clearAllMocks'?
+src/hooks/__tests__/useAuth.test.tsx(48,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(50,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(52,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(53,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(57,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(58,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(62,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(65,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(72,35): error TS2551: Property 'to_equal' does not exist on type 'JestMatchers<any>'. Did you mean 'toEqual'?
+src/hooks/__tests__/useAuth.test.tsx(73,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(74,39): error TS2551: Property 'to_have_been_called' does not exist on type 'JestMatchers<() => Promise<ApiResponse<unknown>>>'. Did you mean 'toHaveBeenCalled'?
+src/hooks/__tests__/useAuth.test.tsx(78,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(79,43): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/hooks/__tests__/useAuth.test.tsx(83,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(89,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(90,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(91,43): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<Mock<any, any, any>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(97,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(98,42): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(105,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(111,38): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<(credentials: { user_name: string; password: string; }) => Promise<ApiResponse<unknown>>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(115,40): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<Mock<any, any, any>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(116,35): error TS2551: Property 'to_equal' does not exist on type 'JestMatchers<any>'. Did you mean 'toEqual'?
+src/hooks/__tests__/useAuth.test.tsx(120,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(121,42): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(128,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(134,35): error TS2551: Property 'to_equal' does not exist on type 'JestMatchers<any>'. Did you mean 'toEqual'?
+src/hooks/__tests__/useAuth.test.tsx(135,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(139,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(140,42): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/hooks/__tests__/useAuth.test.tsx(147,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(153,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(154,47): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(158,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(159,44): error TS2551: Property 'to_have_been_called' does not exist on type 'Matchers<void, Mock<any, any, any>>'. Did you mean 'toHaveBeenCalled'?
+src/hooks/__tests__/useAuth.test.tsx(163,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(164,42): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/hooks/__tests__/useAuth.test.tsx(168,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(174,33): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(178,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(185,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(186,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(189,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(191,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(198,35): error TS2551: Property 'to_equal' does not exist on type 'JestMatchers<any>'. Did you mean 'toEqual'?
+src/hooks/__tests__/useAuth.test.tsx(205,39): error TS2551: Property 'to_have_been_called' does not exist on type 'JestMatchers<() => Promise<ApiResponse<unknown>>>'. Did you mean 'toHaveBeenCalled'?
+src/hooks/__tests__/useAuth.test.tsx(206,43): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<Mock<any, any, any>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(207,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(211,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(212,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(215,43): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/hooks/__tests__/useAuth.test.tsx(219,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(230,43): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<Mock<any, any, any>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(231,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(237,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(238,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(242,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(248,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(249,46): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(253,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(254,43): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(258,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(264,41): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(265,46): error TS2551: Property 'to_be' does not exist on type 'JestMatchers<any>'. Did you mean 'toBe'?
+src/hooks/__tests__/useAuth.test.tsx(271,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(272,43): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/hooks/__tests__/useAuth.test.tsx(279,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(285,35): error TS2551: Property 'to_be_null' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeNull'?
+src/hooks/__tests__/useAuth.test.tsx(286,43): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<Mock<any, any, any>>'. Did you mean 'toHaveBeenCalledWith'?
+src/hooks/__tests__/useAuth.test.tsx(292,33): error TS2551: Property 'mock_return_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockReturnValue'?
+src/hooks/__tests__/useAuth.test.tsx(293,42): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/hooks/__tests__/useAuth.test.tsx(300,26): error TS2304: Cannot find name 'renderHook'.
+src/hooks/__tests__/useAuth.test.tsx(314,38): error TS2551: Property 'to_have_been_called_times' does not exist on type 'JestMatchers<(credentials: { user_name: string; password: string; }) => Promise<ApiResponse<unknown>>>'. Did you mean 'toHaveBeenCalledTimes'?
+src/hooks/__tests__/useAuth.test.tsx(315,35): error TS2551: Property 'to_equal' does not exist on type 'JestMatchers<any>'. Did you mean 'toEqual'?
+src/hooks/useAuth.tsx(223,17): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/hooks/useDeviceDetection.tsx(14,34): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/hooks/useDeviceDetection.tsx(15,26): error TS2551: Property 'inner_width' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerWidth'?
+src/hooks/useDeviceDetection.tsx(16,27): error TS2551: Property 'inner_height' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerHeight'?
+src/hooks/useDeviceDetection.tsx(39,29): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/hooks/useDeviceDetection.tsx(89,29): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/hooks/useDeviceDetection.tsx(126,29): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/hooks/useSkuPermissions.ts(92,33): error TS2551: Property 'to_upper_case' does not exist on type '"BOSS" | "EMPLOYEE"'. Did you mean 'toUpperCase'?
+  Property 'to_upper_case' does not exist on type '"BOSS"'.
+src/hooks/useSkuPermissions.ts(129,25): error TS2551: Property 'to_upper_case' does not exist on type 'string'. Did you mean 'toUpperCase'?
+src/hooks/useSkuPermissions.ts(145,25): error TS2551: Property 'to_upper_case' does not exist on type 'string'. Did you mean 'toUpperCase'?
+src/main.tsx(7,30): error TS2551: Property 'get_element_by_id' does not exist on type 'Document'. Did you mean 'getElementById'?
+src/pages/__tests__/InventoryList.test.tsx(8,1): error TS6133: 'use_auth' is declared but its value is never read.
+src/pages/__tests__/InventoryList.test.tsx(34,21): error TS2304: Cannot find name 'useAuth'.
+src/pages/__tests__/InventoryList.test.tsx(34,59): error TS2304: Cannot find name 'useAuth'.
+src/pages/__tests__/InventoryList.test.tsx(37,7): error TS6133: 'Test_wrapper' is declared but its value is never read.
+src/pages/__tests__/InventoryList.test.tsx(109,10): error TS2551: Property 'clear_all_mocks' does not exist on type 'typeof jest'. Did you mean 'clearAllMocks'?
+src/pages/__tests__/InventoryList.test.tsx(112,35): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/pages/__tests__/InventoryList.test.tsx(113,36): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/pages/__tests__/InventoryList.test.tsx(134,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(136,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(140,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(140,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(145,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(145,43): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(146,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(146,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(147,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(147,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(163,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(165,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(169,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(169,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(174,23): error TS2551: Property 'query_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'queryByText'?
+src/pages/__tests__/InventoryList.test.tsx(174,49): error TS2551: Property 'to_be_in_the_document' does not exist on type 'Matchers<void, any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(175,23): error TS2551: Property 'query_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'queryByText'?
+src/pages/__tests__/InventoryList.test.tsx(175,52): error TS2551: Property 'to_be_in_the_document' does not exist on type 'Matchers<void, any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(176,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(176,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(196,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(198,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(202,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(202,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(206,42): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(207,35): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(213,35): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/InventoryList.test.tsx(214,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(223,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(225,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(229,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(229,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(233,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(234,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(244,35): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/InventoryList.test.tsx(245,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(246,28): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(257,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(259,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(263,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(263,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(267,39): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(272,35): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/InventoryList.test.tsx(273,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(274,28): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(298,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(300,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(304,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(304,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(307,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(308,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(317,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(317,50): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(323,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(325,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(329,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(329,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(332,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(339,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(339,50): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(359,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(361,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(365,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(365,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(369,35): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(370,28): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(376,36): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/InventoryList.test.tsx(377,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(396,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(398,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(402,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(402,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(405,35): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(409,36): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/InventoryList.test.tsx(410,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/__tests__/InventoryList.test.tsx(433,14): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/pages/__tests__/InventoryList.test.tsx(440,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(442,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(446,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(446,45): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(450,35): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/InventoryList.test.tsx(451,28): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(470,37): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/pages/__tests__/InventoryList.test.tsx(478,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(480,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(484,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(484,48): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/InventoryList.test.tsx(490,37): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/pages/__tests__/InventoryList.test.tsx(495,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(497,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/InventoryList.test.tsx(501,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/InventoryList.test.tsx(501,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(8,1): error TS6133: 'use_auth' is declared but its value is never read.
+src/pages/__tests__/PurchaseEntry.test.tsx(34,21): error TS2304: Cannot find name 'useAuth'.
+src/pages/__tests__/PurchaseEntry.test.tsx(34,59): error TS2304: Cannot find name 'useAuth'.
+src/pages/__tests__/PurchaseEntry.test.tsx(37,7): error TS6133: 'Test_wrapper' is declared but its value is never read.
+src/pages/__tests__/PurchaseEntry.test.tsx(57,31): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/pages/__tests__/PurchaseEntry.test.tsx(58,31): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/pages/__tests__/PurchaseEntry.test.tsx(69,26): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/pages/__tests__/PurchaseEntry.test.tsx(70,26): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/pages/__tests__/PurchaseEntry.test.tsx(75,10): error TS2551: Property 'clear_all_mocks' does not exist on type 'typeof jest'. Did you mean 'clearAllMocks'?
+src/pages/__tests__/PurchaseEntry.test.tsx(78,35): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/pages/__tests__/PurchaseEntry.test.tsx(79,36): error TS2551: Property 'mock_resolved_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockResolvedValue'?
+src/pages/__tests__/PurchaseEntry.test.tsx(95,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(97,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(102,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(102,44): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(106,37): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(107,30): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(108,34): error TS2551: Property 'to_be_disabled' does not exist on type 'Matchers<void, any>'. Did you mean 'toBeDisabled'?
+src/pages/__tests__/PurchaseEntry.test.tsx(123,37): error TS2551: Property 'mock_rejected_value' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockRejectedValue'?
+src/pages/__tests__/PurchaseEntry.test.tsx(128,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(130,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(134,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(134,44): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(139,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(139,44): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(159,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(161,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(164,35): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(171,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(171,49): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(172,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(172,48): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(178,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(180,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(183,36): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(192,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(192,55): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(202,23): error TS2551: Property 'query_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'queryByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(202,61): error TS2551: Property 'to_be_in_the_document' does not exist on type 'Matchers<void, any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(208,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(210,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(213,36): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(222,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(222,47): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(232,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(232,47): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(252,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(254,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(257,37): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(264,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(264,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(265,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(265,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(271,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(273,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(276,37): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(283,23): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(283,46): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(287,30): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(290,32): error TS2551: Property 'to_have_value' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveValue'?
+src/pages/__tests__/PurchaseEntry.test.tsx(296,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(298,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(301,37): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(310,36): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/PurchaseEntry.test.tsx(332,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(334,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(338,34): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(339,27): error TS2551: Property 'to_be_in_the_document' does not exist on type 'JestMatchers<any>'. Did you mean 'toBeInTheDocument'?
+src/pages/__tests__/PurchaseEntry.test.tsx(345,35): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/PurchaseEntry.test.tsx(365,10): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(367,11): error TS2304: Cannot find name 'TestWrapper'.
+src/pages/__tests__/PurchaseEntry.test.tsx(371,37): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(372,39): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(373,36): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(374,33): error TS2551: Property 'get_by_label_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByLabelText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(382,35): error TS2551: Property 'get_by_text' does not exist on type 'Screen<typeof import("D:/shuijing ERP/node_modules/@testing-library/dom/types/queries")>'. Did you mean 'getByText'?
+src/pages/__tests__/PurchaseEntry.test.tsx(386,36): error TS2551: Property 'to_have_been_called_with' does not exist on type 'JestMatchers<any>'. Did you mean 'toHaveBeenCalledWith'?
+src/pages/__tests__/PurchaseEntry.test.tsx(387,18): error TS2551: Property 'object_containing' does not exist on type 'Expect'. Did you mean 'objectContaining'?
+src/pages/CustomerManagement.tsx(229,32): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/pages/CustomerManagement.tsx(229,58): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/pages/CustomerManagement.tsx(263,11): error TS6133: 'days_since_last_purchase' is declared but its value is never read.
+src/pages/CustomerManagement.tsx(263,54): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/pages/CustomerManagement.tsx(263,80): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/pages/CustomerManagement.tsx(267,9): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(267,75): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(269,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(269,80): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(271,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(271,79): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(273,16): error TS2304: Cannot find name 'daysSinceLastPurchase'.
+src/pages/CustomerManagement.tsx(451,32): error TS2551: Property 'get_bounding_client_rect' does not exist on type 'HTMLElement'. Did you mean 'getBoundingClientRect'?
+src/pages/CustomerManagement.tsx(452,34): error TS2551: Property 'inner_width' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerWidth'?
+src/pages/CustomerManagement.tsx(453,35): error TS2551: Property 'inner_height' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerHeight'?
+src/pages/CustomerManagement.tsx(494,7): error TS2304: Cannot find name 'getFilterPosition'.
+src/pages/CustomerManagement.tsx(572,66): error TS2304: Cannot find name 'updateFilterPosition'.
+src/pages/CustomerManagement.tsx(799,26): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/CustomerManagement.tsx(799,74): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/CustomerManagement.tsx(857,22): error TS2304: Cannot find name 'category_name'.
+src/pages/CustomerManagement.tsx(858,114): error TS2304: Cannot find name 'category_name'.
+src/pages/CustomerManagement.tsx(1279,57): error TS2304: Cannot find name 'custom_state'.
+src/pages/CustomerManagement.tsx(1768,26): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/CustomerManagement.tsx(1773,33): error TS2551: Property 'to_locale_date_string' does not exist on type 'Date'. Did you mean 'toLocaleDateString'?
+src/pages/CustomerManagement.tsx(1834,104): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/CustomerManagement.tsx(1846,95): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/CustomerManagement.tsx(1870,105): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/CustomerManagement.tsx(2071,27): error TS6133: 'customer_labels' is declared but its value is never read.
+src/pages/CustomerManagement.tsx(2122,30): error TS2304: Cannot find name 'customerLabels'.
+src/pages/CustomerManagement.tsx(2122,50): error TS7006: Parameter 'label_key' implicitly has an 'any' type.
+src/pages/CustomerManagement.tsx(2123,72): error TS2304: Cannot find name 'labelKey'.
+src/pages/CustomerManagement.tsx(2228,27): error TS2551: Property 'inner_width' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerWidth'?
+src/pages/Financial.tsx(18,1): error TS6133: 'inventory_status' is declared but its value is never read.
+src/pages/Financial.tsx(211,15): error TS2339: Property 'inventory_status' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/Home.tsx(66,33): error TS2551: Property 'shift_key' does not exist on type 'KeyboardEvent<Element>'. Did you mean 'shiftKey'?
+src/pages/Home.tsx(182,42): error TS2551: Property 'username' does not exist on type 'User'. Did you mean 'user_name'?
+src/pages/InventoryList.tsx(3,1): error TS6133: 'inventory_api' is declared but its value is never read.
+src/pages/InventoryList.tsx(37,25): error TS2304: Cannot find name 'selected_product_types'.
+src/pages/InventoryList.tsx(37,61): error TS2304: Cannot find name 'selected_product_types'.
+src/pages/InventoryList.tsx(39,26): error TS2304: Cannot find name 'low_stock_only'.
+src/pages/InventoryList.tsx(40,29): error TS2304: Cannot find name 'specification_min'.
+src/pages/InventoryList.tsx(41,29): error TS2304: Cannot find name 'specification_max'.
+src/pages/InventoryList.tsx(46,30): error TS2304: Cannot find name 'inventoryApi'.
+src/pages/InventoryList.tsx(59,39): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/InventoryList.tsx(88,7): error TS2304: Cannot find name 'fetchHierarchicalInventory'.
+src/pages/InventoryList.tsx(96,30): error TS2304: Cannot find name 'inventoryApi'.
+src/pages/InventoryList.tsx(100,33): error TS2551: Property 'create_object_u_r_l' does not exist on type '{ new (url: string | URL, base?: string | URL | undefined): URL; prototype: URL; canParse(url: string | URL, base?: string | URL | undefined): boolean; createObjectURL(obj: Blob | MediaSource): string; parse(url: string | URL, base?: string | ... 1 more ... | undefined): URL | null; revokeObjectURL(url: string): voi...'. Did you mean 'createObjectURL'?
+src/pages/InventoryList.tsx(107,21): error TS2551: Property 'revoke_object_u_r_l' does not exist on type '{ new (url: string | URL, base?: string | URL | undefined): URL; prototype: URL; canParse(url: string | URL, base?: string | URL | undefined): boolean; createObjectURL(obj: Blob | MediaSource): string; parse(url: string | URL, base?: string | ... 1 more ... | undefined): URL | null; revokeObjectURL(url: string): voi...'. Did you mean 'revokeObjectURL'?
+src/pages/InventoryList.tsx(241,15): error TS2322: Type '{ key: string; search_term: string; selected_quality: string; lowStockOnly: any; specification_min: any; specification_max: any; }' is not assignable to type 'IntrinsicAttributes & FinishedProductGridProps'.
+  Property 'lowStockOnly' does not exist on type 'IntrinsicAttributes & FinishedProductGridProps'. Did you mean 'low_stock_only'?
+src/pages/InventoryList.tsx(241,29): error TS2304: Cannot find name 'low_stock_only'.
+src/pages/InventoryList.tsx(242,34): error TS2304: Cannot find name 'specification_min'.
+src/pages/InventoryList.tsx(243,34): error TS2304: Cannot find name 'specification_max'.
+src/pages/InventoryList.tsx(254,15): error TS2322: Type '{ key: string; search_term: string; selected_quality: string; lowStockOnly: any; specification_min: any; specification_max: any; }' is not assignable to type 'IntrinsicAttributes & AccessoriesProductGridProps'.
+  Property 'lowStockOnly' does not exist on type 'IntrinsicAttributes & AccessoriesProductGridProps'. Did you mean 'low_stock_only'?
+src/pages/InventoryList.tsx(254,29): error TS2304: Cannot find name 'low_stock_only'.
+src/pages/InventoryList.tsx(255,34): error TS2304: Cannot find name 'specification_min'.
+src/pages/InventoryList.tsx(256,34): error TS2304: Cannot find name 'specification_max'.
+src/pages/ProductEntry.tsx(19,1): error TS6133: 'use_dropzone' is declared but its value is never read.
+src/pages/ProductEntry.tsx(19,10): error TS2724: '"react-dropzone"' has no exported member named 'use_dropzone'. Did you mean 'useDropzone'?
+src/pages/ProductEntry.tsx(20,57): error TS2724: '"../services/api"' has no exported member named 'getApiUrl'. Did you mean 'get_api_url'?
+src/pages/ProductEntry.tsx(20,57): error TS6133: 'getApiUrl' is declared but its value is never read.
+src/pages/ProductEntry.tsx(24,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/pages/ProductEntry.tsx(41,17): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/ProductEntry.tsx(51,20): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/ProductEntry.tsx(77,17): error TS2339: Property 'isAuthenticated' does not exist on type 'auth_context_type'.
+src/pages/ProductEntry.tsx(77,17): error TS6133: 'isAuthenticated' is declared but its value is never read.
+src/pages/ProductEntry.tsx(78,34): error TS2304: Cannot find name 'useDeviceDetection'.
+src/pages/ProductEntry.tsx(192,41): error TS2551: Property 'char_code_at' does not exist on type 'string'. Did you mean 'charCodeAt'?
+src/pages/ProductEntry.tsx(200,41): error TS2551: Property 'upload_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'uploadPurchaseImages'?
+src/pages/ProductEntry.tsx(203,24): error TS2304: Cannot find name 'get_api_url'.
+src/pages/ProductEntry.tsx(249,25): error TS2551: Property 'for_each' does not exist on type 'File[]'. Did you mean 'forEach'?
+src/pages/ProductEntry.tsx(249,34): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/pages/ProductEntry.tsx(253,41): error TS2551: Property 'upload_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'uploadPurchaseImages'?
+src/pages/ProductEntry.tsx(256,24): error TS2304: Cannot find name 'get_api_url'.
+src/pages/ProductEntry.tsx(289,26): error TS2551: Property 'delete_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'deletePurchaseImages'?
+src/pages/ProductEntry.tsx(321,63): error TS2304: Cannot find name 'useDropzone'.
+src/pages/ProductEntry.tsx(357,43): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/ProductEntry.tsx(359,32): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/ProductEntry.tsx(360,47): error TS2551: Property 'to_lower_case' does not exist on type '"AA" | "A" | "AB" | "B" | "C"'. Did you mean 'toLowerCase'?
+  Property 'to_lower_case' does not exist on type '"AA"'.
+src/pages/ProductEntry.tsx(361,59): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/ProductEntry.tsx(375,9): error TS18004: No value exists in scope for the shorthand property 'is_authenticated'. Either declare one or provide an initializer.
+src/pages/ProductEntry.tsx(380,12): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/ProductEntry.tsx(402,9): error TS2561: Object literal may only specify known properties, but 'minQuantity' does not exist in type '{ search?: string | undefined; material_types?: string[] | undefined; available_only?: boolean | undefined; min_quantity?: number | undefined; }'. Did you mean to write 'min_quantity'?
+src/pages/ProductEntry.tsx(487,37): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(488,35): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(657,31): error TS6133: 'product_id' is declared but its value is never read.
+src/pages/ProductEntry.tsx(660,38): error TS2304: Cannot find name 'productId'.
+src/pages/ProductEntry.tsx(665,17): error TS6133: 'profit_margin' is declared but its value is never read.
+src/pages/ProductEntry.tsx(670,46): error TS2304: Cannot find name 'profitMargin'.
+src/pages/ProductEntry.tsx(730,51): error TS2551: Property 'batch_create' does not exist on type '{ get_materials: (params?: { search?: string | undefined; material_types?: string[] | undefined; available_only?: boolean | undefined; min_quantity?: number | undefined; } | undefined) => Promise<...>; ... 7 more ...; batchCreate: (data: { ...; }) => Promise<...>; }'. Did you mean 'batchCreate'?
+src/pages/ProductEntry.tsx(1187,58): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/ProductEntry.tsx(1189,45): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/ProductEntry.tsx(1350,31): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/ProductEntry.tsx(1386,56): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(1392,47): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(1396,43): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(1400,33): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1508,78): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1518,70): error TS2551: Property 'materialCost' does not exist on type 'CostCalculationResponse'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(1527,51): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1537,87): error TS2551: Property 'materialCost' does not exist on type '{ material_cost: number; labor_cost: number; craft_cost: number; total_cost: number; }'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(1557,93): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1563,93): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1569,31): error TS6133: 'material_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1569,65): error TS2551: Property 'materialCost' does not exist on type 'CostCalculationResponse'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(1577,31): error TS6133: 'labor_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1577,62): error TS2551: Property 'laborCost' does not exist on type 'CostCalculationResponse'. Did you mean 'labor_cost'?
+src/pages/ProductEntry.tsx(1579,31): error TS6133: 'craft_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1579,62): error TS2551: Property 'craftCost' does not exist on type 'CostCalculationResponse'. Did you mean 'craft_cost'?
+src/pages/ProductEntry.tsx(1581,44): error TS2304: Cannot find name 'materialCost'.
+src/pages/ProductEntry.tsx(1581,59): error TS2304: Cannot find name 'laborCost'.
+src/pages/ProductEntry.tsx(1581,71): error TS2304: Cannot find name 'craftCost'.
+src/pages/ProductEntry.tsx(1594,31): error TS6133: 'material_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1594,65): error TS2551: Property 'materialCost' does not exist on type 'CostCalculationResponse'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(1602,31): error TS6133: 'labor_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1602,62): error TS2551: Property 'laborCost' does not exist on type 'CostCalculationResponse'. Did you mean 'labor_cost'?
+src/pages/ProductEntry.tsx(1604,31): error TS6133: 'craft_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(1604,62): error TS2551: Property 'craftCost' does not exist on type 'CostCalculationResponse'. Did you mean 'craft_cost'?
+src/pages/ProductEntry.tsx(1606,44): error TS2304: Cannot find name 'materialCost'.
+src/pages/ProductEntry.tsx(1606,59): error TS2304: Cannot find name 'laborCost'.
+src/pages/ProductEntry.tsx(1606,71): error TS2304: Cannot find name 'craftCost'.
+src/pages/ProductEntry.tsx(1615,95): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1620,42): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(1627,33): error TS2304: Cannot find name 'profitMargin'.
+src/pages/ProductEntry.tsx(1629,48): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2076,70): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2083,89): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2089,89): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2094,28): error TS6133: 'material_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2094,62): error TS2551: Property 'materialCost' does not exist on type 'CostCalculationResponse'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(2095,28): error TS6133: 'labor_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2095,59): error TS2551: Property 'laborCost' does not exist on type 'CostCalculationResponse'. Did you mean 'labor_cost'?
+src/pages/ProductEntry.tsx(2096,28): error TS6133: 'craft_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2096,59): error TS2551: Property 'craftCost' does not exist on type 'CostCalculationResponse'. Did you mean 'craft_cost'?
+src/pages/ProductEntry.tsx(2097,41): error TS2304: Cannot find name 'materialCost'.
+src/pages/ProductEntry.tsx(2097,56): error TS2304: Cannot find name 'laborCost'.
+src/pages/ProductEntry.tsx(2097,68): error TS2304: Cannot find name 'craftCost'.
+src/pages/ProductEntry.tsx(2116,28): error TS6133: 'material_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2116,62): error TS2551: Property 'materialCost' does not exist on type 'CostCalculationResponse'. Did you mean 'material_cost'?
+src/pages/ProductEntry.tsx(2117,28): error TS6133: 'labor_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2117,59): error TS2551: Property 'laborCost' does not exist on type 'CostCalculationResponse'. Did you mean 'labor_cost'?
+src/pages/ProductEntry.tsx(2118,28): error TS6133: 'craft_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2118,59): error TS2551: Property 'craftCost' does not exist on type 'CostCalculationResponse'. Did you mean 'craft_cost'?
+src/pages/ProductEntry.tsx(2119,41): error TS2304: Cannot find name 'materialCost'.
+src/pages/ProductEntry.tsx(2119,56): error TS2304: Cannot find name 'laborCost'.
+src/pages/ProductEntry.tsx(2119,68): error TS2304: Cannot find name 'craftCost'.
+src/pages/ProductEntry.tsx(2128,39): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2135,30): error TS2304: Cannot find name 'profitMargin'.
+src/pages/ProductEntry.tsx(2137,45): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2181,13): error TS6133: 'material_cost' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2182,26): error TS2304: Cannot find name 'materialCost'.
+src/pages/ProductEntry.tsx(2219,27): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/ProductEntry.tsx(2225,57): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2234,50): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2241,25): error TS2304: Cannot find name 'profitMargin'.
+src/pages/ProductEntry.tsx(2243,40): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2369,62): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2373,59): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2377,59): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2386,72): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/ProductEntry.tsx(2438,7): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/ProductEntry.tsx(2466,42): error TS2551: Property 'find_index' does not exist on type '{ key: string; label: string; }[]'. Did you mean 'findIndex'?
+src/pages/ProductEntry.tsx(2466,53): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/pages/ProductEntry.tsx(2474,42): error TS2551: Property 'find_index' does not exist on type '{ key: string; label: string; }[]'. Did you mean 'findIndex'?
+src/pages/ProductEntry.tsx(2474,53): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/pages/ProductEntry.tsx(2476,21): error TS6133: 'is_active' is declared but its value is never read.
+src/pages/ProductEntry.tsx(2489,23): error TS2304: Cannot find name 'isActive'.
+src/pages/ProductEntry.tsx(2498,23): error TS2304: Cannot find name 'isActive'.
+src/pages/ProductEntry.tsx(2550,68): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(2553,97): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(2598,73): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/ProductEntry.tsx(2601,76): error TS2551: Property 'unit_cost' does not exist on type 'AvailableMaterial'. Did you mean 'unitCost'?
+src/pages/PurchaseEntry.tsx(2,1): error TS6133: 'use_form' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(2,10): error TS2724: '"react-hook-form"' has no exported member named 'use_form'. Did you mean 'useForm'?
+src/pages/PurchaseEntry.tsx(17,1): error TS6133: 'use_dropzone' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(17,10): error TS2724: '"react-dropzone"' has no exported member named 'use_dropzone'. Did you mean 'useDropzone'?
+src/pages/PurchaseEntry.tsx(18,58): error TS2724: '"../services/api"' has no exported member named 'getApiUrl'. Did you mean 'get_api_url'?
+src/pages/PurchaseEntry.tsx(18,58): error TS6133: 'getApiUrl' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(19,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(62,22): error TS2551: Property 'set_state' does not exist on type 'CameraErrorBoundary'. Did you mean 'setState'?
+src/pages/PurchaseEntry.tsx(100,34): error TS2304: Cannot find name 'useDeviceDetection'.
+src/pages/PurchaseEntry.tsx(103,17): error TS2339: Property 'isBoss' does not exist on type 'auth_context_type'.
+src/pages/PurchaseEntry.tsx(103,17): error TS6133: 'isBoss' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(106,96): error TS2304: Cannot find name 'useForm'.
+src/pages/PurchaseEntry.tsx(188,9): error TS6133: 'Dropzone_upload' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(211,13): error TS6133: 'getRootProps' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(211,61): error TS2304: Cannot find name 'useDropzone'.
+src/pages/PurchaseEntry.tsx(227,13): error TS2304: Cannot find name 'get_root_props'.
+src/pages/PurchaseEntry.tsx(249,43): error TS2551: Property 'get_entries_by_type' does not exist on type 'Performance'. Did you mean 'getEntriesByType'?
+src/pages/PurchaseEntry.tsx(312,33): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/pages/PurchaseEntry.tsx(312,42): error TS7031: Binding element 'name' implicitly has an 'any' type.
+src/pages/PurchaseEntry.tsx(341,55): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseEntry.tsx(343,26): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseEntry.tsx(344,11): error TS2740: Type '{}' is missing the following properties from type '{ id: string; name: string; contact?: string | undefined; phone?: string | undefined; }[]': length, pop, push, concat, and 28 more.
+src/pages/PurchaseEntry.tsx(354,33): error TS2551: Property 'find_index' does not exist on type '{ id: string; name: string; contact?: string | undefined; phone?: string | undefined; }[]'. Did you mean 'findIndex'?
+src/pages/PurchaseEntry.tsx(354,44): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/pages/PurchaseEntry.tsx(363,14): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(413,12): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(519,11): error TS6133: 'user_agent' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(519,34): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/pages/PurchaseEntry.tsx(523,9): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(525,21): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(527,16): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(529,21): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(531,16): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(531,49): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(533,21): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(535,16): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(537,21): error TS2304: Cannot find name 'userAgent'.
+src/pages/PurchaseEntry.tsx(541,43): error TS18004: No value exists in scope for the shorthand property 'userAgent'. Either declare one or provide an initializer.
+src/pages/PurchaseEntry.tsx(582,53): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(583,53): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(583,80): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(584,64): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(584,91): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(607,20): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(643,20): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(650,20): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(763,41): error TS2551: Property 'char_code_at' does not exist on type 'string'. Did you mean 'charCodeAt'?
+src/pages/PurchaseEntry.tsx(772,41): error TS2551: Property 'upload_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'uploadPurchaseImages'?
+src/pages/PurchaseEntry.tsx(777,24): error TS2304: Cannot find name 'get_api_url'.
+src/pages/PurchaseEntry.tsx(956,14): error TS2551: Property 'read_as_data_u_r_l' does not exist on type 'FileReader'. Did you mean 'readAsDataURL'?
+src/pages/PurchaseEntry.tsx(1011,41): error TS2551: Property 'char_code_at' does not exist on type 'string'. Did you mean 'charCodeAt'?
+src/pages/PurchaseEntry.tsx(1020,41): error TS2551: Property 'upload_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'uploadPurchaseImages'?
+src/pages/PurchaseEntry.tsx(1025,24): error TS2304: Cannot find name 'get_api_url'.
+src/pages/PurchaseEntry.tsx(1081,26): error TS2551: Property 'delete_purchase_images' does not exist on type '{ uploadPurchaseImages: (formData: FormData) => Promise<ApiResponse<unknown>>; deletePurchaseImages: (urls: string[]) => Promise<ApiResponse<unknown>>; single: (file: File) => Promise<...>; multiple: (files: File[]) => Promise<...>; }'. Did you mean 'deletePurchaseImages'?
+src/pages/PurchaseEntry.tsx(1104,70): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/PurchaseEntry.tsx(1112,69): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/PurchaseEntry.tsx(1120,68): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/PurchaseEntry.tsx(1140,37): error TS2551: Property 'parse_crystal_purchase' does not exist on type '{ config: () => Promise<ApiResponse<unknown>>; parseCrystalPurchase: (description: string) => Promise<ApiResponse<unknown>>; parsePurchase: (description: string) => Promise<...>; }'. Did you mean 'parseCrystalPurchase'?
+src/pages/PurchaseEntry.tsx(1524,51): error TS2551: Property 'current_target' does not exist on type 'KeyboardEvent<HTMLFormElement>'. Did you mean 'currentTarget'?
+src/pages/PurchaseEntry.tsx(1615,18): error TS2304: Cannot find name 'DropzoneUpload'.
+src/pages/PurchaseEntry.tsx(1682,96): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1697,44): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1708,43): error TS6133: 'get_user_media' is declared but its value is never read.
+src/pages/PurchaseEntry.tsx(1711,39): error TS2304: Cannot find name 'getUserMedia'.
+src/pages/PurchaseEntry.tsx(1753,40): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/pages/PurchaseEntry.tsx(1762,42): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/pages/PurchaseEntry.tsx(1773,46): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1775,43): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1799,60): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1800,61): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1800,88): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1801,72): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1801,99): error TS2551: Property 'media_devices' does not exist on type 'Navigator'. Did you mean 'mediaDevices'?
+src/pages/PurchaseEntry.tsx(1915,54): error TS2304: Cannot find name 'renderError'.
+src/pages/PurchaseEntry.tsx(1921,72): error TS2304: Cannot find name 'renderError'.
+src/pages/PurchaseEntry.tsx(2007,45): error TS2551: Property 'get_element_by_id' does not exist on type 'Document'. Did you mean 'getElementById'?
+src/pages/PurchaseEntry.tsx(2023,45): error TS2551: Property 'get_element_by_id' does not exist on type 'Document'. Did you mean 'getElementById'?
+src/pages/PurchaseEntry.tsx(2257,34): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/pages/PurchaseEntry.tsx(2266,34): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/pages/PurchaseEntry.tsx(2295,67): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(2296,68): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(2302,37): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(2322,32): error TS2304: Cannot find name 'is_boss'.
+src/pages/PurchaseEntry.tsx(2381,41): error TS2551: Property 'get_element_by_id' does not exist on type 'Document'. Did you mean 'getElementById'?
+src/pages/PurchaseList.tsx(2,1): error TS6133: 'use_navigate' is declared but its value is never read.
+src/pages/PurchaseList.tsx(2,10): error TS2724: '"react-router-dom"' has no exported member named 'use_navigate'. Did you mean 'useNavigate'?
+src/pages/PurchaseList.tsx(15,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/pages/PurchaseList.tsx(17,51): error TS2724: '"../services/api"' has no exported member named 'getApiUrl'. Did you mean 'get_api_url'?
+src/pages/PurchaseList.tsx(17,51): error TS6133: 'getApiUrl' is declared but its value is never read.
+src/pages/PurchaseList.tsx(38,17): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseList.tsx(48,20): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseList.tsx(134,20): error TS2304: Cannot find name 'useNavigate'.
+src/pages/PurchaseList.tsx(135,17): error TS2339: Property 'isAuthenticated' does not exist on type 'auth_context_type'.
+src/pages/PurchaseList.tsx(135,17): error TS6133: 'isAuthenticated' is declared but its value is never read.
+src/pages/PurchaseList.tsx(136,9): error TS6133: 'is_mobile' is declared but its value is never read.
+src/pages/PurchaseList.tsx(136,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/pages/PurchaseList.tsx(394,55): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseList.tsx(397,26): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/PurchaseList.tsx(405,29): error TS2551: Property 'locale_compare' does not exist on type 'string'. Did you mean 'localeCompare'?
+src/pages/PurchaseList.tsx(424,9): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(428,7): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(432,9): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(435,66): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(613,38): error TS2551: Property 'for_each' does not exist on type 'string[]'. Did you mean 'forEach'?
+src/pages/PurchaseList.tsx(613,47): error TS7006: Parameter 'q' implicitly has an 'any' type.
+src/pages/PurchaseList.tsx(622,39): error TS2551: Property 'for_each' does not exist on type 'string[]'. Did you mean 'forEach'?
+src/pages/PurchaseList.tsx(622,48): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/pages/PurchaseList.tsx(627,45): error TS2551: Property 'for_each' does not exist on type 'string[]'. Did you mean 'forEach'?
+src/pages/PurchaseList.tsx(627,54): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/pages/PurchaseList.tsx(668,22): error TS2304: Cannot find name 'get_api_url'.
+src/pages/PurchaseList.tsx(669,79): error TS2551: Property 'to_string' does not exist on type 'URLSearchParams'. Did you mean 'toString'?
+src/pages/PurchaseList.tsx(677,62): error TS2551: Property 'status_text' does not exist on type 'Response'. Did you mean 'statusText'?
+src/pages/PurchaseList.tsx(684,30): error TS2551: Property 'create_object_u_r_l' does not exist on type '{ new (url: string | URL, base?: string | URL | undefined): URL; prototype: URL; canParse(url: string | URL, base?: string | URL | undefined): boolean; createObjectURL(obj: Blob | MediaSource): string; parse(url: string | URL, base?: string | ... 1 more ... | undefined): URL | null; revokeObjectURL(url: string): voi...'. Did you mean 'createObjectURL'?
+src/pages/PurchaseList.tsx(690,41): error TS2551: Property 'to_i_s_o_string' does not exist on type 'Date'. Did you mean 'toISOString'?
+src/pages/PurchaseList.tsx(705,18): error TS2551: Property 'revoke_object_u_r_l' does not exist on type '{ new (url: string | URL, base?: string | URL | undefined): URL; prototype: URL; canParse(url: string | URL, base?: string | URL | undefined): boolean; createObjectURL(obj: Blob | MediaSource): string; parse(url: string | URL, base?: string | ... 1 more ... | undefined): URL | null; revokeObjectURL(url: string): voi...'. Did you mean 'revokeObjectURL'?
+src/pages/PurchaseList.tsx(739,33): error TS2551: Property 'to_locale_string' does not exist on type 'Date'. Did you mean 'toLocaleString'?
+src/pages/PurchaseList.tsx(764,25): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/PurchaseList.tsx(774,25): error TS2551: Property 'to_fixed' does not exist on type 'number'. Did you mean 'toFixed'?
+src/pages/PurchaseList.tsx(803,54): error TS2551: Property 'to_upper_case' does not exist on type 'string'. Did you mean 'toUpperCase'?
+src/pages/PurchaseList.tsx(819,31): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/PurchaseList.tsx(819,68): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/pages/PurchaseList.tsx(828,36): error TS2551: Property 'query_selector' does not exist on type 'Document'. Did you mean 'querySelector'?
+src/pages/PurchaseList.tsx(831,32): error TS2551: Property 'get_bounding_client_rect' does not exist on type 'HTMLButtonElement'. Did you mean 'getBoundingClientRect'?
+src/pages/PurchaseList.tsx(832,34): error TS2551: Property 'inner_width' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerWidth'?
+src/pages/PurchaseList.tsx(833,35): error TS2551: Property 'inner_height' does not exist on type 'Window & typeof globalThis'. Did you mean 'innerHeight'?
+src/pages/PurchaseList.tsx(872,7): error TS2304: Cannot find name 'getFilterPosition'.
+src/pages/PurchaseList.tsx(876,39): error TS2551: Property 'for_each' does not exist on type 'string[]'. Did you mean 'forEach'?
+src/pages/PurchaseList.tsx(876,48): error TS7006: Parameter 'column' implicitly has an 'any' type.
+src/pages/PurchaseList.tsx(881,44): error TS2304: Cannot find name 'updateFilterPosition'.
+src/pages/PurchaseList.tsx(2379,9): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(2389,8): error TS2304: Cannot find name 'is_authenticated'.
+src/pages/PurchaseList.tsx(2406,16): error TS2304: Cannot find name 'isMobile'.
+src/pages/SalesList.tsx(17,1): error TS6133: 'use_device_detection' is declared but its value is never read.
+src/pages/SalesList.tsx(43,17): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/SalesList.tsx(53,20): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/pages/SalesList.tsx(118,25): error TS2304: Cannot find name 'useDeviceDetection'.
+src/pages/SalesList.tsx(918,35): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/SalesList.tsx(919,35): error TS2551: Property 'current_target' does not exist on type 'SyntheticEvent<HTMLImageElement, Event>'. Did you mean 'currentTarget'?
+src/pages/SalesList.tsx(1233,17): error TS2322: Type '{ sku: SkuItem; onSubmit: (data: SellData) => Promise<void>; onCancel: () => void; loading: false; }' is not assignable to type 'IntrinsicAttributes & SkuSellFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuSellFormProps'. Did you mean 'on_submit'?
+src/pages/SalesList.tsx(1266,17): error TS2322: Type '{ sku: SkuItem; onSubmit: (data: DestroyData) => Promise<void>; onCancel: () => void; loading: false; }' is not assignable to type 'IntrinsicAttributes & SkuDestroyFormProps'.
+  Property 'onSubmit' does not exist on type 'IntrinsicAttributes & SkuDestroyFormProps'. Did you mean 'on_submit'?
+src/pages/SupplierManagement.tsx(6,17): error TS2339: Property 'isBoss' does not exist on type 'auth_context_type'.
+src/pages/SupplierManagement.tsx(6,17): error TS6133: 'isBoss' is declared but its value is never read.
+src/pages/SupplierManagement.tsx(9,8): error TS2304: Cannot find name 'is_boss'.
+src/services/api.ts(949,29): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/services/api.ts(949,55): error TS18046: 'response.data' is of type 'unknown'.
+src/services/api.ts(1078,11): error TS2551: Property 'for_each' does not exist on type 'File[]'. Did you mean 'forEach'?
+src/services/api.ts(1078,21): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/services/errorHandler.ts(62,3): error TS2561: Object literal may only specify known properties, but 'redirect_on_auth' does not exist in type 'ErrorHandlerConfig'. Did you mean to write 'redirectOnAuth'?
+src/services/errorHandler.ts(113,7): error TS6133: 'auth_redirect_errors' is declared but its value is never read.
+src/services/errorHandler.ts(122,11): error TS6133: 'retryCount' is declared but its value is never read.
+src/services/errorHandler.ts(186,21): error TS2551: Property 'redirect_on_auth' does not exist on type '{ showToast?: boolean | undefined; logError?: boolean | undefined; redirectOnAuth?: boolean | undefined; retryable?: boolean | undefined; }'. Did you mean 'redirectOnAuth'?
+src/services/errorHandler.ts(186,70): error TS2552: Cannot find name 'AUTH_REDIRECT_ERRORS'. Did you mean 'auth_redirect_errors'?
+src/services/errorHandler.ts(265,9): error TS2552: Cannot find name 'AUTH_REDIRECT_ERRORS'. Did you mean 'auth_redirect_errors'?
+src/services/errorHandler.ts(322,29): error TS2551: Property 'user_agent' does not exist on type 'Navigator'. Did you mean 'userAgent'?
+src/services/errorHandler.ts(366,17): error TS2551: Property 'retry_count' does not exist on type 'ErrorHandler'. Did you mean 'retryCount'?
+src/services/errorHandler.ts(371,24): error TS2551: Property 'get_retry_count' does not exist on type 'ErrorHandler'. Did you mean 'getRetryCount'?
+src/services/errorHandler.ts(372,10): error TS2551: Property 'retry_count' does not exist on type 'ErrorHandler'. Did you mean 'retryCount'?
+src/services/errorHandler.ts(378,10): error TS2551: Property 'retry_count' does not exist on type 'ErrorHandler'. Did you mean 'retryCount'?
+src/services/errorHandler.ts(383,17): error TS2551: Property 'get_retry_count' does not exist on type 'ErrorHandler'. Did you mean 'getRetryCount'?
+src/setupTests.ts(11,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/setupTests.ts(23,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/setupTests.ts(32,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/setupTests.ts(38,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/setupTests.ts(44,8): error TS2551: Property 'define_property' does not exist on type 'ObjectConstructor'. Did you mean 'defineProperty'?
+src/setupTests.ts(46,20): error TS2551: Property 'mock_implementation' does not exist on type 'Mock<any, any, any>'. Did you mean 'mockImplementation'?
+src/setupTests.ts(46,40): error TS7006: Parameter 'query' implicitly has an 'any' type.
+src/setupTests.ts(60,8): error TS2551: Property 'clear_all_mocks' does not exist on type 'typeof jest'. Did you mean 'clearAllMocks'?
+src/types/index.ts(923,3): error TS2300: Duplicate identifier 'original_price'.
+src/types/index.ts(925,3): error TS2300: Duplicate identifier 'refund_date'.
+src/types/index.ts(926,3): error TS2300: Duplicate identifier 'refund_reason'.
+src/types/index.ts(927,3): error TS2300: Duplicate identifier 'refund_notes'.
+src/types/index.ts(928,3): error TS2300: Duplicate identifier 'sale_channel'.
+src/types/index.ts(928,3): error TS2687: All declarations of 'sale_channel' must have identical modifiers.
+src/types/index.ts(941,3): error TS2300: Duplicate identifier 'sale_channel'.
+src/types/index.ts(941,3): error TS2687: All declarations of 'sale_channel' must have identical modifiers.
+src/types/index.ts(941,3): error TS2717: Subsequent property declarations must have the same type.  Property 'sale_channel' must be of type 'string', but here has type 'string | undefined'.
+src/types/index.ts(942,3): error TS2300: Duplicate identifier 'original_price'.
+src/types/index.ts(943,3): error TS2300: Duplicate identifier 'refund_date'.
+src/types/index.ts(944,3): error TS2300: Duplicate identifier 'refund_reason'.
+src/types/index.ts(945,3): error TS2300: Duplicate identifier 'refund_notes'.
+src/utils/fieldConverter.ts(22,27): error TS2551: Property 'char_code_at' does not exist on type 'string'. Did you mean 'charCodeAt'?
+src/utils/fieldConverter.ts(49,53): error TS2551: Property 'to_lower_case' does not exist on type 'string'. Did you mean 'toLowerCase'?
+src/utils/fieldConverter.ts(72,13): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(73,20): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(82,23): error TS2551: Property 'for_each' does not exist on type '[string, any][]'. Did you mean 'forEach'?
+src/utils/fieldConverter.ts(82,34): error TS7031: Binding element 'key' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(82,39): error TS7031: Binding element 'value' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(86,54): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(88,22): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(89,39): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(111,13): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(112,20): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(121,23): error TS2551: Property 'for_each' does not exist on type '[string, any][]'. Did you mean 'forEach'?
+src/utils/fieldConverter.ts(121,34): error TS7031: Binding element 'key' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(121,39): error TS7031: Binding element 'value' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(125,54): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(127,22): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(128,39): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/utils/fieldConverter.ts(464,13): error TS2551: Property 'is_array' does not exist on type 'ArrayConstructor'. Did you mean 'isArray'?
+src/utils/fieldConverter.ts(465,17): error TS2339: Property 'map' does not exist on type 'T | T[]'.
+  Property 'map' does not exist on type 'T'.
+src/utils/fieldConverter.ts(465,21): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/utils/format.ts(103,43): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/utils/format.ts(103,61): error TS2551: Property 'get_time' does not exist on type 'Date'. Did you mean 'getTime'?
+src/utils/validation.ts(152,15): error TS2551: Property 'is_integer' does not exist on type 'NumberConstructor'. Did you mean 'isInteger'?

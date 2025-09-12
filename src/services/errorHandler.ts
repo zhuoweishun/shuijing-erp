@@ -8,7 +8,7 @@ export enum ErrorType {
   INVALID_DIAMETER = 'INVALID_DIAMETER', // 珠子直径无效
   AI_RECOGNITION_FAILED = 'AI_RECOGNITION_FAILED', // AI识别失败
   INSUFFICIENT_STOCK = 'INSUFFICIENT_STOCK', // 库存不足
-  INSUFFICIENT_PERMISSIONS = 'INSUFFICIENT_PERMISSIONS', // 权限不足
+  insufficient_permissions = 'insufficient_permissions', // 权限不足
   CHAT_FAILED = 'CHAT_FAILED', // AI对话失败
   INSIGHTS_FAILED = 'INSIGHTS_FAILED', // 业务洞察失败
   DUPLICATE_ENTRY = 'DUPLICATE_ENTRY', // 重复数据
@@ -24,9 +24,9 @@ export enum ErrorType {
   ASSISTANT_ERROR = 'ASSISTANT_ERROR', // AI助理服务异常
   
   // 认证错误
-  INVALID_TOKEN = 'INVALID_TOKEN', // 无效令牌
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED', // 令牌过期
-  UNAUTHORIZED = 'UNAUTHORIZED', // 未授权
+  invalid_token = 'invalid_token', // 无效令牌
+  token_expired = 'token_expired', // 令牌过期
+  unauthorized = 'unauthorized', // 未授权
   FORBIDDEN = 'FORBIDDEN', // 禁止访问
   
   // 通用错误
@@ -59,7 +59,7 @@ interface ErrorHandlerConfig {
 const DEFAULT_CONFIG: ErrorHandlerConfig = {
   showToast: true,
   logError: true,
-  redirectOnAuth: true,
+  redirect_on_auth: true,
   retryable: false
 }
 
@@ -70,7 +70,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   [ErrorType.INVALID_DIAMETER]: '珠子直径必须在4-20mm之间',
   [ErrorType.AI_RECOGNITION_FAILED]: 'AI识别服务暂时不可用，请稍后重试',
   [ErrorType.INSUFFICIENT_STOCK]: '库存不足，无法完成操作',
-  [ErrorType.INSUFFICIENT_PERMISSIONS]: '权限不足，请联系管理员',
+  [ErrorType.insufficient_permissions]: '权限不足，请联系管理员',
   [ErrorType.CHAT_FAILED]: 'AI对话服务暂时不可用',
   [ErrorType.INSIGHTS_FAILED]: '业务洞察分析失败',
   [ErrorType.DUPLICATE_ENTRY]: '数据已存在，请检查后重试',
@@ -86,9 +86,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   [ErrorType.ASSISTANT_ERROR]: 'AI助理服务异常',
   
   // 认证错误
-  [ErrorType.INVALID_TOKEN]: '登录状态无效，请重新登录',
-  [ErrorType.TOKEN_EXPIRED]: '登录已过期，请重新登录',
-  [ErrorType.UNAUTHORIZED]: '未授权访问，请先登录',
+  [ErrorType.invalid_token]: '登录状态无效，请重新登录',
+  [ErrorType.token_expired]: '登录已过期，请重新登录',
+  [ErrorType.unauthorized]: '未授权访问，请先登录',
   [ErrorType.FORBIDDEN]: '禁止访问，权限不足',
   
   // 通用错误
@@ -110,10 +110,10 @@ const RETRYABLE_ERRORS = new Set([
 ])
 
 // 需要重定向到登录页的错误类型
-const AUTH_REDIRECT_ERRORS = new Set([
-  ErrorType.INVALID_TOKEN,
-  ErrorType.TOKEN_EXPIRED,
-  ErrorType.UNAUTHORIZED
+const auth_redirect_errors = new Set([
+  ErrorType.invalid_token,
+  ErrorType.token_expired,
+  ErrorType.unauthorized
 ])
 
 // 统一错误处理类
@@ -146,7 +146,7 @@ export class ErrorHandler {
         success: false,
         message: error.response.statusText || '请求失败',
         error: {
-          code: this.getErrorCodeFromStatus(statusCode)
+          code: this.get_error_code_from_status(statusCode)
         }
       }
     } else if (error.request) {
@@ -183,7 +183,7 @@ export class ErrorHandler {
     }
     
     // 处理认证错误
-    if (finalConfig.redirectOnAuth && errorResponse.error?.code && AUTH_REDIRECT_ERRORS.has(errorResponse.error.code as ErrorType)) {
+    if (finalConfig.redirect_on_auth && errorResponse.error?.code && AUTH_REDIRECT_ERRORS.has(errorResponse.error.code as ErrorType)) {
       this.handleAuthError()
       return
     }
@@ -253,21 +253,21 @@ export class ErrorHandler {
   
   // 显示错误Toast
   private showErrorToast(errorResponse: ErrorResponse): void {
-    const errorCode = errorResponse.error?.code || ErrorType.UNKNOWN_ERROR
+    const error_code = errorResponse.error?.code || ErrorType.UNKNOWN_ERROR
     
     // 优先使用后端返回的具体错误消息，如果没有则使用预定义消息
     let userMessage = errorResponse.message
     if (!userMessage || userMessage === '请求失败' || userMessage === 'Bad Request') {
-      userMessage = ERROR_MESSAGES[errorCode] || '操作失败，请稍后重试'
+      userMessage = ERROR_MESSAGES[error_code] || '操作失败，请稍后重试'
     }
     
     // 根据错误类型选择不同的toast样式
-    if (AUTH_REDIRECT_ERRORS.has(errorCode as ErrorType)) {
+    if (AUTH_REDIRECT_ERRORS.has(error_code as ErrorType)) {
       toast.error(userMessage, {
         duration: 5000,
         description: '即将跳转到登录页面'
       })
-    } else if (RETRYABLE_ERRORS.has(errorCode as ErrorType)) {
+    } else if (RETRYABLE_ERRORS.has(error_code as ErrorType)) {
       toast.error(userMessage, {
         duration: 4000,
         description: '系统将自动重试'
@@ -295,19 +295,33 @@ export class ErrorHandler {
   
   // 记录错误日志
   private logError(errorResponse: ErrorResponse, originalError: any): void {
+    // 检查是否是正常的"无数据"情况，这些情况不应该记录为错误
+    const isNoDataScenario = (
+      errorResponse.message?.includes('客户不存在') ||
+      errorResponse.message?.includes('没有找到') ||
+      (errorResponse.error?.code === ErrorType.NOT_FOUND && 
+       (window.location.pathname.includes('/customers') || 
+        originalError.config?.url?.includes('/customers')))
+    )
+    
+    // 如果是正常的无数据情况，不记录错误日志
+    if (isNoDataScenario) {
+      return
+    }
+    
     const logData = {
       timestamp: new Date().toISOString(),
       error_code: errorResponse.error?.code || ErrorType.UNKNOWN_ERROR,
       message: errorResponse.message,
       details: errorResponse.error?.details,
-      original_error: {
+      originalError: {
         name: originalError.name,
         message: originalError.message,
         stack: originalError.stack
       },
       user_agent: navigator.userAgent,
       url: window.location.href,
-      user_id: localStorage.getItem('user_id')
+      user_id: localStorage.get_item('')
     }
     
     // 根据环境控制日志输出级别
@@ -326,10 +340,10 @@ export class ErrorHandler {
   }
   
   // 根据HTTP状态码获取错误码
-  private getErrorCodeFromStatus(status: number): string {
+  private get_error_code_from_status(status: number): string {
     switch (status) {
       case 400: return ErrorType.BAD_REQUEST
-      case 401: return ErrorType.UNAUTHORIZED
+      case 401: return ErrorType.unauthorized
       case 403: return ErrorType.FORBIDDEN
       case 404: return ErrorType.NOT_FOUND
       case 409: return ErrorType.CONFLICT
@@ -343,30 +357,30 @@ export class ErrorHandler {
   }
   
   // 检查错误是否可重试
-  private isRetryable(errorCode: string): boolean {
-    return RETRYABLE_ERRORS.has(errorCode as ErrorType)
+  private isRetryable(error_code: string): boolean {
+    return RETRYABLE_ERRORS.has(error_code as ErrorType)
   }
   
   // 获取重试次数
   getRetryCount(key: string): number {
-    return this.retryCount.get(key) || 0
+    return this.retry_count.get(key) || 0
   }
   
   // 增加重试次数
   incrementRetryCount(key: string): number {
-    const count = this.getRetryCount(key) + 1
-    this.retryCount.set(key, count)
+    const count = this.get_retry_count(key) + 1
+    this.retry_count.set(key, count)
     return count
   }
   
   // 重置重试次数
   resetRetryCount(key: string): void {
-    this.retryCount.delete(key)
+    this.retry_count.delete(key)
   }
   
   // 检查是否可以重试
   canRetry(key: string): boolean {
-    return this.getRetryCount(key) < this.maxRetries
+    return this.get_retry_count(key) < this.maxRetries
   }
 }
 

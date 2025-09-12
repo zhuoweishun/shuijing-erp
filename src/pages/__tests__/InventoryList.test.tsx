@@ -43,7 +43,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 // 模拟库存数据
 const mockInventoryData = [
   {
-    product_type: '手串',
+    material_type: '手串',
     variants: [
       {
         id: '1',
@@ -53,15 +53,15 @@ const mockInventoryData = [
         total_quantity: 50,
         available_quantity: 45,
         reserved_quantity: 5,
-        cost_price: 25.5,
+        costPrice: 25.5,
         selling_price: 45.0,
         supplier_name: '水晶供应商A',
-        last_updated: '2024-01-15T10:30:00Z'
+        lastUpdated: '2024-01-15T10:30:00Z'
       }
     ]
   },
   {
-    product_type: '项链',
+    material_type: '项链',
     variants: [
       {
         id: '2',
@@ -71,10 +71,10 @@ const mockInventoryData = [
         total_quantity: 30,
         available_quantity: 28,
         reserved_quantity: 2,
-        cost_price: 35.0,
+        costPrice: 35.0,
         selling_price: 65.0,
         supplier_name: '水晶供应商B',
-        last_updated: '2024-01-14T15:20:00Z'
+        lastUpdated: '2024-01-14T15:20:00Z'
       }
     ]
   }
@@ -82,7 +82,7 @@ const mockInventoryData = [
 
 const mockBossUser = {
   id: 1,
-  username: 'boss',
+  user_name: 'boss',
   real_name: 'Boss User',
   name: 'Boss User',
   role: 'BOSS' as const,
@@ -94,7 +94,7 @@ const mockBossUser = {
 
 const mockEmployeeUser = {
   id: 2,
-  username: 'employee',
+  user_name: 'employee',
   real_name: 'Employee User',
   name: 'Employee User',
   role: 'EMPLOYEE' as const,
@@ -127,7 +127,7 @@ describe('InventoryList 组件测试', () => {
         logout: jest.fn(),
         isLoading: false,
         isAuthenticated: true,
-        isBoss: true
+    isBoss: true
       });
 
       render(
@@ -137,7 +137,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 验证BOSS能看到敏感信息
@@ -156,7 +156,7 @@ describe('InventoryList 组件测试', () => {
         logout: jest.fn(),
         isLoading: false,
         isAuthenticated: true,
-        isBoss: false
+    isBoss: false
       });
 
       render(
@@ -166,7 +166,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 验证EMPLOYEE看不到敏感信息
@@ -187,7 +187,7 @@ describe('InventoryList 组件测试', () => {
         logout: jest.fn(),
         isLoading: false,
         isAuthenticated: true,
-        isBoss: true
+         isBoss: true
       });
     });
 
@@ -199,20 +199,20 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 查找产品类型筛选器
-      const productTypeFilter = screen.getByLabelText(/产品类型/);
-      expect(productTypeFilter).toBeInTheDocument();
+      const product_type_filter = screen.getByLabelText(/产品类型/);
+      expect(product_type_filter).toBeInTheDocument();
 
       // 选择手串类型
-      fireEvent.change(productTypeFilter, { target: { value: '手串' } });
+      fireEvent.change(product_type_filter, { target: { value: '手串' } });
 
       await waitFor(() => {
         expect(mockApiClient.get).toHaveBeenCalledWith('/inventory/hierarchical',
           expect.objectContaining({
-            product_type: '手串'
+            material_type: '手串'
           })
         );
       });
@@ -226,7 +226,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 查找规格筛选输入框
@@ -244,8 +244,8 @@ describe('InventoryList 组件测试', () => {
         expect(mockApiClient.get).toHaveBeenCalledWith('/inventory/hierarchical', 
           expect.objectContaining({
             params: expect.objectContaining({
-              spec_min: 6,
-              spec_max: 10
+              specMin: 6,
+              specMax: 10
             })
           })
         );
@@ -260,13 +260,13 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 查找库存筛选选项
-      const lowStockFilter = screen.getByLabelText(/低库存预警/);
+      const low_stock_filter = screen.getByLabelText(/低库存预警/);
       
-      fireEvent.click(lowStockFilter);
+      fireEvent.click(low_stock_filter);
 
       await waitFor(() => {
         expect(mockApiClient.get).toHaveBeenCalledWith('/inventory/hierarchical',
@@ -301,7 +301,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       const minSpecInput = screen.getByLabelText(/最小规格/);
@@ -326,7 +326,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       const minSpecInput = screen.getByLabelText(/最小规格/);
@@ -362,7 +362,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 查找导出按钮
@@ -389,7 +389,7 @@ describe('InventoryList 组件测试', () => {
         logout: jest.fn(),
         isLoading: false,
         isAuthenticated: true,
-        isBoss: false
+         isBoss: false
       });
 
       render(
@@ -399,7 +399,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       const exportButton = screen.getByText(/导出Excel/);
@@ -443,7 +443,7 @@ describe('InventoryList 组件测试', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('库存查询')).toBeInTheDocument();
+        expect(screen.getByText('原材料库存')).toBeInTheDocument();
       });
 
       // 验证移动端布局元素

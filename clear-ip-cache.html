@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清除IP缓存并重新检测</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .danger {
+            background-color: #dc3545;
+        }
+        .danger:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 IP缓存管理工具</h1>
+        <p>用于清除IP缓存并重新检测当前局域网IP地址</p>
+        
+        <div>
+            <button onclick="showCurrentStatus()">📊 查看当前状态</button>
+            <button onclick="clearCache()" class="danger">🧹 清除IP缓存</button>
+            <button onclick="detectNewIP()">🌐 重新检测IP</button>
+            <button onclick="testAPI()">🚀 测试API连接</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function addInfo(message) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'result info';
+            div.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function showCurrentStatus() {
+            addInfo('=== 当前状态检查 ===');
+            const hostname = window.location.hostname;
+            const cachedIP = localStorage.getItem('cached_local_ip');
+            
+            addInfo(`当前主机名: ${hostname}`);
+            addInfo(`缓存的IP: ${cachedIP || '无'}`);
+            addInfo(`当前页面URL: ${window.location.href}`);
+            
+            // 计算当前API地址
+            const apiUrl = getApiUrl();
+            addInfo(`计算的API地址: ${apiUrl}`);
+        }
+
+        function clearCache() {
+            addInfo('=== 清除IP缓存 ===');
+            const oldIP = localStorage.getItem('cached_local_ip');
+            localStorage.removeItem('cached_local_ip');
+            addResult(`已清除缓存的IP: ${oldIP || '无'}`);
+        }
+
+        async function detectNewIP() {
+            addInfo('=== 重新检测IP地址 ===');
+            try {
+                const ip = await detectLocalIP();
+                if (ip) {
+                    localStorage.setItem('cached_local_ip', ip);
+                    addResult(`✅ 检测到新IP: ${ip}`);
+                } else {
+                    addResult('⚠️ 未检测到局域网IP', false);
+                }
+            } catch (error) {
+                addResult(`❌ IP检测失败: ${error.message}`, false);
+            }
+        }
+
+        async function testAPI() {
+            addInfo('=== 测试API连接 ===');
+            const apiUrl = getApiUrl();
+            addInfo(`测试API地址: ${apiUrl}`);
+            
+            try {
+                const response = await fetch(`${apiUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    addResult(`✅ API连接成功 (${response.status})`);
+                } else {
+                    addResult(`⚠️ API响应异常 (${response.status})`, false);
+                }
+            } catch (error) {
+                addResult(`❌ API连接失败: ${error.message}`, false);
+                
+                // 尝试其他可能的地址
+                addInfo('尝试其他可能的API地址...');
+                const alternatives = [
+                    'http://localhost:3001/api/v1',
+                    'http://127.0.0.1:3001/api/v1'
+                ];
+                
+                for (const altUrl of alternatives) {
+                    try {
+                        const altResponse = await fetch(`${altUrl}/health`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                            timeout: 3000
+                        });
+                        if (altResponse.ok) {
+                            addResult(`✅ 备用地址连接成功: ${altUrl}`);
+                            break;
+                        }
+                    } catch (e) {
+                        addInfo(`备用地址失败: ${altUrl}`);
+                    }
+                }
+            }
+        }
+
+        // 检测本地IP地址
+        function detectLocalIP() {
+            return new Promise((resolve) => {
+                try {
+                    const pc = new RTCPeerConnection({ iceServers: [] });
+                    pc.createDataChannel('');
+                    
+                    const ips = [];
+                    let resolved = false;
+                    
+                    pc.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            const candidate = event.candidate.candidate;
+                            const ipMatch = candidate.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+                            if (ipMatch && ipMatch[1]) {
+                                const ip = ipMatch[1];
+                                if (!ips.includes(ip) && 
+                                    (ip.startsWith('192.168.') || ip.startsWith('10.') || 
+                                     (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31))) {
+                                    ips.push(ip);
+                                }
+                            }
+                        } else if (!resolved) {
+                            resolved = true;
+                            pc.close();
+                            resolve(ips.length > 0 ? ips[0] : null);
+                        }
+                    };
+                    
+                    pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                    
+                    // 超时处理
+                    setTimeout(() => {
+                        if (!resolved) {
+                            resolved = true;
+                            pc.close();
+                            resolve(ips.length > 0 ? ips[0] : null);
+                        }
+                    }, 3000);
+                } catch (error) {
+                    console.error('IP检测错误:', error);
+                    resolve(null);
+                }
+            });
+        }
+
+        // 获取API URL（模拟前端逻辑）
+        function getApiUrl() {
+            const hostname = window.location.hostname;
+            const cachedIP = localStorage.getItem('cached_local_ip');
+            
+            if (hostname.includes('dorblecapital.com')) {
+                return 'https://api.dorblecapital.com/api/v1';
+            }
+            
+            if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+                (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+                return `http://${hostname}:3001/api/v1`;
+            }
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
+                    return `http://${cachedIP}:3001/api/v1`;
+                }
+                return `http://localhost:3001/api/v1`;
+            }
+            
+            return `http://${hostname}:3001/api/v1`;
+        }
+
+        // 页面加载时自动显示状态
+        window.onload = function() {
+            showCurrentStatus();
+        };
+    </script>
+</body>
+</html>

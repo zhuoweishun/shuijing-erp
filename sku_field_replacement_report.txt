@@ -1,0 +1,33 @@
+SKU制作字段蛇形命名转换报告
+生成时间: 2025-09-12 15:01:51
+处理时间: 10.91 秒
+处理文件总数: 643
+修改文件数量: 256
+总替换次数: 5095
+
+字段替换详情:
+skuName → sku_name: 551 次
+craftCost → craft_cost: 516 次
+sellingPrice → selling_price: 516 次
+laborCost → labor_cost: 483 次
+skuCode → sku_code: 481 次
+availableQuantity → available_quantity: 365 次
+quantityUsed → quantity_used: 348 次
+materialCost → material_cost: 304 次
+quantityUsedPieces → quantity_used_pieces: 292 次
+quantityUsedBeads → quantity_used_beads: 267 次
+profitMargin → profit_margin: 236 次
+selectedMaterials → selected_materials: 199 次
+materialId → material_id: 132 次
+materialSignatureHash → material_signature_hash: 78 次
+materialCode → material_code: 74 次
+productionQuantity → production_quantity: 66 次
+successCount → success_count: 56 次
+requiredMaterials → required_materials: 34 次
+failedCount → failed_count: 22 次
+failedProducts → failed_products: 18 次
+selectedQuantity → selected_quantity: 16 次
+createdProducts → created_products: 14 次
+errorCode → error_code: 13 次
+materialTraces → material_traces: 12 次
+availableOnly → available_only: 2 次

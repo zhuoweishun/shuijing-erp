@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API连接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 API连接测试工具</h1>
+        
+        <div class="test-section info">
+            <h3>📋 测试信息</h3>
+            <p><strong>当前页面地址:</strong> <span id="currentUrl"></span></p>
+            <p><strong>检测到的API地址:</strong> <span id="detectedApiUrl"></span></p>
+            <p><strong>测试时间:</strong> <span id="testTime"></span></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 快速测试</h3>
+            <button onclick="testHealthEndpoint()">测试健康检查</button>
+            <button onclick="testFinancialOverview()">测试财务概览</button>
+            <button onclick="testAuthVerify()">测试认证验证</button>
+            <button onclick="clearResults()">清除结果</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // 更新页面信息
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('testTime').textContent = new Date().toLocaleString();
+        
+        // 动态获取API地址
+        function getApiUrl() {
+            const hostname = window.location.hostname;
+            
+            // 如果是局域网IP，使用局域网API地址
+            if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+                (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+                return `http://${hostname}:3001/api/v1`;
+            }
+            
+            // 默认使用localhost
+            return 'http://localhost:3001/api/v1';
+        }
+        
+        const apiUrl = getApiUrl();
+        document.getElementById('detectedApiUrl').textContent = apiUrl;
+        
+        // 添加结果显示函数
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-section ${type}`;
+            resultDiv.innerHTML = `
+                <h4>${title}</h4>
+                <pre>${content}</pre>
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        // 清除结果
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // 测试健康检查端点
+        async function testHealthEndpoint() {
+            try {
+                addResult('🔍 测试健康检查端点...', '正在发送请求...', 'info');
+                
+                const response = await fetch(`${apiUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('✅ 健康检查成功', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    addResult('❌ 健康检查失败', `状态码: ${response.status}\n响应: ${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                addResult('❌ 健康检查错误', `错误信息: ${error.message}\n错误类型: ${error.constructor.name}`, 'error');
+            }
+        }
+        
+        // 测试财务概览端点
+        async function testFinancialOverview() {
+            try {
+                addResult('🔍 测试财务概览端点...', '正在发送请求...', 'info');
+                
+                // 获取token
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    addResult('⚠️ 财务概览测试', '未找到认证token，请先登录', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${apiUrl}/financial/overview/summary`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('✅ 财务概览成功', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    addResult('❌ 财务概览失败', `状态码: ${response.status}\n响应: ${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                addResult('❌ 财务概览错误', `错误信息: ${error.message}\n错误类型: ${error.constructor.name}`, 'error');
+            }
+        }
+        
+        // 测试认证验证端点
+        async function testAuthVerify() {
+            try {
+                addResult('🔍 测试认证验证端点...', '正在发送请求...', 'info');
+                
+                // 获取token
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    addResult('⚠️ 认证验证测试', '未找到认证token，请先登录', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${apiUrl}/auth/verify`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('✅ 认证验证成功', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    addResult('❌ 认证验证失败', `状态码: ${response.status}\n响应: ${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                addResult('❌ 认证验证错误', `错误信息: ${error.message}\n错误类型: ${error.constructor.name}`, 'error');
+            }
+        }
+        
+        // 页面加载时自动测试健康检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testHealthEndpoint();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

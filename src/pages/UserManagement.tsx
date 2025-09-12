@@ -2,7 +2,7 @@
 import { UserCog, AlertCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
-export default function UserManagement() {
+export default function user_management() {
   const { user, isBoss } = useAuth()
   
   // 权限检查：只有BOSS可以访问

@@ -1,0 +1,560 @@
+{
+  "timestamp": "2025-09-12T21:48:20.634556",
+  "total_fixes": 92,
+  "files_modified": 46,
+  "backup_location": "backups\\snake_case_fix_20250912_214820",
+  "fixes_applied": [
+    {
+      "file": "src\\App.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "react_prop",
+      "from": "input_mode",
+      "to": "inputMode"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\PermissionWrapper.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "react_prop",
+      "from": "on_cancel",
+      "to": "onCancel"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "variable_reference",
+      "from": "customer_address",
+      "to": "customerAddress"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "variable_reference",
+      "from": "cost_adjustment",
+      "to": "costAdjustment"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "react_prop",
+      "from": "on_cancel",
+      "to": "onCancel"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "variable_reference",
+      "from": "customer_address",
+      "to": "customerAddress"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "property_access",
+      "from": "user_agent",
+      "to": "userAgent"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "property_access",
+      "from": "inner_width",
+      "to": "innerWidth"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "property_access",
+      "from": "inner_height",
+      "to": "innerHeight"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\hooks\\useSkuPermissions.ts",
+      "type": "property_access",
+      "from": "to_upper_case",
+      "to": "toUpperCase"
+    },
+    {
+      "file": "src\\hooks\\useSkuPermissions.ts",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "property_access",
+      "from": "inner_width",
+      "to": "innerWidth"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "property_access",
+      "from": "inner_height",
+      "to": "innerHeight"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "property_access",
+      "from": "inner_width",
+      "to": "innerWidth"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "property_access",
+      "from": "user_agent",
+      "to": "userAgent"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_access",
+      "from": "inner_width",
+      "to": "innerWidth"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_access",
+      "from": "inner_height",
+      "to": "innerHeight"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_access",
+      "from": "to_upper_case",
+      "to": "toUpperCase"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "react_prop",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "react_prop",
+      "from": "on_cancel",
+      "to": "onCancel"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "variable_reference",
+      "from": "use_device_detection",
+      "to": "useDeviceDetection"
+    },
+    {
+      "file": "src\\pages\\SupplierManagement.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\UserManagement.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "variable_reference",
+      "from": "cost_adjustment",
+      "to": "costAdjustment"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "variable_reference",
+      "from": "customer_address",
+      "to": "customerAddress"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "property_access",
+      "from": "user_agent",
+      "to": "userAgent"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "variable_reference",
+      "from": "cost_adjustment",
+      "to": "costAdjustment"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "variable_reference",
+      "from": "customer_address",
+      "to": "customerAddress"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "property_access",
+      "from": "to_upper_case",
+      "to": "toUpperCase"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_reference",
+      "from": "cost_adjustment",
+      "to": "costAdjustment"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_reference",
+      "from": "customer_address",
+      "to": "customerAddress"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "property_access",
+      "from": "get_by_text",
+      "to": "getByText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "property_access",
+      "from": "get_by_label_text",
+      "to": "getByLabelText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "property_access",
+      "from": "query_by_text",
+      "to": "queryByText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "property_access",
+      "from": "to_be_in_the_document",
+      "to": "toBeInTheDocument"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "property_access",
+      "from": "object_containing",
+      "to": "objectContaining"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "variable_reference",
+      "from": "Test_wrapper",
+      "to": "TestWrapper"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_access",
+      "from": "get_by_text",
+      "to": "getByText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_access",
+      "from": "get_by_label_text",
+      "to": "getByLabelText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_access",
+      "from": "query_by_text",
+      "to": "queryByText"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_access",
+      "from": "to_be_in_the_document",
+      "to": "toBeInTheDocument"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_access",
+      "from": "object_containing",
+      "to": "objectContaining"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "variable_reference",
+      "from": "Test_wrapper",
+      "to": "TestWrapper"
+    },
+    {
+      "file": "src\\hooks\\__tests__\\useAuth.test.tsx",
+      "type": "variable_reference",
+      "from": "use_auth",
+      "to": "useAuth"
+    }
+  ]
+}

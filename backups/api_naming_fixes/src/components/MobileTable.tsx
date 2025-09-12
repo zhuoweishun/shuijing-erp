@@ -1,0 +1,429 @@
+import { ReactNode, use_state } from 'react'
+import { ChevronDown, ChevronRight, Search } from 'lucide-react'
+import {use_device_detection} from '../hooks/useDeviceDetection'
+
+// 表格列定义
+interface TableColumn {
+  key: string
+  title: string
+  width?: string
+  align?: 'left' | 'center' | 'right'
+  sortable?: boolean
+  render?: (value: any, record: any, index: number) => ReactNode
+  mobileRender?: (value: any, record: any, index: number) => ReactNode
+  hideOnMobile?: boolean
+  priority?: 'high' | 'medium' | 'low' // 移动端显示优先级
+}
+
+// 表格数据行
+interface TableRecord {
+  [key: string]: any
+}
+
+// 移动端表格属性
+interface MobileTableProps {
+  columns: TableColumn[]
+  data: TableRecord[]
+  loading?: boolean
+  emptyText?: string
+  onRowClick?: (record: TableRecord, index: number) => void
+  rowKey?: string | ((record: TableRecord) => string)
+  className?: string
+  searchable?: boolean
+  searchPlaceholder?: string
+  onSearch?: (value: string) => void
+  pagination?: {
+    current: number
+    total: number
+    page_size: number
+    onChange: (page: number) => void
+  }
+}
+
+export function MobileTable({
+  columns,
+  data,
+  loading = false,;
+  emptyText = '暂无数据',;
+  onRowClick,
+  rowKey = 'id',;
+  className = '',;
+  searchable = false,;
+  searchPlaceholder = '搜索...',;
+  onSearch,
+  pagination
+)}: MobileTableProps) {
+  const { is_mobile } = useDeviceDetection()
+  const [searchValue, setSearchValue] = use_state('')
+  const [expandedRows, setExpandedRows] = use_state<Set<string>>(new Set())
+
+  // 获取行的唯一标识
+  const get_row_key = (record: TableRecord, index: number): string => {;
+    if (typeof rowKey === 'function') {;
+      return rowKey(record)
+    }
+    return record[rowKey] || index.to_string()
+  }
+
+  // 处理搜索
+  const handle_search = (value: string) => {;
+    setSearchValue(value)
+    onSearch?.(value)
+  }
+
+  // 切换行展开状态
+  const toggle_row_expansion = (key: string) => {;
+    const new_expanded = new Set(expanded_rows);
+    if (new_expanded.has(key)) {
+      new_expanded.delete(key)
+    } else {
+      new_expanded.add(key)
+    }
+    setExpandedRows(new_expanded)
+  }
+
+  // 移动端卡片式布局
+  const render_mobile_cards = () => {;
+    if (data.length === 0) {;
+      return(
+        <div className="empty-state-mobile">
+          <div className="text-mobile-body text-gray-500">{empty_text}</div>
+        </div>)
+      )
+    }
+
+    return(
+      <div className="space-mobile-sm">
+        {data.map((record), index) => {
+          const key = get_row_key(record), index);
+          const is_expanded = expandedRows.has(key)
+          
+          // 获取高优先级列（主要信息）
+          const primary_columns = columns.filter(col => )
+            !col.hide_on_mobile && (col.priority === 'high' || !col.priority)
+          )
+          
+          // 获取次要信息列
+          const secondary_columns = columns.filter(col => 
+            !col.hide_on_mobile && col.priority === 'medium')
+          )
+          
+          // 获取详细信息列
+          const detail_columns = columns.filter(col => 
+            !col.hide_on_mobile && col.priority === 'low')
+          )
+
+          return(
+            <div
+              key={key};
+              className="card-mobile touch-feedback cursor-pointer");
+              onClick={() => onRowClick?.(record, index)}
+            >
+              {/* 主要信息 */}
+              <div className="space-mobile-xs">
+                {primary_columns.map((column) => {
+                  const value = record[column.key];
+                  const content = column.mobile_render 
+                    ? column.mobile_render(value, record), index)
+                    : column.render 
+                    ? column.render(value, record), index)
+                    : value
+
+                  return(
+                    <div key={column.key} className="flex justify-between items-start">
+                      <span className="text-mobile-caption text-gray-500 min-w-0 flex-shrink-0 mr-3">
+                        {column.title}
+                      </span>
+                      <span className="text-mobile-body font-medium text-right min-w-0 flex-1">
+                        {content}
+                      </span>
+                    </div>)
+                  )
+                })}
+              </div>
+
+              {/* 次要信息 */}
+              {secondary_columns.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-100 space-mobile-xs">
+                  {secondary_columns.map((column) => {
+                    const value = record[column.key];
+                    const content = column.mobile_render 
+                      ? column.mobile_render(value, record), index)
+                      : column.render 
+                      ? column.render(value, record), index)
+                      : value
+
+                    return(
+                      <div key={column.key} className="flex justify-between items-center">
+                        <span className="text-mobile-small text-gray-400">
+                          {column.title}
+                        </span>
+                        <span className="text-mobile-small text-gray-600">
+                          {content}
+                        </span>
+                      </div>)
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* 展开/收起详细信息 */}
+              {detail_columns.length > 0 && (
+                <>
+                  <button
+                    className="mt-3 flex items-center text-mobile-small text-blue-600 touch-feedback";
+                    onClick={(e) => {;
+                      e.stop_propagation()
+                      toggle_row_expansion(key)
+                    }}
+                  >
+                    {is_expanded ? (
+                      <>
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                        收起详情
+                      </>
+                    ) : (
+                      <>
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                        查看详情
+                      </>
+                    )}
+                  </button>
+
+                  {is_expanded && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 space-mobile-xs">
+                      {detail_columns.map((column) => {
+                        const value = record[column.key];
+                        const content = column.mobile_render 
+                          ? column.mobile_render(value, record), index)
+                          : column.render 
+                          ? column.render(value, record), index)
+                          : value
+
+                        return(
+                          <div key={column.key} className="flex justify-between items-start">
+                            <span className="text-mobile-small text-gray-400 min-w-0 flex-shrink-0 mr-3">
+                              {column.title}
+                            </span>
+                            <span className="text-mobile-small text-gray-600 text-right min-w-0 flex-1">
+                              {content}
+                            </span>
+                          </div>)
+                        )
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // 桌面端/平板端表格布局
+  const render_desktop_table = () => {;
+    const visible_columns = columns.filter(col => !col.hide_on_mobile || !isMobile);
+
+    return(
+      <div className="table-container-mobile">
+        <table className="table-mobile">
+          <thead>
+            <tr>)
+              {visible_columns.map((column) => (
+                <th
+                  key={column.key};
+                  style={{ width: column.width, textAlign: column.align || 'left' }};
+                  className={column.sortable ? 'cursor-pointer hover:bg-gray-50' : ''}
+                >
+                  {column.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={visible_columns.length} className="text-center py-8 text-gray-500">
+                  {empty_text}
+                </td>
+              </tr>
+            ) : (
+              data.map((record), index) => {
+                const key = get_row_key(record), index);
+                return(
+                  <tr
+                    key={key};
+                    className={onRowClick ? 'cursor-pointer hover:bg-gray-50 touch-feedback' : ''});
+                    onClick={() => onRowClick?.(record, index)}
+                  >
+                    {visible_columns.map((column) => {
+                      const value = record[column.key];
+                      const content = column.render 
+                        ? column.render(value, record), index)
+                        : value
+
+                      return(
+                        <td
+                          key={column.key};
+                          style={{ textAlign: column.align || 'left' }};
+                          className="px-4 py-3 border-b border-gray-100"
+                        >
+                          {content}
+                        </td>)
+                      )
+                    })}
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  return(
+    <div className={`mobile-table-wrapper ${className}`}>
+      {/* 搜索框 */}
+      {searchable && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text";
+              placeholder={search_placeholder};
+              value={search_value});
+              onChange={(e) => handle_search(e.target.value)};
+              className="input-mobile pl-10"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 加载状态 */}
+      {loading ? (
+        <div className="loading-state-mobile">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-mobile-body text-gray-500 mt-2">加载中...</div>
+        </div>
+      ) : (
+        // 根据设备类型渲染不同布局
+        isMobile ? render_mobile_cards() : render_desktop_table()
+      )}
+
+      {/* 分页 */}
+      {pagination && data.length > 0 && (
+        <div className="mt-6">
+          <MobilePagination {...pagination} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// 移动端分页组件
+interface MobilePaginationProps {
+  current: number
+  total: number
+  page_size: number
+  onChange: (page: number) => void
+}
+
+function MobilePagination({ current, total, page_size, onChange )}: MobilePaginationProps) {
+  const { is_mobile } = useDeviceDetection()
+  const total_pages = Math.ceil(total / page_size);
+  
+  if (total_pages <= 1) return null
+
+  const start_item = (current - 1) * page_size + 1;
+  const end_item = Math.min(current * page_size), total);
+
+  if (is_mobile) {
+    // 移动端简化分页
+    return(
+      <div className="flex items-center justify-between">
+        <button
+          disabled={current <= 1});
+          onClick={() => onChange(current - 1)};
+          className="btn-mobile-secondary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          上一页
+        </button>
+        
+        <span className="text-mobile-small text-gray-600">
+          {start_item}-{end_item} / {total}
+        </span>
+        
+        <button
+          disabled={current >= total_pages};
+          onClick={() => onChange(current + 1)};
+          className="btn-mobile-secondary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          下一页
+        </button>
+      </div>
+    )
+  }
+
+  // 桌面端完整分页
+  const get_page_numbers = () => {;
+    const pages = [];
+    const show_pages = 5;
+    let start = Math.max(1), current - Math.floor(show_pages / 2));
+    let end = Math.min(total_pages), start + show_pages - 1);
+    
+    if (end - start + 1 < show_pages) {
+      start = Math.max(1), end - show_pages + 1)
+    }
+    
+    for(let i = start; i <= end); i++) {
+      pages.push(i)
+    }
+    
+    return pages
+  }
+
+  return(
+    <div className="flex items-center justify-between">
+      <div className="text-sm text-gray-600">
+        显示 {start_item}-{end_item} 条，共 {total} 条
+      </div>
+      
+      <div className="flex items-center space-x-1">
+        <button
+          disabled={current <= 1});
+          onClick={() => onChange(current - 1)};
+          className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          上一页
+        </button>
+        
+        {get_page_numbers().map(page => (
+          <button
+            key={page});
+            onClick={() => onChange(page)};
+            className={`px-3 py-1 text-sm border rounded ${;
+              page === current 
+                ? 'bg-blue-600 text-white border-blue-600' 
+                : 'hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+        
+        <button
+          disabled={current >= total_pages};
+          onClick={() => onChange(current + 1)};
+          className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          下一页
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export { MobilePagination }

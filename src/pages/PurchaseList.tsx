@@ -7,21 +7,21 @@ import {
   ChevronLeft, 
   ChevronRight,
   ChevronDown,
-
+  Download,
   Package,
   Loader2,
   AlertCircle
 } from 'lucide-react'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
 import { useAuth } from '../hooks/useAuth'
-import { purchaseApi, supplierApi, fixImageUrl } from '../services/api'
+import { purchase_api, supplier_api, fixImageUrl, get_api_url } from '../services/api'
 import { Purchase } from '../types'
-import PermissionWrapper from '../components/PermissionWrapper'
+import Permission_wrapper from '../components/PermissionWrapper'
 import PurchaseDetailModal from '../components/PurchaseDetailModal'
 import Portal from '../components/Portal'
 
 // 辅助函数：解析并获取第一张图片URL
-const getFirstPhotoUrl = (photos: any): string | null => {
+const get_first_photo_url = (photos: any): string | null => {
   if (!photos) return null
   
   let photoArray: string[] = []
@@ -65,7 +65,7 @@ const getFirstPhotoUrl = (photos: any): string | null => {
 // 扩展Window接口以支持临时位置存储
 declare global {
   interface Window {
-    tempFilterPosition?: {
+    temp_filter_position?: {
       column: string
       top: number
       left: number
@@ -75,53 +75,58 @@ declare global {
 
 interface PurchaseListState {
   purchases: Purchase[]
-  loading: boolean
+  isLoading: boolean
   error: string | null
   pagination: {
-    page: number
-    limit: number
-    total: number
+    current_page: number
+    page_size: number
+    total_count: number
     total_pages: number
   }
   filters: {
-    search: string
-    purchaseCodeSearch: string
-    quality: string[]
-    startDate: string
-    endDate: string
-    supplier: string[]
-    diameterMin: string
-    diameterMax: string
-    specificationMin: string
-    specificationMax: string
-    quantityMin: string
-    quantityMax: string
+    search_term: string
+    purchase_code_search: string
+    quality_filter: string[]
+    start_date: string
+    end_date: string
+    supplier_filter: string[]
+    diameter_min: string
+    diameter_max: string
+    specification_min: string
+    specification_max: string
+    quantity_min: string
+    quantity_max: string
     price_per_gram_min: string
     price_per_gram_max: string
-    totalPriceMin: string
-    totalPriceMax: string
-    product_types: string[]
+    total_price_min: string
+    total_price_max: string
+    material_types_filter: string[]
   }
   sorting: {
     [key: string]: 'asc' | 'desc' | null
   }
-  columnFilters: {
+  column_filters: {
     [key: string]: {
-      visible: boolean
-      type: 'search' | 'select' | 'multiSelect' | 'sortAndRange' | 'sort'
+      is_visible: boolean
+      filter_type: 'search' | 'select' | 'multiSelect' | 'sortAndRange' | 'sort'
     }
   }
   // 详情弹窗状态
   detail_modal: {
-    isOpen: boolean
+    is_open: boolean
     purchase_id: string | null
-    edit_mode?: boolean
+    isEditMode?: boolean
   }
   // 图片预览弹窗状态
   image_preview: {
-    isOpen: boolean
+    is_open: boolean
     image_url: string | null
     alt_text: string | null
+  }
+  // Excel导出状态
+  export_excel: {
+    isLoading: boolean
+    error: string | null
   }
 }
 
@@ -131,19 +136,19 @@ export default function PurchaseList() {
   const { isMobile } = useDeviceDetection()
   
   // 格式化产品类型
-  const formatProductType = (productType?: string) => {
-    const typeMap = {
+  const format_product_type = (product_type?: string) => {
+    const type_map = {
       'LOOSE_BEADS': '散珠',
       'BRACELET': '手串',
       'ACCESSORIES': '饰品配件',
       'FINISHED': '成品'
     }
-    return typeMap[productType as keyof typeof typeMap] || '手串'
+    return type_map[product_type as keyof typeof type_map] || '手串'
   }
   
   // 格式化规格
-  const formatSpecification = (purchase: Purchase) => {
-    if (purchase.product_type === 'LOOSE_BEADS' || purchase.product_type === 'BRACELET') {
+  const format_specification = (purchase: Purchase) => {
+    if (purchase.material_type === 'LOOSE_BEADS' || purchase.material_type === 'BRACELET') {
       // 确保bead_diameter是数字类型
       const diameter = typeof purchase.bead_diameter === 'object' 
         ? (purchase.bead_diameter as any)?.value || (purchase.bead_diameter as any)?.diameter || 0
@@ -159,8 +164,8 @@ export default function PurchaseList() {
   }
   
   // 格式化数量
-  const formatQuantity = (purchase: Purchase) => {
-    switch (purchase.product_type) {
+  const format_quantity = (purchase: Purchase) => {
+    switch (purchase.material_type) {
       case 'LOOSE_BEADS':
         return purchase.piece_count ? `${purchase.piece_count}颗` : '-'
       case 'BRACELET':
@@ -176,66 +181,70 @@ export default function PurchaseList() {
   
   const [state, setState] = useState<PurchaseListState>({
     purchases: [],
-    loading: true,
+    isLoading: true,
     error: null,
     pagination: {
-      page: 1,
-      limit: 10,
-      total: 0,
+      current_page: 1,
+      page_size: 10,
+      total_count: 0,
       total_pages: 0
     },
     filters: {
-      search: '',
-      purchaseCodeSearch: '', // 采购编号搜索
-      quality: ['AA', 'A', 'AB', 'B', 'C', 'UNKNOWN'], // 默认全选状态
-      supplier: [] as string[], // 将在获取供应商数据后设置为全选
-      product_types: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'], // 全选状态
+      search_term: '',
+      purchase_code_search: '', // 采购编号搜索
+      quality_filter: ['AA', 'A', 'AB', 'B', 'C', 'UNKNOWN'], // 默认全选状态
+      supplier_filter: [] as string[], // 将在获取供应商数据后设置为全选
+      material_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'], // 全选状态
       
       // 日期范围
-      startDate: '',
-      endDate: '',
+      start_date: '',
+      end_date: '',
       
       // 数值范围筛选
-      diameterMin: '',
-      diameterMax: '',
-      specificationMin: '',
-      specificationMax: '',
-      quantityMin: '',
-      quantityMax: '',
+      diameter_min: '',
+      diameter_max: '',
+      specification_min: '',
+      specification_max: '',
+      quantity_min: '',
+      quantity_max: '',
       price_per_gram_min: '',
       price_per_gram_max: '',
-      totalPriceMin: '',
-      totalPriceMax: ''
+      total_price_min: '',
+      total_price_max: ''
     },
     sorting: { purchase_date: 'desc' }, // 默认按采购日期降序排列
-    columnFilters: {
-      purchaseCode: { visible: false, type: 'search' }, // 采购编号：搜索功能
-      productName: { visible: false, type: 'search' }, // 产品名称：搜索功能
-      product_type: { visible: false, type: 'multiSelect' }, // 产品类型：多选功能
-      specification: { visible: false, type: 'sortAndRange' }, // 规格：排序和范围筛选
-      quality: { visible: false, type: 'multiSelect' }, // 品相：多选功能
-      supplier: { visible: false, type: 'multiSelect' }, // 供应商：多选功能
-      beadDiameter: { visible: false, type: 'sortAndRange' }, // 珠径：排序和范围筛选
-      quantity: { visible: false, type: 'sort' }, // 数量：排序功能
-      pricePerGram: { visible: false, type: 'sortAndRange' }, // 克价：排序和范围筛选
-      totalPrice: { visible: false, type: 'sortAndRange' }, // 总价：排序和范围筛选
-      purchaseDate: { visible: false, type: 'sortAndRange' } // 采购日期：排序功能和日期范围
+    column_filters: {
+      purchase_code: { is_visible: false, filter_type: 'search' }, // 采购编号：搜索功能
+      product_name: { is_visible: false, filter_type: 'search' }, // 产品名称：搜索功能
+      material_type: { is_visible: false, filter_type: 'multiSelect' }, // 产品类型：多选功能
+      specification: { is_visible: false, filter_type: 'sortAndRange' }, // 规格：排序和范围筛选
+      quality: { is_visible: false, filter_type: 'multiSelect' }, // 品相：多选功能
+      supplier: { is_visible: false, filter_type: 'multiSelect' }, // 供应商：多选功能
+      bead_diameter: { is_visible: false, filter_type: 'sortAndRange' }, // 珠径：排序和范围筛选
+      quantity: { is_visible: false, filter_type: 'sort' }, // 数量：排序功能
+      price_per_gram: { is_visible: false, filter_type: 'sortAndRange' }, // 克价：排序和范围筛选
+      total_price: { is_visible: false, filter_type: 'sortAndRange' }, // 总价：排序和范围筛选
+      purchase_date: { is_visible: false, filter_type: 'sortAndRange' } // 采购日期：排序功能和日期范围
     },
     detail_modal: {
-      isOpen: false,
+      is_open: false,
       purchase_id: null,
-      edit_mode: false
+      isEditMode: false
     },
     image_preview: {
-      isOpen: false,
+      is_open: false,
       image_url: null,
       alt_text: null
+    },
+    export_excel: {
+      isLoading: false,
+      error: null
     }
   })
   
 
-  const [supplierSearchTerm, setSupplierSearchTerm] = useState('')
-  const [allSuppliers, setAllSuppliers] = useState<string[]>([]) // 存储所有供应商数据
+  const [supplier_search_term, set_supplier_search_term] = useState('')
+  const [all_suppliers, set_all_suppliers] = useState<string[]>([]) // 存储所有供应商数据
 
   // 按照文档3.9节实现UI交互细节
   useEffect(() => {
@@ -250,8 +259,8 @@ export default function PurchaseList() {
         // 关闭所有筛选面板
         setState(prev => ({
           ...prev,
-          columnFilters: Object.keys(prev.columnFilters).reduce((acc, key) => {
-            acc[key] = { ...prev.columnFilters[key], visible: false };
+          column_filters: Object.keys(prev.column_filters).reduce((acc, key) => {
+            acc[key] = { ...prev.column_filters[key], is_visible: false };
             return acc;
           }, {} as any)
         }));
@@ -265,26 +274,26 @@ export default function PurchaseList() {
 
 
   // 获取采购列表
-  const fetchPurchases = async (customParams?: any) => {
+  const fetch_purchases = async (custom_params?: any) => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null }))
+      setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const currentState = customParams || state
+      const currentState = custom_params || state
       const params: any = {
-        page: currentState.pagination?.page || state.pagination.page,
-        limit: currentState.pagination?.limit || state.pagination.limit
+        page: currentState.pagination?.current_page || state.pagination.current_page,
+        limit: currentState.pagination?.page_size || state.pagination.page_size
       }
       
-      const filters = customParams?.filters || state.filters
-      const sorting = customParams?.sorting || state.sorting
+      const filters = custom_params?.filters || state.filters
+      const sorting = custom_params?.sorting || state.sorting
       
       // 构建筛选参数
-      if (filters.search) params.search = filters.search
-      if (filters.purchaseCodeSearch) params.purchase_code_search = filters.purchaseCodeSearch
+      if (filters.search_term) params.search = filters.search_term
+      if (filters.purchase_code_search) params.purchase_code_search = filters.purchase_code_search
       // 品相筛选：支持多选，将'UNKNOWN'映射为null
       // 只有当品相数组不为空时才发送quality参数
-      if (filters.quality !== undefined && filters.quality.length > 0) {
-        const qualityParams = filters.quality
+      if (filters.quality_filter !== undefined && filters.quality_filter.length > 0) {
+        const qualityParams = filters.quality_filter
           .map((q: string) => q === 'UNKNOWN' ? null : q)
           .filter((q: string | null) => q !== undefined && q !== '') // 保留null值，只过滤undefined和空字符串
         
@@ -294,33 +303,33 @@ export default function PurchaseList() {
           console.log('品相筛选参数:', params.quality) // 调试信息
         }
       }
-      if (filters.startDate) params.startDate = filters.startDate
-      if (filters.endDate) params.endDate = filters.endDate
+      if (filters.start_date) params.start_date = filters.start_date
+      if (filters.end_date) params.end_date = filters.end_date
       // 添加日期参数调试日志
-      if (filters.startDate || filters.endDate) {
+      if (filters.start_date || filters.end_date) {
         console.log('日期筛选参数:', {
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-          params: { startDate: params.startDate, endDate: params.endDate }
+          start_date: filters.start_date,
+          end_date: filters.end_date,
+          params: { start_date: params.start_date, end_date: params.end_date }
         })
       }
       // 供应商筛选：支持多选
-      if (filters.supplier && filters.supplier.length > 0) {
-        params.supplier = filters.supplier
+      if (filters.supplier_filter && filters.supplier_filter.length > 0) {
+        params.supplier = filters.supplier_filter
       }
-      if (filters.diameterMin) params.diameter_min = filters.diameterMin
-      if (filters.diameterMax) params.diameter_max = filters.diameterMax
-      if (filters.specificationMin) params.specification_min = filters.specificationMin
-      if (filters.specificationMax) params.specification_max = filters.specificationMax
-      if (filters.quantityMin) params.quantity_min = filters.quantityMin
-      if (filters.quantityMax) params.quantity_max = filters.quantityMax
+      if (filters.diameter_min) params.diameter_min = filters.diameter_min
+      if (filters.diameter_max) params.diameter_max = filters.diameter_max
+      if (filters.specification_min) params.specification_min = filters.specification_min
+      if (filters.specification_max) params.specification_max = filters.specification_max
+      if (filters.quantity_min) params.quantity_min = filters.quantity_min
+      if (filters.quantity_max) params.quantity_max = filters.quantity_max
       if (filters.price_per_gram_min) params.price_per_gram_min = filters.price_per_gram_min
       if (filters.price_per_gram_max) params.price_per_gram_max = filters.price_per_gram_max
-      if (filters.totalPriceMin) params.total_price_min = filters.totalPriceMin
-      if (filters.totalPriceMax) params.total_price_max = filters.totalPriceMax
+      if (filters.total_price_min) params.total_price_min = filters.total_price_min
+      if (filters.total_price_max) params.total_price_max = filters.total_price_max
       // 产品类型筛选：如果数组为空，发送空数组表示不显示任何结果
-      if (filters.product_types !== undefined) {
-        params.product_types = filters.product_types
+      if (filters.material_types_filter !== undefined) {
+        params.material_types = filters.material_types_filter
       }
       
       // 构建排序参数
@@ -329,22 +338,20 @@ export default function PurchaseList() {
         const [field, order] = sortingEntries[0]
         const fieldMapping: { [key: string]: string } = {
           'purchase_date': 'purchase_date',
-          'purchaseCode': 'purchase_code', // 修复：前端使用purchaseCode，后端期望purchase_code
           'purchase_code': 'purchase_code',
           'product_name': 'product_name',
           'specification': 'specification',
           'supplier': 'supplier',
           'quantity': 'quantity',
-          'pricePerGram': 'price_per_gram',
-          'totalPrice': 'total_price',
+          'price_per_gram': 'price_per_gram',
+          'total_price': 'total_price',
           'bead_diameter': 'bead_diameter',
-          'purchaseDate': 'purchase_date'
         }
-        params.sortBy = fieldMapping[field] || field
-        params.sortOrder = order
+        params.sort_by = fieldMapping[field] || field
+        params.sort_order = order
       }
       
-      const response = await purchaseApi.list(params)
+      const response = await purchase_api.list(params)
       
       if (response.success && response.data) {
         const data = response.data as any
@@ -353,33 +360,33 @@ export default function PurchaseList() {
           purchases: data.purchases || [],
           pagination: {
             ...prev.pagination,
-            page: data.pagination?.page || 1,
-            limit: data.pagination?.limit || 10,
-            total: data.pagination?.total || 0,
+            current_page: data.pagination?.page || 1,
+            page_size: data.pagination?.limit || 10,
+            total_count: data.pagination?.total || 0,
             total_pages: data.pagination?.pages || 0
           },
-          loading: false
+          isLoading: false
         }))
       } else {
         setState(prev => ({
           ...prev,
           error: response.message || '获取数据失败',
-          loading: false
+          isLoading: false
         }))
       }
     } catch (error) {
       setState(prev => ({
         ...prev,
-        loading: false,
+        isLoading: false,
         error: error instanceof Error ? error.message : '获取采购列表失败'
       }))
     }
   }
 
   // 获取所有供应商数据（用于筛选）
-  const fetchAllSuppliers = async () => {
+  const fetch_all_suppliers = async () => {
     try {
-      const response = await supplierApi.getAll()
+      const response = await supplier_api.get_all()
       if (response.success && response.data) {
         // 处理API返回的数据结构：{suppliers: [...], pagination: {...}}
         let suppliersList: Array<{id: string, name: string}> = []
@@ -396,14 +403,14 @@ export default function PurchaseList() {
           .map(s => s.name)
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b)) // 按A-Z排序
-        setAllSuppliers(supplierNames)
+        set_all_suppliers(supplierNames)
         
         // 设置供应商筛选为全选状态（默认行为）
         setState(prev => ({
           ...prev,
           filters: {
             ...prev.filters,
-            supplier: supplierNames // 默认全选所有供应商
+            supplier_filter: supplierNames // 默认全选所有供应商
           }
         }))
       }
@@ -415,116 +422,116 @@ export default function PurchaseList() {
   // 初始加载（仅在组件首次挂载时加载）
   useEffect(() => {
     if (isAuthenticated) {
-      fetchPurchases()
-      fetchAllSuppliers() // 同时获取所有供应商数据
+      fetch_purchases()
+      fetch_all_suppliers() // 同时获取所有供应商数据
     }
   }, [isAuthenticated])
   
   // 监听分页变化，确保页码和每页条数变化时重新获取数据
   useEffect(() => {
     if (isAuthenticated) {
-      fetchPurchases()
+      fetch_purchases()
     }
-  }, [state.pagination.page, state.pagination.limit, isAuthenticated])
+  }, [state.pagination.current_page, state.pagination.page_size, isAuthenticated])
   
   // 移除自动触发机制，恢复手动点击"应用"按钮的交互方式
 
   // 实时筛选应用
-  const applyFiltersImmediately = (newFilters: any, newSorting?: any) => {
-    const searchParams = {
+  const apply_filters_immediately = (newFilters: any, newSorting?: any) => {
+    const search_params = {
       filters: newFilters,
       sorting: newSorting || state.sorting,
-      pagination: { ...state.pagination, page: 1 }
+      pagination: { ...state.pagination, current_page: 1 }
     }
     
     setState(prev => ({
       ...prev,
-      pagination: { ...prev.pagination, page: 1 }
+      pagination: { ...prev.pagination, current_page: 1 }
     }))
     
     // 使用防抖来避免频繁请求
     setTimeout(() => {
-      fetchPurchases(searchParams)
+      fetch_purchases(search_params)
     }, 300)
   }
 
 
 
   // 重置筛选
-  const handleReset = () => {
-    const new_state = {
+  const handle_reset = () => {
+    const newState = {
       filters: {
-        search: '',
-        purchaseCodeSearch: '',
-        quality: [] as string[],
-        supplier: [],
-        product_types: [],
-        startDate: '',
-        endDate: '',
-        diameterMin: '',
-        diameterMax: '',
-        specificationMin: '',
-        specificationMax: '',
-        quantityMin: '',
-        quantityMax: '',
+        search_term: '',
+        purchase_code_search: '',
+        quality_filter: [] as string[],
+        supplier_filter: [],
+        material_types_filter: [],
+        start_date: '',
+        end_date: '',
+        diameter_min: '',
+        diameter_max: '',
+        specification_min: '',
+        specification_max: '',
+        quantity_min: '',
+        quantity_max: '',
         price_per_gram_min: '',
         price_per_gram_max: '',
-        totalPriceMin: '',
-        totalPriceMax: ''
+        total_price_min: '',
+        total_price_max: ''
       },
       sorting: { purchase_date: 'desc' as 'desc' },
-      pagination: { ...state.pagination, page: 1 }
+      pagination: { ...state.pagination, current_page: 1 }
     }
     
     setState(prev => ({
       ...prev,
-      ...new_state
+      ...newState
     }))
     
-    setTimeout(() => fetchPurchases(new_state), 50)
+    setTimeout(() => fetch_purchases(newState), 50)
   }
   
   // 处理排序
-  const handleSort = (field: string, order: 'asc' | 'desc') => {
+  const handle_sort = (field: string, order: 'asc' | 'desc') => {
     setState(prev => {
       // 确保同时只能有一个字段排序
       const newSorting: { [key: string]: 'asc' | 'desc' | null } = {
         [field]: order
       }
       
-      const new_state = {
+      const newState = {
         ...prev,
         sorting: newSorting,
-        pagination: { ...prev.pagination, page: 1 }
+        pagination: { ...prev.pagination, current_page: 1 }
       }
       
       // 立即调用API应用排序，保留现有筛选条件
-      applyFiltersImmediately(prev.filters, newSorting)
+      apply_filters_immediately(prev.filters, newSorting)
       
-      return new_state
+      return newState
     })
   }
   
   // 切换列筛选器显示
-  const toggleColumnFilter = (column: string) => {
+  const toggle_column_filter = (column: string) => {
     setState(prev => {
-      const newVisible = !prev.columnFilters[column]?.visible
+      const newVisible = !prev.column_filters[column]?.is_visible
       return {
         ...prev,
-        columnFilters: {
-          ...prev.columnFilters,
+        column_filters: {
+          ...prev.column_filters,
           [column]: {
-            ...prev.columnFilters[column],
-            visible: newVisible
+            ...prev.column_filters[column],
+            is_visible: newVisible
           }
         }
       }
     })
     
     // 如果是打开筛选框，立即计算位置
-    const isOpening = !state.columnFilters[column]?.visible
+    const isOpening = !state.column_filters[column]?.is_visible
     if (isOpening) {
-      updateFilterPosition(column)
+      update_filter_position(column)
     }
   }
   
@@ -533,79 +540,214 @@ export default function PurchaseList() {
 
 
   // 分页处理
-  const handlePageChange = (page: number) => {
+  const handle_page_change = (page: number) => {
     setState(prev => ({
       ...prev,
-      pagination: { ...prev.pagination, page }
+      pagination: { ...prev.pagination, current_page: page }
     }))
   }
 
   // 弹窗控制
-  const openDetailModal = (purchase_id: string) => {
+  const open_detail_modal = (purchase_id: string) => {
     setState(prev => ({
       ...prev,
       detail_modal: {
-        isOpen: true,
+        is_open: true,
         purchase_id: purchase_id,
-        edit_mode: false
+        isEditMode: false
       }
     }))
   }
 
-  const closeDetailModal = () => {
+  const close_detail_modal = () => {
     setState(prev => ({
       ...prev,
       detail_modal: {
-        isOpen: false,
+        is_open: false,
         purchase_id: null,
-        edit_mode: false
+        isEditMode: false
       }
     }))
   }
 
   // 图片预览控制
-  const openImagePreview = (image_url: string, alt_text: string) => {
+  const open_image_preview = (image_url: string, alt_text: string) => {
     setState(prev => ({
       ...prev,
       image_preview: {
-        isOpen: true,
+        is_open: true,
         image_url: fixImageUrl(image_url),
         alt_text
       }
     }))
   }
 
-  const closeImagePreview = () => {
+  const close_image_preview = () => {
     setState(prev => ({
       ...prev,
       image_preview: {
-        isOpen: false,
+        is_open: false,
         image_url: null,
         alt_text: null
       }
     }))
   }
 
+  // Excel导出功能
+  const handle_export_excel = async () => {
+    setState(prev => ({
+      ...prev,
+      export_excel: { isLoading: true, error: null }
+    }))
+    
+    try {
+      // 构建查询参数（与当前筛选条件相同）
+      const params = new URLSearchParams()
+      
+      // 添加筛选条件
+      if (state.filters.search_term) params.append('search', state.filters.search_term)
+      if (state.filters.purchase_code_search) params.append('purchase_code_search', state.filters.purchase_code_search)
+      
+      // 品相筛选
+      if (state.filters.quality_filter && state.filters.quality_filter.length > 0) {
+        state.filters.quality_filter.forEach(q => params.append('quality', q))
+      }
+      
+      // 日期范围
+      if (state.filters.start_date) params.append('start_date', state.filters.start_date)
+      if (state.filters.end_date) params.append('end_date', state.filters.end_date)
+      
+      // 供应商筛选
+      if (state.filters.supplier_filter && state.filters.supplier_filter.length > 0) {
+        state.filters.supplier_filter.forEach(s => params.append('supplier', s))
+      }
+      
+      // 材料类型筛选
+      if (state.filters.material_types_filter && state.filters.material_types_filter.length > 0) {
+        state.filters.material_types_filter.forEach(t => params.append('material_types', t))
+      }
+      
+      // 数值范围筛选
+      if (state.filters.diameter_min) params.append('diameter_min', state.filters.diameter_min)
+      if (state.filters.diameter_max) params.append('diameter_max', state.filters.diameter_max)
+      if (state.filters.specification_min) params.append('specification_min', state.filters.specification_min)
+      if (state.filters.specification_max) params.append('specification_max', state.filters.specification_max)
+      if (state.filters.quantity_min) params.append('quantity_min', state.filters.quantity_min)
+      if (state.filters.quantity_max) params.append('quantity_max', state.filters.quantity_max)
+      if (state.filters.price_per_gram_min) params.append('price_per_gram_min', state.filters.price_per_gram_min)
+      if (state.filters.price_per_gram_max) params.append('price_per_gram_max', state.filters.price_per_gram_max)
+      if (state.filters.total_price_min) params.append('total_price_min', state.filters.total_price_min)
+      if (state.filters.total_price_max) params.append('total_price_max', state.filters.total_price_max)
+      
+      // 排序参数
+      const sortingEntries = Object.entries(state.sorting).filter(([_, order]) => order !== null)
+      if (sortingEntries.length > 0) {
+        const [field, order] = sortingEntries[0]
+        const fieldMapping: { [key: string]: string } = {
+          'purchase_date': 'purchase_date',
+          'purchase_code': 'purchase_code',
+          'product_name': 'product_name',
+          'specification': 'specification',
+          'supplier': 'supplier',
+          'quantity': 'quantity',
+          'price_per_gram': 'price_per_gram',
+          'total_price': 'total_price',
+          'bead_diameter': 'bead_diameter',
+        }
+        params.append('sort_by', fieldMapping[field] || field)
+        params.append('sort_order', order as string)
+      }
+      
+      // 获取token
+      const token = localStorage.get_item('auth_token')
+      if (!token) {
+        throw new Error('未找到认证token')
+      }
+      
+      // 发起请求
+      const apiUrl = get_api_url()
+      const response = await fetch(`${apiUrl}/purchases/export/excel?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`导出失败: ${response.status} ${response.statusText}`)
+      }
+      
+      // 获取文件blob
+      const blob = await response.blob()
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // 从响应头获取文件名，如果没有则使用默认名称
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = `采购记录_${new Date().toISOString().slice(0, 10)}.xlsx`
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=(['"]?)([^'"\n]*?)\1/)
+        if (filenameMatch && filenameMatch[2]) {
+          filename = decodeURIComponent(filenameMatch[2])
+        }
+      }
+      
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      
+      // 清理
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      setState(prev => ({
+        ...prev,
+        export_excel: { isLoading: false, error: null }
+      }))
+      
+    } catch (error) {
+      console.error('Excel导出失败:', error)
+      setState(prev => ({
+        ...prev,
+        export_excel: {
+          isLoading: false,
+          error: error instanceof Error ? error.message : '导出失败'
+        }
+      }))
+    }
+  }
+
   // 编辑处理
-  const handleEdit = (purchase_id: string) => {
+  const handle_edit = (purchase_id: string) => {
     // 打开详情弹窗并进入编辑模式
     setState(prev => ({
       ...prev,
       detail_modal: {
-        isOpen: true,
+        is_open: true,
         purchase_id: purchase_id,
-        edit_mode: true
+        isEditMode: true
       }
     }))
   }
 
   // 格式化日期
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN')
+  const format_date = (dateString: string) => {
+    return new Date(dateString).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Shanghai'
+    })
   }
 
   // 格式化价格
-  const formatPrice = (price: number | string | null | undefined, showSensitive: boolean = true, treatNullAsZero: boolean = false) => {
+  const format_price = (price: number | string | null | undefined, showSensitive: boolean = true, treatNullAsZero: boolean = false) => {
     if (price === null || price === undefined || price === '') {
       if (treatNullAsZero) {
         return showSensitive ? '¥0.0' : '不可见'
@@ -623,7 +765,7 @@ export default function PurchaseList() {
   }
 
   // 格式化重量
-  const formatWeight = (weight: number | string | null | undefined) => {
+  const format_weight = (weight: number | string | null | undefined) => {
     if (weight === null || weight === undefined || weight === '') {
       return '-'
     }
@@ -633,11 +775,11 @@ export default function PurchaseList() {
   }
   
   // 格式化敏感价格字段
-  const formatSensitivePrice = (price: number | string | null | undefined, treatNullAsZero: boolean = false) => {
+  const format_sensitive_price = (price: number | string | null | undefined, treatNullAsZero: boolean = false) => {
     if (user?.role === 'EMPLOYEE') {
       return '-'
     }
-    return formatPrice(price, true, treatNullAsZero)
+    return format_price(price, true, treatNullAsZero)
   }
 
   // 移除调试函数以减少不必要的网络请求
@@ -647,7 +789,7 @@ export default function PurchaseList() {
 
 
   // 格式化品相
-  const formatQuality = (quality: string | undefined | null) => {
+  const format_quality = (quality: string | undefined | null) => {
     // 品质值处理
     
     // 处理各种空值情况
@@ -670,19 +812,19 @@ export default function PurchaseList() {
   }
   
   // 获取唯一的供应商列表（按A-Z排序）- 修复：基于全部数据而非当前页
-  const getUniqueSuppliers = (searchTerm: string = '') => {
-    return allSuppliers
+  const get_unique_suppliers = (search_term: string = '') => {
+    return all_suppliers
       .filter(supplier => 
-        searchTerm === '' || 
-        (supplier && supplier.toLowerCase().includes(searchTerm.toLowerCase()))
+        search_term=== '' || 
+        (supplier && supplier.toLowerCase().includes(search_term.toLowerCase()))
       )
   }
   
   // 筛选框位置状态管理
-  const [filterPositions, setFilterPositions] = useState<{[key: string]: {top: number, left: number}}>({})
+  const [filter_positions, set_filter_positions] = useState<{[key: string]: {top: number, left: number}}>({})
   
   // 计算筛选框位置的缓存函数
-  const getFilterPosition = useCallback((column: string) => {
+  const get_filter_position = useCallback((column: string) => {
     const buttonElement = document.querySelector(`[data-filter-column="${column}"]`) as HTMLButtonElement
     if (!buttonElement) return { top: 0, left: 0 }
     
@@ -719,50 +861,50 @@ export default function PurchaseList() {
   }, [])
   
   // 更新筛选框位置
-  const updateFilterPosition = useCallback((column: string) => {
+  const update_filter_position = useCallback((column: string) => {
     setTimeout(() => {
-      const position = getFilterPosition(column)
-      setFilterPositions(prev => ({
+      const position = get_filter_position(column)
+      set_filter_positions(prev => ({
         ...prev,
         [column]: position
       }))
     }, 10) // 延迟10ms确保DOM已更新
-  }, [getFilterPosition])
+  }, [get_filter_position])
   
   // 监听筛选状态变化，重新计算位置
   useEffect(() => {
-    Object.keys(state.columnFilters).forEach(column => {
-      if (state.columnFilters[column]?.visible) {
-        updateFilterPosition(column)
+    Object.keys(state.column_filters).forEach(column => {
+      if (state.column_filters[column]?.is_visible) {
+        update_filter_position(column)
       }
     })
-  }, [state.filters, state.columnFilters, updateFilterPosition])
+  }, [state.filters, state.column_filters, update_filter_position])
   
   // 渲染列头筛选器（按照文档3.6节规范实现）
-  const renderColumnFilter = (column: string, title: string) => {
-    const filter = state.columnFilters[column]
+  const render_column_filter = (column: string, title: string) => {
+    const filter = state.column_filters[column]
     
     if (!filter) {
       return null
     }
     
-    const position = filter.visible ? (filterPositions[column] || { top: 0, left: 0 }) : { top: 0, left: 0 }
+    const position = filter.is_visible ? (filter_positions[column] || { top: 0, left: 0 }) : { top: 0, left: 0 }
     
     return (
       <div className="relative inline-block">
         <button
           data-filter-column={column}
-          onClick={() => toggleColumnFilter(column)}
+          onClick={() => toggle_column_filter(column)}
           className="filter-trigger ml-1 p-1 hover:bg-gray-100 rounded"
         >
           <ChevronDown className="h-3 w-3 text-gray-400" />
         </button>
         
-        {filter.visible && (
+        {filter.is_visible && (
           <Portal>
             <div 
               className="fixed inset-0 bg-black bg-opacity-50 z-[9998]"
-              onClick={() => toggleColumnFilter(column)}
+              onClick={() => toggle_column_filter(column)}
             />
             <div 
               className="filter-panel fixed bg-white border border-gray-200 rounded-lg shadow-xl min-w-[200px] max-w-[300px] p-3 z-[9999]"
@@ -779,13 +921,13 @@ export default function PurchaseList() {
                 padding: '12px'
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
             >
             {/* 关闭按钮 */}
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">{title}筛选</span>
               <button
-                onClick={() => toggleColumnFilter(column)}
+                onClick={() => toggle_column_filter(column)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 ×
@@ -793,12 +935,12 @@ export default function PurchaseList() {
             </div>
             
             {/* 排序功能 */}
-            {(filter.type === 'sort' || filter.type === 'sortAndRange') && (
+            {(filter.filter_type === 'sort' || filter.filter_type === 'sortAndRange') && (
               <div className="mb-3 pb-3 border-b border-gray-100">
                 <div className="text-xs text-gray-500 mb-2">排序</div>
                 <div className="flex space-x-1">
                   <button 
-                    onClick={() => handleSort(column, 'asc')}
+                    onClick={() => handle_sort(column, 'asc')}
                     className={`px-2 py-1 text-xs rounded ${
                       state.sorting[column] === 'asc'
                         ? 'bg-blue-500 text-white' 
@@ -808,7 +950,7 @@ export default function PurchaseList() {
                     升序
                   </button>
                   <button 
-                    onClick={() => handleSort(column, 'desc')}
+                    onClick={() => handle_sort(column, 'desc')}
                     className={`px-2 py-1 text-xs rounded ${
                       state.sorting[column] === 'desc'
                         ? 'bg-blue-500 text-white' 
@@ -822,20 +964,20 @@ export default function PurchaseList() {
             )}
             
             {/* 搜索功能 */}
-            {filter.type === 'search' && (
+            {filter.filter_type === 'search' && (
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
                     placeholder={`搜索${title}...`}
-                    value={column === 'purchaseCode' ? state.filters.purchaseCodeSearch : 
-                           column === 'productName' ? state.filters.search : ''}
+                    value={column === 'purchase_code' ? state.filters.purchase_code_search : 
+                           column === 'product_name' ? state.filters.search_term : ''}
                     onChange={(e) => {
                       let newFilters;
-                      if (column === 'purchaseCode') {
-                        newFilters = { ...state.filters, purchaseCodeSearch: e.target.value }
-                      } else if (column === 'productName') {
-                        newFilters = { ...state.filters, search: e.target.value }
+                      if (column === 'purchase_code') {
+                        newFilters = { ...state.filters, purchase_code_search: e.target.value }
+                      } else if (column === 'product_name') {
+                        newFilters = { ...state.filters, search_term: e.target.value }
                       } else {
                         return;
                       }
@@ -847,28 +989,28 @@ export default function PurchaseList() {
                     }}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
-                        applyFiltersImmediately(state.filters)
+                        apply_filters_immediately(state.filters)
                       }
                     }}
                     className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                   <button
                     onClick={() => {
-                      applyFiltersImmediately(state.filters)
+                      apply_filters_immediately(state.filters)
                     }}
                     className="px-2 py-1 text-xs text-blue-500 hover:text-blue-700 border border-blue-300 rounded"
                   >
                     应用
                   </button>
-                  {((column === 'purchaseCode' && state.filters.purchaseCodeSearch) || 
-                    (column === 'productName' && state.filters.search)) && (
+                  {((column === '' && state.filters.purchase_code_search) || 
+                    (column === '' && state.filters.search_term)) && (
                     <button
                       onClick={() => {
                         let newFilters;
-                        if (column === 'purchaseCode') {
-                          newFilters = { ...state.filters, purchaseCodeSearch: '' }
-                        } else if (column === 'productName') {
-                          newFilters = { ...state.filters, search: '' }
+                        if (column === '') {
+                          newFilters = { ...state.filters, purchase_code_search: '' }
+                        } else if (column === '') {
+                          newFilters = { ...state.filters, search_term: '' }
                         } else {
                           return;
                         }
@@ -876,7 +1018,7 @@ export default function PurchaseList() {
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
+                        apply_filters_immediately(newFilters)
                       }}
                       className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border border-gray-300 rounded"
                     >
@@ -888,7 +1030,7 @@ export default function PurchaseList() {
             )}
             
             {/* 品相多选功能 */}
-            {filter.type === 'multiSelect' && column === 'quality' && (
+            {filter.filter_type === 'multiSelect' && column === 'quality' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-gray-500">品相选择</div>
@@ -897,36 +1039,36 @@ export default function PurchaseList() {
                       onClick={() => {
                         const allQualities = ['AA', 'A', 'AB', 'B', 'C', 'UNKNOWN'];
                         let newFilters;
-                        if (state.filters.quality.length === allQualities.length) {
+                        if (state.filters.quality_filter.length === allQualities.length) {
                           // 当前全选状态，点击变为全不选
-                          newFilters = { ...state.filters, quality: [] };
+                          newFilters = { ...state.filters, quality_filter: [] };
                         } else {
                           // 当前非全选状态，点击变为全选
-                          newFilters = { ...state.filters, quality: allQualities };
+                          newFilters = { ...state.filters, quality_filter: allQualities };
                         }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }));
-                        applyFiltersImmediately(newFilters);
+                        apply_filters_immediately(newFilters);
                         // 状态变化后重新计算位置
-                        setTimeout(() => updateFilterPosition(column), 50);
+                        setTimeout(() => update_filter_position(column), 50);
                       }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >
-                      {state.filters.quality.length === 6 ? '取消全选' : '全选'}
+                      {state.filters.quality_filter.length === 6 ? '取消全选' : '全选'}
                     </button>
-                    {state.filters.quality.length > 0 && (
+                    {state.filters.quality_filter.length > 0 && (
                       <button
                         onClick={() => {
-                          const newFilters = { ...state.filters, quality: [] };
+                          const newFilters = { ...state.filters, quality_filter: [] };
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
                           }));
-                          applyFiltersImmediately(newFilters);
+                          apply_filters_immediately(newFilters);
                           // 状态变化后重新计算位置
-                          setTimeout(() => updateFilterPosition(column), 50);
+                          setTimeout(() => update_filter_position(column), 50);
                         }}
                         className="text-xs text-gray-500 hover:text-gray-700"
                       >
@@ -947,19 +1089,19 @@ export default function PurchaseList() {
                     <label key={quality.value} className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={state.filters.quality.includes(quality.value)}
+                        checked={state.filters.quality_filter.includes(quality.value)}
                         onChange={(e) => {
                           const newQualities = e.target.checked
-                            ? [...state.filters.quality, quality.value]
-                            : state.filters.quality.filter(q => q !== quality.value)
-                          const newFilters = { ...state.filters, quality: newQualities }
+                            ? [...state.filters.quality_filter, quality.value]
+                            : state.filters.quality_filter.filter((q: string) => q !== quality.value)
+                          const newFilters = { ...state.filters, quality_filter: newQualities }
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
                           }))
-                          applyFiltersImmediately(newFilters)
+                          apply_filters_immediately(newFilters)
                           // 状态变化后重新计算位置
-                          setTimeout(() => updateFilterPosition(column), 50)
+                          setTimeout(() => update_filter_position(column), 50)
                         }}
                         className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
@@ -971,21 +1113,21 @@ export default function PurchaseList() {
             )}
             
             {/* 供应商多选功能 */}
-            {filter.type === 'multiSelect' && column === 'supplier' && (
+            {filter.filter_type === 'multiSelect' && column === 'supplier' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">供应商选择</div>
-                  {state.filters.supplier.length > 0 && (
+                  {state.filters.supplier_filter.length > 0 && (
                     <button
                       onClick={() => {
-                        const newFilters = { ...state.filters, supplier: [] }
+                        const newFilters = { ...state.filters, supplier_filter: [] }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
+                        apply_filters_immediately(newFilters)
                         // 状态变化后重新计算位置
-                        setTimeout(() => updateFilterPosition(column), 50)
+                        setTimeout(() => update_filter_position(column), 50)
                       }}
                       className="text-xs text-gray-500 hover:text-gray-700"
                     >
@@ -998,32 +1140,32 @@ export default function PurchaseList() {
                 <input
                   type="text"
                   placeholder="搜索供应商..."
-                  value={supplierSearchTerm}
+                  value={supplier_search_term}
                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm mb-2"
                   onChange={(e) => {
-                    setSupplierSearchTerm(e.target.value)
+                    set_supplier_search_term(e.target.value)
                   }}
                 />
                 
                 {/* 供应商多选列表 */}
                 <div className="max-h-32 overflow-y-auto space-y-1">
-                  {getUniqueSuppliers('').map(supplier => (
+                  {get_unique_suppliers('').map(supplier => (
                     <label key={supplier} className="flex items-center space-x-2 cursor-pointer text-xs">
                       <input
                         type="checkbox"
-                        checked={state.filters.supplier.includes(supplier)}
+                        checked={state.filters.supplier_filter.includes(supplier)}
                         onChange={(e) => {
                           const newSuppliers = e.target.checked
-                            ? [...state.filters.supplier, supplier]
-                            : state.filters.supplier.filter(s => s !== supplier)
-                          const newFilters = { ...state.filters, supplier: newSuppliers }
+                            ? [...state.filters.supplier_filter, supplier]
+                            : state.filters.supplier_filter.filter((s: string) => s !== supplier)
+                          const newFilters = { ...state.filters, supplier_filter: newSuppliers }
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
                           }))
-                          applyFiltersImmediately(newFilters)
+                          apply_filters_immediately(newFilters)
                           // 状态变化后重新计算位置
-                          setTimeout(() => updateFilterPosition(column), 50)
+                          setTimeout(() => update_filter_position(column), 50)
                         }}
                         className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                       />
@@ -1035,7 +1177,7 @@ export default function PurchaseList() {
             )}
             
             {/* 产品类型多选功能 */}
-            {filter.type === 'multiSelect' && column === 'product_type' && (
+            {filter.filter_type === 'multiSelect' && column === 'material_type' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-gray-500">产品类型</div>
@@ -1044,34 +1186,34 @@ export default function PurchaseList() {
                       onClick={() => {
                         const allTypes = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'];
                         let newFilters;
-                        if (state.filters.product_types.length === allTypes.length) {
+                        if (state.filters.material_types_filter.length === allTypes.length) {
                           // 当前全选状态，点击变为全不选
-                          newFilters = { ...state.filters, product_types: [] };
+                          newFilters = { ...state.filters, material_types_filter: [] };
                         } else {
                           // 当前非全选状态，点击变为全选
-                          newFilters = { ...state.filters, product_types: allTypes };
+                          newFilters = { ...state.filters, material_types_filter: allTypes };
                         }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }));
-                        applyFiltersImmediately(newFilters);
+                        apply_filters_immediately(newFilters);
                         // 状态变化后重新计算位置
-                        setTimeout(() => updateFilterPosition(column), 50);
+                        setTimeout(() => update_filter_position(column), 50);
                       }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >
-                      {state.filters.product_types.length === 4 ? '取消全选' : '全选'}
+                      {state.filters.material_types_filter.length === 4 ? '取消全选' : '全选'}
                     </button>
-                    {state.filters.product_types.length > 0 && state.filters.product_types.length < 4 && (
+                    {state.filters.material_types_filter.length > 0 && state.filters.material_types_filter.length < 4 && (
                       <button
                         onClick={() => {
-                          const newFilters = { ...state.filters, product_types: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'] };
+                          const newFilters = { ...state.filters, material_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'] };
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
                           }));
-                          applyFiltersImmediately(newFilters);
+                          apply_filters_immediately(newFilters);
                         }}
                         className="text-xs text-gray-500 hover:text-gray-700"
                       >
@@ -1090,29 +1232,29 @@ export default function PurchaseList() {
                     <label key={type.value} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={state.filters.product_types.includes(type.value)}
+                        checked={state.filters.material_types_filter.includes(type.value)}
                         onChange={(e) => {
                           let newFilters;
                           if (e.target.checked) {
                             // 选中：添加到包含列表
                             newFilters = {
                               ...state.filters,
-                              product_types: [...state.filters.product_types, type.value]
+                              material_types_filter: [...state.filters.material_types_filter, type.value]
                             };
                           } else {
                             // 取消选中：从包含列表中移除
                             newFilters = {
                               ...state.filters,
-                              product_types: state.filters.product_types.filter(t => t !== type.value)
+                              material_types_filter: state.filters.material_types_filter.filter((t: string) => t !== type.value)
                             };
                           }
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
                           }));
-                          applyFiltersImmediately(newFilters);
+                          apply_filters_immediately(newFilters);
                           // 状态变化后重新计算位置
-                          setTimeout(() => updateFilterPosition(column), 50);
+                          setTimeout(() => update_filter_position(column), 50);
                         }}
                         className="rounded"
                       />
@@ -1124,20 +1266,20 @@ export default function PurchaseList() {
             )}
             
             {/* 珠径范围筛选功能 */}
-            {(filter.type === 'sortAndRange') && column === 'beadDiameter' && (
+            {(filter.filter_type === 'sortAndRange') && column === 'bead_diameter' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">珠径范围(mm)</div>
-                  {(state.filters.diameterMin || state.filters.diameterMax) && (
+                  {(state.filters.diameter_min || state.filters.diameter_max) && (
                     <button
                     onClick={() => {
-                      const newFilters = { ...state.filters, diameterMin: '', diameterMax: '' }
+                      const newFilters = { ...state.filters, diameter_min: '', diameter_max: '' }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('beadDiameter')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('bead_diameter')
                     }}
                     className="text-xs text-gray-500 hover:text-gray-700"
                   >
@@ -1149,14 +1291,14 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最小值"
-                    value={state.filters.diameterMin}
+                    value={state.filters.diameter_min}
                     onChange={(e) => {
-                      const newFilters = { ...state.filters, diameterMin: e.target.value }
+                      const newFilters = { ...state.filters, diameter_min: e.target.value }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
+                      apply_filters_immediately(newFilters)
                     }}
                     className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                   />
@@ -1164,14 +1306,14 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最大值"
-                    value={state.filters.diameterMax}
+                    value={state.filters.diameter_max}
                     onChange={(e) => {
-                      const newFilters = { ...state.filters, diameterMax: e.target.value }
+                      const newFilters = { ...state.filters, diameter_max: e.target.value }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
+                      apply_filters_immediately(newFilters)
                     }}
                     className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                   />
@@ -1180,7 +1322,7 @@ export default function PurchaseList() {
             )}
             
             {/* 规格范围筛选功能 */}
-            {(filter.type === 'sortAndRange') && column === 'specification' && (
+            {(filter.filter_type === 'sortAndRange') && column === 'specification' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">规格范围</div>
@@ -1189,11 +1331,11 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最小"
-                    value={state.filters.specificationMin}
+                    value={state.filters.specification_min}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, specificationMin: e.target.value }
+                        filters: { ...prev.filters, specification_min: e.target.value }
                       }))
                     }}
                     className="w-16 px-1 py-1 border border-gray-300 rounded text-xs"
@@ -1202,11 +1344,11 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最大"
-                    value={state.filters.specificationMax}
+                    value={state.filters.specification_max}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, specificationMax: e.target.value }
+                        filters: { ...prev.filters, specification_max: e.target.value }
                       }))
                     }}
                     className="w-16 px-1 py-1 border border-gray-300 rounded text-xs"
@@ -1220,8 +1362,8 @@ export default function PurchaseList() {
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('specification')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('specification')
                     }}
                     className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
@@ -1229,13 +1371,13 @@ export default function PurchaseList() {
                   </button>
                   <button
                     onClick={() => {
-                      const newFilters = { ...state.filters, specificationMin: '', specificationMax: '' }
+                      const newFilters = { ...state.filters, specification_min: '', specification_max: '' }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('specification')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('specification')
                     }}
                     className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                   >
@@ -1246,7 +1388,7 @@ export default function PurchaseList() {
             )}
             
             {/* 克价范围筛选功能 */}
-            {(filter.type === 'sortAndRange') && column === 'pricePerGram' && (
+            {(filter.filter_type === 'sortAndRange') && column === 'price_per_gram' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">克价范围(元/克)</div>
@@ -1286,8 +1428,8 @@ export default function PurchaseList() {
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('pricePerGram')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('price_per_gram')
                     }}
                     className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
@@ -1300,8 +1442,8 @@ export default function PurchaseList() {
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('pricePerGram')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('price_per_gram')
                     }}
                     className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                   >
@@ -1312,7 +1454,7 @@ export default function PurchaseList() {
             )}
             
             {/* 总价范围筛选功能 */}
-            {(filter.type === 'sortAndRange') && column === 'totalPrice' && (
+            {(filter.filter_type === 'sortAndRange') && column === 'total_price' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">总价范围(元)</div>
@@ -1321,11 +1463,11 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最小"
-                    value={state.filters.totalPriceMin}
+                    value={state.filters.total_price_min}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, totalPriceMin: e.target.value }
+                        filters: { ...prev.filters, total_price_min: e.target.value }
                       }))
                     }}
                     className="w-16 px-1 py-1 border border-gray-300 rounded text-xs"
@@ -1334,11 +1476,11 @@ export default function PurchaseList() {
                   <input
                     type="number"
                     placeholder="最大"
-                    value={state.filters.totalPriceMax}
+                    value={state.filters.total_price_max}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, totalPriceMax: e.target.value }
+                        filters: { ...prev.filters, total_price_max: e.target.value }
                       }))
                     }}
                     className="w-16 px-1 py-1 border border-gray-300 rounded text-xs"
@@ -1352,8 +1494,8 @@ export default function PurchaseList() {
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('totalPrice')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('')
                     }}
                     className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
@@ -1361,13 +1503,13 @@ export default function PurchaseList() {
                   </button>
                   <button
                     onClick={() => {
-                      const newFilters = { ...state.filters, totalPriceMin: '', totalPriceMax: '' }
+                      const newFilters = { ...state.filters, total_price_min: '', total_price_max: '' }
                       setState(prev => ({
                         ...prev,
                         filters: newFilters
                       }))
-                      applyFiltersImmediately(newFilters)
-                      toggleColumnFilter('totalPrice')
+                      apply_filters_immediately(newFilters)
+                      toggle_column_filter('')
                     }}
                     className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                   >
@@ -1378,20 +1520,20 @@ export default function PurchaseList() {
             )}
             
             {/* 日期范围筛选功能 */}
-            {column === 'purchaseDate' && (
+            {column === 'purchase_date' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <div className="text-xs text-gray-500">日期范围</div>
-                  {(state.filters.startDate || state.filters.endDate) && (
+                  {(state.filters.start_date || state.filters.end_date) && (
                     <button
                       onClick={() => {
-                        const newFilters = { ...state.filters, startDate: '', endDate: '' }
+                        const newFilters = { ...state.filters, start_date: '', end_date: '' }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
-                        toggleColumnFilter('purchaseDate')
+                        apply_filters_immediately(newFilters)
+                        toggle_column_filter('purchase_date')
                       }}
                       className="text-xs text-gray-500 hover:text-gray-700"
                     >
@@ -1403,11 +1545,11 @@ export default function PurchaseList() {
                   <input
                     type="date"
                     placeholder="开始日期"
-                    value={state.filters.startDate}
+                    value={state.filters.start_date}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, startDate: e.target.value }
+                        filters: { ...prev.filters, start_date: e.target.value }
                       }))
                     }}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
@@ -1415,11 +1557,11 @@ export default function PurchaseList() {
                   <input
                     type="date"
                     placeholder="结束日期"
-                    value={state.filters.endDate}
+                    value={state.filters.end_date}
                     onChange={(e) => {
                       setState(prev => ({
                         ...prev,
-                        filters: { ...prev.filters, endDate: e.target.value }
+                        filters: { ...prev.filters, end_date: e.target.value }
                       }))
                     }}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
@@ -1427,8 +1569,8 @@ export default function PurchaseList() {
                   <div className="flex space-x-2 pt-2">
                     <button
                       onClick={() => {
-                        applyFiltersImmediately(state.filters)
-                        toggleColumnFilter('purchaseDate')
+                        apply_filters_immediately(state.filters)
+                        toggle_column_filter('purchase_date')
                       }}
                       className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
@@ -1436,13 +1578,13 @@ export default function PurchaseList() {
                     </button>
                     <button
                       onClick={() => {
-                        const newFilters = { ...state.filters, startDate: '', endDate: '' }
+                        const newFilters = { ...state.filters, start_date: '', end_date: '' }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
-                        toggleColumnFilter('purchaseDate')
+                        apply_filters_immediately(newFilters)
+                        toggle_column_filter('purchase_date')
                       }}
                       className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                     >
@@ -1470,49 +1612,49 @@ export default function PurchaseList() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '120px' }}>
                 <div className="flex items-center">
                   采购编号
-                  {renderColumnFilter('purchaseCode', '采购编号')}
+                  {render_column_filter('purchase_code', '采购编号')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '180px' }}>
                 <div className="flex items-center">
                   产品名称
-                  {renderColumnFilter('productName', '产品名称')}
+                  {render_column_filter('material_name', '产品名称')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '100px' }}>
                 <div className="flex items-center">
                   产品类型
-                  {renderColumnFilter('product_type', '产品类型')}
+                  {render_column_filter('material_type', '产品类型')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '80px' }}>
                 <div className="flex items-center">
                   规格
-                  {renderColumnFilter('specification', '规格')}
+                  {render_column_filter('specification', '规格')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '80px' }}>
                 <div className="flex items-center">
                   品相
-                  {renderColumnFilter('quality', '品相')}
+                  {render_column_filter('quality', '品相')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '80px' }}>
                 <div className="flex items-center">
                   数量
-                  {renderColumnFilter('quantity', '数量')}
+                  {render_column_filter('quantity', '数量')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '100px' }}>
                 <div className="flex items-center">
                   克价
-                  {user?.role === 'BOSS' && renderColumnFilter('pricePerGram', '克价')}
+                  {user?.role === 'BOSS' && render_column_filter('price_per_gram', '克价')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '100px' }}>
                 <div className="flex items-center">
                   总价
-                  {renderColumnFilter('totalPrice', '总价')}
+                  {render_column_filter('total_price', '总价')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '80px' }}>
@@ -1521,13 +1663,13 @@ export default function PurchaseList() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '120px' }}>
                 <div className="flex items-center">
                   供应商
-                  {user?.role === 'BOSS' && renderColumnFilter('supplier', '供应商')}
+                  {user?.role === 'BOSS' && render_column_filter('supplier', '供应商')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '120px' }}>
                 <div className="flex items-center">
                   采购日期
-                  {renderColumnFilter('purchaseDate', '采购日期')}
+                  {render_column_filter('purchase_date', '采购日期')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '100px' }}>
@@ -1544,65 +1686,65 @@ export default function PurchaseList() {
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap" style={{ width: '180px' }}>
                      <div className="flex items-center space-x-3">
-                       {getFirstPhotoUrl(purchase.photos) && (
+                       {get_first_photo_url(purchase.photos) && (
                          <img 
-                           src={getFirstPhotoUrl(purchase.photos)!} 
-                           alt={purchase.product_name}
+                           src={get_first_photo_url(purchase.photos)!} 
+                           alt={purchase.material_name}
                            className="w-8 h-12 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
                            onClick={() => {
-                             const photoUrl = getFirstPhotoUrl(purchase.photos)
-                             if (photoUrl) openImagePreview(photoUrl, purchase.product_name)
+                             const photoUrl = get_first_photo_url(purchase.photos)
+                             if (photoUrl) open_image_preview(photoUrl, purchase.material_name)
                            }}
                          />
                        )}
-                       <div className="text-sm font-medium text-gray-900 truncate">{purchase.product_name}</div>
+                       <div className="text-sm font-medium text-gray-900 truncate">{purchase.material_name}</div>
                      </div>
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
-                     {formatProductType(purchase.product_type)}
+                     {format_product_type(purchase.material_type)}
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '80px' }}>
-                     {formatSpecification(purchase)}
+                     {format_specification(purchase)}
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '80px' }}>
-                     {formatQuality(purchase.quality)}
+                     {format_quality(purchase.quality)}
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '80px' }}>
-                     {formatQuantity(purchase)}
+                     {format_quantity(purchase)}
                    </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
-                    {formatSensitivePrice(purchase.price_per_gram, true)}
+                    {format_sensitive_price(purchase.price_per_gram, true)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
-                    {formatSensitivePrice(purchase.total_price)}
+                    {format_sensitive_price(purchase.total_price)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '80px' }}>
-                    {user?.role === 'EMPLOYEE' ? '-' : formatWeight(purchase.weight)}
+                    {user?.role === 'EMPLOYEE' ? '-' : format_weight(purchase.weight)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '120px' }}>
                     <div className="truncate">{user?.role === 'BOSS' ? (purchase.supplier?.name || '-') : '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '120px' }}>
-                    {formatDate(purchase.purchase_date)}
+                    {format_date(purchase.purchase_date)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ width: '100px' }}>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => openDetailModal(purchase.id)}
+                        onClick={() => open_detail_modal(purchase.id)}
                         className="text-gray-600 hover:text-gray-900"
                         title="查看详情"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      <PermissionWrapper allowed_roles={['BOSS']}>
+                      <Permission_wrapper allowed_roles={['BOSS']}>
                         <button
-                          onClick={() => handleEdit(purchase.id)}
+                          onClick={() => handle_edit(purchase.id)}
                           className="text-blue-600 hover:text-blue-900"
                           title="编辑"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                      </PermissionWrapper>
+                      </Permission_wrapper>
                     </div>
                   </td>
                 </tr>
@@ -1622,62 +1764,62 @@ export default function PurchaseList() {
           <div key={purchase.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
             <div className="flex justify-between items-start mb-3">
               <div className="flex items-center space-x-3 flex-1">
-                {getFirstPhotoUrl(purchase.photos) && (
+                {get_first_photo_url(purchase.photos) && (
                    <img 
-                     src={getFirstPhotoUrl(purchase.photos)!} 
-                     alt={purchase.product_name}
+                     src={get_first_photo_url(purchase.photos)!} 
+                     alt={purchase.material_name}
                      className="w-12 h-16 object-cover rounded border border-gray-200 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                      onClick={() => {
-                       const photoUrl = getFirstPhotoUrl(purchase.photos)
-                       if (photoUrl) openImagePreview(photoUrl, purchase.product_name)
+                       const photoUrl = get_first_photo_url(purchase.photos)
+                       if (photoUrl) open_image_preview(photoUrl, purchase.material_name)
                      }}
                    />
                  )}
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 text-base">{purchase.product_name}</h3>
+                  <h3 className="font-medium text-gray-900 text-base">{purchase.material_name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{purchase.purchase_code}</p>
                 </div>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button
-                  onClick={() => openDetailModal(purchase.id)}
+                  onClick={() => open_detail_modal(purchase.id)}
                   className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
                   title="查看详情"
                 >
                   <Eye className="h-4 w-4" />
                 </button>
-                <PermissionWrapper allowed_roles={['BOSS']}>
+                <Permission_wrapper allowed_roles={['BOSS']}>
                   <button
-                    onClick={() => handleEdit(purchase.id)}
+                    onClick={() => handle_edit(purchase.id)}
                     className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg"
                     title="编辑"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
-                </PermissionWrapper>
+                </Permission_wrapper>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                  <span className="text-gray-500">类型:</span>
-                 <span className="ml-1 text-gray-900">{formatProductType(purchase.product_type)}</span>
+                 <span className="ml-1 text-gray-900">{format_product_type(purchase.material_type)}</span>
                </div>
               <div>
                 <span className="text-gray-500">规格:</span>
-                <span className="ml-1 text-gray-900">{formatSpecification(purchase)}</span>
+                <span className="ml-1 text-gray-900">{format_specification(purchase)}</span>
               </div>
               <div>
                 <span className="text-gray-500">品相:</span>
-                <span className="ml-1 text-gray-900">{formatQuality(purchase.quality)}</span>
+                <span className="ml-1 text-gray-900">{format_quality(purchase.quality)}</span>
               </div>
               <div>
                 <span className="text-gray-500">数量:</span>
-                <span className="ml-1 text-gray-900">{formatQuantity(purchase)}</span>
+                <span className="ml-1 text-gray-900">{format_quantity(purchase)}</span>
               </div>
               <div>
                 <span className="text-gray-500">日期:</span>
-                <span className="ml-1 text-gray-900">{formatDate(purchase.purchase_date)}</span>
+                <span className="ml-1 text-gray-900">{format_date(purchase.purchase_date)}</span>
               </div>
             </div>
             
@@ -1692,15 +1834,15 @@ export default function PurchaseList() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-500">克价:</span>
-                  <span className="ml-1 text-gray-900">{formatSensitivePrice(purchase.price_per_gram, true)}</span>
+                  <span className="ml-1 text-gray-900">{format_sensitive_price(purchase.price_per_gram, true)}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">重量:</span>
-                  <span className="ml-1 text-gray-900">{user?.role === 'EMPLOYEE' ? '-' : formatWeight(purchase.weight)}</span>
+                  <span className="ml-1 text-gray-900">{user?.role === 'EMPLOYEE' ? '-' : format_weight(purchase.weight)}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">总价:</span>
-                  <span className="ml-1 text-gray-900">{formatSensitivePrice(purchase.total_price)}</span>
+                  <span className="ml-1 text-gray-900">{format_sensitive_price(purchase.total_price)}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">供应商:</span>
@@ -1724,15 +1866,23 @@ export default function PurchaseList() {
       ...prev,
       pagination: {
         ...prev.pagination,
-        limit: newLimit,
-        page: 1 // 重置到第一页
+        page_size: newLimit,
+        current_page: 1 // 重置到第一页
       }
     }))
+    // 立即使用新的limit值重新获取数据
+    setTimeout(() => {
+      fetch_purchases({
+        pagination: { current_page: 1, page_size: newLimit },
+        filters: state.filters,
+        sorting: state.sorting
+      })
+    }, 0)
   }
 
   const renderPagination = () => {
     // 只有在没有数据时才不显示分页组件
-    if (state.pagination.total === 0) return null
+    if (state.pagination.total_count === 0) return null
     
     return (
       <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
@@ -1740,12 +1890,12 @@ export default function PurchaseList() {
           {/* 手机端记录信息和每页显示条数 */}
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm text-gray-700">
-              第{state.pagination.page}页，共{state.pagination.total_pages}页
+              第{state.pagination.current_page}页，共{state.pagination.total_pages}页
             </p>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">每页:</span>
               <select
-                value={state.pagination.limit}
+                value={state.pagination.page_size}
                 onChange={(e) => handleLimitChange(Number(e.target.value))}
                 className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
@@ -1760,15 +1910,15 @@ export default function PurchaseList() {
           {state.pagination.total_pages > 1 && (
             <div className="flex justify-between">
               <button
-                onClick={() => handlePageChange(state.pagination.page - 1)}
-                disabled={state.pagination.page <= 1}
+                onClick={() => handle_page_change(state.pagination.current_page - 1)}
+                disabled={state.pagination.current_page <= 1}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 上一页
               </button>
               <button
-                onClick={() => handlePageChange(state.pagination.page + 1)}
-                disabled={state.pagination.page >= state.pagination.total_pages}
+                onClick={() => handle_page_change(state.pagination.current_page + 1)}
+                disabled={state.pagination.current_page >= state.pagination.total_pages}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 下一页
@@ -1779,16 +1929,16 @@ export default function PurchaseList() {
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div className="flex items-center space-x-4">
             <p className="text-sm text-gray-700">
-              显示第 <span className="font-medium">{(state.pagination.page - 1) * state.pagination.limit + 1}</span> 到{' '}
+              显示第 <span className="font-medium">{(state.pagination.current_page - 1) * state.pagination.page_size + 1}</span> 到{' '}
               <span className="font-medium">
-                {Math.min(state.pagination.page * state.pagination.limit, state.pagination.total)}
+                {Math.min(state.pagination.current_page * state.pagination.page_size, state.pagination.total_count)}
               </span>{' '}
-              条，共 <span className="font-medium">{state.pagination.total}</span> 条记录
+              条，共 <span className="font-medium">{state.pagination.total_count}</span> 条记录
             </p>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">每页显示:</span>
               <select
-                value={state.pagination.limit}
+                value={state.pagination.page_size}
                 onChange={(e) => handleLimitChange(Number(e.target.value))}
                 className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               >
@@ -1804,33 +1954,48 @@ export default function PurchaseList() {
             <div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                 <button
-                  onClick={() => handlePageChange(state.pagination.page - 1)}
-                  disabled={state.pagination.page <= 1}
+                  onClick={() => handle_page_change(state.pagination.current_page - 1)}
+                  disabled={state.pagination.current_page <= 1}
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 
-                {Array.from({ length: Math.min(5, state.pagination.total_pages) }, (_, i) => {
-                  const page = i + 1
-                  return (
+                {(() => {
+                   const total_pages = state.pagination.total_pages
+                  const maxVisiblePages = 5
+                  
+                  let startPage = Math.max(1, state.pagination.current_page - Math.floor(maxVisiblePages / 2))
+                  let endPage = Math.min(total_pages, startPage + maxVisiblePages - 1)
+                  
+                  // 调整起始页，确保显示足够的页码
+                  if (endPage - startPage + 1 < maxVisiblePages) {
+                    startPage = Math.max(1, endPage - maxVisiblePages + 1)
+                  }
+                  
+                  const pages = []
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(i)
+                  }
+                  
+                  return pages.map(page => (
                     <button
                       key={page}
-                      onClick={() => handlePageChange(page)}
+                      onClick={() => handle_page_change(page)}
                       className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        page === state.pagination.page
+                        page === state.pagination.current_page
                           ? 'z-10 bg-gray-50 border-gray-500 text-gray-600'
                           : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                       }`}
                     >
                       {page}
                     </button>
-                  )
-                })}
+                  ))
+                })()}
                 
                 <button
-                  onClick={() => handlePageChange(state.pagination.page + 1)}
-                  disabled={state.pagination.page >= state.pagination.total_pages}
+                  onClick={() => handle_page_change(state.pagination.current_page + 1)}
+                  disabled={state.pagination.current_page >= state.pagination.total_pages}
                   className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-5 w-5" />
@@ -1855,6 +2020,18 @@ export default function PurchaseList() {
         </div>
         <div className="flex items-center space-x-3">
           <button
+            onClick={handle_export_excel}
+            disabled={state.export_excel.isLoading}
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {state.export_excel.isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            {state.export_excel.isLoading ? '导出中...' : '导出Excel'}
+          </button>
+          <button
             onClick={() => navigate('/purchase-entry')}
             className="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 transition-colors"
           >
@@ -1869,20 +2046,43 @@ export default function PurchaseList() {
         <span className="text-sm text-gray-600">表头筛选：点击列标题旁的筛选按钮进行筛选，筛选条件会实时应用</span>
       </div>
 
+      {/* Excel导出错误提示 */}
+      {state.export_excel.error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">导出失败</h3>
+              <p className="text-sm text-red-700 mt-1">{state.export_excel.error}</p>
+            </div>
+            <button
+              onClick={() => setState(prev => ({
+                ...prev,
+                export_excel: { ...prev.export_excel, error: null }
+              }))}
+              className="text-red-400 hover:text-red-600"
+            >
+              <span className="sr-only">关闭</span>
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 采购详情弹窗 */}
       <PurchaseDetailModal
-        isOpen={state.detail_modal.isOpen}
-        onClose={closeDetailModal}
+        is_open={state.detail_modal.is_open}
+        onClose={close_detail_modal}
         purchase_id={state.detail_modal.purchase_id}
-        edit_mode={state.detail_modal.edit_mode}
-        onEdit={handleEdit}
+        edit_mode={state.detail_modal.isEditMode}
+        onEdit={handle_edit}
         onDelete={() => {
           // 删除成功后刷新列表
-          fetchPurchases()
+          fetch_purchases()
         }}
         onSave={() => {
           // 保存成功后刷新列表
-          fetchPurchases()
+          fetch_purchases()
         }}
       />
 
@@ -1892,7 +2092,7 @@ export default function PurchaseList() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-medium text-gray-900">筛选和排序</h3>
             <button
-              onClick={handleReset}
+              onClick={handle_reset}
               className="text-xs text-gray-500 hover:text-gray-700"
             >
               重置
@@ -1906,9 +2106,9 @@ export default function PurchaseList() {
                 <input
                   type="text"
                   placeholder="搜索产品名称或采购编号..."
-                  value={state.filters.search}
+                  value={state.filters.search_term}
                   onChange={(e) => {
-                    const newFilters = { ...state.filters, search: e.target.value }
+                    const newFilters = { ...state.filters, search_term: e.target.value }
                     setState(prev => ({
                       ...prev,
                       filters: newFilters
@@ -1917,29 +2117,29 @@ export default function PurchaseList() {
                   }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
-                      applyFiltersImmediately(state.filters)
+                      apply_filters_immediately(state.filters)
                     }
                   }}
                   className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                 />
                 <button
                   onClick={() => {
-                    applyFiltersImmediately(state.filters)
+                    apply_filters_immediately(state.filters)
                   }}
                   className="px-3 py-2 text-sm text-blue-500 hover:text-blue-700 border border-blue-300 rounded-lg"
                 >
                   应用
                 </button>
               </div>
-              {state.filters.search && (
+              {state.filters.search_term && (
                 <button
                   onClick={() => {
-                    const newFilters = { ...state.filters, search: '' }
+                    const newFilters = { ...state.filters, search_term: '' }
                     setState(prev => ({
                       ...prev,
                       filters: newFilters
                     }))
-                    applyFiltersImmediately(newFilters)
+                    apply_filters_immediately(newFilters)
                   }}
                   className="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg"
                 >
@@ -1961,17 +2161,17 @@ export default function PurchaseList() {
                   <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={state.filters.product_types.includes(type.value)}
+                      checked={state.filters.material_types_filter.includes(type.value)}
                       onChange={(e) => {
-                        const newProductTypes = e.target.checked
-                          ? [...state.filters.product_types, type.value]
-                          : state.filters.product_types.filter(t => t !== type.value)
-                        const newFilters = { ...state.filters, product_types: newProductTypes }
+                        const newMaterialTypes = e.target.checked
+                          ? [...state.filters.material_types_filter, type.value]
+                          : state.filters.material_types_filter.filter((t: string) => t !== type.value)
+                        const newFilters = { ...state.filters, material_types_filter: newMaterialTypes }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
+                        apply_filters_immediately(newFilters)
                       }}
                       className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                     />
@@ -1996,17 +2196,17 @@ export default function PurchaseList() {
                   <label key={quality.value} className="flex items-center space-x-1 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={state.filters.quality.includes(quality.value)}
+                      checked={state.filters.quality_filter.includes(quality.value)}
                       onChange={(e) => {
                         const newQualities = e.target.checked
-                          ? [...state.filters.quality, quality.value]
-                          : state.filters.quality.filter(q => q !== quality.value)
-                        const newFilters = { ...state.filters, quality: newQualities }
+                          ? [...state.filters.quality_filter, quality.value]
+                          : state.filters.quality_filter.filter((q: string) => q !== quality.value)
+                        const newFilters = { ...state.filters, quality_filter: newQualities }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters
                         }))
-                        applyFiltersImmediately(newFilters)
+                        apply_filters_immediately(newFilters)
                       }}
                       className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                     />
@@ -2026,12 +2226,12 @@ export default function PurchaseList() {
                    if (e.target.value) {
                       const updatedSorting: { [key: string]: 'asc' | 'desc' | null } = { [e.target.value]: 'desc' as 'desc' }
                       setState(prev => ({ ...prev, sorting: updatedSorting }))
-                      applyFiltersImmediately(state.filters, updatedSorting)
+                      apply_filters_immediately(state.filters, updatedSorting)
                     } else {
                       // 清除排序时，传递空的排序对象
                       const emptySorting: { [key: string]: 'asc' | 'desc' | null } = {}
                       setState(prev => ({ ...prev, sorting: emptySorting }))
-                      applyFiltersImmediately(state.filters, emptySorting)
+                      apply_filters_immediately(state.filters, emptySorting)
                     }
                 }}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
@@ -2049,56 +2249,56 @@ export default function PurchaseList() {
               <input
                 type="number"
                 placeholder="最小直径"
-                value={state.filters.diameterMin}
+                value={state.filters.diameter_min}
                 onChange={(e) => {
-                  const newFilters = { ...state.filters, diameterMin: e.target.value }
+                  const newFilters = { ...state.filters, diameter_min: e.target.value }
                   setState(prev => ({
                     ...prev,
                     filters: newFilters
                   }))
-                  applyFiltersImmediately(newFilters)
+                  apply_filters_immediately(newFilters)
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
               <input
                 type="number"
                 placeholder="最大直径"
-                value={state.filters.diameterMax}
+                value={state.filters.diameter_max}
                 onChange={(e) => {
-                  const newFilters = { ...state.filters, diameterMax: e.target.value }
+                  const newFilters = { ...state.filters, diameter_max: e.target.value }
                   setState(prev => ({
                     ...prev,
                     filters: newFilters
                   }))
-                  applyFiltersImmediately(newFilters)
+                  apply_filters_immediately(newFilters)
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
               <input
                 type="number"
                 placeholder="最小数量"
-                value={state.filters.quantityMin}
+                value={state.filters.quantity_min}
                 onChange={(e) => {
-                  const newFilters = { ...state.filters, quantityMin: e.target.value }
+                  const newFilters = { ...state.filters, quantity_min: e.target.value }
                   setState(prev => ({
                     ...prev,
                     filters: newFilters
                   }))
-                  applyFiltersImmediately(newFilters)
+                  apply_filters_immediately(newFilters)
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
               <input
                 type="number"
                 placeholder="最大数量"
-                value={state.filters.quantityMax}
+                value={state.filters.quantity_max}
                 onChange={(e) => {
-                  const newFilters = { ...state.filters, quantityMax: e.target.value }
+                  const newFilters = { ...state.filters, quantity_max: e.target.value }
                   setState(prev => ({
                     ...prev,
                     filters: newFilters
                   }))
-                  applyFiltersImmediately(newFilters)
+                  apply_filters_immediately(newFilters)
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
@@ -2108,22 +2308,22 @@ export default function PurchaseList() {
             <div className="grid grid-cols-3 gap-2">
               <input
                 type="date"
-                value={state.filters.startDate}
+                value={state.filters.start_date}
                 onChange={(e) => {
                   setState(prev => ({
                     ...prev,
-                    filters: { ...prev.filters, startDate: e.target.value }
+                    filters: { ...prev.filters, start_date: e.target.value }
                   }))
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
               <input
                 type="date"
-                value={state.filters.endDate}
+                value={state.filters.end_date}
                 onChange={(e) => {
                   setState(prev => ({
                     ...prev,
-                    filters: { ...prev.filters, endDate: e.target.value }
+                    filters: { ...prev.filters, end_date: e.target.value }
                   }))
                 }}
                 className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
@@ -2135,7 +2335,7 @@ export default function PurchaseList() {
                   if (sortField && e.target.value) {
                     const updatedSorting: { [key: string]: 'asc' | 'desc' | null } = { [sortField]: e.target.value as 'asc' | 'desc' }
                     setState(prev => ({ ...prev, sorting: updatedSorting }))
-                    applyFiltersImmediately(state.filters, updatedSorting)
+                    apply_filters_immediately(state.filters, updatedSorting)
                   }
                 }}
                 disabled={!Object.keys(state.sorting).find(key => state.sorting[key] !== null)}
@@ -2156,7 +2356,7 @@ export default function PurchaseList() {
       </div>
 
       {/* 加载状态 */}
-      {state.loading && (
+      {state.isLoading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           <span className="ml-2 text-gray-500">加载中...</span>
@@ -2186,7 +2386,7 @@ export default function PurchaseList() {
       )}
 
       {/* 数据列表 */}
-      {isAuthenticated && !state.loading && !state.error && (
+      {isAuthenticated && !state.isLoading && !state.error && (
         <>
           {state.purchases.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -2211,10 +2411,10 @@ export default function PurchaseList() {
       )}
 
       {/* 图片预览弹窗 */}
-      {state.image_preview.isOpen && (
+      {state.image_preview.is_open && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 sm:p-4"
-          onClick={closeImagePreview}
+          onClick={close_image_preview}
         >
           <div 
             className="relative flex items-center justify-center"
@@ -2234,7 +2434,7 @@ export default function PurchaseList() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                closeImagePreview()
+                close_image_preview()
               }}
               className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-black bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90 transition-all z-20 shadow-lg"
               title="关闭"

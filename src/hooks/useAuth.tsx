@@ -1,35 +1,35 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { User, LoginRequest } from '../types'
-import { authApi } from '../services/api'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react'
+import { User, login_request } from '../types'
+import { auth_api } from '../services/api'
 
-interface AuthContextType {
+interface auth_context_type {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (credentials: LoginRequest) => Promise<void>
+  login: (credentials: login_request) => Promise<void>
   logout: () => void
   isAuthenticated: boolean
   isBoss: boolean
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<auth_context_type | undefined>(undefined)
 
-interface AuthProviderProps {
+interface auth_provider_props {
   children: ReactNode
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export function AuthProvider({ children }: auth_provider_props) {
+  const [user, set_user] = useState<User | null>(null)
+  const [token, set_token] = useState<string | null>(null)
+  const [isLoading, set_is_loading] = useState(true)
 
   // 初始化时检查本地存储的认证信息
   useEffect(() => {
     const initAuth = async () => {
       console.log('🔄 [认证初始化] 开始初始化认证状态')
       try {
-        const storedToken = localStorage.getItem('auth_token')
-        const storedUser = localStorage.getItem('auth_user')
+        const storedToken = localStorage.get_item('auth_token')
+        const storedUser = localStorage.get_item('auth_user')
         
         console.log('🔍 [认证初始化] 检查本地存储:', {
           hasToken: !!storedToken,
@@ -40,25 +40,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (storedToken && storedUser) {
           try {
             const userData = JSON.parse(storedUser)
-            console.log('✅ [认证初始化] 从本地存储恢复用户数据:', userData.username)
+            console.log('✅ [认证初始化] 从本地存储恢复用户数据:', userData.user_name)
             
             // 先设置本地存储的数据
-            setToken(storedToken)
-            setUser(userData)
+            set_token(storedToken)
+            set_user(userData)
             
             // 验证token是否仍然有效
             console.log('🔍 [认证初始化] 验证token有效性...')
             try {
-              const response = await authApi.verify()
+              const response = await auth_api.verify()
               if (response.success && response.data) {
                 console.log('✅ [认证初始化] Token验证成功，更新用户数据')
-                setUser(response.data as User)
+                set_user(response.data as User)
               } else {
                 // 只有在明确的认证错误时才清除认证信息
                 if (response.message && (response.message.includes('token') || response.message.includes('认证') || response.message.includes('unauthorized'))) {
                   console.warn('⚠️ [认证初始化] Token无效，清除认证信息')
-                  setUser(null)
-                  setToken(null)
+                  set_user(null)
+                  set_token(null)
                   localStorage.removeItem('auth_token')
                   localStorage.removeItem('auth_user')
                 } else {
@@ -71,8 +71,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
               // 只有在明确的认证错误时才清除认证信息
               if (verifyError.response?.status === 401 || verifyError.response?.status === 403) {
                 console.warn('❌ [认证初始化] 认证失效，清除认证信息')
-                setUser(null)
-                setToken(null)
+                set_user(null)
+                set_token(null)
                 localStorage.removeItem('auth_token')
                 localStorage.removeItem('auth_user')
               } else {
@@ -80,8 +80,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 // 网络错误，保持本地认证状态
               }
             }
-          } catch (parseError) {
-            console.error('❌ [认证初始化] 解析用户数据失败:', parseError)
+          } catch (parse_error) {
+            console.error('❌ [认证初始化] 解析用户数据失败:', parse_error)
             // 清除损坏的数据
             localStorage.removeItem('auth_token')
             localStorage.removeItem('auth_user')
@@ -91,35 +91,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch (error) {
         console.error('❌ [认证初始化] 初始化认证状态失败:', error)
-        setUser(null)
-        setToken(null)
+        set_user(null)
+        set_token(null)
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
       } finally {
         console.log('🏁 [认证初始化] 认证状态初始化完成')
-        setIsLoading(false)
+        set_is_loading(false)
       }
     }
 
     initAuth()
   }, [])
 
-  const login = async (credentials: LoginRequest) => {
+  const login = useCallback(async (credentials: login_request) => {
     try {
-      setIsLoading(true)
+      set_is_loading(true)
       
       console.log('登录开始:', {
-        username: credentials.username,
+        user_name: credentials.user_name,
         timestamp: new Date().toISOString()
       });
       
-      const response = await authApi.login(credentials)
+      const response = await auth_api.login(credentials)
       
       if (response.success && response.data) {
         const { user: userData, token: userToken } = response.data as { user: User; token: string }
         
-        setUser(userData)
-        setToken(userToken)
+        set_user(userData)
+        set_token(userToken)
         
         // 存储到本地存储
         localStorage.setItem('auth_token', userToken)
@@ -134,25 +134,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('登录失败:', error);
       throw new Error(error.response?.data?.message || error.message || '登录失败')
     } finally {
-      setIsLoading(false)
+      set_is_loading(false)
     }
-  }
+  }, [])
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
-      await authApi.logout()
+      await auth_api.logout()
     } catch (error) {
       console.error('登出请求失败:', error)
     } finally {
-      setUser(null)
-      setToken(null)
+      set_user(null)
+      set_token(null)
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
       console.log('用户已退出登录')
     }
-  }
+  }, [])
 
-  const value: AuthContextType = {
+  const value: auth_context_type = useMemo(() => ({
     user,
     token,
     isLoading,
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     isAuthenticated: !!user && !!token,
     isBoss: user?.role === 'BOSS'
-  }
+  }), [user, token, isLoading, login, logout])
 
   return (
     <AuthContext.Provider value={value}>
@@ -181,35 +181,35 @@ export function useAuth() {
 export function usePermission() {
   const { user, isBoss } = useAuth()
   
-  const hasPermission = (requiredRole?: 'BOSS' | 'EMPLOYEE') => {
+  const has_permission = (required_role?: 'BOSS' | 'EMPLOYEE') => {
     if (!user) return false
-    if (!requiredRole) return true
-    if (requiredRole === 'BOSS') return isBoss
+    if (!required_role) return true
+    if (required_role === 'BOSS') return isBoss
     return true // employee权限所有认证用户都有
   }
   
-  const canViewSensitiveData = () => {
+  const can_view_sensitive_data = () => {
     return isBoss
   }
   
-  const canManageUsers = () => {
+  const can_manage_users = () => {
     return isBoss
   }
   
-  const canManageSuppliers = () => {
+  const can_manage_suppliers = () => {
     return isBoss
   }
   
-  const canUseBatchImport = () => {
+  const can_use_batch_import = () => {
     return isBoss
   }
   
-  const canUseAssistant = () => {
+  const can_use_assistant = () => {
     return isBoss
   }
 
   // 敏感数据过滤（递归处理嵌套字段）
-  const filterSensitiveData = <T,>(data: T): T => {
+  const filter_sensitive_data = <T,>(data: T): T => {
     if (isBoss) return data
 
     const sensitiveFields = [
@@ -238,13 +238,13 @@ export function usePermission() {
   }
   
   return {
-    hasPermission,
-    canViewSensitiveData,
-    canManageUsers,
-    canManageSuppliers,
-    canUseBatchImport,
-    canUseAssistant,
-    filterSensitiveData,
+    has_permission,
+    can_view_sensitive_data,
+    can_manage_users,
+    can_manage_suppliers,
+    can_use_batch_import,
+    can_use_assistant,
+    filter_sensitive_data,
     isBoss
   }
 }

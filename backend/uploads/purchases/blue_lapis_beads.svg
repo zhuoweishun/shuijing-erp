@@ -1,0 +1,16 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#084fc3;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#grad)" rx="10" ry="10"/>
+  <circle cx="200" cy="120" r="60" fill="#88cfff" opacity="0.8"/>
+  <circle cx="160" cy="140" r="25" fill="#baffff" opacity="0.6"/>
+  <circle cx="240" cy="140" r="25" fill="#baffff" opacity="0.6"/>
+  <circle cx="200" cy="160" r="20" fill="#eeffff" opacity="0.4"/>
+  <text x="200" y="220" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="white">青金石散珠</text>
+  <text x="200" y="240" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="white" opacity="0.8">高品质天然水晶</text>
+  <text x="200" y="270" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white" opacity="0.6">Crystal ERP System</text>
+</svg>

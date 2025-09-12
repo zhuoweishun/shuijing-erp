@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-09-12T16:14:32.770981",
+  "fixes_applied": [
+    {
+      "file": "scripts\\convert-camel-to-snake.js",
+      "type": "targeted_fix",
+      "count": 2
+    },
+    {
+      "file": "scripts\\create-realistic-test-data.js",
+      "type": "targeted_fix",
+      "count": 2
+    },
+    {
+      "file": "scripts\\create-realistic-test-data_backup.js",
+      "type": "targeted_fix",
+      "count": 2
+    }
+  ],
+  "files_modified": [
+    "scripts\\convert-camel-to-snake.js",
+    "scripts\\create-realistic-test-data.js",
+    "scripts\\create-realistic-test-data_backup.js"
+  ],
+  "stats": {
+    "files_scanned": 4,
+    "files_modified": 3,
+    "total_replacements": 6,
+    "undefined_var_fixes": 2,
+    "unused_var_fixes": 4
+  }
+}

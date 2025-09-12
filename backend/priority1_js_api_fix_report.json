@@ -1,0 +1,617 @@
+{
+  "timestamp": "2025-09-12T18:25:29.773716",
+  "summary": {
+    "processed_files": 31,
+    "modified_files": 5,
+    "total_fixes": 143
+  },
+  "fixes_by_file": {
+    "src\\server.ts": 5,
+    "src\\middleware\\auth.ts": 1,
+    "src\\middleware\\errorHandler.ts": 16,
+    "src\\middleware\\responseValidator.ts": 6,
+    "src\\routes\\customers.ts": 10,
+    "src\\routes\\dashboard.ts": 1,
+    "src\\routes\\financial.ts": 31,
+    "src\\routes\\health.ts": 3,
+    "src\\routes\\inventory.ts": 90,
+    "src\\routes\\materials.ts": 9,
+    "src\\routes\\products.ts": 16,
+    "src\\routes\\purchases.ts": 88,
+    "src\\routes\\skus.ts": 23,
+    "src\\routes\\suppliers.ts": 11,
+    "src\\routes\\upload.ts": 2,
+    "src\\routes\\users.ts": 5,
+    "src\\services\\ai.ts": 8,
+    "src\\utils\\fieldConverter.ts": 11,
+    "src\\utils\\logger.ts": 2,
+    "src\\utils\\network.ts": 1,
+    "src\\utils\\operationLogger.ts": 6,
+    "src\\utils\\updateImageUrls.ts": 1,
+    "src\\utils\\validation.ts": 1,
+    "src\\routes\\__tests__\\purchases.test.ts": 1
+  },
+  "fixes_by_pattern": {
+    "\\.includes\\(": 44,
+    "console\\.log\\(": 124,
+    "Object\\.keys\\(": 31,
+    "JSON\\.stringify\\(": 18,
+    "console\\.error\\(": 33,
+    "console\\.warn\\(": 5,
+    "\\.get_time\\(": 5,
+    "\\.to_lower_case\\(": 1,
+    "Math\\.ceil\\(": 19,
+    "Math\\.floor\\(": 7,
+    "\\.index_of\\(": 1,
+    "\\.to_fixed\\(": 10,
+    "Math\\.abs\\(": 6,
+    "Math\\.round\\(": 10,
+    "Object\\.entries\\(": 6,
+    "JSON\\.parse\\(": 9,
+    "Math\\.max\\(": 4,
+    "Math\\.min\\(": 7,
+    "Math\\.random\\(": 5,
+    "Object\\.values\\(": 2,
+    "\\.get_date\\(": 1
+  },
+  "detailed_log": [
+    {
+      "file": "src\\server.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 1
+    },
+    {
+      "file": "src\\server.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 4
+    },
+    {
+      "file": "src\\middleware\\auth.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 1
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 16
+    },
+    {
+      "file": "src\\middleware\\responseValidator.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 1
+    },
+    {
+      "file": "src\\middleware\\responseValidator.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\middleware\\responseValidator.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 1
+    },
+    {
+      "file": "src\\middleware\\responseValidator.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 2
+    },
+    {
+      "file": "src\\middleware\\responseValidator.ts",
+      "pattern": "console\\.warn\\(",
+      "replacement": "console.warn(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "\\.get_time\\(",
+      "replacement": ".getTime(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "\\.to_lower_case\\(",
+      "replacement": ".toLowerCase(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 3
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\dashboard.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "\\.get_time\\(",
+      "replacement": ".getTime(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "\\.index_of\\(",
+      "replacement": ".indexOf(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "\\.to_fixed\\(",
+      "replacement": ".toFixed(",
+      "count": 6
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 3
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 10
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "Math\\.abs\\(",
+      "replacement": "Math.abs(",
+      "count": 5
+    },
+    {
+      "file": "src\\routes\\financial.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\health.ts",
+      "pattern": "Math\\.round\\(",
+      "replacement": "Math.round(",
+      "count": 3
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "\\.to_fixed\\(",
+      "replacement": ".toFixed(",
+      "count": 3
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 7
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 7
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Object\\.entries\\(",
+      "replacement": "Object.entries(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "JSON\\.parse\\(",
+      "replacement": "JSON.parse(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Math\\.round\\(",
+      "replacement": "Math.round(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Math\\.max\\(",
+      "replacement": "Math.max(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "Math\\.min\\(",
+      "replacement": "Math.min(",
+      "count": 6
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 39
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 14
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "pattern": "console\\.warn\\(",
+      "replacement": "console.warn(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\materials.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\materials.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\materials.ts",
+      "pattern": "Math\\.random\\(",
+      "replacement": "Math.random(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\materials.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 6
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "pattern": "Math\\.round\\(",
+      "replacement": "Math.round(",
+      "count": 3
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 6
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 9
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 6
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 5
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "Math\\.random\\(",
+      "replacement": "Math.random(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 55
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 4
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "pattern": "console\\.warn\\(",
+      "replacement": "console.warn(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Object\\.values\\(",
+      "replacement": "Object.values(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Object\\.entries\\(",
+      "replacement": "Object.entries(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Math\\.max\\(",
+      "replacement": "Math.max(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "Math\\.random\\(",
+      "replacement": "Math.random(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 12
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\suppliers.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\suppliers.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 7
+    },
+    {
+      "file": "src\\routes\\suppliers.ts",
+      "pattern": "console\\.warn\\(",
+      "replacement": "console.warn(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\upload.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\upload.ts",
+      "pattern": "Math\\.random\\(",
+      "replacement": "Math.random(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\users.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\users.ts",
+      "pattern": "Math\\.ceil\\(",
+      "replacement": "Math.ceil(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\users.ts",
+      "pattern": "Math\\.max\\(",
+      "replacement": "Math.max(",
+      "count": 2
+    },
+    {
+      "file": "src\\routes\\users.ts",
+      "pattern": "Math\\.min\\(",
+      "replacement": "Math.min(",
+      "count": 1
+    },
+    {
+      "file": "src\\services\\ai.ts",
+      "pattern": "JSON\\.parse\\(",
+      "replacement": "JSON.parse(",
+      "count": 4
+    },
+    {
+      "file": "src\\services\\ai.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 4
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "\\.to_fixed\\(",
+      "replacement": ".toFixed(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 2
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "Object\\.entries\\(",
+      "replacement": "Object.entries(",
+      "count": 3
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "JSON\\.parse\\(",
+      "replacement": "JSON.parse(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "Math\\.abs\\(",
+      "replacement": "Math.abs(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "console\\.log\\(",
+      "replacement": "console.log(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "pattern": "console\\.error\\(",
+      "replacement": "console.error(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\logger.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\logger.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\network.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "pattern": "Object\\.keys\\(",
+      "replacement": "Object.keys(",
+      "count": 2
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "pattern": "JSON\\.parse\\(",
+      "replacement": "JSON.parse(",
+      "count": 2
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "pattern": "JSON\\.stringify\\(",
+      "replacement": "JSON.stringify(",
+      "count": 2
+    },
+    {
+      "file": "src\\utils\\updateImageUrls.ts",
+      "pattern": "\\.includes\\(",
+      "replacement": ".includes(",
+      "count": 1
+    },
+    {
+      "file": "src\\utils\\validation.ts",
+      "pattern": "Math\\.floor\\(",
+      "replacement": "Math.floor(",
+      "count": 1
+    },
+    {
+      "file": "src\\routes\\__tests__\\purchases.test.ts",
+      "pattern": "\\.get_date\\(",
+      "replacement": ".getDate(",
+      "count": 1
+    }
+  ]
+}

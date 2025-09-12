@@ -1,0 +1,415 @@
+{
+  "timestamp": "2025-09-12T21:51:19.016086",
+  "total_fixes": 68,
+  "files_modified": 38,
+  "backup_location": "backups\\final_round_fix_20250912_215118",
+  "fixes_applied": [
+    {
+      "file": "src\\setupTests.ts",
+      "type": "dom_api",
+      "from": "define_property",
+      "to": "defineProperty"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "complete_rewrite",
+      "description": "Rewrote useDeviceDetection to fix duplicate declarations"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "variable_reference",
+      "from": "custom_status",
+      "to": "item.custom_status"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "variable_reference",
+      "from": "selected_product_type",
+      "to": "selectedProductTypes"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "dom_api",
+      "from": "get_input_props",
+      "to": "getInputProps"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "variable_reference",
+      "from": "dropzone_upload",
+      "to": "DropzoneUpload"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "html_form_attribute",
+      "from": "on_submit",
+      "to": "onSubmit"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "component_prop",
+      "from": "onChange",
+      "to": "on_change"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "user_agent",
+      "to": "userAgent"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "get_user_media",
+      "to": "getUserMedia"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "get_supported_constraints",
+      "to": "getSupportedConstraints"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "is_valid",
+      "to": "isValid"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "define_property",
+      "to": "defineProperty"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "dom_api",
+      "from": "get_input_props",
+      "to": "getInputProps"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "dropzone_upload",
+      "to": "DropzoneUpload"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "Dropzone_upload",
+      "to": "DropzoneUpload"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "get_user_media",
+      "to": "getUserMedia"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "variable_reference",
+      "from": "renderError",
+      "to": "render_error"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "dom_api",
+      "from": "to_string",
+      "to": "toString"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "dom_api",
+      "from": "status_text",
+      "to": "statusText"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "dom_api",
+      "from": "query_selector",
+      "to": "querySelector"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_reference",
+      "from": "use_navigate",
+      "to": "useNavigate"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\SupplierManagement.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\pages\\UserManagement.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "dom_api",
+      "from": "user_agent",
+      "to": "userAgent"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "dom_api",
+      "from": "status_text",
+      "to": "statusText"
+    },
+    {
+      "file": "src\\types\\financial.ts",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "variable_reference",
+      "from": "category",
+      "to": "item.category"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_reference",
+      "from": "piece_count_value",
+      "to": "piece_count"
+    },
+    {
+      "file": "src\\utils\\validation.ts",
+      "type": "dom_api",
+      "from": "is_valid",
+      "to": "isValid"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "variable_reference",
+      "from": "is_authenticated",
+      "to": "isAuthenticated"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "variable_reference",
+      "from": "is_boss",
+      "to": "isBoss"
+    }
+  ]
+}

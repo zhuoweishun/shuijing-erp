@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-09-12T16:02:57.368167",
+  "total_files_scanned": 105,
+  "files_modified": 6,
+  "total_replacements": 23,
+  "field_replacements": {
+    "totalPurchases": 10,
+    "usedBeads": 13
+  },
+  "modified_files": [
+    "src\\components\\CustomerDetailModal.tsx",
+    "src\\pages\\CustomerManagement.tsx",
+    "backend\\src\\routes\\customers.ts",
+    "backend\\src\\routes\\dashboard.ts",
+    "backend\\src\\routes\\inventory.ts",
+    "backend\\src\\routes\\products.ts"
+  ],
+  "errors": []
+}

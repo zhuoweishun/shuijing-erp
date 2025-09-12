@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-09-12T16:04:07.170715",
+  "total_files_scanned": 2,
+  "files_modified": 1,
+  "total_replacements": 5,
+  "field_replacements": {
+    "totalPurchases": 5
+  },
+  "modified_files": [
+    "test-customer-labels.js"
+  ],
+  "errors": []
+}

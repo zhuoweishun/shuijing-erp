@@ -17,14 +17,14 @@ if (import.meta.env.MODE === 'development') {
   }
 }
 import { useDropzone } from 'react-dropzone'
-import { finishedProductApi, fixImageUrl, uploadApi, getApiUrl } from '../services/api'
+import { finished_product_api, fixImageUrl, upload_api, get_api_url } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
-import { formatPurchaseCode } from '../utils/fieldConverter'
-import { sortByPinyin } from '../utils/pinyinSort'
+import { format_purchase_code } from '../utils/fieldConverter'
+import { sort_by_pinyin } from '../utils/pinyinSort'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
 // 辅助函数：解析并获取第一张图片URL
-const getFirstPhotoUrl = (photos: any): string | null => {
+const get_first_photo_url = (photos: any): string | null => {
   if (!photos) return null
   
   let photoArray: string[] = []
@@ -75,12 +75,12 @@ import {
 
 export default function ProductEntry() {
   const { user, isAuthenticated } = useAuth()
-  const { isMobile } = useDeviceDetection()
-  const [currentStep, setCurrentStep] = useState<'mode' | 'materials' | 'info' | 'batch_details' | 'review'>('mode')
-  const [productionMode, setProductionMode] = useState<ProductionMode>('DIRECT_TRANSFORM')
-  const [formData, setFormData] = useState<ProductionFormData>({
+  const { isMobile: isMobile } = useDeviceDetection()
+  const [current_step, set_current_step] = useState<'mode' | 'materials' | 'info' | 'batch_details' | 'review'>('mode')
+  const [production_mode, set_production_mode] = useState<ProductionMode>('DIRECT_TRANSFORM')
+  const [formData, set_form_data] = useState<ProductionFormData>({
     mode: 'DIRECT_TRANSFORM',
-    product_name: '',
+    material_name: '',
     description: '',
     specification: '',
     selected_materials: [],
@@ -93,18 +93,18 @@ export default function ProductEntry() {
   })
   
   // 批量创建模式的状态
-  const [batchFormData, setBatchFormData] = useState<{
+  const [batch_form_data, set_batch_form_data] = useState<{
     selected_materials: (AvailableMaterial & { 
       selected_quantity: number
-      product_info: {
-        product_name: string
+      productInfo: {
+        material_name: string
         description: string
         specification: string | number
         labor_cost: number
         craft_cost: number
         selling_price: number
         photos: string[]
-        material_cost: number
+        materialCost: number
         total_cost: number
         profit_margin: number
       }
@@ -112,23 +112,23 @@ export default function ProductEntry() {
   }>({
     selected_materials: []
   })
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
+  const [expanded_items, set_expanded_items] = useState<Set<string>>(new Set())
   
-  const [availableMaterials, setAvailableMaterials] = useState<AvailableMaterial[]>([])
-  const [materialSearch, setMaterialSearch] = useState('')
-  const [costCalculation, setCostCalculation] = useState<CostCalculationResponse | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [materialsLoading, setMaterialsLoading] = useState(false)
-  const [selectedMaterialDetail, setSelectedMaterialDetail] = useState<AvailableMaterial | null>(null)
+  const [available_materials, set_available_materials] = useState<AvailableMaterial[]>([])
+  const [material_search, set_material_search] = useState('')
+  const [cost_calculation, set_cost_calculation] = useState<CostCalculationResponse | null>(null)
+  const [loading, set_loading] = useState(false)
+  const [materials_loading, set_materials_loading] = useState(false)
+  const [selected_material_detail, set_selected_material_detail] = useState<AvailableMaterial | null>(null)
   
   // 组合制作模式的分类标签页状态
-  const [activeTab, setActiveTab] = useState<'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES'>('LOOSE_BEADS')
+  const [active_tab, set_active_tab] = useState<'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES'>('LOOSE_BEADS')
   
   // 拍照相关状态
-  const [isCameraActive, setIsCameraActive] = useState(false)
-  const [cameraError, setCameraError] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [productPhotos, setProductPhotos] = useState<string[]>([])
+  const [is_camera_active, set_is_camera_active] = useState(false)
+  const [camera_error, set_camera_error] = useState<string | null>(null)
+  const [uploading, set_uploading] = useState(false)
+  const [material_photos, set_material_photos] = useState<string[]>([])
   
   // 文件数据接口
   interface FileData {
@@ -139,26 +139,26 @@ export default function ProductEntry() {
     uploaded_url?: string
   }
   
-  const [fileDataList, setFileDataList] = useState<FileData[]>([])
+  const [file_data_list, set_file_data_list] = useState<FileData[]>([])
   
   // 拍照功能函数
   const startCamera = () => {
     console.log('启动相机')
-    setCameraError(null)
-    setIsCameraActive(true)
+    set_camera_error(null)
+    set_is_camera_active(true)
   }
   
   const stopCamera = () => {
     console.log('停止相机')
-    setIsCameraActive(false)
-    setCameraError(null)
+    set_is_camera_active(false)
+    set_camera_error(null)
   }
   
   // 处理相机拍照
   const handleCameraPhoto = async (dataUri: string) => {
     console.log('处理相机拍照')
     
-    if (productPhotos.length > 0) {
+    if (material_photos.length > 0) {
       toast.error('已有图片，请先删除当前图片再拍照')
       return
     }
@@ -168,7 +168,7 @@ export default function ProductEntry() {
       return
     }
     
-    setUploading(true)
+    set_uploading(true)
     
     try {
       const timestamp = Date.now()
@@ -176,14 +176,14 @@ export default function ProductEntry() {
       const base64Data = dataUri.split(',')[1]
       const fileSize = Math.round((base64Data.length * 3) / 4)
       
-      const file_data: FileData = {
+      const fileData: FileData = {
         base64: dataUri,
         name: fileName,
         size: fileSize,
         type: 'image/jpeg'
       }
       
-      setFileDataList([file_data])
+      set_file_data_list([fileData])
       
       // 转换为Blob并上传
       const byteCharacters = atob(base64Data)
@@ -197,10 +197,10 @@ export default function ProductEntry() {
       const formData = new FormData()
       formData.append('images', blob, fileName)
       
-      const response = await uploadApi.upload_purchase_images(formData)
+      const response = await upload_api.uploadPurchaseImages(formData)
       
       if (response.success && response.data && (response.data as any).urls) {
-        const apiUrl = getApiUrl()
+        const apiUrl = get_api_url()
         const baseUrl = apiUrl.replace('/api/v1', '')
         const url = (response.data as any).urls[0]
         
@@ -212,8 +212,8 @@ export default function ProductEntry() {
           fullUrl = `${baseUrl}${normalizedUrl}`
         }
         
-        setProductPhotos([fullUrl])
-        setFormData(prev => ({ ...prev, photos: [fullUrl] }))
+        set_material_photos([fullUrl])
+        set_form_data(prev => ({ ...prev, photos: [fullUrl] }))
         stopCamera()
         toast.success('拍照上传成功')
       } else {
@@ -222,9 +222,9 @@ export default function ProductEntry() {
     } catch (error) {
       console.error('拍照上传失败:', error)
       toast.error('拍照上传失败，请重试')
-      setFileDataList([])
+      set_file_data_list([])
     } finally {
-      setUploading(false)
+      set_uploading(false)
     }
   }
   
@@ -232,7 +232,7 @@ export default function ProductEntry() {
   const handleImageUpload = async (files: FileList) => {
     if (files.length === 0) return
     
-    if (productPhotos.length > 0) {
+    if (material_photos.length > 0) {
       toast.error('已有图片，请先删除当前图片再上传新图片')
       return
     }
@@ -242,7 +242,7 @@ export default function ProductEntry() {
       return
     }
     
-    setUploading(true)
+    set_uploading(true)
     
     try {
       const formData = new FormData()
@@ -250,10 +250,10 @@ export default function ProductEntry() {
         formData.append('images', file)
       })
       
-      const response = await uploadApi.upload_purchase_images(formData)
+      const response = await upload_api.uploadPurchaseImages(formData)
       
       if (response.success && response.data && (response.data as any).urls) {
-        const apiUrl = getApiUrl()
+        const apiUrl = get_api_url()
         const baseUrl = apiUrl.replace('/api/v1', '')
         const urls = (response.data as any).urls
         
@@ -266,8 +266,8 @@ export default function ProductEntry() {
           }
         })
         
-        setProductPhotos(fullUrls)
-        setFormData(prev => ({ ...prev, photos: fullUrls }))
+        set_material_photos(fullUrls)
+        set_form_data(prev => ({ ...prev, photos: fullUrls }))
         toast.success('图片上传成功')
       } else {
         throw new Error(response.message || '上传失败')
@@ -276,23 +276,23 @@ export default function ProductEntry() {
       console.error('图片上传失败:', error)
       toast.error('图片上传失败，请重试')
     } finally {
-      setUploading(false)
+      set_uploading(false)
     }
   }
   
   // 删除图片
-  const removeProductImage = async (index: number) => {
-    const imageUrl = productPhotos[index]
+  const removeMaterialImage = async (index: number) => {
+    const image_url = material_photos[index]
     
     try {
-      if (imageUrl) {
-        await uploadApi.deletePurchaseImages([imageUrl])
+      if (image_url) {
+        await upload_api.deletePurchaseImages([image_url])
       }
       
-      const newPhotos = productPhotos.filter((_, i) => i !== index)
-      setProductPhotos(newPhotos)
-      setFormData(prev => ({ ...prev, photos: newPhotos }))
-      setFileDataList([])
+      const newPhotos = material_photos.filter((_, i) => i !== index)
+      set_material_photos(newPhotos)
+      set_form_data(prev => ({ ...prev, photos: newPhotos }))
+      set_file_data_list([])
       toast.success('图片删除成功')
     } catch (error) {
       console.error('删除图片失败:', error)
@@ -318,8 +318,8 @@ export default function ProductEntry() {
       }
     }, [onFilesAccepted])
     
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-      onDrop,
+    const { getRootProps, get_input_props, isDragActive } = useDropzone({
+      onDrop: onDrop,
       accept: {
         'image/*': ['.jpeg', '.jpg', '.png', '.gif']
       },
@@ -344,21 +344,21 @@ export default function ProductEntry() {
   }
   
   // 根据当前标签页和搜索条件筛选原材料
-  const getFilteredMaterials = () => {
-    let filteredMaterials = availableMaterials
+  const get_filtered_materials = () => {
+    let filteredMaterials = available_materials
     
     // 组合制作模式：按分类筛选
     if (formData.mode === 'COMBINATION_CRAFT') {
-      filteredMaterials = filteredMaterials.filter(material => material.product_type === activeTab)
+      filteredMaterials = filteredMaterials.filter(material => material.material_type === active_tab)
     }
     
     // 搜索筛选
-    if (materialSearch.trim()) {
-      const searchTerm = materialSearch.toLowerCase().trim()
+    if (material_search.trim()) {
+      const search_term = material_search.toLowerCase().trim()
       filteredMaterials = filteredMaterials.filter(material => 
-        material.product_name.toLowerCase().includes(searchTerm) ||
-        (material.quality && material.quality.toLowerCase().includes(searchTerm)) ||
-        (material.supplier_name && material.supplier_name.toLowerCase().includes(searchTerm))
+        material.material_name.toLowerCase().includes(search_term) ||
+        (material.quality && material.quality.toLowerCase().includes(search_term)) ||
+        (material.supplier_name && material.supplier_name.toLowerCase().includes(search_term))
       )
     }
     
@@ -368,81 +368,81 @@ export default function ProductEntry() {
   // 获取可用原材料
   const fetchAvailableMaterials = async () => {
     try {
-      setMaterialsLoading(true)
+      set_materials_loading(true)
       
       // 添加认证状态调试信息
       console.log('🔍 [DEBUG] 认证状态检查:', {
         isAuthenticated,
-        user: user ? { id: user.id, username: user.username, role: user.role } : null,
-        token: localStorage.getItem('auth_token') ? '有token' : '无token'
+        user: user ? { id: user.id, user_name: user.user_name, role: user.role } : null,
+        token: localStorage.get_item('auth_token') ? '有token' : '无token'
       })
       
       if (!isAuthenticated) {
         console.error('❌ 用户未认证，无法获取原材料')
         toast.error('请先登录')
-        setAvailableMaterials([])
+        set_available_materials([])
         return
       }
       
       // 根据制作模式筛选原材料类型
-      let productTypes: string[] = []
+      let material_types: string[] = []
       if (formData.mode === 'DIRECT_TRANSFORM') {
         // 直接转化模式：只显示成品类型的原材料
-        productTypes = ['FINISHED']
+        material_types = ['FINISHED']
       } else if (formData.mode === 'COMBINATION_CRAFT') {
         // 组合制作模式：显示散珠、手串、配件
-        productTypes = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES']
+        material_types = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES']
       }
       
-      console.log('🔍 [原材料筛选] 制作模式:', formData.mode, '筛选类型:', productTypes)
+      console.log('🔍 [原材料筛选] 制作模式:', formData.mode, '筛选类型:', material_types)
       
-      const response = await finishedProductApi.getMaterials({
-        search: materialSearch,
+      const response = await finished_product_api.get_materials({
+        search: material_search,
         available_only: true,
         min_quantity: 1,
-        product_types: productTypes
+        material_types: material_types
       })
       
       if (response.success && response.data && typeof response.data === 'object' && response.data !== null && 'materials' in response.data) {
         let materials = (response.data as any).materials
         
         // 对原材料进行拼音排序
-        materials = sortByPinyin(materials, (material: any) => material.product_name)
+        materials = sort_by_pinyin(materials, (material: any) => material.material_name)
         
-        setAvailableMaterials(materials)
+        set_available_materials(materials)
       } else {
-        setAvailableMaterials([])
+        set_available_materials([])
       }
     } catch (error: any) {
       console.error('获取原材料失败:', error)
       toast.error('获取原材料失败')
-      setAvailableMaterials([])
+      set_available_materials([])
     } finally {
-      setMaterialsLoading(false)
+      set_materials_loading(false)
     }
   }
 
   // 计算制作成本
-  const calculateCost = async () => {
+  const calculate_cost = async () => {
     if (formData.selected_materials.length === 0) {
-      setCostCalculation(null)
+      set_cost_calculation(null)
       return
     }
 
     try {
       // 根据制作数量计算总的原材料使用量
-      const productionQuantity = formData.mode === 'COMBINATION_CRAFT' ? formData.production_quantity : 1
+      const production_quantity = formData.mode === 'COMBINATION_CRAFT' ? formData.production_quantity : 1
       
       const materials: MaterialUsageRequest[] = formData.selected_materials.map(item => ({
         purchase_id: item.material.purchase_id,
-        quantity_used_beads: item.quantity_used_beads * productionQuantity,
-        quantity_used_pieces: item.quantity_used_pieces * productionQuantity
+        quantity_used_beads: item.quantity_used_beads * production_quantity,
+        quantity_used_pieces: item.quantity_used_pieces * production_quantity
       }))
 
-      const response = await finishedProductApi.calculateCost({
+      const response = await finished_product_api.calculate_cost({
         materials,
-        labor_cost: formData.labor_cost * productionQuantity,
-        craft_cost: formData.craft_cost * productionQuantity,
+        labor_cost: formData.labor_cost * production_quantity,
+        craft_cost: formData.craft_cost * production_quantity,
         profit_margin: formData.profit_margin
       })
 
@@ -450,7 +450,7 @@ export default function ProductEntry() {
         const costData = response.data as CostCalculationResponse
         console.log('🔍 [成本计算] 后端返回的完整数据:', JSON.stringify(costData, null, 2))
         console.log('🔍 [成本计算] 成本分解数据:', costData.cost_breakdown)
-        setCostCalculation(costData)
+        set_cost_calculation(costData)
         // 移除自动设置销售价格的逻辑，让用户完全控制销售价格输入
       }
     } catch (error: any) {
@@ -463,7 +463,7 @@ export default function ProductEntry() {
   const addMaterial = (material: AvailableMaterial) => {
     if (formData.mode === 'DIRECT_TRANSFORM') {
       // 直接转化模式：添加到批量选择列表
-      const isAlreadySelected = batchFormData.selected_materials.some(
+      const isAlreadySelected = batch_form_data.selected_materials.some(
         item => item.purchase_id === material.purchase_id
       )
       
@@ -472,20 +472,20 @@ export default function ProductEntry() {
         return
       }
 
-      setBatchFormData(prev => {
+      set_batch_form_data(prev => {
         const materialWithQuantity = { 
           ...material, 
           selected_quantity: 1,
-          product_info: {
-            product_name: material.product_name + '（销售成品）',
+          productInfo: {
+            material_name: material.material_name + '（销售成品）',
             description: '',
             specification: material.specification || '',
             labor_cost: 20, // 默认人工成本
             craft_cost: 100, // 默认工艺成本
             selling_price: 0,
             photos: material.photos || [],
-            material_cost: material.unit_cost || 0,
-            total_cost: (material.unit_cost || 0) + 20 + 100,
+            materialCost: material.unitCost || 0,
+            total_cost: (material.unitCost || 0) + 20 + 100,
             profit_margin: 0
           }
         }
@@ -505,22 +505,22 @@ export default function ProductEntry() {
         return
       }
 
-      setFormData(prev => ({
+      set_form_data(prev => ({
         ...prev,
         selected_materials: [...prev.selected_materials, {
           material,
-          quantity_used_beads: material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? 1 : 0,
-          quantity_used_pieces: material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED' ? 1 : 0
+          quantity_used_beads: material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? 1 : 0,
+          quantity_used_pieces: material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED' ? 1 : 0
         }]
       }))
     }
   }
 
   // 更新原材料选择数量（直接转化模式）
-  const updateBatchMaterialQuantity = (purchaseId: string, quantity: number) => {
-    setBatchFormData(prev => ({
+  const updateBatchMaterialQuantity = (material_id: string, quantity: number) => {
+    set_batch_form_data(prev => ({
       selected_materials: prev.selected_materials.map(material => 
-        material.purchase_id === purchaseId 
+        material.purchase_id === material_id 
           ? { ...material, selected_quantity: Math.min(quantity, material.available_quantity) }
           : material
       )
@@ -528,36 +528,36 @@ export default function ProductEntry() {
   }
 
   // 移除原材料
-  const removeMaterial = (purchaseId: string) => {
+  const removeMaterial = (material_id: string) => {
     if (formData.mode === 'DIRECT_TRANSFORM') {
       // 直接转化模式：从批量选择列表中移除
-      setBatchFormData(prev => ({
+      set_batch_form_data(prev => ({
         selected_materials: prev.selected_materials.filter(
-          item => item.purchase_id !== purchaseId
+          item => item.purchase_id !== material_id
         )
       }))
     } else {
       // 组合制作模式：原有逻辑
-      setFormData(prev => ({
+      set_form_data(prev => ({
         ...prev,
         selected_materials: prev.selected_materials.filter(
-          item => item.material.purchase_id !== purchaseId
+          item => item.material.purchase_id !== material_id
         )
       }))
     }
   }
 
   // 输入框显示值状态
-  const [inputValues, setInputValues] = useState<Record<string, string>>({})
+  const [input_values, set_input_values] = useState<Record<string, string>>({})
 
   // 更新原材料使用数量
-  const updateMaterialQuantity = (purchaseId: string, field: 'quantity_used_beads' | 'quantity_used_pieces', value: number) => {
-    setFormData(prev => {
+  const updateMaterialQuantity = (material_id: string, field: 'quantity_used_beads' | 'quantity_used_pieces', value: number) => {
+    set_form_data(prev => {
       // 更新原材料使用量
       const updatedFormData = {
         ...prev,
         selected_materials: prev.selected_materials.map(item => 
-          item.material.purchase_id === purchaseId 
+          item.material.purchase_id === material_id 
             ? { ...item, [field]: Math.max(0, Math.min(value, item.material.available_quantity)) }
             : item
         )
@@ -580,21 +580,21 @@ export default function ProductEntry() {
   }
 
   // 更新输入框显示值
-  const updateInputValue = (purchaseId: string, field: string, displayValue: string) => {
-    const key = `${purchaseId}_${field}`
+  const updateInputValue = (material_id: string, field: string, displayValue: string) => {
+    const key = `${ material_id }_${field}`
     console.log(`🔄 更新输入框显示值: ${key} = "${displayValue}"`)
-    setInputValues(prev => ({
+    set_input_values(prev => ({
       ...prev,
       [key]: displayValue
     }))
   }
 
   // 获取输入框显示值
-  const getInputValue = (purchaseId: string, field: string, actualValue: number) => {
-    const key = `${purchaseId}_${field}`
-    if (inputValues[key] !== undefined) {
-      console.log(`📖 使用显示值: ${key} = "${inputValues[key]}" (实际值: ${actualValue})`)
-      return inputValues[key]
+  const get_input_value = (material_id: string, field: string, actualValue: number) => {
+    const key = `${ material_id }_${field}`
+    if (input_values[key] !== undefined) {
+      console.log(`📖 使用显示值: ${key} = "${input_values[key]}" (实际值: ${actualValue})`)
+      return input_values[key]
     }
     const displayValue = actualValue > 0 ? actualValue.toString() : ''
     console.log(`📖 使用实际值: ${key} = "${displayValue}" (实际值: ${actualValue})`)
@@ -613,12 +613,12 @@ export default function ProductEntry() {
       const material = item.material
       let availableForThisMaterial = 0
       
-      if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
+      if (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') {
         // 散珠和手串按颗数计算
         if (item.quantity_used_beads > 0) {
           availableForThisMaterial = Math.floor(material.available_quantity / item.quantity_used_beads)
         }
-      } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
+      } else if (material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED') {
         // 配件和成品按片/件数计算
         if (item.quantity_used_pieces > 0) {
           availableForThisMaterial = Math.floor(material.available_quantity / item.quantity_used_pieces)
@@ -643,7 +643,7 @@ export default function ProductEntry() {
     const maxQuantity = calculateMaxProductionQuantity()
     const validQuantity = Math.max(1, Math.min(quantity, maxQuantity))
     
-    setFormData(prev => ({
+    set_form_data(prev => ({
       ...prev,
       production_quantity: validQuantity
     }))
@@ -654,24 +654,24 @@ export default function ProductEntry() {
   }
 
   // 更新批量产品信息
-  const updateBatchProduct = (materialId: string, field: string, value: any) => {
-    setBatchFormData(prev => ({
+  const updateBatchProduct = (product_id: string, field: string, value: any) => {
+    set_batch_form_data(prev => ({
       selected_materials: prev.selected_materials.map(material => {
-        if (material.purchase_id === materialId) {
-          const updatedProductInfo = { ...material.product_info, [field]: value }
+        if (material.purchase_id === product_id) {
+          const updatedProductInfo = { ...material.productInfo, [field]: value }
           
           // 重新计算成本和利润率
-          const totalCost = updatedProductInfo.material_cost + updatedProductInfo.labor_cost + updatedProductInfo.craft_cost
-          const profitMargin = updatedProductInfo.selling_price > 0 
-            ? ((updatedProductInfo.selling_price - totalCost) / updatedProductInfo.selling_price) * 100 
+          const total_cost = updatedProductInfo.materialCost + updatedProductInfo.labor_cost + updatedProductInfo.craft_cost
+          const profit_margin = updatedProductInfo.selling_price > 0 
+            ? ((updatedProductInfo.selling_price - total_cost) / updatedProductInfo.selling_price) * 100 
             : 0
           
-          updatedProductInfo.total_cost = totalCost
-          updatedProductInfo.profit_margin = profitMargin
+          updatedProductInfo.total_cost = total_cost
+          updatedProductInfo.profit_margin = profit_margin
           
           return {
             ...material,
-            product_info: updatedProductInfo
+            productInfo: updatedProductInfo
           }
         }
         return material
@@ -682,19 +682,19 @@ export default function ProductEntry() {
   // 批量创建成品提交
   const handleBatchSubmit = async () => {
     try {
-      setLoading(true)
+      set_loading(true)
       
       // 验证批量表单数据
-      if (batchFormData.selected_materials.length === 0) {
+      if (batch_form_data.selected_materials.length === 0) {
         toast.error('请至少选择一种原材料')
         return
       }
       
       // 验证每个成品的必填字段
-      for (let i = 0; i < batchFormData.selected_materials.length; i++) {
-        const material = batchFormData.selected_materials[i]
-        const product = material.product_info
-        if (!product.product_name.trim()) {
+      for (let i = 0; i < batch_form_data.selected_materials.length; i++) {
+        const material = batch_form_data.selected_materials[i]
+        const product = material.productInfo
+        if (!product.material_name.trim()) {
           toast.error(`第${i + 1}个成品请输入名称`)
           return
         }
@@ -708,17 +708,17 @@ export default function ProductEntry() {
 
       // 根据数量生成批量请求
       const products = []
-      for (const material of batchFormData.selected_materials) {
+      for (const material of batch_form_data.selected_materials) {
         for (let i = 0; i < material.selected_quantity; i++) {
           products.push({
             material_id: material.purchase_id,
-            product_name: material.product_info.product_name + (material.selected_quantity > 1 ? ` #${i + 1}` : ''),
-            description: material.product_info.description,
+            material_name: material.productInfo.material_name + (material.selected_quantity > 1 ? ` #${i + 1}` : ''),
+            description: material.productInfo.description,
             specification: material.specification || '',
-            labor_cost: material.product_info.labor_cost,
-            craft_cost: material.product_info.craft_cost,
-            selling_price: material.product_info.selling_price,
-            photos: material.product_info.photos
+            labor_cost: material.productInfo.labor_cost,
+            craft_cost: material.productInfo.craft_cost,
+            selling_price: material.productInfo.selling_price,
+            photos: material.productInfo.photos
           })
         }
       }
@@ -727,17 +727,17 @@ export default function ProductEntry() {
         products
       }
 
-      const response = await finishedProductApi.batchCreate(batchRequest)
+      const response = await finished_product_api.batchCreate(batchRequest)
 
       if (response.success) {
         const data = response.data as BatchProductCreateResponse
         toast.success(`批量创建成功！成功创建${data.success_count}个成品${data.failed_count > 0 ? `，失败${data.failed_count}个` : ''}`)
         
         // 重置表单
-        setBatchFormData({
+        set_batch_form_data({
           selected_materials: []
         })
-        setCurrentStep('mode')
+        set_current_step('mode')
       } else {
         toast.error(response.message || '批量创建失败')
       }
@@ -745,17 +745,17 @@ export default function ProductEntry() {
       console.error('批量提交失败:', error)
       toast.error('批量提交失败，请重试')
     } finally {
-      setLoading(false)
+      set_loading(false)
     }
   }
 
-  // 提交成品制作（组合模式）
+  // 提交SKU成品制作（组合模式）
   const handleSubmit = async () => {
     try {
-      setLoading(true)
+      set_loading(true)
       
       // 验证表单数据
-      if (!formData.product_name.trim()) {
+      if (!formData.material_name.trim()) {
         toast.error('请输入成品名称')
         return
       }
@@ -797,8 +797,8 @@ export default function ProductEntry() {
           quantity_used_pieces: item.quantity_used_pieces
         }))
 
-        const response = await finishedProductApi.create({
-          product_name: formData.product_name,
+        const response = await finished_product_api.create({
+          material_name: formData.material_name,
           description: formData.description,
           specification: formData.specification,
           materials,
@@ -810,7 +810,7 @@ export default function ProductEntry() {
         })
 
         if (response.success) {
-          toast.success('成品制作成功！')
+          toast.success('SKU成品制作成功！')
         } else {
           toast.error(response.message || '制作失败')
           return
@@ -826,8 +826,8 @@ export default function ProductEntry() {
           }))
 
           // 为每个成品创建请求
-          const response = await finishedProductApi.create({
-            product_name: formData.product_name + (formData.production_quantity > 1 ? ` #${i + 1}` : ''),
+          const response = await finished_product_api.create({
+            material_name: formData.material_name + (formData.production_quantity > 1 ? ` #${i + 1}` : ''),
             description: formData.description,
             specification: formData.specification,
             materials,
@@ -839,7 +839,7 @@ export default function ProductEntry() {
           })
 
           if (!response.success) {
-            toast.error(`第${i + 1}个成品制作失败: ${response.message}`)
+            toast.error(`第${i + 1}个SKU成品制作失败: ${response.message}`)
             return
           }
         }
@@ -848,9 +848,9 @@ export default function ProductEntry() {
       }
 
       // 重置表单
-      setFormData({
+      set_form_data({
         mode: 'DIRECT_TRANSFORM',
-        product_name: '',
+        material_name: '',
         description: '',
         specification: '',
         selected_materials: [],
@@ -861,47 +861,47 @@ export default function ProductEntry() {
         photos: [],
         production_quantity: 1
       })
-      setCurrentStep('mode')
-      setCostCalculation(null)
+      set_current_step('mode')
+      set_cost_calculation(null)
     } catch (error: any) {
       console.error('提交失败:', error)
       toast.error('提交失败，请重试')
     } finally {
-      setLoading(false)
+      set_loading(false)
     }
   }
 
   // 当选择的原材料或成本发生变化时，重新计算成本
   useEffect(() => {
-    calculateCost()
+    calculate_cost()
   }, [formData.selected_materials, formData.labor_cost, formData.craft_cost, formData.profit_margin, formData.production_quantity, formData.selling_price])
 
   // 当进入原材料选择步骤时，获取可用原材料
   useEffect(() => {
-    if (currentStep === 'materials') {
+    if (current_step === 'materials') {
       fetchAvailableMaterials()
     }
-  }, [currentStep, materialSearch, formData.mode])
+  }, [current_step, material_search, formData.mode])
 
   // 渲染制作模式选择
   const renderModeSelection = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">选择制作模式</h2>
-        <p className="text-gray-600">请选择适合的成品制作方式</p>
+        <p className="text-gray-600">请选择适合的SKU成品制作方式</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 直接转化模式 */}
         <div 
           className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-            productionMode === 'DIRECT_TRANSFORM' 
+            production_mode === 'DIRECT_TRANSFORM' 
               ? 'border-crystal-500 bg-crystal-50' 
               : 'border-gray-200 hover:border-gray-300'
           }`}
           onClick={() => {
-            setProductionMode('DIRECT_TRANSFORM')
-            setFormData(prev => ({ ...prev, mode: 'DIRECT_TRANSFORM' }))
+            set_production_mode('DIRECT_TRANSFORM')
+            set_form_data(prev => ({ ...prev, mode: 'DIRECT_TRANSFORM' }))
           }}
         >
           <div className="text-center">
@@ -916,13 +916,13 @@ export default function ProductEntry() {
         {/* 组合制作模式 */}
         <div 
           className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-            productionMode === 'COMBINATION_CRAFT' 
+            production_mode === 'COMBINATION_CRAFT' 
               ? 'border-crystal-500 bg-crystal-50' 
               : 'border-gray-200 hover:border-gray-300'
           }`}
           onClick={() => {
-            setProductionMode('COMBINATION_CRAFT')
-            setFormData(prev => ({ ...prev, mode: 'COMBINATION_CRAFT' }))
+            set_production_mode('COMBINATION_CRAFT')
+            set_form_data(prev => ({ ...prev, mode: 'COMBINATION_CRAFT' }))
           }}
         >
           <div className="text-center">
@@ -937,7 +937,7 @@ export default function ProductEntry() {
       
       <div className="flex justify-center">
         <button
-          onClick={() => setCurrentStep('materials')}
+          onClick={() => set_current_step('materials')}
           className="px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 transition-colors"
         >
           下一步：选择原材料
@@ -951,24 +951,24 @@ export default function ProductEntry() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900">选择原材料</h2>
-        <p className="text-gray-600">模式：{productionMode === 'DIRECT_TRANSFORM' ? '直接转化' : '组合制作'}</p>
+        <p className="text-gray-600">模式：{production_mode === 'DIRECT_TRANSFORM' ? '直接转化' : '组合制作'}</p>
       </div>
       
 
       
       {/* 已选择的原材料 */}
-      {(formData.mode === 'DIRECT_TRANSFORM' ? batchFormData.selected_materials.length > 0 : formData.selected_materials.length > 0) && (
+      {(formData.mode === 'DIRECT_TRANSFORM' ? batch_form_data.selected_materials.length > 0 : formData.selected_materials.length > 0) && (
         <div className="bg-crystal-50 p-4 rounded-lg">
           <h3 className="font-semibold text-gray-900 mb-3">已选择的原材料</h3>
           <div className="space-y-3">
             {formData.mode === 'DIRECT_TRANSFORM' ? (
               // 直接转化模式：显示批量选择的原材料
-              batchFormData.selected_materials.map((material) => (
+              batch_form_data.selected_materials.map((material) => (
                 <div key={material.purchase_id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{material.product_name}</div>
+                    <div className="font-medium text-gray-900">{material.material_name}</div>
                     <div className="text-sm text-gray-600">
-                      {material.product_type} · {material.quality}级 · 可用: {material.available_quantity}
+                      {material.material_type} · {material.quality}级 · 可用: {material.available_quantity}
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -1000,21 +1000,21 @@ export default function ProductEntry() {
               formData.selected_materials.map((item) => (
                 <div key={item.material.purchase_id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.material.product_name}</div>
+                    <div className="font-medium text-gray-900">{item.material.material_name}</div>
                     <div className="text-sm text-gray-600">
-                      {item.material.product_type} · {item.material.quality}级 · 可用: {item.material.available_quantity}
+                      {item.material.material_type} · {item.material.quality}级 · 可用: {item.material.available_quantity}
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     {/* 珠子数量输入 */}
-                    {(item.material.product_type === 'LOOSE_BEADS' || item.material.product_type === 'BRACELET') && (
+                    {(item.material.material_type === 'LOOSE_BEADS' || item.material.material_type === 'BRACELET') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-sm text-gray-600">颗数:</label>
                         <input
                           type="number"
                           min="0"
                           max={item.material.available_quantity}
-                          value={getInputValue(item.material.purchase_id, 'quantity_used_beads', item.quantity_used_beads)}
+                          value={get_input_value(item.material.purchase_id, 'quantity_used_beads', item.quantity_used_beads)}
                           onChange={(e) => {
                             const value = e.target.value
                             updateInputValue(item.material.purchase_id, 'quantity_used_beads', value)
@@ -1027,7 +1027,7 @@ export default function ProductEntry() {
                           onBlur={() => {
                             // 失焦时清理显示值状态，让实际值接管
                             const key = `${item.material.purchase_id}_quantity_used_beads`
-                            setInputValues(prev => {
+                            set_input_values((prev: any) => {
                               const newValues = { ...prev }
                               delete newValues[key]
                               return newValues
@@ -1039,14 +1039,14 @@ export default function ProductEntry() {
                     )}
                     
                     {/* 片/件数量输入 */}
-                    {(item.material.product_type === 'ACCESSORIES' || item.material.product_type === 'FINISHED') && (
+                    {(item.material.material_type === 'ACCESSORIES' || item.material.material_type === 'FINISHED') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-sm text-gray-600">数量:</label>
                         <input
                           type="number"
                           min="0"
                           max={item.material.available_quantity}
-                          value={getInputValue(item.material.purchase_id, 'quantity_used_pieces', item.quantity_used_pieces)}
+                          value={get_input_value(item.material.purchase_id, 'quantity_used_pieces', item.quantity_used_pieces)}
                           onChange={(e) => {
                             const value = e.target.value
                             updateInputValue(item.material.purchase_id, 'quantity_used_pieces', value)
@@ -1059,7 +1059,7 @@ export default function ProductEntry() {
                           onBlur={() => {
                             // 失焦时清理显示值状态，让实际值接管
                             const key = `${item.material.purchase_id}_quantity_used_pieces`
-                            setInputValues(prev => {
+                            set_input_values((prev: any) => {
                               const newValues = { ...prev }
                               delete newValues[key]
                               return newValues
@@ -1095,8 +1095,8 @@ export default function ProductEntry() {
               <input
                 type="text"
                 placeholder="搜索原材料..."
-                value={materialSearch}
-                onChange={(e) => setMaterialSearch(e.target.value)}
+                value={material_search}
+                onChange={(e) => set_material_search(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent text-sm"
               />
             </div>
@@ -1106,9 +1106,9 @@ export default function ProductEntry() {
           {formData.mode === 'COMBINATION_CRAFT' && (
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
               <button
-                onClick={() => setActiveTab('LOOSE_BEADS')}
+                onClick={() => set_active_tab('LOOSE_BEADS')}
                 className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'LOOSE_BEADS'
+                  active_tab === 'LOOSE_BEADS'
                     ? 'bg-white text-crystal-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -1116,9 +1116,9 @@ export default function ProductEntry() {
                 散珠
               </button>
               <button
-                onClick={() => setActiveTab('BRACELET')}
+                onClick={() => set_active_tab('BRACELET')}
                 className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'BRACELET'
+                  active_tab === 'BRACELET'
                     ? 'bg-white text-crystal-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -1126,9 +1126,9 @@ export default function ProductEntry() {
                 手串
               </button>
               <button
-                onClick={() => setActiveTab('ACCESSORIES')}
+                onClick={() => set_active_tab('ACCESSORIES')}
                 className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'ACCESSORIES'
+                  active_tab === 'ACCESSORIES'
                     ? 'bg-white text-crystal-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -1139,14 +1139,14 @@ export default function ProductEntry() {
           )}
         </div>
         <div className="p-4">
-          {materialsLoading ? (
+          {materials_loading ? (
             <div className="p-8 text-center text-gray-500">加载中...</div>
-          ) : getFilteredMaterials().length === 0 ? (
+          ) : get_filtered_materials().length === 0 ? (
             <div className="text-center py-12">
               <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {formData.mode === 'COMBINATION_CRAFT' 
-                  ? `暂无可用的${activeTab === 'LOOSE_BEADS' ? '散珠' : activeTab === 'BRACELET' ? '手串' : '配饰'}原材料`
+                  ? `暂无可用的${active_tab === 'LOOSE_BEADS' ? '散珠' : active_tab === 'BRACELET' ? '手串' : '配饰'}原材料`
                   : '暂无可用原材料'
                 }
               </h3>
@@ -1154,8 +1154,8 @@ export default function ProductEntry() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
-              {getFilteredMaterials().map((material) => {
-                const getQualityColor = (quality: string) => {
+              {get_filtered_materials().map((material) => {
+                const get_quality_color = (quality: string) => {
                   switch (quality) {
                     case 'A': return 'bg-green-100 text-green-800'
                     case 'B': return 'bg-blue-100 text-blue-800'
@@ -1165,23 +1165,23 @@ export default function ProductEntry() {
                   }
                 }
                 
-                const isLowStock = material.available_quantity < 5
+                const is_low_stock = material.available_quantity < 5
                 
                 return (
                   <div 
                     key={material.purchase_id} 
                     className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 bg-white rounded-lg shadow-sm border border-gray-200 ${
-                      isLowStock ? 'ring-2 ring-red-200' : ''
+                      is_low_stock ? 'ring-2 ring-red-200' : ''
                     }`}
                   >
                     {/* 产品图片 */}
                     <div className="aspect-square relative overflow-hidden rounded-t-lg bg-gray-100">
                       {(() => {
-                        const photoUrl = getFirstPhotoUrl(material.photos)
+                        const photoUrl = get_first_photo_url(material.photos)
                         return photoUrl ? (
                           <img
                             src={photoUrl}
-                            alt={material.product_name}
+                            alt={material.material_name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
                             onError={(e) => {
                               console.error('图片加载失败:', e.currentTarget.src)
@@ -1203,7 +1203,7 @@ export default function ProductEntry() {
                       })()}
                       
                       {/* 低库存标识 */}
-                      {isLowStock && (
+                      {is_low_stock && (
                         <div className="absolute top-2 left-2">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                             库存不足
@@ -1214,7 +1214,7 @@ export default function ProductEntry() {
                       {/* 品相标识 */}
                       {material.quality && (
                         <div className="absolute top-2 right-2">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getQualityColor(material.quality)}`}>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${get_quality_color(material.quality)}`}>
                             {material.quality}级
                           </span>
                         </div>
@@ -1223,7 +1223,7 @@ export default function ProductEntry() {
                       {/* 悬浮查看详情按钮 */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                         <button
-                          onClick={() => setSelectedMaterialDetail(material)}
+                          onClick={() => set_selected_material_detail(material)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-2 bg-crystal-600 text-white rounded-lg shadow-md hover:bg-crystal-700 flex items-center space-x-1"
                         >
                           <Eye className="h-4 w-4" />
@@ -1236,7 +1236,7 @@ export default function ProductEntry() {
                     <div className="p-4">
                       {/* 产品名称 */}
                       <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm leading-tight">
-                        {material.product_name}
+                        {material.material_name}
                       </h3>
                       
                       {/* 规格信息 */}
@@ -1251,7 +1251,7 @@ export default function ProductEntry() {
                       {/* 库存数量 */}
                       <div className="flex items-center text-xs text-gray-600 mb-2">
                         <Package className="h-3 w-3 mr-1" />
-                        <span>库存: {material.available_quantity}{material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : material.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                        <span>库存: {material.available_quantity}{material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
                       </div>
                       
                       {/* 底部按钮 - 添加到清单 */}
@@ -1275,7 +1275,7 @@ export default function ProductEntry() {
       
       <div className="flex justify-between">
         <button
-          onClick={() => setCurrentStep('mode')}
+          onClick={() => set_current_step('mode')}
           className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
           上一步
@@ -1283,12 +1283,12 @@ export default function ProductEntry() {
         <button
           onClick={() => {
             if (formData.mode === 'DIRECT_TRANSFORM') {
-              setCurrentStep('batch_details')
+              set_current_step('batch_details')
             } else {
-              setCurrentStep('info')
+              set_current_step('info')
             }
           }}
-          disabled={formData.mode === 'DIRECT_TRANSFORM' ? batchFormData.selected_materials.length === 0 : formData.selected_materials.length === 0}
+          disabled={formData.mode === 'DIRECT_TRANSFORM' ? batch_form_data.selected_materials.length === 0 : formData.selected_materials.length === 0}
           className="px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           下一步：{formData.mode === 'DIRECT_TRANSFORM' ? '批量填写信息' : '填写信息'}
@@ -1303,7 +1303,7 @@ export default function ProductEntry() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">填写成品信息</h2>
         <button
-          onClick={() => setCurrentStep('materials')}
+          onClick={() => set_current_step('materials')}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -1324,7 +1324,7 @@ export default function ProductEntry() {
           <div className="space-y-3">
             {formData.selected_materials.map((item) => {
               const material = item.material
-              const getQualityColor = (quality: string) => {
+              const get_quality_color = (quality: string) => {
                 switch (quality) {
                   case 'AA': return 'bg-purple-100 text-purple-800'
                   case 'A': return 'bg-green-100 text-green-800'
@@ -1340,11 +1340,11 @@ export default function ProductEntry() {
                   {/* 原材料图片 */}
                   <div className="flex-shrink-0">
                     {(() => {
-                      const photoUrl = getFirstPhotoUrl(material.photos)
+                      const photoUrl = get_first_photo_url(material.photos)
                       return photoUrl ? (
                         <img
                           src={photoUrl}
-                          alt={material.product_name}
+                          alt={material.material_name}
                           className="w-16 h-16 object-cover rounded-lg border border-gray-200"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none'
@@ -1362,10 +1362,10 @@ export default function ProductEntry() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {material.product_name}
+                        {material.material_name}
                       </h4>
                       {material.quality && (
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getQualityColor(material.quality)}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${get_quality_color(material.quality)}`}>
                           {material.quality}级
                         </span>
                       )}
@@ -1378,23 +1378,23 @@ export default function ProductEntry() {
                       </span>
                       <span>
                         库存: {material.available_quantity}
-                        {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : material.product_type === 'ACCESSORIES' ? '片' : '件'}
+                        {material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}
                       </span>
                     </div>
                     
                     {/* 成本信息（仅BOSS可见） */}
-                    {user?.role === 'BOSS' && material.unit_cost && (
+                    {user?.role === 'BOSS' && material.unitCost && (
                       <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
                         <div className="flex items-center justify-between">
                           <span className="text-blue-700 font-medium">成本信息:</span>
                           <div className="flex items-center space-x-3">
                             <span className="text-blue-600">
-                              单价: ¥{(material.unit_cost || 0).toFixed(2)}
+                              单价: ¥{(material.unitCost || 0).toFixed(2)}
                             </span>
                             <span className="text-blue-800 font-medium">
                               小计: ¥{(
-                                (material.unit_cost || 0) * 
-                                ((material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
+                                (material.unitCost || 0) * 
+                                ((material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') 
                                   ? item.quantity_used_beads 
                                   : item.quantity_used_pieces)
                               ).toFixed(2)}
@@ -1408,14 +1408,14 @@ export default function ProductEntry() {
                   {/* 使用数量控制 */}
                   <div className="flex items-center space-x-3">
                     {/* 颗数输入 */}
-                    {(material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') && (
+                    {(material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-xs text-gray-600 whitespace-nowrap">使用颗数:</label>
                         <input
                           type="number"
                           min="0"
                           max={material.available_quantity}
-                          value={getInputValue(material.purchase_id, 'quantity_used_beads', item.quantity_used_beads)}
+                          value={get_input_value(material.purchase_id, 'quantity_used_beads', item.quantity_used_beads)}
                           onChange={(e) => {
                             const value = e.target.value
                             updateInputValue(material.purchase_id, 'quantity_used_beads', value)
@@ -1428,7 +1428,7 @@ export default function ProductEntry() {
                           onBlur={() => {
                             // 失焦时清理显示值状态，让实际值接管
                             const key = `${material.purchase_id}_quantity_used_beads`
-                            setInputValues(prev => {
+                            set_input_values(prev => {
                               const newValues = { ...prev }
                               delete newValues[key]
                               return newValues
@@ -1441,14 +1441,14 @@ export default function ProductEntry() {
                     )}
                     
                     {/* 片/件数输入 */}
-                    {(material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') && (
+                    {(material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-xs text-gray-600 whitespace-nowrap">使用数量:</label>
                         <input
                           type="number"
                           min="0"
                           max={material.available_quantity}
-                          value={getInputValue(material.purchase_id, 'quantity_used_pieces', item.quantity_used_pieces)}
+                          value={get_input_value(material.purchase_id, 'quantity_used_pieces', item.quantity_used_pieces)}
                           onChange={(e) => {
                             const value = e.target.value
                             updateInputValue(material.purchase_id, 'quantity_used_pieces', value)
@@ -1461,7 +1461,7 @@ export default function ProductEntry() {
                           onBlur={() => {
                             // 失焦时清理显示值状态，让实际值接管
                             const key = `${material.purchase_id}_quantity_used_pieces`
-                            setInputValues(prev => {
+                            set_input_values(prev => {
                               const newValues = { ...prev }
                               delete newValues[key]
                               return newValues
@@ -1469,7 +1469,7 @@ export default function ProductEntry() {
                           }}
                           className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-crystal-500"
                         />
-                        <span className="text-xs text-gray-500">{material.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                        <span className="text-xs text-gray-500">{material.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
                       </div>
                     )}
                     
@@ -1492,18 +1492,18 @@ export default function ProductEntry() {
             <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               <h4 className="text-sm font-medium text-blue-900 mb-3">原材料成本汇总</h4>
               <div className="space-y-2">
-                {formData.selected_materials.map((item) => {
+                {formData.selected_materials.map((item: any) => {
                   const material = item.material
-                  const usedQuantity = (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
-                    ? item.quantity_used_beads 
-                    : item.quantity_used_pieces
-                  const itemCost = (material.unit_cost || 0) * usedQuantity
+                  const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                    ? item.quantity_used_beads || 0
+                    : item.quantity_used_pieces || 0
+                  const itemCost = (material.unitCost || 0) * used_quantity
                   
                   return (
                     <div key={material.purchase_id} className="flex justify-between text-xs">
                       <span className="text-gray-700 truncate max-w-xs">
-                        {material.product_name} × {usedQuantity}
-                        {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : material.product_type === 'ACCESSORIES' ? '片' : '件'}
+                        {material.material_name} × {used_quantity}
+                        {material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}
                       </span>
                       <span className="text-blue-700 font-medium">¥{itemCost.toFixed(2)}</span>
                     </div>
@@ -1515,14 +1515,14 @@ export default function ProductEntry() {
                     <span className="text-blue-900">
                       ¥{(() => {
                         // 优先使用后端返回的成本计算结果（单个成品的材料成本）
-                        const singleMaterialCost = costCalculation?.material_cost ? 
-                          (costCalculation.material_cost / formData.production_quantity) :
-                          formData.selected_materials.reduce((total, item) => {
+                        const singleMaterialCost = cost_calculation?.materialCost ? 
+                          (cost_calculation.materialCost / formData.production_quantity) :
+                          formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const usedQuantity = (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
-                              ? item.quantity_used_beads 
-                              : item.quantity_used_pieces
-                            return total + ((material.unit_cost || 0) * usedQuantity)
+                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                               ? item.quantity_used_beads || 0
+                               : item.quantity_used_pieces || 0
+                             return total + ((material.unitCost || 0) * used_quantity)
                           }, 0)
                         return singleMaterialCost.toFixed(2)
                       })()}
@@ -1534,13 +1534,13 @@ export default function ProductEntry() {
                       <span className="font-medium">
                         ¥{(() => {
                           // 优先使用后端返回的成本计算结果
-                          const totalMaterialCost = costCalculation?.cost_breakdown?.material_cost ||
-                            (formData.selected_materials.reduce((total, item) => {
+                          const totalMaterialCost = cost_calculation?.cost_breakdown?.materialCost ||
+                            (formData.selected_materials.reduce((total: number, item: any) => {
                               const material = item.material
-                              const usedQuantity = (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
-                                ? item.quantity_used_beads 
-                                : item.quantity_used_pieces
-                              return total + ((material.unit_cost || 0) * usedQuantity)
+                              const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                                 ? item.quantity_used_beads || 0
+                                 : item.quantity_used_pieces || 0
+                               return total + ((material.unitCost || 0) * used_quantity)
                             }, 0) * formData.production_quantity)
                           return totalMaterialCost.toFixed(2)
                         })()}
@@ -1566,24 +1566,24 @@ export default function ProductEntry() {
                       {/* 总成本计算 */}
                       {(() => {
                         // 优先使用后端返回的成本计算结果
-                        const materialCost = costCalculation?.material_cost || 
-                          formData.selected_materials.reduce((total, item) => {
+                        const materialCost = cost_calculation?.materialCost || 
+                          formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const usedQuantity = (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
-                              ? item.quantity_used_beads 
-                              : item.quantity_used_pieces
-                            return total + ((material.unit_cost || 0) * usedQuantity)
+                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                               ? item.quantity_used_beads || 0
+                               : item.quantity_used_pieces || 0
+                             return total + ((material.unitCost || 0) * used_quantity)
                           }, 0)
-                        const laborCost = costCalculation?.labor_cost || 
+                        const labor_cost = cost_calculation?.labor_cost || 
                           ((formData.labor_cost || 0) * formData.production_quantity)
-                        const craftCost = costCalculation?.craft_cost || 
+                        const craft_cost = cost_calculation?.craft_cost || 
                           ((formData.craft_cost || 0) * formData.production_quantity)
-                        const totalCost = materialCost + laborCost + craftCost
+                        const total_cost = materialCost + labor_cost + craft_cost
                         
                         return (
                           <div className="flex justify-between text-sm font-semibold text-blue-900 border-t border-blue-300 pt-1 mt-1">
                             <span>总成本:</span>
-                            <span>¥{totalCost.toFixed(2)}</span>
+                            <span>¥{total_cost.toFixed(2)}</span>
                           </div>
                         )
                       })()}
@@ -1591,22 +1591,22 @@ export default function ProductEntry() {
                       {/* 销售价格和利润计算 */}
                       {formData.selling_price > 0 && (() => {
                         // 优先使用后端返回的成本计算结果
-                        const materialCost = costCalculation?.material_cost || 
-                          formData.selected_materials.reduce((total, item) => {
+                        const materialCost = cost_calculation?.materialCost || 
+                          formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const usedQuantity = (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') 
+                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') 
                               ? item.quantity_used_beads 
                               : item.quantity_used_pieces
-                            return total + ((material.unit_cost || 0) * usedQuantity)
+                            return total + ((material.unitCost || 0) * used_quantity)
                           }, 0)
-                        const laborCost = costCalculation?.labor_cost || 
+                        const labor_cost = cost_calculation?.labor_cost || 
                           ((formData.labor_cost || 0) * formData.production_quantity)
-                        const craftCost = costCalculation?.craft_cost || 
+                        const craft_cost = cost_calculation?.craft_cost || 
                           ((formData.craft_cost || 0) * formData.production_quantity)
-                        const totalCost = materialCost + laborCost + craftCost
+                        const total_cost = materialCost + labor_cost + craft_cost
                         const totalSellingPrice = formData.selling_price * formData.production_quantity
-                        const profit = totalSellingPrice - totalCost
-                        const profitMargin = totalSellingPrice > 0 ? (profit / totalSellingPrice) * 100 : 0
+                        const profit = totalSellingPrice - total_cost
+                        const profit_margin = totalSellingPrice > 0 ? (profit / totalSellingPrice) * 100 : 0
                         
                         return (
                           <>
@@ -1623,10 +1623,10 @@ export default function ProductEntry() {
                             <div className="flex justify-between text-xs mt-1">
                               <span className="text-blue-700">利润率:</span>
                               <span className={`font-medium ${
-                                profitMargin >= 30 ? 'text-green-600' : 
-                                profitMargin >= 10 ? 'text-yellow-600' : 'text-red-600'
+                                profit_margin >= 30 ? 'text-green-600' : 
+                                profit_margin >= 10 ? 'text-yellow-600' : 'text-red-600'
                               }`}>
-                                {profitMargin.toFixed(1)}%
+                                {profit_margin.toFixed(1)}%
                               </span>
                             </div>
                           </>
@@ -1642,7 +1642,7 @@ export default function ProductEntry() {
           {/* 继续添加原材料按钮 */}
           <div className="mt-4 pt-3 border-t border-gray-200">
             <button
-              onClick={() => setCurrentStep('materials')}
+              onClick={() => set_current_step('materials')}
               className="text-sm text-crystal-600 hover:text-crystal-700 font-medium"
             >
               + 继续添加原材料
@@ -1659,18 +1659,18 @@ export default function ProductEntry() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">成品图片</h3>
             <div className="space-y-4">
                 {/* 图片预览 */}
-                 {productPhotos.length > 0 && (
+                 {material_photos.length > 0 && (
                    <div className="flex flex-col h-full">
                      <div className="flex items-center justify-between mb-2">
                        <p className="text-sm text-gray-600">成品图片：</p>
                        <button
                          type="button"
                          onClick={() => {
-                           console.log('用户手动清除productPhotos状态')
-                           setProductPhotos([])
-                           setFileDataList([])
+                           console.log('用户手动清除material_photos状态')
+                           set_material_photos([])
+                           set_file_data_list([])
                            // 更新表单数据
-                           setFormData(prev => ({ ...prev, photos: [] }))
+                           set_form_data(prev => ({ ...prev, photos: [] }))
                            toast.success('已清除所有图片')
                          }}
                          className="text-xs text-red-600 hover:text-red-800 transition-colors"
@@ -1682,30 +1682,30 @@ export default function ProductEntry() {
                      <div className="flex justify-center flex-1 min-h-0">
                        <div className="relative group w-full h-full">
                          <img
-                           src={fixImageUrl(productPhotos[0])}
+                           src={fixImageUrl(material_photos[0])}
                            alt="成品图片"
                            className="h-full max-h-96 object-contain rounded-lg border border-gray-200 shadow-sm bg-gray-50 mx-auto"
                            onLoad={() => console.log('图片加载成功')}
                            onError={() => {
-                             console.error('图片加载失败:', productPhotos[0])
+                             console.error('图片加载失败:', material_photos[0])
                              toast.error('图片加载失败')
                            }}
                          />
                          <button
                            type="button"
-                           onClick={() => removeProductImage(0)}
+                           onClick={() => removeMaterialImage(0)}
                            className="absolute -top-2 -right-2 w-7 h-7 bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 hover:border-red-200"
                            title="删除图片"
                          >
                            <X className="h-4 w-4" />
                          </button>
                          {/* 上传状态指示器 */}
-                         {fileDataList.length > 0 && productPhotos.length === 0 && (
+                         {file_data_list.length > 0 && material_photos.length === 0 && (
                            <div className="absolute bottom-2 left-2 bg-blue-50 text-blue-700 text-xs px-3 py-1.5 rounded-lg border border-blue-200 font-medium">
                              准备上传
                            </div>
                          )}
-                         {productPhotos.length > 0 && (
+                         {material_photos.length > 0 && (
                            <div className="absolute bottom-2 left-2 bg-green-50 text-green-700 text-xs px-3 py-1.5 rounded-lg border border-green-200 font-medium">
                              已上传
                            </div>
@@ -1716,7 +1716,7 @@ export default function ProductEntry() {
                  )}
                  
                  {/* 相机拍照区域 */}
-                 {!isCameraActive && productPhotos.length === 0 && fileDataList.length === 0 && (
+                 {!is_camera_active && material_photos.length === 0 && file_data_list.length === 0 && (
                    <div className={`flex gap-3 ${isMobile ? 'justify-center' : 'justify-center'}`}>
                      <button
                        type="button"
@@ -1738,7 +1738,7 @@ export default function ProductEntry() {
                  )}
                  
                  {/* 相机组件 */}
-                 {isCameraActive && (
+                 {is_camera_active && (
                    <div className="relative w-full max-w-2xl mx-auto">
                      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                        <div className="p-4 bg-gray-50 border-b border-gray-200">
@@ -1764,8 +1764,8 @@ export default function ProductEntry() {
                            }}
                            onCameraError={(error: Error) => {
                              console.error('相机错误:', error)
-                             setCameraError(`相机错误: ${error.message}`)
-                             setIsCameraActive(false)
+                             set_camera_error(`相机错误: ${error.message}`)
+                             set_is_camera_active(false)
                            }}
                            idealFacingMode={FACING_MODES.ENVIRONMENT}
                            idealResolution={{ width: 1280, height: 720 }}
@@ -1779,7 +1779,7 @@ export default function ProductEntry() {
                            sizeFactor={1}
                            onCameraStart={() => {
                              console.log('相机启动成功')
-                             setCameraError(null)
+                             set_camera_error(null)
                            }}
                            onCameraStop={() => {
                              console.log('相机已停止')
@@ -1791,11 +1791,11 @@ export default function ProductEntry() {
                  )}
                  
                  {/* 相机错误提示 */}
-                 {!isCameraActive && productPhotos.length === 0 && fileDataList.length === 0 && cameraError && (
+                 {!is_camera_active && material_photos.length === 0 && file_data_list.length === 0 && camera_error && (
                    <div className="space-y-3">
                      <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
                        <AlertCircle className="h-4 w-4 inline mr-2" />
-                       {cameraError}
+                       {camera_error}
                      </div>
                    </div>
                  )}
@@ -1821,8 +1821,8 @@ export default function ProductEntry() {
                  <label className="block text-sm font-medium text-gray-700 mb-2">成品名称 *</label>
                  <input
                    type="text"
-                   value={formData.product_name}
-                   onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+                   value={formData.material_name}
+                   onChange={(e) => set_form_data(prev => ({ ...prev, material_name: e.target.value }))}
                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                    placeholder="请输入成品名称"
                  />
@@ -1832,7 +1832,7 @@ export default function ProductEntry() {
                  <label className="block text-sm font-medium text-gray-700 mb-2">成品描述</label>
                  <textarea
                    value={formData.description}
-                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                   onChange={(e) => set_form_data(prev => ({ ...prev, description: e.target.value }))}
                    rows={3}
                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                    placeholder="请输入成品描述"
@@ -1844,7 +1844,7 @@ export default function ProductEntry() {
                  <input
                    type="text"
                    value={formData.specification}
-                   onChange={(e) => setFormData(prev => ({ ...prev, specification: e.target.value }))}
+                   onChange={(e) => set_form_data(prev => ({ ...prev, specification: e.target.value }))}
                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                    placeholder="如：8mm"
                  />
@@ -1861,11 +1861,11 @@ export default function ProductEntry() {
                      onChange={(e) => {
                        const value = e.target.value
                        if (value === '' || value === '0') {
-                         setFormData(prev => ({ ...prev, labor_cost: 0 }))
+                         set_form_data(prev => ({ ...prev, labor_cost: 0 }))
                        } else {
-                         const numValue = parseFloat(value)
-                         if (!isNaN(numValue)) {
-                           setFormData(prev => ({ ...prev, labor_cost: numValue }))
+                         const num_value = parseFloat(value)
+                         if (!isNaN(num_value)) {
+                           set_form_data(prev => ({ ...prev, labor_cost: num_value }))
                          }
                        }
                      }}
@@ -1883,11 +1883,11 @@ export default function ProductEntry() {
                      onChange={(e) => {
                        const value = e.target.value
                        if (value === '' || value === '0') {
-                         setFormData(prev => ({ ...prev, craft_cost: 0 }))
+                         set_form_data(prev => ({ ...prev, craft_cost: 0 }))
                        } else {
-                         const numValue = parseFloat(value)
-                         if (!isNaN(numValue)) {
-                           setFormData(prev => ({ ...prev, craft_cost: numValue }))
+                         const num_value = parseFloat(value)
+                         if (!isNaN(num_value)) {
+                           set_form_data(prev => ({ ...prev, craft_cost: num_value }))
                          }
                        }
                      }}
@@ -1906,20 +1906,20 @@ export default function ProductEntry() {
                    onChange={(e) => {
                      const value = e.target.value
                      if (value === '' || value === '0') {
-                       setFormData(prev => ({ ...prev, selling_price: 0, profit_margin: 0 }))
+                       set_form_data(prev => ({ ...prev, selling_price: 0, profit_margin: 0 }))
                      } else {
-                       const numValue = parseFloat(value)
-                       if (!isNaN(numValue)) {
+                       const num_value = parseFloat(value)
+                       if (!isNaN(num_value)) {
                          // 计算利润率
-                         const totalCost = costCalculation?.cost_breakdown?.total_cost || 0
-                         const profitMargin = numValue > 0 
-                           ? ((numValue - totalCost) / numValue) * 100 
+                         const total_cost = cost_calculation?.cost_breakdown?.total_cost || 0
+                         const profit_margin = num_value > 0 
+                           ? ((num_value - total_cost) / num_value) * 100 
                            : 0
                          
-                         setFormData(prev => ({ 
+                         set_form_data(prev => ({ 
                            ...prev, 
-                           selling_price: numValue,
-                           profit_margin: Math.max(0, profitMargin) // 确保利润率不为负数
+                           selling_price: num_value,
+                           profit_margin: Math.max(0, profit_margin) // 确保利润率不为负数
                          }))
                        }
                      }
@@ -1961,8 +1961,8 @@ export default function ProductEntry() {
                <label className="block text-sm font-medium text-gray-700 mb-2">成品名称 *</label>
                <input
                  type="text"
-                 value={formData.product_name}
-                 onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+                 value={formData.material_name}
+                 onChange={(e) => set_form_data(prev => ({ ...prev, material_name: e.target.value }))}
                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                  placeholder="请输入成品名称"
                />
@@ -1972,7 +1972,7 @@ export default function ProductEntry() {
                <label className="block text-sm font-medium text-gray-700 mb-2">成品描述</label>
                <textarea
                  value={formData.description}
-                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                 onChange={(e) => set_form_data(prev => ({ ...prev, description: e.target.value }))}
                  rows={3}
                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                  placeholder="请输入成品描述"
@@ -1984,7 +1984,7 @@ export default function ProductEntry() {
                <input
                  type="text"
                  value={formData.specification}
-                 onChange={(e) => setFormData(prev => ({ ...prev, specification: e.target.value }))}
+                 onChange={(e) => set_form_data(prev => ({ ...prev, specification: e.target.value }))}
                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                  placeholder="如：8mm"
                />
@@ -2004,11 +2004,11 @@ export default function ProductEntry() {
                    onChange={(e) => {
                      const value = e.target.value
                      if (value === '' || value === '0') {
-                       setFormData(prev => ({ ...prev, labor_cost: 0 }))
+                       set_form_data(prev => ({ ...prev, labor_cost: 0 }))
                      } else {
-                       const numValue = parseFloat(value)
-                       if (!isNaN(numValue)) {
-                         setFormData(prev => ({ ...prev, labor_cost: numValue }))
+                       const num_value = parseFloat(value)
+                       if (!isNaN(num_value)) {
+                         set_form_data(prev => ({ ...prev, labor_cost: num_value }))
                        }
                      }
                    }}
@@ -2026,11 +2026,11 @@ export default function ProductEntry() {
                    onChange={(e) => {
                      const value = e.target.value
                      if (value === '' || value === '0') {
-                       setFormData(prev => ({ ...prev, craft_cost: 0 }))
+                       set_form_data(prev => ({ ...prev, craft_cost: 0 }))
                      } else {
-                       const numValue = parseFloat(value)
-                       if (!isNaN(numValue)) {
-                         setFormData(prev => ({ ...prev, craft_cost: numValue }))
+                       const num_value = parseFloat(value)
+                       if (!isNaN(num_value)) {
+                         set_form_data(prev => ({ ...prev, craft_cost: num_value }))
                        }
                      }
                    }}
@@ -2049,13 +2049,13 @@ export default function ProductEntry() {
                  onChange={(e) => {
                    const value = e.target.value
                    if (value === '' || value === '0') {
-                     setFormData(prev => ({ ...prev, selling_price: 0, profit_margin: 0 }))
+                     set_form_data(prev => ({ ...prev, selling_price: 0, profit_margin: 0 }))
                    } else {
-                     const numValue = parseFloat(value)
-                     if (!isNaN(numValue)) {
-                       setFormData(prev => ({ 
+                     const num_value = parseFloat(value)
+                     if (!isNaN(num_value)) {
+                       set_form_data(prev => ({ 
                          ...prev, 
-                         selling_price: numValue
+                         selling_price: num_value
                        }))
                      }
                    }
@@ -2065,47 +2065,47 @@ export default function ProductEntry() {
              </div>
              
              {/* 成本汇总 */}
-             {(costCalculation || formData.labor_cost > 0 || formData.craft_cost > 0 || formData.selling_price > 0) && (
+             {(cost_calculation || formData.labor_cost > 0 || formData.craft_cost > 0 || formData.selling_price > 0) && (
                <div className="bg-gray-50 p-3 rounded-lg">
                  <h5 className="font-medium text-gray-900 mb-2">成本汇总</h5>
                  <div className="space-y-1 text-sm">
-                   {/* 原材料成本 - 只有在有costCalculation时显示 */}
-                   {costCalculation && (
+                   {/* 原材料成本 - 只有在有cost_calculation时显示 */}
+                   {cost_calculation && (
                      <div className="flex justify-between">
                        <span className="text-gray-600">原材料成本：</span>
-                       <span>¥{(costCalculation.material_cost || 0).toFixed(2)}</span>
+                       <span>¥{(cost_calculation.materialCost || 0).toFixed(2)}</span>
                      </div>
                    )}
                    
                    {/* 人工成本 - 始终显示 */}
                    <div className="flex justify-between">
                      <span className="text-gray-600">人工成本：</span>
-                     <span>¥{(costCalculation?.labor_cost || formData.labor_cost || 0).toFixed(2)}</span>
+                     <span>¥{(cost_calculation?.labor_cost || formData.labor_cost || 0).toFixed(2)}</span>
                    </div>
                    
                    {/* 工艺成本 - 始终显示 */}
                    <div className="flex justify-between">
                      <span className="text-gray-600">工艺成本：</span>
-                     <span>¥{(costCalculation?.craft_cost || formData.craft_cost || 0).toFixed(2)}</span>
+                     <span>¥{(cost_calculation?.craft_cost || formData.craft_cost || 0).toFixed(2)}</span>
                    </div>
                    
                    {/* 总成本计算 */}
                    {(() => {
-                     const materialCost = costCalculation?.material_cost || 0
-                     const laborCost = costCalculation?.labor_cost || formData.labor_cost || 0
-                     const craftCost = costCalculation?.craft_cost || formData.craft_cost || 0
-                     const totalCost = materialCost + laborCost + craftCost
+                     const materialCost = cost_calculation?.materialCost || 0
+                     const labor_cost = cost_calculation?.labor_cost || formData.labor_cost || 0
+                     const craft_cost = cost_calculation?.craft_cost || formData.craft_cost || 0
+                     const total_cost = materialCost + labor_cost + craft_cost
                      
                      return (
                        <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
                          <span>总成本：</span>
-                         <span>¥{totalCost.toFixed(2)}</span>
+                         <span>¥{total_cost.toFixed(2)}</span>
                        </div>
                      )
                    })()}
                    
                    {/* 没有选择原材料时的提示 */}
-                   {!costCalculation && formData.selected_materials.length === 0 && (
+                   {!cost_calculation && formData.selected_materials.length === 0 && (
                      <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mt-2">
                        💡 提示：选择原材料后将显示完整的成本分析
                      </div>
@@ -2113,12 +2113,12 @@ export default function ProductEntry() {
                    
                    {/* 利润计算 - 有销售价格时显示 */}
                    {formData.selling_price > 0 && (() => {
-                     const materialCost = costCalculation?.material_cost || 0
-                     const laborCost = costCalculation?.labor_cost || formData.labor_cost || 0
-                     const craftCost = costCalculation?.craft_cost || formData.craft_cost || 0
-                     const totalCost = materialCost + laborCost + craftCost
-                     const profit = formData.selling_price - totalCost
-                     const profitMargin = (profit / formData.selling_price) * 100
+                     const materialCost = cost_calculation?.materialCost || 0
+                     const labor_cost = cost_calculation?.labor_cost || formData.labor_cost || 0
+                     const craft_cost = cost_calculation?.craft_cost || formData.craft_cost || 0
+                     const total_cost = materialCost + labor_cost + craft_cost
+                     const profit = formData.selling_price - total_cost
+                     const profit_margin = (profit / formData.selling_price) * 100
                      
                      return (
                        <>
@@ -2131,10 +2131,10 @@ export default function ProductEntry() {
                          <div className="flex justify-between font-medium">
                            <span>利润率：</span>
                            <span className={`${
-                             profitMargin >= 30 ? 'text-green-600' : 
-                             profitMargin >= 10 ? 'text-yellow-600' : 'text-red-600'
+                             profit_margin >= 30 ? 'text-green-600' : 
+                             profit_margin >= 10 ? 'text-yellow-600' : 'text-red-600'
                            }`}>
-                             {profitMargin.toFixed(1)}%
+                             {profit_margin.toFixed(1)}%
                            </span>
                          </div>
                        </>
@@ -2152,7 +2152,7 @@ export default function ProductEntry() {
       <div className="flex justify-between mt-6">
         <button
           onClick={handleSubmit}
-          disabled={!formData.product_name.trim() || formData.selling_price <= 0 || loading}
+          disabled={!formData.material_name.trim() || formData.selling_price <= 0 || loading}
           className="px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           {loading ? '提交中...' : '提交制作'}
@@ -2162,30 +2162,29 @@ export default function ProductEntry() {
   )
 
   // 渲染批量信息填写（直接转化模式）
-  const renderBatchDetails = () => {
-    const toggleExpanded = (materialId: string) => {
-      const newExpanded = new Set(expandedItems)
-      if (newExpanded.has(materialId)) {
-        newExpanded.delete(materialId)
+  const renderBatchDetails = () => {const toggleExpanded = (purchase_id: string) => {
+      const newExpanded = new Set(expanded_items)
+      if (newExpanded.has(purchase_id)) {
+        newExpanded.delete(purchase_id)
       } else {
-        newExpanded.add(materialId)
+        newExpanded.add(purchase_id)
       }
-      setExpandedItems(newExpanded)
+      set_expanded_items(newExpanded)
     }
 
-    const calculateCosts = (product: {
-      material_cost: number
+    const calculate_costs = (product: {
+      materialCost: number
       labor_cost: number
       craft_cost: number
       selling_price: number
     }) => {
-      const materialCost = product.material_cost || 0
-      const totalCost = materialCost + product.labor_cost + product.craft_cost
-      const profitMargin = product.selling_price > 0 
-        ? ((product.selling_price - totalCost) / product.selling_price) * 100 
+      const materialCost = product.materialCost || 0
+      const total_cost = materialCost + product.labor_cost + product.craft_cost
+      const profit_margin = product.selling_price > 0 
+        ? ((product.selling_price - total_cost) / product.selling_price) * 100 
         : 0
       
-      return { totalCost, profitMargin }
+      return { total_cost, profit_margin }
     }
 
     return (
@@ -2199,10 +2198,10 @@ export default function ProductEntry() {
         </div>
         
         <div className="space-y-4">
-          {batchFormData.selected_materials.map((material) => {
-            const product = material.product_info
-            const { totalCost, profitMargin } = calculateCosts(product)
-            const isExpanded = expandedItems.has(material.purchase_id)
+          {batch_form_data.selected_materials.map((material) => {
+            const product = material.productInfo
+            const { total_cost, profit_margin } = calculate_costs(product)
+            const isExpanded = expanded_items.has(material.purchase_id)
             
             return (
               <div key={material.purchase_id} className="border border-gray-200 rounded-lg">
@@ -2213,17 +2212,17 @@ export default function ProductEntry() {
                 >
                   <div className="flex items-center space-x-3">
                     <img 
-                      src={getFirstPhotoUrl(material.photos) || ''} 
-                      alt={material.product_name}
+                      src={get_first_photo_url(material.photos) || ''} 
+                      alt={material.material_name}
                       className="w-12 h-12 object-cover rounded"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none'
                       }}
                     />
                     <div>
-                      <h4 className="font-medium text-gray-900">{material.product_name}</h4>
+                      <h4 className="font-medium text-gray-900">{material.material_name}</h4>
                       <p className="text-sm text-gray-500">
-                        原材料成本: ¥{product.material_cost?.toFixed(2) || '0.00'} × {material.selected_quantity}个
+                        原材料成本: ¥{product.materialCost?.toFixed(2) || '0.00'} × {material.selected_quantity}个
                       </p>
                     </div>
                   </div>
@@ -2238,10 +2237,10 @@ export default function ProductEntry() {
                     <div className="text-right">
                       <div className="text-sm text-gray-500">利润率</div>
                       <div className={`font-medium ${
-                        profitMargin >= 30 ? 'text-green-600' : 
-                        profitMargin >= 10 ? 'text-yellow-600' : 'text-red-600'
+                        profit_margin >= 30 ? 'text-green-600' : 
+                        profit_margin >= 10 ? 'text-yellow-600' : 'text-red-600'
                       }`}>
-                        {profitMargin.toFixed(1)}%
+                        {profit_margin.toFixed(1)}%
                       </div>
                     </div>
                     <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${
@@ -2262,8 +2261,8 @@ export default function ProductEntry() {
                           </label>
                           <input
                             type="text"
-                            value={product.product_name}
-                            onChange={(e) => updateBatchProduct(material.purchase_id, 'product_name', e.target.value)}
+                            value={product.material_name}
+                            onChange={(e) => updateBatchProduct(material.purchase_id, 'material_name', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
                             placeholder="请输入成品名称"
                           />
@@ -2302,9 +2301,9 @@ export default function ProductEntry() {
                                 if (value === '' || value === '0') {
                                   updateBatchProduct(material.purchase_id, 'labor_cost', 0)
                                 } else {
-                                  const numValue = parseFloat(value)
-                                  if (!isNaN(numValue)) {
-                                    updateBatchProduct(material.purchase_id, 'labor_cost', numValue)
+                                  const num_value = parseFloat(value)
+                                  if (!isNaN(num_value)) {
+                                    updateBatchProduct(material.purchase_id, 'labor_cost', num_value)
                                   }
                                 }
                               }}
@@ -2326,9 +2325,9 @@ export default function ProductEntry() {
                                 if (value === '' || value === '0') {
                                   updateBatchProduct(material.purchase_id, 'craft_cost', 0)
                                 } else {
-                                  const numValue = parseFloat(value)
-                                  if (!isNaN(numValue)) {
-                                    updateBatchProduct(material.purchase_id, 'craft_cost', numValue)
+                                  const num_value = parseFloat(value)
+                                  if (!isNaN(num_value)) {
+                                    updateBatchProduct(material.purchase_id, 'craft_cost', num_value)
                                   }
                                 }
                               }}
@@ -2351,9 +2350,9 @@ export default function ProductEntry() {
                               if (value === '' || value === '0') {
                                 updateBatchProduct(material.purchase_id, 'selling_price', 0)
                               } else {
-                                const numValue = parseFloat(value)
-                                if (!isNaN(numValue)) {
-                                  updateBatchProduct(material.purchase_id, 'selling_price', numValue)
+                                const num_value = parseFloat(value)
+                                if (!isNaN(num_value)) {
+                                  updateBatchProduct(material.purchase_id, 'selling_price', num_value)
                                 }
                               }
                             }}
@@ -2367,7 +2366,7 @@ export default function ProductEntry() {
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-600">原材料成本：</span>
-                              <span>¥{product.material_cost?.toFixed(2) || '0.00'}</span>
+                              <span>¥{product.materialCost?.toFixed(2) || '0.00'}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">人工成本：</span>
@@ -2379,12 +2378,12 @@ export default function ProductEntry() {
                             </div>
                             <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
                               <span>总成本：</span>
-                              <span>¥{totalCost.toFixed(2)}</span>
+                              <span>¥{total_cost.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between font-medium">
                               <span>预期利润：</span>
-                              <span className={profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                ¥{(product.selling_price - totalCost).toFixed(2)}
+                              <span className={profit_margin >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                ¥{(product.selling_price - total_cost).toFixed(2)}
                               </span>
                             </div>
                           </div>
@@ -2408,7 +2407,7 @@ export default function ProductEntry() {
             className="flex items-center space-x-2 px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             <Save className="h-4 w-4" />
-            <span>{loading ? '创建中...' : `批量创建成品 (${batchFormData.selected_materials.reduce((total, material) => total + material.selected_quantity, 0)}个)`}</span>
+            <span>{loading ? '创建中...' : `批量创建成品 (${batch_form_data.selected_materials.reduce((total, material) => total + material.selected_quantity, 0)}个)`}</span>
           </button>
         </div>
       </div>
@@ -2418,7 +2417,7 @@ export default function ProductEntry() {
 
 
   // 获取品相颜色样式
-  const getQualityColor = (quality: string) => {
+  const get_quality_color = (quality: string) => {
     switch (quality) {
       case 'AA': return 'bg-purple-100 text-purple-800'
       case 'A': return 'bg-green-100 text-green-800'
@@ -2430,8 +2429,8 @@ export default function ProductEntry() {
   }
 
   // 格式化品相显示
-  const formatQuality = (quality: string) => {
-    return quality + '级'
+  const format_quality = (quality: string) => {
+    return quality === '未知' ? quality : quality + '级'
   }
 
   // 处理图片加载错误
@@ -2444,7 +2443,7 @@ export default function ProductEntry() {
       <div className="space-y-6">
         <div className="flex items-center space-x-3">
           <Gem className="h-8 w-8 text-crystal-500" />
-          <h1 className="text-2xl font-bold text-gray-900">成品制作</h1>
+          <h1 className="text-2xl font-bold text-gray-900">SKU成品制作</h1>
         </div>
       
       {/* 步骤指示器 */}
@@ -2464,17 +2463,17 @@ export default function ProductEntry() {
                 ]
             
             const handleStepClick = (stepKey: string, stepIndex: number) => {
-              const currentIndex = steps.findIndex(s => s.key === currentStep)
+              const currentIndex = steps.findIndex(s => s.key === current_step)
               // 只允许点击当前步骤或之前的步骤
               if (stepIndex <= currentIndex) {
-                setCurrentStep(stepKey as any)
+                set_current_step(stepKey as any)
               }
             }
             
             return steps.map((step, index) => {
-              const currentIndex = steps.findIndex(s => s.key === currentStep)
+              const currentIndex = steps.findIndex(s => s.key === current_step)
               const isClickable = index <= currentIndex
-              const isActive = currentStep === step.key
+              const is_active = current_step === step.key
               const isCompleted = index < currentIndex
               
               return (
@@ -2487,7 +2486,7 @@ export default function ProductEntry() {
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                      isActive
+                      is_active
                         ? 'bg-crystal-600 text-white' 
                         : isCompleted
                           ? 'bg-crystal-100 text-crystal-600'
@@ -2496,7 +2495,7 @@ export default function ProductEntry() {
                       {index + 1}
                     </div>
                     <span className={`ml-2 text-sm font-medium transition-colors ${
-                      isActive ? 'text-crystal-600' : isCompleted ? 'text-crystal-500' : 'text-gray-500'
+                      is_active ? 'text-crystal-600' : isCompleted ? 'text-crystal-500' : 'text-gray-500'
                     }`}>
                       {step.label}
                     </span>
@@ -2517,25 +2516,25 @@ export default function ProductEntry() {
       
       {/* 主要内容区域 */}
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        {currentStep === 'mode' && renderModeSelection()}
-        {currentStep === 'materials' && renderMaterialSelection()}
-        {currentStep === 'info' && renderProductInfo()}
-        {currentStep === 'batch_details' && renderBatchDetails()}
+        {current_step === 'mode' && renderModeSelection()}
+        {current_step === 'materials' && renderMaterialSelection()}
+        {current_step === 'info' && renderProductInfo()}
+        {current_step === 'batch_details' && renderBatchDetails()}
 
       </div>
     </div>
 
     {/* 原材料详情模态框 */}
-    {selectedMaterialDetail && (
+    {selected_material_detail && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {selectedMaterialDetail.product_name}
+                {selected_material_detail.material_name}
               </h3>
               <button
-                onClick={() => setSelectedMaterialDetail(null)}
+                onClick={() => set_selected_material_detail(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X className="h-6 w-6" />
@@ -2546,12 +2545,12 @@ export default function ProductEntry() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-gray-500">库存数量</div>
-                  <div className="text-xl font-bold text-gray-900">{selectedMaterialDetail.available_quantity} {selectedMaterialDetail.product_type === 'LOOSE_BEADS' || selectedMaterialDetail.product_type === 'BRACELET' ? '颗' : selectedMaterialDetail.product_type === 'ACCESSORIES' ? '片' : '件'}</div>
+                  <div className="text-xl font-bold text-gray-900">{selected_material_detail.available_quantity} {selected_material_detail.material_type === 'LOOSE_BEADS' || selected_material_detail.material_type === 'BRACELET' ? '颗' : selected_material_detail.material_type === 'ACCESSORIES' ? '片' : '件'}</div>
                 </div>
-                {user?.role === 'BOSS' && selectedMaterialDetail.unit_cost && (
+                {user?.role === 'BOSS' && selected_material_detail.unitCost && (
                   <div>
                     <div className="text-sm text-gray-500">单价</div>
-                    <div className="text-xl font-bold text-gray-900">¥{selectedMaterialDetail.unit_cost.toFixed(2)}</div>
+                    <div className="text-xl font-bold text-gray-900">¥{selected_material_detail.unitCost.toFixed(2)}</div>
                   </div>
                 )}
               </div>
@@ -2561,17 +2560,17 @@ export default function ProductEntry() {
                 <div className="flex items-center space-x-2">
                   <Ruler className="h-4 w-4 text-gray-400" />
                   <span className="text-sm text-gray-700">
-                    {selectedMaterialDetail.bead_diameter ? `${selectedMaterialDetail.bead_diameter}mm` : 
-                     selectedMaterialDetail.specification ? selectedMaterialDetail.specification : '无规格'}
+                    {selected_material_detail.bead_diameter ? `${selected_material_detail.bead_diameter}mm` : 
+                     selected_material_detail.specification ? selected_material_detail.specification : '无规格'}
                   </span>
                 </div>
               </div>
               
-              {selectedMaterialDetail.quality && (
+              {selected_material_detail.quality && (
                 <div>
                   <div className="text-sm text-gray-500 mb-2">品相等级</div>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQualityColor(selectedMaterialDetail.quality)}`}>
-                    {formatQuality(selectedMaterialDetail.quality)}
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${get_quality_color(selected_material_detail.quality)}`}>
+                    {format_quality(selected_material_detail.quality)}
                   </span>
                 </div>
               )}
@@ -2583,38 +2582,38 @@ export default function ProductEntry() {
                     <div>
                       <span className="font-medium text-gray-700">产品类型:</span>
                       <span className="ml-1">
-                        {selectedMaterialDetail.product_type === 'LOOSE_BEADS' ? '散珠' :
-                         selectedMaterialDetail.product_type === 'BRACELET' ? '手串' :
-                         selectedMaterialDetail.product_type === 'ACCESSORIES' ? '配件' : '成品'}
+                        {selected_material_detail.material_type === 'LOOSE_BEADS' ? '散珠' :
+                       selected_material_detail.material_type === 'BRACELET' ? '手串' :
+                       selected_material_detail.material_type === 'ACCESSORIES' ? '配件' : '成品'}
                       </span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">供应商:</span>
-                      <span className="ml-1">{selectedMaterialDetail.supplier_name || '未知'}</span>
+                      <span className="ml-1">{selected_material_detail.supplier_name || '未知'}</span>
                     </div>
                     <div>
                         <span className="font-medium text-gray-700">采购ID:</span>
-                        <span className="ml-1">{selectedMaterialDetail.purchase_code || formatPurchaseCode(selectedMaterialDetail.purchase_id)}</span>
+                        <span className="ml-1">{selected_material_detail.purchase_code || format_purchase_code(selected_material_detail.purchase_id)}</span>
                      </div>
-                     {user?.role === 'BOSS' && selectedMaterialDetail.unit_cost && (
+                     {user?.role === 'BOSS' && selected_material_detail.unitCost && (
                        <div>
                          <span className="font-medium text-gray-700">单位成本:</span>
-                         <span className="ml-1">¥{selectedMaterialDetail.unit_cost.toFixed(2)}</span>
+                         <span className="ml-1">¥{selected_material_detail.unitCost.toFixed(2)}</span>
                        </div>
                      )}
                   </div>
                 </div>
               </div>
               
-              {selectedMaterialDetail.photos && selectedMaterialDetail.photos.length > 0 && (
+              {selected_material_detail.photos && selected_material_detail.photos.length > 0 && (
                 <div>
                   <div className="text-sm text-gray-500 mb-2">产品图片</div>
                   <div className="grid grid-cols-2 gap-3">
-                    {selectedMaterialDetail.photos.slice(0, 4).map((photo, index) => (
+                    {selected_material_detail.photos.slice(0, 4).map((photo, index) => (
                       <img
                         key={index}
                         src={fixImageUrl(photo)}
-                        alt={`${selectedMaterialDetail.product_name} ${index + 1}`}
+                        alt={`${selected_material_detail.material_name} ${index + 1}`}
                         className="w-full max-w-full h-auto object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                         onError={handleImageError}
                         onClick={() => window.open(fixImageUrl(photo), '_blank')}
@@ -2628,8 +2627,8 @@ export default function ProductEntry() {
               <div className="pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
-                    addMaterial(selectedMaterialDetail)
-                    setSelectedMaterialDetail(null)
+                    addMaterial(selected_material_detail)
+                    set_selected_material_detail(null)
                   }}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 transition-colors"
                 >

@@ -1,0 +1,1536 @@
+{
+  "timestamp": "2025-09-12T19:23:38.558633",
+  "dry_run": true,
+  "total_files_processed": 392,
+  "files_modified": 40,
+  "changes": {
+    "d:\\shuijing ERP\\validate-field-naming.js": [
+      [
+        "validateFieldNaming",
+        "validate_field_naming",
+        1
+      ],
+      [
+        "validateFieldNaming",
+        "validate_field_naming",
+        1
+      ],
+      [
+        "validateFieldNaming",
+        "validate_field_naming",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\clean-and-regenerate-skus.js": [
+      [
+        "generateMaterialSignature",
+        "generate_material_signature",
+        1
+      ],
+      [
+        "generateMaterialSignature",
+        "generate_material_signature",
+        1
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        1
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        2
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\create-50-skus.js": [
+      [
+        "generateMaterialSignature",
+        "generate_material_signature",
+        1
+      ],
+      [
+        "generateMaterialSignature",
+        "generate_material_signature",
+        2
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        1
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        2
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\test-fixed-inventory.js": [
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\test-inventory-data.js": [
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        3
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\test-process-verification.js": [
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\test-sku-creation.js": [
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        1
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\test-sku-with-real-images.js": [
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        1
+      ],
+      [
+        "generateSkuCode",
+        "generate_sku_code",
+        2
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\routes\\financial.ts": [
+      [
+        "createSuccessResponse",
+        "create_success_response",
+        1
+      ],
+      [
+        "createSuccessResponse",
+        "create_success_response",
+        8
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\server.ts": [
+      [
+        "testDatabaseConnection",
+        "test_database_connection",
+        1
+      ],
+      [
+        "testDatabaseConnection",
+        "test_database_connection",
+        1
+      ],
+      [
+        "closeDatabaseConnection",
+        "close_database_connection",
+        1
+      ],
+      [
+        "closeDatabaseConnection",
+        "close_database_connection",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\ai.ts": [
+      [
+        "checkAIHealth",
+        "check_ai_health",
+        1
+      ],
+      [
+        "parseCrystalPurchaseDescription",
+        "parse_crystal_purchase_description",
+        1
+      ],
+      [
+        "parseCrystalPurchaseDescription",
+        "parse_crystal_purchase_description",
+        2
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\assistant.ts": [
+      [
+        "chatWithAssistant",
+        "chat_with_assistant",
+        1
+      ],
+      [
+        "chatWithAssistant",
+        "chat_with_assistant",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\auth.ts": [
+      [
+        "createSuccessResponse",
+        "create_success_response",
+        1
+      ],
+      [
+        "createSuccessResponse",
+        "create_success_response",
+        3
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\customers.ts": [
+      [
+        "REFUND_REASON_LABELS",
+        "refund_reason_labels",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\financial.ts": [
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\health.ts": [
+      [
+        "checkDatabaseHealth",
+        "check_database_health",
+        1
+      ],
+      [
+        "checkDatabaseHealth",
+        "check_database_health",
+        2
+      ],
+      [
+        "checkAIHealth",
+        "check_ai_health",
+        1
+      ],
+      [
+        "checkAIHealth",
+        "check_ai_health",
+        1
+      ],
+      [
+        "checkNetworkHealth",
+        "check_network_health",
+        1
+      ],
+      [
+        "checkNetworkHealth",
+        "check_network_health",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts": [
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        4
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts": [
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "filterSensitiveFields",
+        "filter_sensitive_fields",
+        1
+      ],
+      [
+        "filterSensitiveFields",
+        "filter_sensitive_fields",
+        6
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\skus.ts": [
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        1
+      ],
+      [
+        "calculateRemainingQuantity",
+        "calculate_remaining_quantity",
+        2
+      ],
+      [
+        "adjustSchema",
+        "adjust_schema",
+        1
+      ],
+      [
+        "sellSchema",
+        "sell_schema",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts": [
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "createSupplierSchema",
+        "create_supplier_schema",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\upload.ts": [
+      [
+        "deleteImagesSchema",
+        "delete_images_schema",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\routes\\users.ts": [
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        4
+      ],
+      [
+        "createUserSchema",
+        "create_user_schema",
+        1
+      ],
+      [
+        "updateUserSchema",
+        "update_user_schema",
+        1
+      ],
+      [
+        "updateProfileSchema",
+        "update_profile_schema",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\services\\ai.ts": [
+      [
+        "checkAIHealth",
+        "check_ai_health",
+        1
+      ],
+      [
+        "parseCrystalPurchaseDescription",
+        "parse_crystal_purchase_description",
+        1
+      ],
+      [
+        "parsePurchaseDescription",
+        "parse_purchase_description",
+        1
+      ],
+      [
+        "chatWithAssistant",
+        "chat_with_assistant",
+        1
+      ],
+      [
+        "DOUBAO_CONFIG",
+        "doubao_config",
+        1
+      ],
+      [
+        "DOUBAO_CONFIG",
+        "doubao_config",
+        1
+      ],
+      [
+        "DOUBAO_CONFIG",
+        "doubao_config",
+        8
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\services\\database.ts": [
+      [
+        "testDatabaseConnection",
+        "test_database_connection",
+        1
+      ],
+      [
+        "closeDatabaseConnection",
+        "close_database_connection",
+        1
+      ],
+      [
+        "checkDatabaseHealth",
+        "check_database_health",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\utils\\errorResponse.ts": [
+      [
+        "createErrorResponse",
+        "create_error_response",
+        1
+      ],
+      [
+        "createErrorResponse",
+        "create_error_response",
+        16
+      ],
+      [
+        "createSuccessResponse",
+        "create_success_response",
+        1
+      ],
+      [
+        "ErrorResponses",
+        "error_responses",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts": [
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        1
+      ],
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        3
+      ],
+      [
+        "snakeToCamel",
+        "snake_to_camel",
+        1
+      ],
+      [
+        "snakeToCamel",
+        "snake_to_camel",
+        2
+      ],
+      [
+        "validateFieldNaming",
+        "validate_field_naming",
+        1
+      ],
+      [
+        "batchConvertFields",
+        "batch_convert_fields",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        3
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        3
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ],
+      [
+        "isPrismaDecimal",
+        "is_prisma_decimal",
+        1
+      ],
+      [
+        "isPrismaDecimal",
+        "is_prisma_decimal",
+        2
+      ],
+      [
+        "convertPrismaDecimal",
+        "convert_prisma_decimal",
+        1
+      ],
+      [
+        "convertPrismaDecimal",
+        "convert_prisma_decimal",
+        2
+      ],
+      [
+        "convertNumericField",
+        "convert_numeric_field",
+        1
+      ],
+      [
+        "convertNumericField",
+        "convert_numeric_field",
+        1
+      ],
+      [
+        "filterSensitiveFields",
+        "filter_sensitive_fields",
+        1
+      ],
+      [
+        "filterSensitiveFields",
+        "filter_sensitive_fields",
+        1
+      ],
+      [
+        "COMPLETE_FIELD_MAPPINGS",
+        "complete_field_mappings",
+        1
+      ],
+      [
+        "REVERSE_FIELD_MAPPINGS",
+        "reverse_field_mappings",
+        1
+      ],
+      [
+        "NUMERIC_FIELDS",
+        "numeric_fields",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\utils\\network.ts": [
+      [
+        "isPortAvailable",
+        "is_port_available",
+        1
+      ],
+      [
+        "isPortAvailable",
+        "is_port_available",
+        1
+      ],
+      [
+        "checkNetworkHealth",
+        "check_network_health",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\backend\\src\\utils\\validation.ts": [
+      [
+        "DIAMETER_CONFIG",
+        "diameter_config",
+        1
+      ],
+      [
+        "SPECIFICATION_CONFIG",
+        "specification_config",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\scripts\\convert-camel-to-snake.js": [
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        1
+      ],
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        1
+      ],
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        4
+      ]
+    ],
+    "d:\\shuijing ERP\\shared\\types\\financial.ts": [
+      [
+        "FINANCIAL_RECORD_TYPE_LABELS",
+        "financial_record_type_labels",
+        1
+      ],
+      [
+        "FINANCIAL_REFERENCE_TYPE_LABELS",
+        "financial_reference_type_labels",
+        1
+      ],
+      [
+        "FINANCIAL_RECORD_TYPE_COLORS",
+        "financial_record_type_colors",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\components\\FinishedProductGrid.tsx": [
+      [
+        "FinishedProduct",
+        "finished_product",
+        1
+      ],
+      [
+        "FinishedProduct",
+        "finished_product",
+        2
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\hooks\\useSkuPermissions.ts": [
+      [
+        "SkuPermissions",
+        "sku_permissions",
+        1
+      ],
+      [
+        "SkuPermissions",
+        "sku_permissions",
+        3
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\services\\aiService.ts": [
+      [
+        "formatAIParseResult",
+        "format_ai_parse_result",
+        1
+      ],
+      [
+        "validateAIParseResult",
+        "validate_ai_parse_result",
+        1
+      ],
+      [
+        "AIParseResponse",
+        "ai_parse_response",
+        2
+      ],
+      [
+        "AIParseResponse",
+        "ai_parse_response",
+        2
+      ],
+      [
+        "AIService",
+        "ai_service",
+        1
+      ],
+      [
+        "AIService",
+        "ai_service",
+        1
+      ],
+      [
+        "AIService",
+        "ai_service",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\services\\api.ts": [
+      [
+        "RequestConfig",
+        "request_config",
+        1
+      ],
+      [
+        "RequestConfig",
+        "request_config",
+        6
+      ],
+      [
+        "RequestConfig",
+        "request_config",
+        1
+      ],
+      [
+        "ApiClient",
+        "api_client",
+        1
+      ],
+      [
+        "ApiClient",
+        "api_client",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\services\\errorHandler.ts": [
+      [
+        "ErrorResponse",
+        "error_response",
+        1
+      ],
+      [
+        "ErrorResponse",
+        "error_response",
+        5
+      ],
+      [
+        "ErrorHandlerConfig",
+        "error_handler_config",
+        1
+      ],
+      [
+        "ErrorHandlerConfig",
+        "error_handler_config",
+        1
+      ],
+      [
+        "ErrorHandlerConfig",
+        "error_handler_config",
+        6
+      ],
+      [
+        "ErrorHandler",
+        "error_handler",
+        1
+      ],
+      [
+        "ErrorHandler",
+        "error_handler",
+        1
+      ],
+      [
+        "ErrorHandler",
+        "error_handler",
+        1
+      ],
+      [
+        "ErrorHandler",
+        "error_handler",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\types\\financial.ts": [
+      [
+        "FINANCIAL_RECORD_TYPE_LABELS",
+        "financial_record_type_labels",
+        1
+      ],
+      [
+        "FINANCIAL_REFERENCE_TYPE_LABELS",
+        "financial_reference_type_labels",
+        1
+      ],
+      [
+        "FINANCIAL_RECORD_TYPE_COLORS",
+        "financial_record_type_colors",
+        1
+      ],
+      [
+        "FINANCIAL_RECORD_TYPE_BG_COLORS",
+        "financial_record_type_bg_colors",
+        1
+      ],
+      [
+        "TRANSACTION_CATEGORY_LABELS",
+        "transaction_category_labels",
+        1
+      ],
+      [
+        "TRANSACTION_CATEGORY_COLORS",
+        "transaction_category_colors",
+        1
+      ],
+      [
+        "STALE_PERIOD_LABELS",
+        "stale_period_labels",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\types\\index.ts": [
+      [
+        "AIParseRequest",
+        "ai_parse_request",
+        1
+      ],
+      [
+        "AIParseResponse",
+        "ai_parse_response",
+        1
+      ],
+      [
+        "AssistantMessage",
+        "assistant_message",
+        1
+      ],
+      [
+        "AssistantRequest",
+        "assistant_request",
+        1
+      ],
+      [
+        "AssistantResponse",
+        "assistant_response",
+        1
+      ],
+      [
+        "UploadResponse",
+        "upload_response",
+        1
+      ],
+      [
+        "ApiResponse",
+        "api_response",
+        1
+      ],
+      [
+        "PaginatedResponse",
+        "paginated_response",
+        1
+      ],
+      [
+        "QueryParams",
+        "query_params",
+        1
+      ],
+      [
+        "FinishedProduct",
+        "finished_product",
+        1
+      ],
+      [
+        "FinishedProductMaterialUsage",
+        "finished_product_material_usage",
+        1
+      ],
+      [
+        "FinishedProductMaterialUsage",
+        "finished_product_material_usage",
+        1
+      ],
+      [
+        "MaterialUsageRequest",
+        "material_usage_request",
+        1
+      ],
+      [
+        "MaterialUsageRequest",
+        "material_usage_request",
+        2
+      ],
+      [
+        "CostCalculationRequest",
+        "cost_calculation_request",
+        1
+      ],
+      [
+        "CostCalculationResponse",
+        "cost_calculation_response",
+        1
+      ],
+      [
+        "AvailableMaterial",
+        "available_material",
+        1
+      ],
+      [
+        "AvailableMaterial",
+        "available_material",
+        1
+      ],
+      [
+        "FinishedProductCreateRequest",
+        "finished_product_create_request",
+        1
+      ],
+      [
+        "ProductionFormData",
+        "production_form_data",
+        1
+      ],
+      [
+        "BatchProductInfo",
+        "batch_product_info",
+        1
+      ],
+      [
+        "BatchProductCreateRequest",
+        "batch_product_create_request",
+        1
+      ],
+      [
+        "BatchProductCreateResponse",
+        "batch_product_create_response",
+        1
+      ],
+      [
+        "SkuItem",
+        "sku_item",
+        1
+      ],
+      [
+        "SkuItem",
+        "sku_item",
+        1
+      ],
+      [
+        "SkuItem",
+        "sku_item",
+        1
+      ],
+      [
+        "MaterialTrace",
+        "material_trace",
+        1
+      ],
+      [
+        "MaterialTrace",
+        "material_trace",
+        3
+      ],
+      [
+        "TraceNode",
+        "trace_node",
+        1
+      ],
+      [
+        "TraceNode",
+        "trace_node",
+        1
+      ],
+      [
+        "SkuTraceResponse",
+        "sku_trace_response",
+        1
+      ],
+      [
+        "SkuInventoryLog",
+        "sku_inventory_log",
+        1
+      ],
+      [
+        "SkuInventoryLog",
+        "sku_inventory_log",
+        1
+      ],
+      [
+        "SkuListParams",
+        "sku_list_params",
+        1
+      ],
+      [
+        "SellData",
+        "sell_data",
+        1
+      ],
+      [
+        "DestroyData",
+        "destroy_data",
+        1
+      ],
+      [
+        "SkuMaterialInfo",
+        "sku_material_info",
+        1
+      ],
+      [
+        "AdjustData",
+        "adjust_data",
+        1
+      ],
+      [
+        "RestockData",
+        "restock_data",
+        1
+      ],
+      [
+        "RestockInfo",
+        "restock_info",
+        1
+      ],
+      [
+        "RestockInfo",
+        "restock_info",
+        1
+      ],
+      [
+        "RestockMaterial",
+        "restock_material",
+        1
+      ],
+      [
+        "RestockMaterial",
+        "restock_material",
+        1
+      ],
+      [
+        "RestockInfoResponse",
+        "restock_info_response",
+        1
+      ],
+      [
+        "RestockResponse",
+        "restock_response",
+        1
+      ],
+      [
+        "HistoryParams",
+        "history_params",
+        1
+      ],
+      [
+        "SkuPermissions",
+        "sku_permissions",
+        1
+      ],
+      [
+        "SkuListResponse",
+        "sku_list_response",
+        1
+      ],
+      [
+        "SkuDetailResponse",
+        "sku_detail_response",
+        1
+      ],
+      [
+        "SkuHistoryResponse",
+        "sku_history_response",
+        1
+      ],
+      [
+        "CustomerNote",
+        "customer_note",
+        1
+      ],
+      [
+        "CustomerNote",
+        "customer_note",
+        1
+      ],
+      [
+        "CustomerPurchase",
+        "customer_purchase",
+        1
+      ],
+      [
+        "CustomerCreateRequest",
+        "customer_create_request",
+        1
+      ],
+      [
+        "CustomerListParams",
+        "customer_list_params",
+        1
+      ],
+      [
+        "CustomerListResponse",
+        "customer_list_response",
+        1
+      ],
+      [
+        "CustomerAnalytics",
+        "customer_analytics",
+        1
+      ],
+      [
+        "CustomerAnalyticsParams",
+        "customer_analytics_params",
+        1
+      ],
+      [
+        "DashboardStats",
+        "dashboard_stats",
+        1
+      ],
+      [
+        "DashboardStats",
+        "dashboard_stats",
+        1
+      ],
+      [
+        "RecentPurchase",
+        "recent_purchase",
+        1
+      ],
+      [
+        "RecentPurchase",
+        "recent_purchase",
+        1
+      ],
+      [
+        "RecentMaterial",
+        "recent_material",
+        1
+      ],
+      [
+        "RecentMaterial",
+        "recent_material",
+        1
+      ],
+      [
+        "SupplierStat",
+        "supplier_stat",
+        1
+      ],
+      [
+        "SupplierStat",
+        "supplier_stat",
+        1
+      ],
+      [
+        "DashboardResponse",
+        "dashboard_response",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\utils\\fieldConverter.ts": [
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        1
+      ],
+      [
+        "camelToSnake",
+        "camel_to_snake",
+        2
+      ],
+      [
+        "snakeToCamel",
+        "snake_to_camel",
+        1
+      ],
+      [
+        "snakeToCamel",
+        "snake_to_camel",
+        2
+      ],
+      [
+        "validateFieldNaming",
+        "validate_field_naming",
+        1
+      ],
+      [
+        "batchConvertFields",
+        "batch_convert_fields",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        1
+      ],
+      [
+        "convertToApiFormat",
+        "convert_to_api_format",
+        3
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        3
+      ],
+      [
+        "convertFromApiFormat",
+        "convert_from_api_format",
+        1
+      ],
+      [
+        "COMPLETE_FIELD_MAPPINGS",
+        "complete_field_mappings",
+        1
+      ],
+      [
+        "REVERSE_FIELD_MAPPINGS",
+        "reverse_field_mappings",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\utils\\refundReasons.ts": [
+      [
+        "REFUND_REASON_LABELS",
+        "refund_reason_labels",
+        1
+      ]
+    ],
+    "d:\\shuijing ERP\\src\\utils\\validation.ts": [
+      [
+        "DIAMETER_CONFIG",
+        "diameter_config",
+        1
+      ],
+      [
+        "SPECIFICATION_CONFIG",
+        "specification_config",
+        1
+      ]
+    ]
+  },
+  "log": [
+    "[2025-09-12 19:23:34] 开始批量处理 (干运行: True)",
+    "[2025-09-12 19:23:34] 找到 392 个目标文件",
+    "[2025-09-12 19:23:34] 跳过黑名单项: SellData in d:\\shuijing ERP\\test-sku-sell-actual-price.js",
+    "[2025-09-12 19:23:34] 替换 validateFieldNaming -> validate_field_naming (1次) in d:\\shuijing ERP\\validate-field-naming.js",
+    "[2025-09-12 19:23:34] 替换 validateFieldNaming -> validate_field_naming (1次) in d:\\shuijing ERP\\validate-field-naming.js",
+    "[2025-09-12 19:23:34] 替换 validateFieldNaming -> validate_field_naming (1次) in d:\\shuijing ERP\\validate-field-naming.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: CustomerNote in d:\\shuijing ERP\\backend\\check-customer-notes.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: CustomerPurchase in d:\\shuijing ERP\\backend\\check-customer-purchase-time.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: RestockInfo in d:\\shuijing ERP\\backend\\check-hetianyu-restock-info.js",
+    "[2025-09-12 19:23:34] 替换 generateMaterialSignature -> generate_material_signature (1次) in d:\\shuijing ERP\\backend\\clean-and-regenerate-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateMaterialSignature -> generate_material_signature (1次) in d:\\shuijing ERP\\backend\\clean-and-regenerate-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (1次) in d:\\shuijing ERP\\backend\\clean-and-regenerate-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (2次) in d:\\shuijing ERP\\backend\\clean-and-regenerate-skus.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: SkuInventoryLog in d:\\shuijing ERP\\backend\\clear-all-business-data.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: CustomerNote in d:\\shuijing ERP\\backend\\clear-all-business-data.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: CustomerPurchase in d:\\shuijing ERP\\backend\\clear-all-business-data.js",
+    "[2025-09-12 19:23:34] 替换 generateMaterialSignature -> generate_material_signature (1次) in d:\\shuijing ERP\\backend\\create-50-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateMaterialSignature -> generate_material_signature (2次) in d:\\shuijing ERP\\backend\\create-50-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (1次) in d:\\shuijing ERP\\backend\\create-50-skus.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (2次) in d:\\shuijing ERP\\backend\\create-50-skus.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: calculateRemainingQuantity in d:\\shuijing ERP\\backend\\debug-return-records.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: calculateRemainingQuantity in d:\\shuijing ERP\\backend\\fix-material-usage-calculation.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: ApiResponse in d:\\shuijing ERP\\backend\\test-api-response.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: DestroyData in d:\\shuijing ERP\\backend\\test-destroy-api.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\test-fixed-inventory.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\test-fixed-inventory.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\test-inventory-data.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (3次) in d:\\shuijing ERP\\backend\\test-inventory-data.js",
+    "[2025-09-12 19:23:34] 跳过黑名单项: RestockResponse in d:\\shuijing ERP\\backend\\test-inventory-fix.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\test-process-verification.js",
+    "[2025-09-12 19:23:34] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\test-process-verification.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (1次) in d:\\shuijing ERP\\backend\\test-sku-creation.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (1次) in d:\\shuijing ERP\\backend\\test-sku-creation.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (1次) in d:\\shuijing ERP\\backend\\test-sku-with-real-images.js",
+    "[2025-09-12 19:23:34] 替换 generateSkuCode -> generate_sku_code (2次) in d:\\shuijing ERP\\backend\\test-sku-with-real-images.js",
+    "[2025-09-12 19:23:34] 替换 createSuccessResponse -> create_success_response (1次) in d:\\shuijing ERP\\backend\\routes\\financial.ts",
+    "[2025-09-12 19:23:34] 替换 createSuccessResponse -> create_success_response (8次) in d:\\shuijing ERP\\backend\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponse in d:\\shuijing ERP\\backend\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponses in d:\\shuijing ERP\\backend\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 testDatabaseConnection -> test_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\server.ts",
+    "[2025-09-12 19:23:35] 替换 testDatabaseConnection -> test_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\server.ts",
+    "[2025-09-12 19:23:35] 替换 closeDatabaseConnection -> close_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\server.ts",
+    "[2025-09-12 19:23:35] 替换 closeDatabaseConnection -> close_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\server.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ApiResponse in d:\\shuijing ERP\\backend\\src\\server.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ApiResponse in d:\\shuijing ERP\\backend\\src\\middleware\\errorHandler.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: validateFieldNaming in d:\\shuijing ERP\\backend\\src\\middleware\\responseValidator.ts",
+    "[2025-09-12 19:23:35] 替换 checkAIHealth -> check_ai_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 parseCrystalPurchaseDescription -> parse_crystal_purchase_description (1次) in d:\\shuijing ERP\\backend\\src\\routes\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 parseCrystalPurchaseDescription -> parse_crystal_purchase_description (2次) in d:\\shuijing ERP\\backend\\src\\routes\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 chatWithAssistant -> chat_with_assistant (1次) in d:\\shuijing ERP\\backend\\src\\routes\\assistant.ts",
+    "[2025-09-12 19:23:35] 替换 chatWithAssistant -> chat_with_assistant (1次) in d:\\shuijing ERP\\backend\\src\\routes\\assistant.ts",
+    "[2025-09-12 19:23:35] 替换 createSuccessResponse -> create_success_response (1次) in d:\\shuijing ERP\\backend\\src\\routes\\auth.ts",
+    "[2025-09-12 19:23:35] 替换 createSuccessResponse -> create_success_response (3次) in d:\\shuijing ERP\\backend\\src\\routes\\auth.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponse in d:\\shuijing ERP\\backend\\src\\routes\\auth.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponses in d:\\shuijing ERP\\backend\\src\\routes\\auth.ts",
+    "[2025-09-12 19:23:35] 替换 REFUND_REASON_LABELS -> refund_reason_labels (1次) in d:\\shuijing ERP\\backend\\src\\routes\\customers.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: convertToApiFormat in d:\\shuijing ERP\\backend\\src\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 checkDatabaseHealth -> check_database_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 checkDatabaseHealth -> check_database_health (2次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 checkAIHealth -> check_ai_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 checkAIHealth -> check_ai_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 checkNetworkHealth -> check_network_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 checkNetworkHealth -> check_network_health (1次) in d:\\shuijing ERP\\backend\\src\\routes\\health.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (4次) in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: convertFromApiFormat in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: createSuccessResponse in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: filterSensitiveFields in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponse in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponses in d:\\shuijing ERP\\backend\\src\\routes\\inventory.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: filterSensitiveFields in d:\\shuijing ERP\\backend\\src\\routes\\products.ts",
+    "[2025-09-12 19:23:35] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: createSuccessResponse in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 替换 filterSensitiveFields -> filter_sensitive_fields (1次) in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 替换 filterSensitiveFields -> filter_sensitive_fields (6次) in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponse in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponses in d:\\shuijing ERP\\backend\\src\\routes\\purchases.ts",
+    "[2025-09-12 19:23:35] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (1次) in d:\\shuijing ERP\\backend\\src\\routes\\skus.ts",
+    "[2025-09-12 19:23:35] 替换 calculateRemainingQuantity -> calculate_remaining_quantity (2次) in d:\\shuijing ERP\\backend\\src\\routes\\skus.ts",
+    "[2025-09-12 19:23:35] 替换 adjustSchema -> adjust_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\skus.ts",
+    "[2025-09-12 19:23:35] 替换 sellSchema -> sell_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\skus.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: convertFromApiFormat in d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: filterSensitiveFields in d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts",
+    "[2025-09-12 19:23:35] 替换 createSupplierSchema -> create_supplier_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\suppliers.ts",
+    "[2025-09-12 19:23:35] 替换 deleteImagesSchema -> delete_images_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\upload.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (4次) in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: convertFromApiFormat in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: createSuccessResponse in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: filterSensitiveFields in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponse in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: ErrorResponses in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 替换 createUserSchema -> create_user_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 替换 updateUserSchema -> update_user_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 替换 updateProfileSchema -> update_profile_schema (1次) in d:\\shuijing ERP\\backend\\src\\routes\\users.ts",
+    "[2025-09-12 19:23:35] 替换 checkAIHealth -> check_ai_health (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 parseCrystalPurchaseDescription -> parse_crystal_purchase_description (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 parsePurchaseDescription -> parse_purchase_description (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 chatWithAssistant -> chat_with_assistant (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 DOUBAO_CONFIG -> doubao_config (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 DOUBAO_CONFIG -> doubao_config (1次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 DOUBAO_CONFIG -> doubao_config (8次) in d:\\shuijing ERP\\backend\\src\\services\\ai.ts",
+    "[2025-09-12 19:23:35] 替换 testDatabaseConnection -> test_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\services\\database.ts",
+    "[2025-09-12 19:23:35] 替换 closeDatabaseConnection -> close_database_connection (1次) in d:\\shuijing ERP\\backend\\src\\services\\database.ts",
+    "[2025-09-12 19:23:35] 替换 checkDatabaseHealth -> check_database_health (1次) in d:\\shuijing ERP\\backend\\src\\services\\database.ts",
+    "[2025-09-12 19:23:35] 替换 createErrorResponse -> create_error_response (1次) in d:\\shuijing ERP\\backend\\src\\utils\\errorResponse.ts",
+    "[2025-09-12 19:23:35] 替换 createErrorResponse -> create_error_response (16次) in d:\\shuijing ERP\\backend\\src\\utils\\errorResponse.ts",
+    "[2025-09-12 19:23:35] 替换 createSuccessResponse -> create_success_response (1次) in d:\\shuijing ERP\\backend\\src\\utils\\errorResponse.ts",
+    "[2025-09-12 19:23:35] 替换 ErrorResponses -> error_responses (1次) in d:\\shuijing ERP\\backend\\src\\utils\\errorResponse.ts",
+    "[2025-09-12 19:23:35] 替换 camelToSnake -> camel_to_snake (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 camelToSnake -> camel_to_snake (3次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 snakeToCamel -> snake_to_camel (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 snakeToCamel -> snake_to_camel (2次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 validateFieldNaming -> validate_field_naming (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 batchConvertFields -> batch_convert_fields (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertToApiFormat -> convert_to_api_format (3次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertFromApiFormat -> convert_from_api_format (3次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 isPrismaDecimal -> is_prisma_decimal (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 isPrismaDecimal -> is_prisma_decimal (2次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertPrismaDecimal -> convert_prisma_decimal (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertPrismaDecimal -> convert_prisma_decimal (2次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertNumericField -> convert_numeric_field (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 convertNumericField -> convert_numeric_field (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 filterSensitiveFields -> filter_sensitive_fields (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 filterSensitiveFields -> filter_sensitive_fields (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 COMPLETE_FIELD_MAPPINGS -> complete_field_mappings (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 REVERSE_FIELD_MAPPINGS -> reverse_field_mappings (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 NUMERIC_FIELDS -> numeric_fields (1次) in d:\\shuijing ERP\\backend\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:35] 替换 isPortAvailable -> is_port_available (1次) in d:\\shuijing ERP\\backend\\src\\utils\\network.ts",
+    "[2025-09-12 19:23:35] 替换 isPortAvailable -> is_port_available (1次) in d:\\shuijing ERP\\backend\\src\\utils\\network.ts",
+    "[2025-09-12 19:23:35] 替换 checkNetworkHealth -> check_network_health (1次) in d:\\shuijing ERP\\backend\\src\\utils\\network.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuInventoryLog in d:\\shuijing ERP\\backend\\src\\utils\\skuUtils.js",
+    "[2025-09-12 19:23:35] 替换 DIAMETER_CONFIG -> diameter_config (1次) in d:\\shuijing ERP\\backend\\src\\utils\\validation.ts",
+    "[2025-09-12 19:23:35] 替换 SPECIFICATION_CONFIG -> specification_config (1次) in d:\\shuijing ERP\\backend\\src\\utils\\validation.ts",
+    "[2025-09-12 19:23:35] 替换 camelToSnake -> camel_to_snake (1次) in d:\\shuijing ERP\\scripts\\convert-camel-to-snake.js",
+    "[2025-09-12 19:23:35] 替换 camelToSnake -> camel_to_snake (1次) in d:\\shuijing ERP\\scripts\\convert-camel-to-snake.js",
+    "[2025-09-12 19:23:35] 替换 camelToSnake -> camel_to_snake (4次) in d:\\shuijing ERP\\scripts\\convert-camel-to-snake.js",
+    "[2025-09-12 19:23:35] 替换 FINANCIAL_RECORD_TYPE_LABELS -> financial_record_type_labels (1次) in d:\\shuijing ERP\\shared\\types\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 FINANCIAL_REFERENCE_TYPE_LABELS -> financial_reference_type_labels (1次) in d:\\shuijing ERP\\shared\\types\\financial.ts",
+    "[2025-09-12 19:23:35] 替换 FINANCIAL_RECORD_TYPE_COLORS -> financial_record_type_colors (1次) in d:\\shuijing ERP\\shared\\types\\financial.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: CustomerNote in d:\\shuijing ERP\\src\\components\\CustomerDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: CustomerPurchase in d:\\shuijing ERP\\src\\components\\CustomerDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: CustomerPurchase in d:\\shuijing ERP\\src\\components\\CustomerRefundModal.tsx",
+    "[2025-09-12 19:23:35] 替换 FinishedProduct -> finished_product (1次) in d:\\shuijing ERP\\src\\components\\FinishedProductGrid.tsx",
+    "[2025-09-12 19:23:35] 替换 FinishedProduct -> finished_product (2次) in d:\\shuijing ERP\\src\\components\\FinishedProductGrid.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: STALE_PERIOD_LABELS in d:\\shuijing ERP\\src\\components\\InventoryStatus.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\RefundConfirmModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: CustomerPurchase in d:\\shuijing ERP\\src\\components\\RefundConfirmModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\ReverseSaleModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SellData in d:\\shuijing ERP\\src\\components\\ReverseSaleModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: FinishedProduct in d:\\shuijing ERP\\src\\components\\SalesDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuAdjustForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: AdjustData in d:\\shuijing ERP\\src\\components\\SkuAdjustForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuControlModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuDestroyForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: DestroyData in d:\\shuijing ERP\\src\\components\\SkuDestroyForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuMaterialInfo in d:\\shuijing ERP\\src\\components\\SkuDestroyForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: MaterialTrace in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuInventoryLog in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SellData in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: DestroyData in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: AdjustData in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuPermissions in d:\\shuijing ERP\\src\\components\\SkuDetailModal.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuHistoryView.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuInventoryLog in d:\\shuijing ERP\\src\\components\\SkuHistoryView.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuRestockForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: RestockData in d:\\shuijing ERP\\src\\components\\SkuRestockForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: RestockInfo in d:\\shuijing ERP\\src\\components\\SkuRestockForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuSellForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SellData in d:\\shuijing ERP\\src\\components\\SkuSellForm.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\components\\SkuTraceView.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: TRANSACTION_CATEGORY_LABELS in d:\\shuijing ERP\\src\\components\\TransactionLog.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: TRANSACTION_CATEGORY_COLORS in d:\\shuijing ERP\\src\\components\\TransactionLog.tsx",
+    "[2025-09-12 19:23:35] 替换 SkuPermissions -> sku_permissions (1次) in d:\\shuijing ERP\\src\\hooks\\useSkuPermissions.ts",
+    "[2025-09-12 19:23:35] 替换 SkuPermissions -> sku_permissions (3次) in d:\\shuijing ERP\\src\\hooks\\useSkuPermissions.ts",
+    "[2025-09-12 19:23:35] 跳过黑名单项: CustomerAnalytics in d:\\shuijing ERP\\src\\pages\\CustomerManagement.tsx",
+    "[2025-09-12 19:23:35] 跳过黑名单项: DashboardStats in d:\\shuijing ERP\\src\\pages\\Home.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: RecentMaterial in d:\\shuijing ERP\\src\\pages\\Home.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: FinishedProduct in d:\\shuijing ERP\\src\\pages\\InventoryList.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: MaterialUsageRequest in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: CostCalculationResponse in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: AvailableMaterial in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: ProductionFormData in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: BatchProductCreateRequest in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: BatchProductCreateResponse in d:\\shuijing ERP\\src\\pages\\ProductEntry.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: SkuItem in d:\\shuijing ERP\\src\\pages\\SalesList.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: SellData in d:\\shuijing ERP\\src\\pages\\SalesList.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: DestroyData in d:\\shuijing ERP\\src\\pages\\SalesList.tsx",
+    "[2025-09-12 19:23:36] 跳过黑名单项: SkuPermissions in d:\\shuijing ERP\\src\\pages\\SalesList.tsx",
+    "[2025-09-12 19:23:36] 替换 formatAIParseResult -> format_ai_parse_result (1次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 validateAIParseResult -> validate_ai_parse_result (1次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 跳过黑名单项: AIParseRequest in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 AIParseResponse -> ai_parse_response (2次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 AIParseResponse -> ai_parse_response (2次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 跳过黑名单项: AssistantRequest in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 跳过黑名单项: AssistantResponse in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 AIService -> ai_service (1次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 AIService -> ai_service (1次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 AIService -> ai_service (1次) in d:\\shuijing ERP\\src\\services\\aiService.ts",
+    "[2025-09-12 19:23:36] 替换 RequestConfig -> request_config (1次) in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 替换 RequestConfig -> request_config (6次) in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 替换 RequestConfig -> request_config (1次) in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 跳过黑名单项: ApiResponse in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 替换 ApiClient -> api_client (1次) in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 替换 ApiClient -> api_client (1次) in d:\\shuijing ERP\\src\\services\\api.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorResponse -> error_response (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorResponse -> error_response (5次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandlerConfig -> error_handler_config (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandlerConfig -> error_handler_config (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandlerConfig -> error_handler_config (6次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandler -> error_handler (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandler -> error_handler (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandler -> error_handler (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 ErrorHandler -> error_handler (1次) in d:\\shuijing ERP\\src\\services\\errorHandler.ts",
+    "[2025-09-12 19:23:36] 替换 FINANCIAL_RECORD_TYPE_LABELS -> financial_record_type_labels (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 FINANCIAL_REFERENCE_TYPE_LABELS -> financial_reference_type_labels (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 FINANCIAL_RECORD_TYPE_COLORS -> financial_record_type_colors (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 FINANCIAL_RECORD_TYPE_BG_COLORS -> financial_record_type_bg_colors (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 TRANSACTION_CATEGORY_LABELS -> transaction_category_labels (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 TRANSACTION_CATEGORY_COLORS -> transaction_category_colors (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 STALE_PERIOD_LABELS -> stale_period_labels (1次) in d:\\shuijing ERP\\src\\types\\financial.ts",
+    "[2025-09-12 19:23:36] 替换 AIParseRequest -> ai_parse_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AIParseResponse -> ai_parse_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AssistantMessage -> assistant_message (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AssistantRequest -> assistant_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AssistantResponse -> assistant_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 UploadResponse -> upload_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 ApiResponse -> api_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 PaginatedResponse -> paginated_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 QueryParams -> query_params (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 FinishedProduct -> finished_product (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 FinishedProductMaterialUsage -> finished_product_material_usage (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 FinishedProductMaterialUsage -> finished_product_material_usage (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 MaterialUsageRequest -> material_usage_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 MaterialUsageRequest -> material_usage_request (2次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 CostCalculationRequest -> cost_calculation_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 CostCalculationResponse -> cost_calculation_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AvailableMaterial -> available_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 AvailableMaterial -> available_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 FinishedProductCreateRequest -> finished_product_create_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:36] 替换 ProductionFormData -> production_form_data (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 BatchProductInfo -> batch_product_info (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 BatchProductCreateRequest -> batch_product_create_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 BatchProductCreateResponse -> batch_product_create_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuItem -> sku_item (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuItem -> sku_item (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuItem -> sku_item (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 MaterialTrace -> material_trace (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 MaterialTrace -> material_trace (3次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 TraceNode -> trace_node (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 TraceNode -> trace_node (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuTraceResponse -> sku_trace_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuInventoryLog -> sku_inventory_log (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuInventoryLog -> sku_inventory_log (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuListParams -> sku_list_params (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SellData -> sell_data (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 DestroyData -> destroy_data (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuMaterialInfo -> sku_material_info (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 AdjustData -> adjust_data (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockData -> restock_data (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockInfo -> restock_info (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockInfo -> restock_info (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockMaterial -> restock_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockMaterial -> restock_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockInfoResponse -> restock_info_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 RestockResponse -> restock_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 HistoryParams -> history_params (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuPermissions -> sku_permissions (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuListResponse -> sku_list_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuDetailResponse -> sku_detail_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:37] 替换 SkuHistoryResponse -> sku_history_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerNote -> customer_note (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerNote -> customer_note (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerPurchase -> customer_purchase (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerCreateRequest -> customer_create_request (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerListParams -> customer_list_params (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerListResponse -> customer_list_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerAnalytics -> customer_analytics (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 CustomerAnalyticsParams -> customer_analytics_params (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 DashboardStats -> dashboard_stats (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 DashboardStats -> dashboard_stats (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 RecentPurchase -> recent_purchase (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 RecentPurchase -> recent_purchase (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 RecentMaterial -> recent_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 RecentMaterial -> recent_material (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 SupplierStat -> supplier_stat (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 SupplierStat -> supplier_stat (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 DashboardResponse -> dashboard_response (1次) in d:\\shuijing ERP\\src\\types\\index.ts",
+    "[2025-09-12 19:23:38] 替换 camelToSnake -> camel_to_snake (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 camelToSnake -> camel_to_snake (2次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 snakeToCamel -> snake_to_camel (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 snakeToCamel -> snake_to_camel (2次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 validateFieldNaming -> validate_field_naming (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 batchConvertFields -> batch_convert_fields (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertToApiFormat -> convert_to_api_format (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertToApiFormat -> convert_to_api_format (3次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertFromApiFormat -> convert_from_api_format (3次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 convertFromApiFormat -> convert_from_api_format (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 COMPLETE_FIELD_MAPPINGS -> complete_field_mappings (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 REVERSE_FIELD_MAPPINGS -> reverse_field_mappings (1次) in d:\\shuijing ERP\\src\\utils\\fieldConverter.ts",
+    "[2025-09-12 19:23:38] 替换 REFUND_REASON_LABELS -> refund_reason_labels (1次) in d:\\shuijing ERP\\src\\utils\\refundReasons.ts",
+    "[2025-09-12 19:23:38] 替换 DIAMETER_CONFIG -> diameter_config (1次) in d:\\shuijing ERP\\src\\utils\\validation.ts",
+    "[2025-09-12 19:23:38] 替换 SPECIFICATION_CONFIG -> specification_config (1次) in d:\\shuijing ERP\\src\\utils\\validation.ts",
+    "[2025-09-12 19:23:38] 处理完成: 40 个文件被修改"
+  ]
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>财务API测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .highlight {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>财务API测试 - 总收入验证</h1>
+        <p>测试修改后的财务概览API，验证总收入计算是否正确（应该显示约¥4,073）</p>
+        
+        <button onclick="testFinancialOverview()">测试财务概览API</button>
+        <button onclick="testDirectConnection()">测试直接连接</button>
+        <button onclick="clearResults()">清除结果</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // 动态获取API地址
+        function getApiUrl() {
+            const hostname = window.location.hostname;
+            
+            // 如果是localhost，尝试使用localhost:3001
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:3001/api/v1';
+            }
+            
+            // 如果是局域网IP，使用相同IP的3001端口
+            if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+                (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+                return `http://${hostname}:3001/api/v1`;
+            }
+            
+            // 默认使用localhost
+            return 'http://localhost:3001/api/v1';
+        }
+
+        function addResult(content, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testFinancialOverview() {
+            const apiUrl = getApiUrl();
+            addResult(`🔍 测试API地址: ${apiUrl}/financial/overview/summary`);
+            
+            try {
+                // 获取token（如果有的话）
+                const token = localStorage.getItem('auth_token');
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                    addResult(`🔑 使用认证token: ${token.substring(0, 20)}...`);
+                } else {
+                    addResult(`⚠️ 未找到认证token，可能需要先登录`, false);
+                }
+                
+                const response = await fetch(`${apiUrl}/financial/overview/summary`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                addResult(`📡 响应状态: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    addResult(`❌ API错误: ${errorText}`, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const overview = data.data;
+                    
+                    addResult(`✅ API调用成功！`);
+                    addResult(`
+                        <h3>📊 财务概览数据:</h3>
+                        <div class="highlight">总收入（年度）: ¥${overview.this_year?.income?.toFixed(2) || '0.00'}</div>
+                        <p>今日收入: ¥${overview.today?.income?.toFixed(2) || '0.00'}</p>
+                        <p>本月收入: ¥${overview.this_month?.income?.toFixed(2) || '0.00'}</p>
+                        <p>今日支出: ¥${overview.today?.expense?.toFixed(2) || '0.00'}</p>
+                        <p>本月支出: ¥${overview.this_month?.expense?.toFixed(2) || '0.00'}</p>
+                        <p>年度支出: ¥${overview.this_year?.expense?.toFixed(2) || '0.00'}</p>
+                    `);
+                    
+                    // 验证总收入是否在期望范围内
+                    const yearlyIncome = overview.this_year?.income || 0;
+                    if (yearlyIncome >= 4000 && yearlyIncome <= 4100) {
+                        addResult(`🎯 总收入验证成功！显示 ¥${yearlyIncome.toFixed(2)}，在期望的4000左右范围内`);
+                    } else {
+                        addResult(`⚠️ 总收入 ¥${yearlyIncome.toFixed(2)} 不在期望的4000左右范围内`, false);
+                    }
+                } else {
+                    addResult(`❌ API返回格式错误: ${JSON.stringify(data)}`, false);
+                }
+                
+            } catch (error) {
+                addResult(`❌ 网络错误: ${error.message}`, false);
+                addResult(`💡 建议: 检查后端服务是否启动，或尝试不同的API地址`, false);
+            }
+        }
+
+        async function testDirectConnection() {
+            const apiUrl = getApiUrl();
+            addResult(`🔍 测试直接连接: ${apiUrl}/health`);
+            
+            try {
+                const response = await fetch(`${apiUrl}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ 后端服务连接成功: ${JSON.stringify(data)}`);
+                } else {
+                    addResult(`❌ 后端服务响应错误: ${response.status}`, false);
+                }
+            } catch (error) {
+                addResult(`❌ 无法连接后端服务: ${error.message}`, false);
+                
+                // 尝试其他可能的地址
+                const alternatives = [
+                    'http://localhost:3001/api/v1',
+                    'http://127.0.0.1:3001/api/v1',
+                    'http://192.168.50.160:3001/api/v1'
+                ];
+                
+                addResult(`🔄 尝试其他API地址...`);
+                
+                for (const altUrl of alternatives) {
+                    try {
+                        const altResponse = await fetch(`${altUrl}/health`);
+                        if (altResponse.ok) {
+                            addResult(`✅ 找到可用地址: ${altUrl}`);
+                            break;
+                        }
+                    } catch (e) {
+                        addResult(`❌ ${altUrl} 不可用`);
+                    }
+                }
+            }
+        }
+
+        // 页面加载时显示当前API地址
+        window.onload = function() {
+            const apiUrl = getApiUrl();
+            addResult(`🌐 当前API地址: ${apiUrl}`);
+            addResult(`📍 页面地址: ${window.location.href}`);
+        };
+    </script>
+</body>
+</html>

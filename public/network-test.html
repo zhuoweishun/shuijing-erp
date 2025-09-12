@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网络连接测试 - 水晶ERP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 网络连接诊断工具</h1>
+        
+        <div class="test-section">
+            <div class="test-title">1. 环境信息检测</div>
+            <button onclick="checkEnvironment()">检测环境信息</button>
+            <div id="env-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. IP地址检测</div>
+            <button onclick="detectIP()">检测本机IP</button>
+            <button onclick="clearIPCache()">清除IP缓存</button>
+            <div id="ip-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. API地址测试</div>
+            <button onclick="testApiUrl()">测试API地址</button>
+            <button onclick="testAllEndpoints()">测试所有端点</button>
+            <div id="api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 连接测试</div>
+            <button onclick="testConnections()">测试所有连接</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">5. 修复建议</div>
+            <button onclick="showFixSuggestions()">获取修复建议</button>
+            <div id="fix-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // 动态获取本机局域网IP地址
+        const getLocalNetworkIP = () => {
+            return new Promise((resolve) => {
+                try {
+                    const pc = new RTCPeerConnection({ iceServers: [] })
+                    pc.createDataChannel('')
+                    
+                    let resolved = false
+                    
+                    pc.onicecandidate = (event) => {
+                        if (resolved) return
+                        
+                        if (event.candidate) {
+                            const candidate = event.candidate.candidate
+                            const ipMatch = candidate.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/)
+                            if (ipMatch && ipMatch[1]) {
+                                const ip = ipMatch[1]
+                                if (ip.startsWith('192.168.') || ip.startsWith('10.') || 
+                                    (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31)) {
+                                    resolved = true
+                                    pc.close()
+                                    resolve(ip)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                    
+                    pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {
+                        if (!resolved) {
+                            resolved = true
+                            pc.close()
+                            resolve(null)
+                        }
+                    })
+                    
+                    // 使用更安全的超时处理
+                    if (typeof window !== 'undefined' && window.setTimeout) {
+                        window.setTimeout(() => {
+                            if (!resolved) {
+                                resolved = true
+                                pc.close()
+                                resolve(null)
+                            }
+                        }, 3000)
+                    } else {
+                        // 如果setTimeout不可用，使用Promise.race作为备选
+                        Promise.race([
+                            new Promise(resolve => {
+                                // 简单的延时实现
+                                let start = Date.now()
+                                function check() {
+                                    if (Date.now() - start > 3000) {
+                                        resolve(null)
+                                    } else {
+                                        requestAnimationFrame(check)
+                                    }
+                                }
+                                check()
+                            })
+                        ]).then(() => {
+                            if (!resolved) {
+                                resolved = true
+                                pc.close()
+                                resolve(null)
+                            }
+                        })
+                    }
+                } catch (error) {
+                    console.error('IP检测错误:', error)
+                    resolve(null)
+                }
+            })
+        }
+
+        // 获取API基础URL
+        const getApiUrl = () => {
+            const hostname = window.location.hostname
+            
+            if (hostname.includes('dorblecapital.com')) {
+                return 'https://api.dorblecapital.com/api/v1'
+            }
+            
+            if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+                (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+                return `http://${hostname}:3001/api/v1`
+            }
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `http://localhost:3001/api/v1`
+            }
+            
+            return `http://${hostname}:3001/api/v1`
+        }
+
+        // 检测环境信息
+        async function checkEnvironment() {
+            const result = document.getElementById('env-result')
+            result.className = 'result info'
+            result.textContent = '正在检测环境信息...'
+            
+            try {
+                const info = {
+                    '当前URL': window.location.href,
+                    '主机名': window.location.hostname,
+                    '端口': window.location.port || '默认端口',
+                    '协议': window.location.protocol,
+                    '用户代理': navigator.userAgent,
+                    '开发模式': window.location.hostname === 'localhost' ? '是' : '否',
+                    '时间戳': new Date().toLocaleString()
+                }
+                
+                let output = '环境信息检测结果:\n'
+                for (const [key, value] of Object.entries(info)) {
+                    output += `${key}: ${value}\n`
+                }
+                
+                result.className = 'result success'
+                result.textContent = output
+            } catch (error) {
+                result.className = 'result error'
+                result.textContent = `环境检测失败: ${error.message}`
+            }
+        }
+
+        // 检测IP地址
+        async function detectIP() {
+            const result = document.getElementById('ip-result')
+            result.className = 'result info'
+            result.textContent = '正在检测IP地址...'
+            
+            try {
+                const cachedIP = localStorage.getItem('cached_local_ip')
+                const detectedIP = await getLocalNetworkIP()
+                
+                let output = 'IP地址检测结果:\n'
+                output += `当前主机名: ${window.location.hostname}\n`
+                output += `缓存的IP: ${cachedIP || '无'}\n`
+                output += `检测到的IP: ${detectedIP || '无法检测'}\n`
+                
+                if (detectedIP) {
+                    localStorage.setItem('cached_local_ip', detectedIP)
+                    output += `已更新缓存IP: ${detectedIP}\n`
+                }
+                
+                result.className = 'result success'
+                result.textContent = output
+            } catch (error) {
+                result.className = 'result error'
+                result.textContent = `IP检测失败: ${error.message}`
+            }
+        }
+
+        // 清除IP缓存
+        function clearIPCache() {
+            const result = document.getElementById('ip-result')
+            localStorage.removeItem('cached_local_ip')
+            result.className = 'result warning'
+            result.textContent = 'IP缓存已清除，请重新检测IP地址'
+        }
+
+        // 测试API地址
+        async function testApiUrl() {
+            const result = document.getElementById('api-result')
+            result.className = 'result info'
+            result.textContent = '正在测试API地址...'
+            
+            try {
+                const apiUrl = getApiUrl()
+                let output = 'API地址测试结果:\n'
+                output += `计算出的API地址: ${apiUrl}\n`
+                
+                // 测试健康检查端点
+                const healthUrl = `${apiUrl}/health`
+                output += `\n测试健康检查端点: ${healthUrl}\n`
+                
+                const response = await fetch(healthUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    output += `✅ 健康检查成功\n`
+                    output += `响应状态: ${response.status}\n`
+                    output += `响应数据: ${JSON.stringify(data, null, 2)}\n`
+                    result.className = 'result success'
+                } else {
+                    output += `❌ 健康检查失败\n`
+                    output += `响应状态: ${response.status}\n`
+                    output += `响应文本: ${await response.text()}\n`
+                    result.className = 'result error'
+                }
+                
+                result.textContent = output
+            } catch (error) {
+                result.className = 'result error'
+                result.textContent = `API测试失败: ${error.message}`
+            }
+        }
+
+        // 测试所有端点
+        async function testAllEndpoints() {
+            const result = document.getElementById('api-result')
+            result.className = 'result info'
+            result.textContent = '正在测试所有端点...'
+            
+            const apiUrl = getApiUrl()
+            const endpoints = [
+                '/health',
+                '/auth/verify',
+                '/financial/overview/summary'
+            ]
+            
+            let output = '端点测试结果:\n'
+            output += `基础API地址: ${apiUrl}\n\n`
+            
+            for (const endpoint of endpoints) {
+                const fullUrl = `${apiUrl}${endpoint}`
+                output += `测试: ${fullUrl}\n`
+                
+                try {
+                    const response = await fetch(fullUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token') || 'no-token'}`
+                        }
+                    })
+                    
+                    output += `状态: ${response.status} ${response.statusText}\n`
+                    
+                    if (response.ok) {
+                        output += `✅ 成功\n`
+                    } else {
+                        output += `❌ 失败\n`
+                    }
+                } catch (error) {
+                    output += `❌ 网络错误: ${error.message}\n`
+                }
+                
+                output += '\n'
+            }
+            
+            result.className = 'result info'
+            result.textContent = output
+        }
+
+        // 测试所有连接
+        async function testConnections() {
+            const result = document.getElementById('connection-result')
+            result.className = 'result info'
+            result.textContent = '正在测试所有连接...'
+            
+            let output = '连接测试结果:\n'
+            
+            // 测试不同的API地址
+            const testUrls = [
+                'http://localhost:3001/api/v1/health',
+                'http://127.0.0.1:3001/api/v1/health'
+            ]
+            
+            // 添加局域网IP测试
+            const cachedIP = localStorage.getItem('cached_local_ip')
+            if (cachedIP) {
+                testUrls.push(`http://${cachedIP}:3001/api/v1/health`)
+            }
+            
+            // 添加当前主机名测试
+            const hostname = window.location.hostname
+            if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                testUrls.push(`http://${hostname}:3001/api/v1/health`)
+            }
+            
+            for (const url of testUrls) {
+                output += `测试连接: ${url}\n`
+                
+                try {
+                    const startTime = Date.now()
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    const endTime = Date.now()
+                    
+                    if (response.ok) {
+                        output += `✅ 连接成功 (${endTime - startTime}ms)\n`
+                    } else {
+                        output += `❌ 连接失败: ${response.status}\n`
+                    }
+                } catch (error) {
+                    output += `❌ 连接错误: ${error.message}\n`
+                }
+                
+                output += '\n'
+            }
+            
+            result.className = 'result info'
+            result.textContent = output
+        }
+
+        // 显示修复建议
+        function showFixSuggestions() {
+            const result = document.getElementById('fix-result')
+            
+            const suggestions = `修复建议:
+
+1. 检查后端服务状态:
+   - 确认后端服务在3001端口运行
+   - 检查防火墙设置
+   - 确认CORS配置正确
+
+2. IP地址问题:
+   - 清除浏览器缓存
+   - 重新检测本机IP地址
+   - 检查网络配置
+
+3. 前端配置:
+   - 检查getApiUrl函数逻辑
+   - 验证环境变量设置
+   - 清除localStorage缓存
+
+4. 网络连接:
+   - 尝试不同的IP地址
+   - 检查端口是否被占用
+   - 测试网络连通性
+
+5. 开发环境:
+   - 重启前端开发服务器
+   - 重启后端服务器
+   - 检查依赖包版本
+
+如果问题仍然存在，请联系技术支持。`
+            
+            result.className = 'result warning'
+            result.textContent = suggestions
+        }
+
+        // 页面加载时自动检测环境
+        window.addEventListener('load', () => {
+            console.log('🌐 网络诊断工具已加载')
+            checkEnvironment()
+        })
+    </script>
+</body>
+</html>

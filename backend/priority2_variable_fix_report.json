@@ -1,0 +1,721 @@
+{
+  "timestamp": "2025-09-12T18:28:02.491847",
+  "summary": {
+    "processed_files": 31,
+    "modified_files": 8,
+    "total_fixes": 100,
+    "variable_mappings_used": 14
+  },
+  "fixes_by_file": {
+    "src\\middleware\\errorHandler.ts": 14,
+    "src\\routes\\customers.ts": 3,
+    "src\\routes\\inventory.ts": 11,
+    "src\\routes\\products.ts": 22,
+    "src\\routes\\purchases.ts": 5,
+    "src\\routes\\skus.ts": 37,
+    "src\\utils\\fieldConverter.ts": 2,
+    "src\\utils\\operationLogger.ts": 6
+  },
+  "detailed_fixes": [
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 25,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "let statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 31,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": ".statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 11,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": ".statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 173,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "(statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 119,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": ",\n    statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 9,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": ", statusCode"
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 97,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 91,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 70,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 65,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 61,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 47,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 36,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\middleware\\errorHandler.ts",
+      "line": 31,
+      "original": "statusCode",
+      "fixed": "status_code",
+      "context": "statusCode ="
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "line": 63,
+      "original": "daysSinceLastPurchase",
+      "fixed": "days_since_last_purchase",
+      "context": "(daysSinceLastPurchase"
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "line": 62,
+      "original": "daysSinceLastPurchase",
+      "fixed": "days_since_last_purchase",
+      "context": "(daysSinceLastPurchase"
+    },
+    {
+      "file": "src\\routes\\customers.ts",
+      "line": 61,
+      "original": "daysSinceLastPurchase",
+      "fixed": "days_since_last_purchase",
+      "context": "(daysSinceLastPurchase"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1718,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "const responseData"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1614,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "const responseData"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1479,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "const responseData"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 823,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "const responseData"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1489,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "(responseData"
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1843,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1842,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1841,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1833,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 1626,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\inventory.ts",
+      "line": 842,
+      "original": "responseData",
+      "fixed": "response_data",
+      "context": "responseData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 795,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "const productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 977,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 977,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 976,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 975,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 927,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 913,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 913,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 912,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 901,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 846,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "(productData"
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 972,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 950,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 941,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 932,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 926,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 925,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 906,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 900,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 841,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 840,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\products.ts",
+      "line": 802,
+      "original": "productData",
+      "fixed": "product_data",
+      "context": "productData."
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "line": 1690,
+      "original": "userName",
+      "fixed": "user_name",
+      "context": "const userName"
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "line": 1569,
+      "original": "userName",
+      "fixed": "user_name",
+      "context": "const userName"
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "line": 939,
+      "original": "userName",
+      "fixed": "user_name",
+      "context": ".userName"
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "line": 874,
+      "original": "userName",
+      "fixed": "user_name",
+      "context": ".userName"
+    },
+    {
+      "file": "src\\routes\\purchases.ts",
+      "line": 807,
+      "original": "userName",
+      "fixed": "user_name",
+      "context": ".userName"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 187,
+      "original": "customerAddress",
+      "fixed": "customer_address",
+      "context": "(customerAddress"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1231,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1065,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 938,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 859,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 850,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 663,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 455,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "const materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1789,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1291,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1210,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1086,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 986,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 960,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 913,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 887,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 632,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 17,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": ".materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 941,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 940,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 939,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 860,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 851,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 704,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "(materialUsage"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1232,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1066,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 863,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 862,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 704,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 671,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 664,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 536,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 535,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 456,
+      "original": "materialUsage",
+      "fixed": "material_usage",
+      "context": "materialUsage."
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 103,
+      "original": "totalValue",
+      "fixed": "total_value",
+      "context": ".totalValue"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 104,
+      "original": "totalCost",
+      "fixed": "total_cost",
+      "context": ".totalCost"
+    },
+    {
+      "file": "src\\routes\\skus.ts",
+      "line": 1619,
+      "original": "laborCost",
+      "fixed": "labor_cost",
+      "context": ",\n    laborCost"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "line": 100,
+      "original": "purchaseList",
+      "fixed": "purchase_list",
+      "context": ",\n  purchaseList"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "line": 117,
+      "original": "inventoryList",
+      "fixed": "inventory_list",
+      "context": ",\n  inventoryList"
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 105,
+      "original": "userAgent",
+      "fixed": "user_agent",
+      "context": ", userAgent"
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 136,
+      "original": "purchaseData",
+      "fixed": "purchase_data",
+      "context": ", \n    purchaseData"
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 150,
+      "original": "purchaseData",
+      "fixed": "purchase_data",
+      "context": "purchaseData."
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 149,
+      "original": "purchaseData",
+      "fixed": "purchase_data",
+      "context": "purchaseData."
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 148,
+      "original": "purchaseData",
+      "fixed": "purchase_data",
+      "context": "purchaseData."
+    },
+    {
+      "file": "src\\utils\\operationLogger.ts",
+      "line": 147,
+      "original": "purchaseData",
+      "fixed": "purchase_data",
+      "context": "purchaseData."
+    }
+  ]
+}

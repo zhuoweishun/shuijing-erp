@@ -1,0 +1,200 @@
+{
+  "timestamp": "2025-09-12T19:39:43.546392",
+  "total_fixes": 148,
+  "fixed_files_count": 48,
+  "fixed_files": [
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "fixes": 4
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "fixes": 7
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "fixes": 12
+    },
+    {
+      "file": "src\\components\\NetworkInfo.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "fixes": 5
+    },
+    {
+      "file": "src\\components\\ProductTypeTab.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "fixes": 5
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "fixes": 7
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "fixes": 3
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "fixes": 14
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "fixes": 12
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "fixes": 5
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "fixes": 5
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "fixes": 5
+    },
+    {
+      "file": "src\\pages\\Settings.tsx",
+      "fixes": 1
+    },
+    {
+      "file": "src\\pages\\SupplierManagement.tsx",
+      "fixes": 2
+    },
+    {
+      "file": "src\\pages\\UserManagement.tsx",
+      "fixes": 2
+    }
+  ],
+  "summary": "成功修复 48 个文件中的 148 处return语法错误"
+}

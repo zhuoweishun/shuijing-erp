@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客户标签计算调试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .label { display: inline-block; margin: 5px; padding: 5px 10px; background: #f0f0f0; border-radius: 3px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>客户标签计算调试工具</h1>
+    
+    <div class="section">
+        <h2>模拟20个客户数据</h2>
+        <div id="customers"></div>
+    </div>
+    
+    <div class="section">
+        <h2>标签分配结果</h2>
+        <div id="results"></div>
+    </div>
+    
+    <script>
+        // 模拟20个客户数据
+        const customers = [
+            { id: 1, name: '客户1', total_purchases: 10000, total_orders: 15, refund_count: 8, refund_rate: 53.3 },
+            { id: 2, name: '客户2', total_purchases: 8500, total_orders: 12, refund_count: 6, refund_rate: 50.0 },
+            { id: 3, name: '客户3', total_purchases: 7200, total_orders: 10, refund_count: 5, refund_rate: 50.0 },
+            { id: 4, name: '客户4', total_purchases: 6800, total_orders: 9, refund_count: 4, refund_rate: 44.4 },
+            { id: 5, name: '客户5', total_purchases: 5500, total_orders: 8, refund_count: 3, refund_rate: 37.5 },
+            { id: 6, name: '客户6', total_purchases: 4800, total_orders: 7, refund_count: 3, refund_rate: 42.9 },
+            { id: 7, name: '客户7', total_purchases: 4200, total_orders: 6, refund_count: 2, refund_rate: 33.3 },
+            { id: 8, name: '客户8', total_purchases: 3800, total_orders: 6, refund_count: 2, refund_rate: 33.3 },
+            { id: 9, name: '客户9', total_purchases: 3200, total_orders: 5, refund_count: 2, refund_rate: 40.0 },
+            { id: 10, name: '客户10', total_purchases: 2800, total_orders: 4, refund_count: 1, refund_rate: 25.0 },
+            { id: 11, name: '客户11', total_purchases: 2400, total_orders: 4, refund_count: 1, refund_rate: 25.0 },
+            { id: 12, name: '客户12', total_purchases: 2000, total_orders: 3, refund_count: 1, refund_rate: 33.3 },
+            { id: 13, name: '客户13', total_purchases: 1800, total_orders: 3, refund_count: 1, refund_rate: 33.3 },
+            { id: 14, name: '客户14', total_purchases: 1500, total_orders: 3, refund_count: 0, refund_rate: 0 },
+            { id: 15, name: '客户15', total_purchases: 1200, total_orders: 2, refund_count: 0, refund_rate: 0 },
+            { id: 16, name: '客户16', total_purchases: 1000, total_orders: 2, refund_count: 0, refund_rate: 0 },
+            { id: 17, name: '客户17', total_purchases: 800, total_orders: 2, refund_count: 0, refund_rate: 0 },
+            { id: 18, name: '客户18', total_purchases: 600, total_orders: 1, refund_count: 0, refund_rate: 0 },
+            { id: 19, name: '客户19', total_purchases: 400, total_orders: 1, refund_count: 0, refund_rate: 0 },
+            { id: 20, name: '客户20', total_purchases: 200, total_orders: 1, refund_count: 0, refund_rate: 0 }
+        ];
+        
+        // 计算标签的函数
+        function calculateLabels() {
+            const totalCount = customers.length; // 20
+            const top20Percent = Math.ceil(totalCount * 0.2); // 4
+            
+            console.log('总客户数:', totalCount);
+            console.log('前20%数量:', top20Percent);
+            
+            // VIP客户：累计消费金额前20%
+            const sortedByPurchases = [...customers].sort((a, b) => b.total_purchases - a.total_purchases);
+            const vipThreshold = sortedByPurchases[top20Percent - 1].total_purchases;
+            console.log('VIP阈值:', vipThreshold);
+            
+            // 狂热客户：购买次数前20%
+            const sortedByOrders = [...customers].sort((a, b) => b.total_orders - a.total_orders);
+            const fanaticThreshold = sortedByOrders[top20Percent - 1].total_orders;
+            console.log('狂热客户阈值:', fanaticThreshold);
+            
+            // 高客：客单价前20%
+            const avgOrderValues = customers.map(c => ({
+                ...c,
+                avgOrderValue: c.total_purchases / c.total_orders
+            })).sort((a, b) => b.avgOrderValue - a.avgOrderValue);
+            const highValueThreshold = avgOrderValues[top20Percent - 1].avgOrderValue;
+            console.log('高客阈值:', highValueThreshold);
+            
+            // 低客：客单价后20%
+            const lowValueThreshold = avgOrderValues[avgOrderValues.length - top20Percent].avgOrderValue;
+            console.log('低客阈值:', lowValueThreshold);
+            
+            // 挑剔客户：退货次数前20%
+            const sortedByRefundCount = [...customers].sort((a, b) => b.refund_count - a.refund_count);
+            const pickyThreshold = sortedByRefundCount[top20Percent - 1].refund_count;
+            console.log('挑剔客户阈值:', pickyThreshold);
+            
+            // 刺客客户：退货率前20%
+            const sortedByRefundRate = [...customers].sort((a, b) => b.refund_rate - a.refund_rate);
+            const assassinThreshold = sortedByRefundRate[top20Percent - 1].refund_rate;
+            console.log('刺客客户阈值:', assassinThreshold);
+            
+            // 计算每个客户的标签
+            const results = {
+                VIP: [],
+                FANATIC: [],
+                HIGH_VALUE: [],
+                LOW_VALUE: [],
+                PICKY: [],
+                ASSASSIN: []
+            };
+            
+            customers.forEach(customer => {
+                const avgOrderValue = customer.total_purchases / customer.total_orders;
+                
+                if (customer.total_purchases >= vipThreshold) {
+                    results.VIP.push(customer.name);
+                }
+                if (customer.total_orders >= fanaticThreshold) {
+                    results.FANATIC.push(customer.name);
+                }
+                if (avgOrderValue >= highValueThreshold) {
+                    results.HIGH_VALUE.push(customer.name);
+                }
+                if (avgOrderValue <= lowValueThreshold) {
+                    results.LOW_VALUE.push(customer.name);
+                }
+                if (customer.refund_count >= pickyThreshold) {
+                    results.PICKY.push(customer.name);
+                }
+                if (customer.refund_rate >= assassinThreshold) {
+                    results.ASSASSIN.push(customer.name);
+                }
+            });
+            
+            return results;
+        }
+        
+        // 显示客户数据
+        function displayCustomers() {
+            const customersDiv = document.getElementById('customers');
+            let html = '<table><tr><th>客户</th><th>累计消费</th><th>订单数</th><th>客单价</th><th>退货次数</th><th>退货率</th></tr>';
+            
+            customers.forEach(customer => {
+                const avgOrderValue = (customer.total_purchases / customer.total_orders).toFixed(2);
+                html += `<tr>
+                    <td>${customer.name}</td>
+                    <td>¥${customer.total_purchases}</td>
+                    <td>${customer.total_orders}</td>
+                    <td>¥${avgOrderValue}</td>
+                    <td>${customer.refund_count}</td>
+                    <td>${customer.refund_rate}%</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            customersDiv.innerHTML = html;
+        }
+        
+        // 显示结果
+        function displayResults() {
+            const results = calculateLabels();
+            const resultsDiv = document.getElementById('results');
+            
+            let html = '';
+            Object.keys(results).forEach(labelType => {
+                const count = results[labelType].length;
+                const isCorrect = count === 4;
+                const color = isCorrect ? 'green' : 'red';
+                
+                html += `<div style="margin: 10px 0; color: ${color}">`;
+                html += `<strong>${labelType}客户 (${count}/4个):</strong> `;
+                html += results[labelType].join(', ');
+                html += `</div>`;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 初始化
+        displayCustomers();
+        displayResults();
+    </script>
+</body>
+</html>

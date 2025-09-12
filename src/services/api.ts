@@ -1,13 +1,13 @@
 // API服务配置和请求处理
 import { ApiResponse } from '../types'
-import { convertToApiFormat, validateFieldNaming } from '../utils/fieldConverter'
+// 移除fieldConverter导入，前后端统一使用snake_case
 
 
 
 import { handleApiError, handleNetworkError, handleTimeoutError, ErrorType } from './errorHandler'
 
 // 动态获取本机局域网IP地址
-const getLocalNetworkIP = (): Promise<string | null> => {
+const get_local_network_ip = (): Promise<string | null> => {
   return new Promise((resolve) => {
     // 尝试通过WebRTC获取本机IP
     const pc = new RTCPeerConnection({ iceServers: [] })
@@ -49,7 +49,7 @@ const ensureLocalIP = async (): Promise<string | null> => {
   if (cachedLocalIP) return cachedLocalIP
   
   if (!ipDetectionPromise) {
-    ipDetectionPromise = getLocalNetworkIP().then(ip => {
+    ipDetectionPromise = get_local_network_ip().then(ip => {
       if (ip) {
         cachedLocalIP = ip
         localStorage.setItem('cached_local_ip', ip)
@@ -67,8 +67,27 @@ export const fixImageUrl = (url: string): string => {
   // 类型检查：确保url是字符串类型
   if (!url || typeof url !== 'string') return url || ''
   
-  // 如果是相对路径，直接返回
-  if (!url.startsWith('http')) return url
+  // 如果是相对路径，转换为完整URL
+  if (!url.startsWith('http')) {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      // const port = window.location.port
+      const protocol = window.location.protocol
+      
+      // 构建后端服务器地址
+      let backendUrl
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        backendUrl = 'http://localhost:3001'
+      } else {
+        backendUrl = `${protocol}//${hostname}:3001`
+      }
+      
+      const fullUrl = `${backendUrl}${url}`
+      console.log(`🔄 相对路径转换为完整URL: ${url} -> ${fullUrl}`)
+      return fullUrl
+    }
+    return url
+  }
   
   // 获取当前主机名
   const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
@@ -78,7 +97,7 @@ export const fixImageUrl = (url: string): string => {
     // 在开发环境中，绝对不使用公域URL
     if (import.meta.env.MODE === 'development' || import.meta.env.DEV) {
       // 优先使用缓存的局域网IP
-      const cachedIP = localStorage.getItem('cached_local_ip')
+      const cachedIP = localStorage.get_item('cached_local_ip')
       
       if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
         const newUrl = url.replace(/https?:\/\/api\.dorblecapital\.com/g, `http://${cachedIP}:3001`)
@@ -117,7 +136,7 @@ export const fixImageUrl = (url: string): string => {
       }
       // 如果当前是localhost，优先使用缓存的局域网IP
       else if (currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-        const cachedIP = localStorage.getItem('cached_local_ip')
+        const cachedIP = localStorage.get_item('cached_local_ip')
         if (cachedIP && cachedIP !== urlIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
           const newUrl = url.replace(new RegExp(`https?://${urlIP.replace(/\./g, '\\.')}:3001`, 'g'), `http://${cachedIP}:3001`)
           console.log(`🔄 图片URL已更新为缓存的局域网IP: ${url} -> ${newUrl}`)
@@ -142,9 +161,74 @@ export const fixImageUrl = (url: string): string => {
 // 初始化IP检测（在页面加载时自动执行）
 if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
   // 延迟执行，避免阻塞页面加载
-  setTimeout(() => {
-    ensureLocalIP().catch(console.error)
-  }, 1000)
+  if (typeof window.setTimeout === 'function') {
+    window.setTimeout(() => {
+      ensureLocalIP().catch(console.error)
+    }, 1000)
+  } else {
+    // 如果setTimeout不可用，使用Promise.resolve().then()作为备选
+    Promise.resolve().then(() => {
+      ensureLocalIP().catch(console.error)
+    })
+  }
+  
+  // 添加全局调试函数
+  (window as any).debugAPI = {
+    // 重新检测IP
+    async refreshIP() {
+      console.log('🔄 重新检测IP地址...')
+      cachedLocalIP = null
+      ipDetectionPromise = null
+      localStorage.removeItem('cached_local_ip')
+      const newIP = await ensureLocalIP()
+      console.log('✅ IP检测完成:', newIP)
+      return newIP
+    },
+    
+    // 清除所有缓存
+    clearCache() {
+      console.log('🧹 清除API缓存...')
+      cachedLocalIP = null
+      ipDetectionPromise = null
+      localStorage.removeItem('cached_local_ip')
+      console.log('✅ 缓存已清除')
+    },
+    
+    // 获取当前API地址
+    get_current_api_url() {
+      const url = get_api_url()
+      console.log('🔧 当前API地址:', url)
+      return url
+    },
+    
+    // 测试API连接
+    async testConnection() {
+      const apiUrl = get_api_url()
+      const test_url = `${apiUrl}/health`
+      console.log('🚀 测试API连接:', test_url)
+      
+      try {
+        const response = await fetch(test_url)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('✅ API连接成功:', data)
+          return { success: true, data }
+        } else {
+          console.log('❌ API连接失败:', response.status, response.statusText)
+          return { success: false, status: response.status, statusText: response.statusText }
+        }
+      } catch (error: any) {
+        console.log('❌ API连接错误:', error?.message || error)
+        return { success: false, error: error?.message || String(error) }
+      }
+    }
+  }
+  
+  console.log('🔧 调试工具已加载，可用命令:')
+  console.log('  debugAPI.refreshIP() - 重新检测IP')
+  console.log('  debugAPI.clearCache() - 清除缓存')
+  console.log('  debugAPI.get_current_api_url() - 获取当前API地址')
+  console.log('  debugAPI.testConnection() - 测试API连接')
 }
 
 
@@ -155,41 +239,82 @@ if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
 
 
 
-// 简化的API基础URL获取
-const getApiUrl = (): string => {
+// 简化的API基础URL获取（增强调试版本）
+const get_api_url = (): string => {
   // 1. 优先使用环境变量配置
   const envApiUrl = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && (window as any).__VITE_API_URL__)
   if (envApiUrl && envApiUrl.trim() !== '') {
     const apiUrl = envApiUrl.endsWith('/api/v1') ? envApiUrl : `${envApiUrl}/api/v1`
+    if (import.meta.env.MODE === 'development') {
+      console.log('🔧 [API_URL] 使用环境变量配置:', apiUrl)
+    }
     return apiUrl
   }
   
   // 2. 根据当前环境动态构建API地址
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
+    const cachedIP = localStorage.get_item('cached_local_ip')
+    
+    if (import.meta.env.MODE === 'development') {
+      console.log('🔧 [API_URL] 当前主机名:', hostname)
+      console.log('🔧 [API_URL] 缓存的IP:', cachedIP)
+    }
     
     // 如果是公网域名，使用公网API
     if (hostname.includes('dorblecapital.com')) {
-      return 'https://api.dorblecapital.com/api/v1'
+      const apiUrl = 'https://api.dorblecapital.com/api/v1'
+      if (import.meta.env.MODE === 'development') {
+        console.log('🔧 [API_URL] 使用公网域名:', apiUrl)
+      }
+      return apiUrl
     }
     
     // 如果是局域网IP，动态构建局域网API地址
     if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
         (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
-      return `http://${hostname}:3001/api/v1`
+      const apiUrl = `http://${hostname}:3001/api/v1`
+      if (import.meta.env.MODE === 'development') {
+        console.log('🔧 [API_URL] 使用局域网IP:', apiUrl)
+      }
+      return apiUrl
     }
     
-    // localhost情况
+    // localhost情况 - 优先使用缓存的局域网IP
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return `http://localhost:3001/api/v1`
+      // 如果有缓存的局域网IP且不是localhost，优先使用
+      if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1' && 
+          (cachedIP.startsWith('192.168.') || cachedIP.startsWith('10.') || 
+           (cachedIP.startsWith('172.') && parseInt(cachedIP.split('.')[1]) >= 16 && parseInt(cachedIP.split('.')[1]) <= 31))) {
+        const apiUrl = `http://${cachedIP}:3001/api/v1`
+        if (import.meta.env.MODE === 'development') {
+          console.log('🔧 [API_URL] localhost使用缓存的局域网IP:', apiUrl)
+        }
+        return apiUrl
+      }
+      
+      // 否则使用localhost
+      const apiUrl = `http://localhost:3001/api/v1`
+      if (import.meta.env.MODE === 'development') {
+        console.log('🔧 [API_URL] 使用localhost:', apiUrl)
+      }
+      return apiUrl
     }
     
     // 其他情况，本地开发环境使用HTTP
-    return `http://${hostname}:3001/api/v1`
+    const apiUrl = `http://${hostname}:3001/api/v1`
+    if (import.meta.env.MODE === 'development') {
+      console.log('🔧 [API_URL] 使用其他主机名:', apiUrl)
+    }
+    return apiUrl
   }
   
   // 服务端渲染时的默认值
-  return 'http://localhost:3001/api/v1'
+  const apiUrl = 'http://localhost:3001/api/v1'
+  if (import.meta.env.MODE === 'development') {
+    console.log('🔧 [API_URL] 服务端渲染默认值:', apiUrl)
+  }
+  return apiUrl
 }
 
 
@@ -217,36 +342,36 @@ interface RequestConfig extends RequestInit {
 const buildQueryString = (params?: Record<string, any>): string => {
   if (!params) return ''
   
-  const searchParams = new URLSearchParams()
+  const search_params = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined) {
       // 处理数组参数
       if (Array.isArray(value)) {
         // 过滤掉空字符串和undefined，保留null值但转换为特殊标识
-        const filteredArray = value
+        const filtered_array = value
           .filter(item => item !== undefined && item !== '')
           .map(item => item === null ? 'null' : String(item))
         
         // 为每个数组元素添加单独的参数
-        filteredArray.forEach(item => {
-          searchParams.append(key, item)
+        filtered_array.forEach(item => {
+          search_params.append(key, item)
         })
       } else if (value !== null) {
-        searchParams.append(key, String(value))
+        search_params.append(key, String(value))
       }
     }
   })
   
-  const queryString = searchParams.toString()
+  const queryString = search_params.toString()
   return queryString ? `?${queryString}` : ''
 }
 
 // 创建请求实例
 class ApiClient {
-  // private default_timeout: number // 暂时注释掉未使用的属性
+  // private defaultTimeout: number // 暂时注释掉未使用的属性
 
   constructor() {
-    // this.default_timeout = API_CONFIG.timeout // 暂时注释掉
+    // this.defaultTimeout = API_CONFIG.timeout // 暂时注释掉
   }
 
   // 通用请求方法（带重试机制和智能错误处理）
@@ -255,7 +380,7 @@ class ApiClient {
       config: RequestConfig = {},
       // retry_count: number = 0 // 暂时注释掉未使用的参数
     ): Promise<ApiResponse<T>> {
-      // const baseURL = getApiUrl() // 暂时注释掉未使用的变量
+      // const baseURL = get_api_url() // 暂时注释掉未使用的变量
       // const url = `${baseURL}${endpoint}` // 暂时注释掉未使用的变量
       
       return this.executeRequest<T>(endpoint, config)
@@ -266,7 +391,7 @@ class ApiClient {
       config: RequestConfig = {}
     ): Promise<ApiResponse<T>> {
       // 获取基础配置
-      const baseURL = getApiUrl()
+      const baseURL = get_api_url()
       const url = `${baseURL}${endpoint}`
     // 移除缓存相关代码
     
@@ -274,8 +399,11 @@ class ApiClient {
     if (import.meta.env.MODE === 'development') {
       console.log('🚀 发起API请求:', {
         endpoint,
+        fullUrl: url,
         method: config.method || 'GET',
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
+        hostname: window.location.hostname,
+        cachedIP: localStorage.get_item('cached_local_ip')
       })
     }
     
@@ -290,7 +418,7 @@ class ApiClient {
     }
 
     // 添加认证token
-    const token = localStorage.getItem('auth_token')
+    const token = localStorage.get_item('auth_token')
     if (import.meta.env.MODE === 'development') {
       console.log('🔍 [DEBUG] 从localStorage获取的token:', token ? `${token.substring(0, 20)}...` : 'null')
     }
@@ -307,7 +435,7 @@ class ApiClient {
       // 创建AbortController用于超时控制
       const controller = new AbortController()
       const timeout = 10000 // 10秒超时
-      const timeoutId = setTimeout(() => controller.abort(), timeout)
+      const timeout_id = setTimeout(() => controller.abort(), timeout)
 
       const response = await fetch(url, {
         ...config,
@@ -315,7 +443,7 @@ class ApiClient {
         signal: controller.signal,
       })
 
-      clearTimeout(timeoutId)
+      clearTimeout(timeout_id)
 
       if (import.meta.env.MODE === 'development') {
         console.log('API请求成功:', {
@@ -339,13 +467,13 @@ class ApiClient {
         try {
           const errorData = await response.json()
           ;(error as any).response.data = errorData
-        } catch (parseError) {
+        } catch (parse_error) {
           // 如果无法解析响应体，使用默认错误信息
           ;(error as any).response.data = {
             success: false,
             message: response.statusText || '请求失败',
             error: {
-              code: this.getErrorCodeFromStatus(response.status)
+              code: this.get_error_code_from_status(response.status)
             }
           }
         }
@@ -359,27 +487,12 @@ class ApiClient {
       
       // 请求成功，返回数据
       
-      // 根据文档规范，API响应应使用snake_case格式
-      // 如果后端返回的是camelCase，需要转换为snake_case
-      if (data && typeof data === 'object') {
-        // 验证响应字段命名格式
-        const validation = validateFieldNaming(data, 'snake_case')
-        if (!validation.isValid && Object.keys(validation.suggestions).length > 0) {
-          if (import.meta.env.MODE === 'development') {
-            console.warn('⚠️ API响应字段命名不符合规范:', {
-              endpoint,
-              invalidFields: validation.invalidFields,
-              suggestions: validation.suggestions
-            })
-          }
-          
-          // 自动转换为规范格式
-           const convertedData = convertToApiFormat(data)
-           if (import.meta.env.MODE === 'development') {
-             console.log('🔄 已自动转换字段格式为snake_case')
-           }
-           return convertedData as ApiResponse<T>
-        }
+      // 前后端统一使用snake_case，无需转换
+      if (import.meta.env.MODE === 'development') {
+        console.log('📥 [API] 接收到响应数据:', {
+          endpoint: url,
+          dataKeys: data && typeof data === 'object' ? Object.keys(data).slice(0, 10) : 'non-object'
+        })
       }
       
       return data
@@ -424,7 +537,7 @@ class ApiClient {
                 success: false,
                 message: (apiError as Error).message || '请求失败',
                 error: {
-                  code: this.getErrorCodeFromStatus(apiError.response?.status || 500)
+                  code: this.get_error_code_from_status(apiError.response?.status || 500)
                 }
               }
             }
@@ -468,10 +581,10 @@ class ApiClient {
   // }
   
   // 根据HTTP状态码获取错误码
-  private getErrorCodeFromStatus(status: number): string {
+  private get_error_code_from_status(status: number): string {
     switch (status) {
       case 400: return ErrorType.BAD_REQUEST
-      case 401: return ErrorType.UNAUTHORIZED
+      case 401: return ErrorType.unauthorized
       case 403: return ErrorType.FORBIDDEN
       case 404: return ErrorType.NOT_FOUND
       case 409: return ErrorType.CONFLICT
@@ -534,25 +647,14 @@ class ApiClient {
     let body: any = undefined
     
     if (data) {
-      // 根据API接口统一规范文档6.1节，前端发送给后端的数据应使用snake_case格式
-      let processedData = data
-      if (data && typeof data === 'object') {
-        const validation = validateFieldNaming(data, 'snake_case')
-        if (!validation.isValid && Object.keys(validation.suggestions).length > 0) {
-          console.log('🔄 转换PUT请求数据字段格式为snake_case:', {
-            endpoint,
-            originalFields: validation.invalidFields,
-            suggestions: validation.suggestions
-          })
-          processedData = convertToApiFormat(data)
-        }
-      }
+      // 前后端统一使用snake_case，直接发送数据无需转换
+      console.log('📤 [PUT] 发送数据到后端:', {
+        endpoint,
+        dataKeys: Object.keys(data),
+        sampleData: Object.fromEntries(Object.entries(data).slice(0, 3))
+      })
       
-      console.log('🔍 [PUT请求调试] 原始数据:', data)
-      console.log('🔍 [PUT请求调试] 处理后数据:', processedData)
-      console.log('🔍 [PUT请求调试] 即将发送的JSON:', JSON.stringify(processedData))
-      
-      body = JSON.stringify(processedData)
+      body = JSON.stringify(data)
     }
     
     return this.request<T>(endpoint, {
@@ -583,7 +685,7 @@ class ApiClient {
     const headers: Record<string, string> = {}
     
     // 添加认证token
-    const token = localStorage.getItem('auth_token')
+    const token = localStorage.get_item('auth_token')
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
@@ -607,14 +709,14 @@ export const apiClient = new ApiClient()
 // 健康检查API已移除
 
 // 认证API
-export const authApi = {
+export const auth_api = {
   // 用户登录
-  login: (credentials: { username: string; password: string }) =>
+  login: (credentials: { user_name: string; password: string }) =>
     apiClient.post('/auth/login', credentials),
   
   // 用户注册
   register: (userData: {
-    username: string
+    user_name: string
     password: string
     email?: string
     name: string
@@ -632,17 +734,17 @@ export const authApi = {
 }
 
 // 采购API
-export const purchaseApi = {
+export const purchase_api = {
   // 获取采购列表
   list: (params?: {
     page?: number
     limit?: number
     search?: string
     quality?: string[] | string
-    startDate?: string
-    endDate?: string
+    purchase_date_start?: string
+    purchase_date_end?: string
     supplier?: string[]
-    product_types?: string[]
+    material_types?: string[]
     diameter_min?: string
     diameter_max?: string
     specification_min?: string
@@ -653,14 +755,14 @@ export const purchaseApi = {
     price_per_gram_max?: string
     total_price_min?: string
     total_price_max?: string
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
+    sort_by?: string
+    sort?: 'asc' | 'desc'
   }) => apiClient.get(`/purchases${buildQueryString(params)}`),
   
   // 创建采购记录
   create: (data: {
-    product_name: string
-    product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+    material_name: string
+    material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
     unit_type: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
     bead_diameter?: number // 散珠和手串使用
     specification?: number // 饰品配件和成品使用
@@ -693,47 +795,47 @@ export const purchaseApi = {
   delete: (id: string) => apiClient.delete(`/purchases/${id}`),
 }
 
-// 产品API
-export const productApi = {
-  // 获取产品列表
+// 材料API
+export const material_api = {
+  // 获取材料列表
   list: (params?: {
     page?: number
     limit?: number
-    category?: string
+    item.category?: string
     status?: string
     search?: string
-  }) => apiClient.get(`/products${buildQueryString(params)}`),
+  }) => apiClient.get(`/materials${buildQueryString(params)}`),
   
-  // 创建产品记录
+  // 创建材料记录
   create: (data: {
     name: string
     description?: string
-    category?: string
+    item.category?: string
     quantity: number
     unit: string
     unit_price: number
     location?: string
     notes?: string
-  }) => apiClient.post('/products', data),
+  }) => apiClient.post('/materials', data),
   
-  // 获取单个产品记录
-  get: (id: string) => apiClient.get(`/products/${id}`),
+  // 获取单个材料记录
+  get: (id: string) => apiClient.get(`/materials/${id}`),
   
-  // 更新产品记录
-  update: (id: string, data: any) => apiClient.put(`/products/${id}`, data),
+  // 更新材料记录
+  update: (id: string, data: any) => apiClient.put(`/materials/${id}`, data),
   
-  // 删除产品记录
-  delete: (id: string) => apiClient.delete(`/products/${id}`),
+  // 删除材料记录
+  delete: (id: string) => apiClient.delete(`/materials/${id}`),
 }
 
 // 库存API
-export const inventoryApi = {
-  // 获取层级式库存列表（按产品类型分类：产品类型→规格→品相）
+export const inventory_api = {
+  // 获取层级式库存列表（按材料类型分类：材料类型→规格→品相）
   list_hierarchical: (params?: {
     page?: number
     limit?: number
     search?: string
-    product_types?: string[] // 产品类型筛选（多选）
+    material_types?: string[] // 原材料类型筛选（多选）
     quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
     low_stock_only?: boolean
     diameter_min?: string // 珠子直径范围
@@ -741,19 +843,19 @@ export const inventoryApi = {
     specification_min?: string // 规格范围
     specification_max?: string
     sort?: 'asc' | 'desc'
-    sort_by?: 'product_type' | 'total_quantity'
+    sort_by?: 'material_type' | 'total_quantity' // 按原材料类型排序
   }) => apiClient.get(`/inventory/hierarchical${buildQueryString(params)}`),
 
-  // 获取分组库存列表（按产品名称分组）
+  // 获取分组库存列表（按原材料名称分组）
   list_grouped: (params?: {
     page?: number
     limit?: number
     search?: string
-    product_types?: string[] // 产品类型筛选（多选）
+    material_types?: string[] // 原材料类型筛选（多选）
     quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
     low_stock_only?: boolean
     sort?: 'asc' | 'desc'
-    sort_by?: 'product_name' | 'total_remaining_quantity' | 'product_type'
+    sort_by?: 'material_name' | 'total_remaining_quantity' | 'material_type' // 按原材料名称和类型排序
   }) => apiClient.get(`/inventory/grouped${buildQueryString(params)}`),
   
   // 获取库存列表（原有接口保持兼容）
@@ -766,7 +868,7 @@ export const inventoryApi = {
     min_stock?: number
     max_stock?: number
     sort?: 'asc' | 'desc'
-    sort_by?: 'purchase_date' | 'created_at' | 'remaining_beads' | 'product_name'
+    sort_by?: 'purchase_date' | 'created_at' | 'remaining_beads' | 'material_name' // 按原材料名称排序
   }) => apiClient.get(`/inventory${buildQueryString(params)}`),
   
   // 库存搜索
@@ -774,16 +876,16 @@ export const inventoryApi = {
     apiClient.get(`/inventory/search?q=${encodeURIComponent(query)}${limit ? `&limit=${limit}` : ''}`),
   
   // 获取库存详情
-  get: (purchaseId: string) => apiClient.get(`/inventory/${purchaseId}`),
+  get: (purchase_id: string) => apiClient.get(`/inventory/${purchase_id}`),
   
   // 获取低库存预警
-  getLowStockAlerts: () => apiClient.get('/inventory/alerts/low-stock'),
+  get_low_stock_alerts: () => apiClient.get('/inventory/alerts/low-stock'),
   
   // 导出库存数据
   export: () => apiClient.get('/inventory/export/excel'),
   
   // 获取成品卡片数据（专用于成品展示）
-  getFinishedProducts: (params?: {
+  get_finished_products: (params?: {
     page?: number
     limit?: number
     search?: string
@@ -792,34 +894,36 @@ export const inventoryApi = {
     specification_min?: string
     specification_max?: string
     sort?: 'asc' | 'desc'
-    sort_by?: 'purchase_date' | 'product_name' | 'specification' | 'remaining_quantity'
+    sort_by?: 'purchase_date' | 'material_name' | 'specification' | 'remaining_quantity' // 按原材料名称排序
   }) => apiClient.get(`/inventory/finished-products-cards${buildQueryString(params)}`),
 
   // 获取库存统计数据（仪表盘）
-  getStatistics: () => apiClient.get('/inventory/statistics'),
+  get_statistics: () => apiClient.get('/inventory/statistics'),
   
-  // 获取产品分布数据（饼图）
-  getProductDistribution: (params?: {
-    product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+  // 获取原材料分布数据（饼图）
+  get_material_distribution: (params?: {
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' // 原材料类型
     limit?: number
-  }) => apiClient.get(`/inventory/product-distribution${buildQueryString(params)}`),
+  }) => apiClient.get(`/inventory/material-distribution${buildQueryString(params)}`),
   
   // 获取库存消耗分析数据
-  getConsumptionAnalysis: (params?: {
+  get_consumption_analysis: (params?: {
     time_range?: '7d' | '30d' | '90d' | '6m' | '1y' | 'all'
     limit?: number
   }) => apiClient.get(`/inventory/consumption-analysis${buildQueryString(params)}`),
   
-  // 获取产品价格分布数据
-  getPriceDistribution: (params?: {
-    product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' | 'ALL'
+  // 获取原材料价格分布数据
+  get_price_distribution: (params?: {
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' | 'ALL' // 原材料类型
     price_type?: 'unit_price' | 'total_price'
     limit?: number
   }) => apiClient.get(`/inventory/price-distribution${buildQueryString(params)}`),
+  
+
 }
 
 // 供应商API
-export const supplierApi = {
+export const supplier_api = {
   // 获取供应商列表
   list: (params?: {
     page?: number
@@ -829,7 +933,7 @@ export const supplierApi = {
   }): Promise<ApiResponse<import('../types').SupplierListResponse>> => apiClient.get(`/suppliers${buildQueryString(params)}`),
   
   // 获取所有活跃供应商（用于下拉框）
-  getAll: () => {
+  get_all: () => {
     if (import.meta.env.MODE === 'development') {
       console.log('🔍 [供应商API] 发送请求:', {
         url: '/suppliers?limit=1000',
@@ -842,10 +946,10 @@ export const supplierApi = {
       if (import.meta.env.MODE === 'development') {
         console.log('📥 [供应商API] 收到响应:', {
           success: response.success,
-          data_length: Array.isArray(response.data) ? response.data.length : 0,
+          dataLength: Array.isArray(response.data) ? response.data.length : 0,
           total_count: (response as any).total || 0,
           data: response.data,
-          full_response: response,
+          fullResponse: response,
           timestamp: new Date().toISOString()
         })
       }
@@ -882,7 +986,7 @@ export const supplierApi = {
 }
 
 // 用户管理API
-export const userApi = {
+export const user_api = {
   // 获取用户列表
   list: (params?: {
     page?: number
@@ -895,11 +999,11 @@ export const userApi = {
   profile: () => apiClient.get('/users/profile'),
   
   // 更新用户资料
-  updateProfile: (data: any) => apiClient.put('/users/profile', data),
+  update_profile: (data: any) => apiClient.put('/users/profile', data),
   
   // 创建用户
   create: (data: {
-    username: string
+    user_name: string
     password: string
     email?: string
     name: string
@@ -915,23 +1019,23 @@ export const userApi = {
 }
 
 // AI服务API
-export const aiApi = {
+export const ai_api = {
   // 健康检查已移除
   
   // 获取AI配置
   config: () => apiClient.get('/ai/config'),
   
   // 解析水晶采购描述
-  parse_crystal_purchase: (description: string) =>
+  parseCrystalPurchase: (description: string) =>
     apiClient.post('/ai/parse-crystal-purchase', { description }),
   
   // 解析采购描述（保持向后兼容）
-  parse_purchase: (description: string) =>
+  parsePurchase: (description: string) =>
     apiClient.post('/ai/parse-description', { description }),
 }
 
 // 智能助理API
-export const assistantApi = {
+export const assistant_api = {
   // 智能助理对话
   chat: (message: string, context?: any) =>
     apiClient.post('/assistant/chat', { message, context }),
@@ -941,14 +1045,14 @@ export const assistantApi = {
 }
 
 // 文件上传API
-export const uploadApi = {
+export const upload_api = {
   // 上传采购图片
-  upload_purchase_images: (formData: FormData) => {
+  uploadPurchaseImages: (formData: FormData) => {
     if (import.meta.env.MODE === 'development') {
-      console.log('upload_purchase_images调用:', {
+      console.log('uploadPurchaseImages调用:', {
         formData,
         hasFiles: formData.has('images'),
-        token: localStorage.getItem('auth_token') ? '有token' : '无token'
+        token: localStorage.get_item('auth_token') ? '有token' : '无token'
       })
     }
     
@@ -961,7 +1065,7 @@ export const uploadApi = {
       body: JSON.stringify({ urls }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.get_item('auth_token') || ''}`,
       },
     }),
   
@@ -977,30 +1081,30 @@ export const uploadApi = {
     
     return apiClient.post('/upload/multiple', formData, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.get_item('auth_token') || ''}`,
       },
     })
   },
 }
 
 // 仪表板API
-export const dashboardApi = {
+export const dashboard_api = {
   // 获取仪表板数据
-  getData: () => apiClient.get('/dashboard'),
+  get_data: () => apiClient.get('/dashboard'),
 }
 
-// 成品制作API
-export const finishedProductApi = {
+// SKU成品制作API
+export const finished_product_api = {
   // 获取可用原材料列表
-  getMaterials: (params?: {
+  get_materials: (params?: {
     search?: string
-    product_types?: string[]
+    material_types?: string[] // 原材料类型筛选
     available_only?: boolean
     min_quantity?: number
   }) => apiClient.get(`/finished-products/materials${buildQueryString(params)}`),
   
   // 计算制作成本预估
-  calculateCost: (data: {
+  calculate_cost: (data: {
     materials: {
       purchase_id: string
       quantity_used_beads?: number
@@ -1011,9 +1115,9 @@ export const finishedProductApi = {
     profit_margin?: number
   }) => apiClient.post('/finished-products/cost', data),
   
-  // 创建销售成品
+  // 创建成品原材料（注意：这里创建的仍然是原材料material，不是最终产品）
   create: (data: {
-    product_name: string
+    material_name: string // 成品原材料名称
     description?: string
     specification?: string
     materials: {
@@ -1044,9 +1148,9 @@ export const finishedProductApi = {
   // 获取单个销售成品详情
   get: (id: string) => apiClient.get(`/finished-products/${id}`),
   
-  // 更新销售成品信息
+  // 更新成品原材料信息
   update: (id: string, data: {
-    product_name?: string
+    material_name?: string // 成品原材料名称
     description?: string
     specification?: string
     selling_price?: number
@@ -1064,11 +1168,11 @@ export const finishedProductApi = {
     buyer_info?: string
   }) => apiClient.put(`/finished-products/${id}/sold`, data),
 
-  // 批量创建销售成品（直接转化模式）
+  // 批量创建成品原材料（直接转化模式）
   batchCreate: (data: {
     products: {
       material_id: string
-      product_name: string
+      material_name: string // 成品原材料名称
       description?: string
       specification?: string | number
       labor_cost: number
@@ -1080,7 +1184,7 @@ export const finishedProductApi = {
 }
 
 // SKU管理API
-export const skuApi = {
+export const sku_api = {
   // 获取SKU列表
   list: (params?: {
     page?: number
@@ -1101,9 +1205,12 @@ export const skuApi = {
   // 销售SKU
   sell: (id: string, data: {
     quantity: number
-    buyer_info?: string
-    sales_channel?: string
+    customer_name: string
+    customer_phone: string
+    customerAddress?: string
+    sale_channel?: string
     notes?: string
+    actual_total_price?: number
   }) => apiClient.post(`/skus/${id}/sell`, data),
   
   // 销毁SKU
@@ -1111,6 +1218,8 @@ export const skuApi = {
     quantity: number
     reason: string
     return_to_material: boolean
+    selected_materials?: string[]
+    custom_return_quantities?: Record<string, number>
   }) => apiClient.post(`/skus/${id}/destroy`, data),
   
   // 调整SKU库存
@@ -1118,11 +1227,11 @@ export const skuApi = {
     type: 'increase' | 'decrease'
     quantity: number
     reason: string
-    cost_adjustment?: number
+    costAdjustment?: number
   }) => apiClient.post(`/skus/${id}/adjust`, data),
   
   // 获取SKU库存变更历史
-  getHistory: (id: string, params?: {
+  get_history: (id: string, params?: {
     page?: number
     limit?: number
     type?: string
@@ -1130,21 +1239,224 @@ export const skuApi = {
     date_range?: string
   }) => apiClient.get(`/skus/${id}/history${buildQueryString(params)}`),
   
-  // 获取SKU溯源信息
-  getTraces: (id: string) => apiClient.get(`/skus/${id}/traces`),
+  // 获取SKU溯源信息（制作配方）
+  get_traces: (id: string) => apiClient.get(`/skus/${id}/trace`),
+  
+  // 获取SKU原材料信息
+  get_materials: (id: string) => apiClient.get(`/skus/${id}/materials`),
   
   // 获取SKU统计信息
-  getStats: () => apiClient.get('/skus/stats/overview'),
+  get_stats: () => apiClient.get('/skus/stats/overview'),
   
   // 批量操作
   batchUpdate: (data: {
-    sku_ids: string[]
+    skuIds: string[]
     operation: 'activate' | 'deactivate' | 'delete'
   }) => apiClient.post('/skus/batch', data),
+  
+  // SKU调控（价格调整和状态管理）
+  control: (id: string, data: {
+    type: 'price' | 'status'
+    newPrice?: number
+    newStatus?: 'ACTIVE' | 'INACTIVE'
+    reason: string
+  }) => {
+    // 将前端参数格式转换为后端期望的格式
+    const backendData = {
+      action: data.type,
+      newPrice: data.newPrice,
+      newStatus: data.newStatus,
+      reason: data.reason
+    };
+    
+    return apiClient.put(`/skus/${id}/control`, backendData);
+  },
+  
+  // SKU退货
+  refund: (id: string, data: {
+    quantity: number
+    reason: string
+    refund_amount?: number
+    notes?: string
+  }) => apiClient.post(`/skus/${id}/refund`, data),
+}
+
+// 财务管理API
+export const financial_api = {
+  // 获取财务记录列表
+  get_records: (params?: {
+    page?: number
+    limit?: number
+    record_type?: 'INCOME' | 'EXPENSE' | 'REFUND' | 'LOSS'
+    reference_type?: 'PURCHASE' | 'SALE' | 'REFUND' | 'MANUAL'
+    start_date?: string
+    end_date?: string
+    item.category?: string
+    search?: string
+    sort?: 'asc' | 'desc'
+    sort_by?: string
+  }) => apiClient.get(`/financial/records${buildQueryString(params)}`),
+  
+  // 创建财务记录
+  createRecord: (data: {
+    record_type: 'INCOME' | 'EXPENSE' | 'REFUND' | 'LOSS'
+    amount: number
+    description: string
+    reference_type: 'PURCHASE' | 'SALE' | 'REFUND' | 'MANUAL'
+    reference_id?: string
+    item.category?: string
+    transaction_date: string
+    notes?: string
+  }) => apiClient.post('/financial/records', data),
+  
+  // 更新财务记录
+  updateRecord: (id: string, data: {
+    record_type: 'INCOME' | 'EXPENSE' | 'REFUND' | 'LOSS'
+    amount: number
+    description: string
+    reference_type: 'PURCHASE' | 'SALE' | 'REFUND' | 'MANUAL'
+    reference_id?: string
+    item.category?: string
+    transaction_date: string
+    notes?: string
+  }) => apiClient.put(`/financial/records/${id}`, data),
+  
+  // 删除财务记录
+  deleteRecord: (id: string) => apiClient.delete(`/financial/records/${id}`),
+  
+  // 获取财务概览
+  get_overview: () => apiClient.get('/financial/overview/summary'),
+  
+  // 获取财务统计数据
+  get_statistics: (params?: {
+    period?: 'daily' | 'monthly'
+    start_date?: string
+    end_date?: string
+  }) => apiClient.get(`/financial/statistics${buildQueryString(params)}`),
+  
+  // 创建退货财务记录（供客户管理模块调用）
+  createRefundRecord: (data: {
+    refund_amount: number
+    loss_amount?: number
+    customer_name?: string
+    reference_id?: string
+  }) => apiClient.post('/financial/records/refund', data),
+  
+  // 获取流水账记录
+  get_transactions: (params?: {
+    page?: number
+    limit?: number
+    type?: 'income' | 'expense' | 'all'
+    start_date?: string
+    end_date?: string
+    search?: string
+  }) => apiClient.get(`/financial/transactions${buildQueryString(params)}`),
+  
+  // 获取库存状况统计
+  get_inventory_status: (params?: {
+    stale_period?: '1' | '3' | '6' // 滞销时间：1个月、3个月、6个月
+  }) => apiClient.get(`/financial/inventory/status${buildQueryString(params)}`),
+}
+
+// 客户管理API
+export const customer_api = {
+  // 获取客户列表
+  list: (params?: {
+    page?: number
+    limit?: number
+    search?: string
+    customer_type?: 'NEW' | 'REPEAT' | 'VIP' | 'ACTIVE' | 'INACTIVE'
+    sort?: 'asc' | 'desc'
+    sort_by?: 'name' | 'total_purchases' | 'total_orders' | 'last_purchase_date' | 'created_at'
+  }) => apiClient.get(`/customers${buildQueryString(params)}`),
+  
+  // 获取客户详情
+  get: (id: string) => apiClient.get(`/customers/${id}`),
+  
+  // 创建客户
+  create: (data: {
+    name: string
+    phone: string
+    address?: string
+    wechat?: string
+    birthday?: string
+    notes?: string
+  }) => apiClient.post('/customers', data),
+  
+  // 更新客户信息
+  update: (id: string, data: {
+    name?: string
+    phone?: string
+    address?: string
+    wechat?: string
+    birthday?: string
+  }) => apiClient.put(`/customers/${id}`, data),
+  
+  // 删除客户
+  delete: (id: string) => apiClient.delete(`/customers/${id}`),
+  
+  // 获取客户购买记录
+  get_purchases: (id: string, params?: {
+    page?: number
+    limit?: number
+    start_date?: string
+    end_date?: string
+  }) => apiClient.get(`/customers/${id}/purchases${buildQueryString(params)}`),
+  
+  // 为客户添加购买记录（反向销售录入）
+  addPurchase: (id: string, data: { sku_id: string
+    quantity: number
+    unit_price: number
+    total_price: number
+    sale_channel?: string
+    sale_source: 'SKU_PAGE' | 'CUSTOMER_PAGE'
+    notes?: string
+  }) => apiClient.post(`/customers/${id}/purchases`, data),
+  
+  // 获取客户备注
+  get_notes: (id: string) => apiClient.get(`/customers/${id}/notes`),
+  
+  // 添加客户备注
+  addNote: (id: string, data: {
+    content: string
+    item.category: 'PREFERENCE' | 'BEHAVIOR' | 'CONTACT' | 'OTHER'
+  }) => apiClient.post(`/customers/${id}/notes`, data),
+  
+  // 更新客户备注
+  updateNote: (customer_id: string, note_id: string, data: {
+    content: string
+    item.category: 'PREFERENCE' | 'BEHAVIOR' | 'CONTACT' | 'OTHER'
+  }) => apiClient.put(`/customers/${ customer_id }/notes/${ note_id }`, data),
+
+  // 删除客户备注
+  deleteNote: (customer_id: string, note_id: string) => apiClient.delete(`/customers/${ customer_id }/notes/${ note_id }`),
+  
+  // 获取客户统计分析
+  get_analytics: (params?: {
+    time_period?: 'week' | 'month' | 'half_year' | 'year' | 'all'
+  }) => apiClient.get(`/customers/analytics${buildQueryString(params)}`),
+  
+  // 搜索客户（用于销售时快速选择）
+  search: (query: string) => apiClient.get(`/customers/search?q=${encodeURIComponent(query)}`),
+  
+  // 获取可用SKU列表（用于反向销售录入）
+  get_available_skus: (params?: {
+    search?: string
+    page?: number
+    limit?: number
+  }) => apiClient.get(`/customers/available-skus${buildQueryString(params)}`),
+  
+  // 客户购买记录退货
+  refundPurchase: (customer_id: string, purchase_id: string, data: {
+    quantity: number
+    reason: string
+    refund_amount?: number
+    notes?: string
+  }) => apiClient.post(`/customers/${ customer_id }/purchases/${purchase_id}/refund`, data),
 }
 
 // 导出getApiUrl函数
-export { getApiUrl }
+export { get_api_url }
 
 // 导出默认API客户端
 export default apiClient

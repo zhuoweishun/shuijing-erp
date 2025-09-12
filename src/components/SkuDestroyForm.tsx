@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { Trash2, AlertTriangle, AlertCircle } from 'lucide-react'
-import { SkuItem, DestroyData } from '../types'
+import { useState, useEffect } from 'react'
+import { Trash2, AlertTriangle, AlertCircle, Package } from 'lucide-react'
+import { SkuItem, DestroyData, SkuMaterialInfo } from '../types'
+import { sku_api } from '../services/api'
 
 interface SkuDestroyFormProps {
   sku: SkuItem
-  onSubmit: (data: DestroyData) => void
+  on_submit: (data: DestroyData) => void
   onCancel: () => void
   loading?: boolean
 }
@@ -13,6 +14,9 @@ interface FormState {
   quantity: number
   reason: string
   return_to_material: boolean
+  selected_materials: string[]
+  materials: SkuMaterialInfo[]
+  custom_return_quantities: { [purchase_id: string]: number }
 }
 
 interface FormErrors {
@@ -20,25 +24,100 @@ interface FormErrors {
   reason?: string
 }
 
-export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = false }: SkuDestroyFormProps) {
+export default function SkuDestroyForm({ sku, on_submit, onCancel, loading = false }: SkuDestroyFormProps) {
   const [formData, setFormData] = useState<FormState>({
     quantity: 1,
     reason: '',
-    return_to_material: true
+    return_to_material: true,
+    selected_materials: [],
+    materials: [],
+    custom_return_quantities: {}
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [loadingMaterials, setLoadingMaterials] = useState(false)
 
-  // 预定义的销毁原因
+  // 根据销毁原因自动设置原材料处理选项
+  useEffect(() => {
+    if (formData.reason === '赠送销毁' || formData.reason === '库存遗失') {
+      // 赠送销毁和库存遗失不退回原材料
+      setFormData(prev => ({ ...prev, return_to_material: false }))
+    } else if (formData.reason === '拆散重做') {
+      // 拆散重做退回原材料，并加载原材料列表
+      setFormData(prev => ({ ...prev, return_to_material: true }))
+      loadSkuMaterials()
+    } else if (formData.reason && !destroyReasons.includes(formData.reason)) {
+      // 自定义原因默认不退回原材料
+      setFormData(prev => ({ ...prev, return_to_material: false }))
+    }
+  }, [formData.reason])
+
+  // 加载SKU的原材料信息
+  const loadSkuMaterials = async () => {
+    const sku_id = sku.sku_id || sku.id
+    if (!sku_id) {
+      console.error('SKU ID不存在:', { sku })
+      return
+    }
+    
+    setLoadingMaterials(true)
+    try {
+      console.log('🔍 开始获取SKU原材料信息:', { sku_id })
+      
+      const result = await sku_api.get_materials(sku_id)
+      
+      console.log('📦 SKU原材料API响应:', result)
+      
+      if (result.success) {
+        const materials = (result.data as any)?.materials || []
+        console.log('✅ 成功获取原材料信息:', materials)
+        
+        // 初始化自定义退回数量（简化版）
+        const initialCustomQuantities: { [purchase_id: string]: number } = {}
+        materials.forEach((material: SkuMaterialInfo) => {
+          // 简化：直接使用数字转换
+          initialCustomQuantities[material.purchase_id] = Number(material.quantity_used_beads) || 0
+        })
+        
+        console.log('🔍 [原材料初始化] 初始化自定义退回数量:', {
+          materialsCount: materials.length,
+          initialCustomQuantities,
+          sampleMaterial: materials[0]
+        })
+        
+        setFormData(prev => ({
+          ...prev,
+          materials: materials,
+          selected_materials: materials.map((m: SkuMaterialInfo) => m.purchase_id), // 默认全选
+          custom_return_quantities: initialCustomQuantities
+        }))
+      } else {
+        throw new Error(result.message || '获取原材料信息失败')
+      }
+    } catch (error) {
+      console.error('❌ 加载原材料信息失败:', {
+        error,
+        sku_id,
+        errorMessage: error instanceof Error ? error.message : '未知错误'
+      })
+      
+      // 如果加载失败，使用空数组
+      setFormData(prev => ({
+        ...prev,
+        materials: [],
+        selected_materials: []
+      }))
+    } finally {
+      setLoadingMaterials(false)
+    }
+  }
+
+  // 预定义的销毁原因（只保留三个核心选项）
   const destroyReasons = [
-    '质量问题',
-    '损坏破损',
-    '过期变质',
-    '客户退货',
-    '库存清理',
-    '样品消耗',
-    '其他原因'
+    '赠送销毁',
+    '库存遗失', 
+    '拆散重做'
   ]
 
   // 验证表单
@@ -49,7 +128,7 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
     if (!formData.quantity || formData.quantity <= 0) {
       newErrors.quantity = '销毁数量必须大于0'
     } else if (formData.quantity > sku.available_quantity) {
-      newErrors.quantity = `销毁数量不能超过可售数量(${sku.available_quantity}件)`
+      newErrors.quantity = `销毁数量不能超过当前库存(${sku.available_quantity}件)`
     } else if (!Number.isInteger(formData.quantity)) {
       newErrors.quantity = '销毁数量必须是整数'
     }
@@ -79,13 +158,33 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
 
   // 确认销毁
   const handleConfirmDestroy = () => {
+    // 简化数据处理：直接使用退回数量
+    let returnQuantities: { [purchase_id: string]: number } | undefined = undefined
+    
+    if (formData.reason === '拆散重做' && formData.custom_return_quantities) {
+      returnQuantities = {}
+      Object.entries(formData.custom_return_quantities).forEach(([material_id, quantity]) => {
+        // 直接使用数字作为退回数量
+        returnQuantities![material_id] = Number(quantity) || 0
+      })
+    }
+    
     const destroyData: DestroyData = {
       quantity: formData.quantity,
       reason: formData.reason.trim(),
-      return_to_material: formData.return_to_material
+      return_to_material: formData.return_to_material,
+      selected_materials: formData.reason === '拆散重做' ? formData.selected_materials : undefined,
+      custom_return_quantities: returnQuantities
     }
 
-    onSubmit(destroyData)
+    console.log('🔍 [销毁数据调试] 发送的数据:', {
+      destroyData,
+      returnQuantitiesType: typeof destroyData.custom_return_quantities,
+      returnQuantitiesKeys: destroyData.custom_return_quantities ? Object.keys(destroyData.custom_return_quantities) : [],
+      sampleValue: destroyData.custom_return_quantities ? Object.values(destroyData.custom_return_quantities)[0] : null
+    })
+
+    on_submit(destroyData)
   }
 
   // 处理输入变化
@@ -98,9 +197,67 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
     }
   }
 
-  // 计算损失价值
-  const calculateLossValue = () => {
-    return (sku.unit_price || sku.selling_price || 0) * formData.quantity
+  // 处理原材料选择变化
+  const handleMaterialSelection = (material_id: string, selected: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      selected_materials: selected 
+        ? [...prev.selected_materials, material_id]
+        : prev.selected_materials.filter(id => id !== material_id)
+    }))
+  }
+
+  // 全选/取消全选原材料
+  const handleSelectAllMaterials = (selectAll: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      selected_materials: selectAll ? prev.materials.map(m => m.purchase_id) : []
+    }))
+  }
+
+  // 处理自定义退回数量变化（简化版）
+  const handleCustomQuantityChange = (material_id: string, value: number) => {
+    const numericValue = Math.max(0, Number(value) || 0) // 简化：确保是非负数字
+    
+    setFormData(prev => {
+      console.log('🔍 [数量变化] 更新退回数量:', {
+        material_id,
+        oldValue: prev.custom_return_quantities[material_id],
+        newValue: numericValue,
+        inputValue: value
+      })
+      
+      return {
+        ...prev,
+        custom_return_quantities: {
+          ...prev.custom_return_quantities,
+          [material_id]: numericValue
+        }
+      }
+    })
+  }
+
+  // 获取原材料的最大可退回数量
+  const getMaxReturnQuantity = (material: SkuMaterialInfo) => {
+    // 使用单个SKU的配方数量（同时考虑颗数和件数）
+    const singleSkuBeads = material.quantity_used_beads || 0
+    const singleSkuPieces = material.quantity_used_pieces || 0
+    const singleSkuQuantity = singleSkuBeads + singleSkuPieces
+    
+    // 确保销毁数量大于0
+    const destroyQuantity = Math.max(1, formData.quantity || 1)
+    
+    console.log('🔍 [最大退回数量] 计算过程:', {
+      material_name: material.material_name,
+      quantity_used_beads: material.quantity_used_beads,
+      quantity_used_pieces: material.quantity_used_pieces,
+      singleSkuQuantity,
+      destroyQuantity,
+      maxReturn: singleSkuQuantity * destroyQuantity
+    })
+    
+    // 最大退回数量 = 单个SKU配方数量 * 销毁数量
+    return singleSkuQuantity * destroyQuantity
   }
 
   if (showConfirmation) {
@@ -113,16 +270,17 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
             <div>
               <h3 className="text-lg font-medium text-red-800">确认销毁操作</h3>
               <p className="text-sm text-red-700 mt-2">
-                您即将销毁 <span className="font-medium">{sku.sku_name}</span> {formData.quantity} 件
+                您即将销毁 <span className="font-medium">{formData.quantity}</span> 件 
+                <span className="font-medium">{sku.sku_name}</span>
               </p>
-              <div className="mt-3 space-y-1 text-sm text-red-700">
-                <p><span className="font-medium">销毁原因：</span>{formData.reason}</p>
-                <p><span className="font-medium">损失价值：</span>¥{calculateLossValue().toFixed(2)}</p>
-                <p><span className="font-medium">原材料退回：</span>{formData.return_to_material ? '是' : '否'}</p>
-              </div>
-              <p className="text-sm text-red-800 font-medium mt-3">
-                ⚠️ 此操作不可撤销，请确认无误后继续
+              <p className="text-sm text-red-700 mt-1">
+                销毁原因：<span className="font-medium">{formData.reason}</span>
               </p>
+              {formData.return_to_material && (
+                <p className="text-sm text-red-700 mt-1">
+                  原材料处理：退回到库存
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -140,7 +298,7 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
           <button
             type="button"
             onClick={handleConfirmDestroy}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
             disabled={loading}
           >
             {loading ? (
@@ -159,27 +317,26 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
 
   return (
     <div className="space-y-6">
-      {/* 销毁警告提示 */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex items-start">
-          <Trash2 className="h-5 w-5 text-yellow-500 mt-0.5 mr-3" />
-          <div>
-            <h3 className="text-sm font-medium text-yellow-800">销毁操作</h3>
-            <p className="text-sm text-yellow-700 mt-1">
-              销毁 <span className="font-medium">{sku.sku_name}</span>，当前可售数量：{sku.available_quantity} 件
-            </p>
-            <p className="text-xs text-yellow-600 mt-1">
-              ⚠️ 销毁操作将永久删除SKU库存，请谨慎操作
-            </p>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 销毁信息 */}
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <Trash2 className="h-6 w-6 text-red-500 mt-0.5 mr-3" />
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-red-800">SKU销毁</h3>
+              <p className="text-sm text-red-700 mt-1">
+                销毁 <span className="font-medium">{sku.sku_name}</span>，当前库存：{sku.available_quantity} 件
+              </p>
+              <p className="text-xs text-yellow-600 mt-1">
+                ⚠️ 销毁操作将永久删除SKU库存，请谨慎操作
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 销毁表单 */}
-      <form onSubmit={handleSubmit} className="space-y-4">
         {/* 销毁数量 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             销毁数量 <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -195,9 +352,6 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
               placeholder="请输入销毁数量"
               disabled={loading}
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-sm text-gray-500">件</span>
-            </div>
           </div>
           {errors.quantity && (
             <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -205,28 +359,25 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
               {errors.quantity}
             </p>
           )}
-          <p className="mt-1 text-xs text-gray-500">
-            可售数量：{sku.available_quantity} 件
-          </p>
         </div>
 
         {/* 销毁原因 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             销毁原因 <span className="text-red-500">*</span>
           </label>
           <div className="space-y-2">
-            {/* 预定义原因选择 */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* 预定义原因按钮 */}
+            <div className="flex flex-wrap gap-2">
               {destroyReasons.map((reason) => (
                 <button
                   key={reason}
                   type="button"
                   onClick={() => handleInputChange('reason', reason)}
-                  className={`px-3 py-2 text-sm border rounded-lg text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
                     formData.reason === reason
-                      ? 'border-red-500 bg-red-50 text-red-700'
-                      : 'border-gray-300 text-gray-700'
+                      ? 'bg-red-100 border-red-300 text-red-700'
+                      : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
                   }`}
                   disabled={loading}
                 >
@@ -268,7 +419,7 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
                 checked={formData.return_to_material === true}
                 onChange={() => handleInputChange('return_to_material', true)}
                 className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                disabled={loading}
+                disabled={loading || (formData.reason === '赠送销毁' || formData.reason === '库存遗失')}
               />
               <span className="ml-2 text-sm text-gray-700">
                 退回原材料库存
@@ -282,7 +433,7 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
                 checked={formData.return_to_material === false}
                 onChange={() => handleInputChange('return_to_material', false)}
                 className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                disabled={loading}
+                disabled={loading || formData.reason === '拆散重做'}
               />
               <span className="ml-2 text-sm text-gray-700">
                 不退回原材料
@@ -290,20 +441,127 @@ export default function SkuDestroyForm({ sku, onSubmit, onCancel, loading = fals
               </span>
             </label>
           </div>
+          
+          {/* 原因说明 */}
+          {(formData.reason === '赠送销毁' || formData.reason === '库存遗失') && (
+            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+              💡 {formData.reason}不支持退回原材料
+            </div>
+          )}
+          {formData.reason === '拆散重做' && (
+            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-700">
+              💡 拆散重做必须退回原材料到库存
+            </div>
+          )}
         </div>
 
-        {/* 损失价值预览 */}
-        <div className="bg-red-50 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">预计损失价值：</span>
-            <span className="text-lg font-medium text-red-600">
-              ¥{calculateLossValue().toFixed(2)}
-            </span>
+        {/* 原材料选择界面（仅当选择"拆散重做"时显示） */}
+        {formData.reason === '拆散重做' && formData.return_to_material && (
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-gray-700">
+                <Package className="inline h-4 w-4 mr-1" />
+                选择要退回的原材料
+              </label>
+              {loadingMaterials ? (
+                <div className="text-xs text-gray-500">加载中...</div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectAllMaterials(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800"
+                    disabled={loading}
+                  >
+                    全选
+                  </button>
+                  <span className="text-xs text-gray-400">|</span>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectAllMaterials(false)}
+                    className="text-xs text-blue-600 hover:text-blue-800"
+                    disabled={loading}
+                  >
+                    取消全选
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {loadingMaterials ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span className="ml-2 text-sm text-gray-500">正在加载原材料信息...</span>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {formData.materials.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    暂无原材料信息
+                  </div>
+                ) : (
+                  formData.materials.map((material) => (
+                    <label key={material.purchase_id} className="flex items-start space-x-3 p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.selected_materials.includes(material.purchase_id)}
+                        onChange={(e) => handleMaterialSelection(material.purchase_id, e.target.checked)}
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        disabled={loading}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900">
+                          {material.material_name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          供应商: {material.supplier_name || '未知'}
+                        </div>
+                        
+                        {/* 自定义退回数量输入 */}
+                        <div className="mt-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-gray-600 w-16">退回数量:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max={getMaxReturnQuantity(material)}
+                              value={formData.custom_return_quantities[material.purchase_id] || 0}
+                              onChange={(e) => handleCustomQuantityChange(material.purchase_id, parseInt(e.target.value) || 0)}
+                              className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                              disabled={loading || !formData.selected_materials.includes(material.purchase_id)}
+                            />
+                            <span className="text-xs text-gray-500">/ {getMaxReturnQuantity(material)} {material.quantity_used_beads > 0 ? '颗' : '件'}</span>
+                          </div>
+                          
+                          {/* 显示计算后的成本 */}
+                          {formData.custom_return_quantities[material.purchase_id] > 0 && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {(() => {
+                                const returnQuantity = formData.custom_return_quantities[material.purchase_id] || 0;
+                                
+                                // 使用后端返回的unit_cost字段（已根据产品类型选择正确的价格字段）
+                                if (material.unitCost && material.unitCost > 0) {
+                                  const totalCost = material.unitCost * returnQuantity;
+                                  return <div>退回成本: ¥{totalCost.toFixed(2)}</div>;
+                                } else {
+                                  return <div>退回成本: 暂无价格数据</div>;
+                                }
+                              })()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            )}
+            
+            <div className="mt-3 text-xs text-gray-500">
+              已选择 {formData.selected_materials.length} / {formData.materials.length} 项原材料
+            </div>
           </div>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-xs text-gray-500">单价：¥{(sku.unit_price || sku.selling_price || 0).toFixed(2)} × {formData.quantity} 件</span>
-          </div>
-        </div>
+        )}
 
         {/* 操作按钮 */}
         <div className="flex items-center space-x-3 pt-4">

@@ -1,0 +1,20 @@
+精确错误修复日志
+时间: 2025-09-12T16:14:32.770981
+备份目录: D:\shuijing ERP\backups\targeted_fix_20250912_161432
+
+修复统计:
+  files_scanned: 4
+  files_modified: 3
+  total_replacements: 6
+  undefined_var_fixes: 2
+  unused_var_fixes: 4
+
+修复的文件:
+  - scripts\convert-camel-to-snake.js
+  - scripts\create-realistic-test-data.js
+  - scripts\create-realistic-test-data_backup.js
+
+应用的修复:
+  - scripts\convert-camel-to-snake.js: targeted_fix (2 处)
+  - scripts\create-realistic-test-data.js: targeted_fix (2 处)
+  - scripts\create-realistic-test-data_backup.js: targeted_fix (2 处)

@@ -1,0 +1,823 @@
+{
+  "timestamp": "2025-09-12T21:18:46.438848",
+  "total_fixes": 162,
+  "total_errors": 0,
+  "fixes_by_type": {
+    "object_literal_syntax_fix": 62,
+    "array_object_syntax_fix": 58,
+    "function_call_syntax_fix": 42
+  },
+  "fixes_applied": [
+    {
+      "file": "src\\jest.d.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\vite-env.d.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\hooks\\useSkuPermissions.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\services\\aiService.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\services\\aiService.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\types\\financial.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\types\\financial.ts",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\types\\financial.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\utils\\format.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\utils\\format.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\utils\\network.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\utils\\network.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\utils\\pinyinSort.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\utils\\refundReasons.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\utils\\validation.ts",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\utils\\validation.ts",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\NetworkInfo.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\NetworkInfo.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\PermissionWrapper.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\PermissionWrapper.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\Portal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\ProductTypeTab.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\ProductTypeTab.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\ProductTypeTab.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "function_call_syntax_fix",
+      "description": "修复函数调用语法问题"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    },
+    {
+      "file": "src\\hooks\\__tests__\\useAuth.test.tsx",
+      "type": "array_object_syntax_fix",
+      "description": "修复数组和对象语法问题"
+    },
+    {
+      "file": "src\\hooks\\__tests__\\useAuth.test.tsx",
+      "type": "object_literal_syntax_fix",
+      "description": "修复对象字面量语法"
+    }
+  ],
+  "errors_found": []
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端API测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1>前端API测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 测试API基础URL</h2>
+        <button onclick="testApiUrl()">测试API URL</button>
+        <div id="apiUrlResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 测试半成品库存API</h2>
+        <button onclick="testSemiFinishedInventory()">测试半成品库存</button>
+        <div id="semiFinishedResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 测试网络连接</h2>
+        <button onclick="testNetworkConnection()">测试网络连接</button>
+        <div id="networkResult" class="result"></div>
+    </div>
+
+    <script>
+        // 动态获取API基础URL
+        function getApiUrl() {
+            const hostname = window.location.hostname;
+            const cachedIP = localStorage.getItem('cached_local_ip');
+            
+            console.log('🔧 当前主机名:', hostname);
+            console.log('🔧 缓存的IP:', cachedIP);
+            
+            // 如果是公网域名，使用公网API
+            if (hostname.includes('dorblecapital.com')) {
+                return 'https://api.dorblecapital.com/api/v1';
+            }
+            
+            // 如果是局域网IP，动态构建局域网API地址
+            if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+                (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+                return `http://${hostname}:3001/api/v1`;
+            }
+            
+            // localhost情况 - 优先使用缓存的局域网IP
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1' && 
+                    (cachedIP.startsWith('192.168.') || cachedIP.startsWith('10.') || 
+                     (cachedIP.startsWith('172.') && parseInt(cachedIP.split('.')[1]) >= 16 && parseInt(cachedIP.split('.')[1]) <= 31))) {
+                    return `http://${cachedIP}:3001/api/v1`;
+                }
+                return `http://localhost:3001/api/v1`;
+            }
+            
+            return `http://${hostname}:3001/api/v1`;
+        }
+        
+        function testApiUrl() {
+            const result = document.getElementById('apiUrlResult');
+            const apiUrl = getApiUrl();
+            result.className = 'result success';
+            result.textContent = `API基础URL: ${apiUrl}`;
+        }
+        
+        async function testSemiFinishedInventory() {
+            const result = document.getElementById('semiFinishedResult');
+            result.className = 'result';
+            result.textContent = '正在测试...';
+            
+            try {
+                const apiUrl = getApiUrl();
+                const testUrl = `${apiUrl}/inventory/hierarchical`;
+                const params = new URLSearchParams({
+                    material_types: 'LOOSE_BEADS,BRACELET'
+                });
+                
+                console.log('🚀 测试URL:', `${testUrl}?${params}`);
+                
+                const response = await fetch(`${testUrl}?${params}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWY4aDNnOHAwMDAwdHVwZ3E0Z2NyZncwIiwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NzQ4ODIwNywiZXhwIjoxNzU3NTc0NjA3fQ.x00o5OWqX6qmzXUu6qRBkx7ymBhNrFJfCn_pMTk-Pwg'
+                    }
+                });
+                
+                console.log('📡 响应状态:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📥 响应数据:', data);
+                    
+                    result.className = 'result success';
+                    result.textContent = `✅ API调用成功\n状态码: ${response.status}\n响应数据: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ API调用失败:', response.status, errorText);
+                    
+                    result.className = 'result error';
+                    result.textContent = `❌ API调用失败\n状态码: ${response.status}\n错误信息: ${errorText}`;
+                }
+            } catch (error) {
+                console.error('❌ 网络错误:', error);
+                result.className = 'result error';
+                result.textContent = `❌ 网络错误: ${error.message}`;
+            }
+        }
+        
+        async function testNetworkConnection() {
+            const result = document.getElementById('networkResult');
+            result.className = 'result';
+            result.textContent = '正在测试网络连接...';
+            
+            try {
+                const apiUrl = getApiUrl();
+                const healthUrl = `${apiUrl.replace('/api/v1', '')}/health`;
+                
+                console.log('🚀 健康检查URL:', healthUrl);
+                
+                const response = await fetch(healthUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.className = 'result success';
+                    result.textContent = `✅ 网络连接正常\n健康检查: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = `❌ 健康检查失败\n状态码: ${response.status}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 网络连接失败: ${error.message}`;
+            }
+        }
+        
+        // 页面加载时自动测试API URL
+        window.onload = function() {
+            testApiUrl();
+        };
+    </script>
+</body>
+</html>

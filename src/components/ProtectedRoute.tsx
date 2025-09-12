@@ -13,7 +13,7 @@ export default function ProtectedRoute({
   required_role 
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth()
-  const { hasPermission } = usePermission()
+  const { has_permission } = usePermission()
   const location = useLocation()
 
   // 显示加载状态
@@ -40,7 +40,7 @@ export default function ProtectedRoute({
   }
 
   // 权限不足，显示无权限页面
-  if (!hasPermission(required_role)) {
+  if (!has_permission(required_role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto px-4">

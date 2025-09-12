@@ -1,0 +1,37 @@
+
+============================================================
+原材料库存查询字段蛇形命名转换报告
+============================================================
+处理时间: 16.06 秒
+处理文件总数: 377
+修改文件数量: 50
+总替换次数: 482
+
+字段替换统计:
+----------------------------------------
+remainingQuantity              → remaining_quantity             ( 96 次)
+usedQuantity                   → used_quantity                  ( 71 次)
+isLowStock                     → is_low_stock                   ( 67 次)
+originalQuantity               → original_quantity              ( 41 次)
+setLoading                     → set_loading                    ( 39 次)
+pricePerUnit                   → price_per_unit                 ( 34 次)
+lowStockOnly                   → low_stock_only                 ( 24 次)
+purchaseDate                   → purchase_date                  ( 16 次)
+purchaseId                     → purchase_id                    ( 11 次)
+handleViewModeChange           → handle_view_mode_change        (  5 次)
+setViewMode                    → set_view_mode                  (  3 次)
+listHierarchical               → list_hierarchical              (  2 次)
+getFinishedProducts            → get_finished_products          (  2 次)
+setCurrentPage                 → set_current_page               (  2 次)
+selectedProductTypes           → selected_product_types         (  2 次)
+fetchHierarchicalInventory     → fetch_hierarchical_inventory   (  2 次)
+handleExport                   → handle_export                  (  2 次)
+handleMaterialClick            → handle_material_click          (  2 次)
+getStatistics                  → get_statistics                 (  2 次)
+listGrouped                    → list_grouped                   (  1 次)
+getLowStockAlerts              → get_low_stock_alerts           (  1 次)
+getMaterialDistribution        → get_material_distribution      (  1 次)
+getConsumptionAnalysis         → get_consumption_analysis       (  1 次)
+getPriceDistribution           → get_price_distribution         (  1 次)
+
+============================================================

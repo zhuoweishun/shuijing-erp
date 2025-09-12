@@ -1,0 +1,1129 @@
+{
+  "timestamp": "20250912_173918",
+  "stage": "Stage 4 - Import/Export Cleanup",
+  "summary": {
+    "total_files_processed": 71,
+    "files_modified": 54,
+    "total_fixes": 176
+  },
+  "file_changes": {
+    "src\\hooks\\useSkuPermissions.ts": 1,
+    "src\\services\\aiService.ts": 2,
+    "src\\services\\api.ts": 2,
+    "src\\App.tsx": 16,
+    "src\\main.tsx": 1,
+    "src\\components\\AccessoriesProductGrid.tsx": 4,
+    "src\\components\\CustomerCreateModal.tsx": 1,
+    "src\\components\\CustomerDetailModal.tsx": 3,
+    "src\\components\\CustomerRefundModal.tsx": 4,
+    "src\\components\\FinancialCharts.tsx": 2,
+    "src\\components\\FinancialRecordModal.tsx": 2,
+    "src\\components\\FinancialReports.tsx": 2,
+    "src\\components\\FinishedProductGrid.tsx": 3,
+    "src\\components\\InventoryConsumptionChart.tsx": 2,
+    "src\\components\\InventoryDashboard.tsx": 6,
+    "src\\components\\InventoryPieChart.tsx": 1,
+    "src\\components\\InventoryStatus.tsx": 3,
+    "src\\components\\Layout.tsx": 2,
+    "src\\components\\MobileForm.tsx": 1,
+    "src\\components\\MobileTable.tsx": 1,
+    "src\\components\\PermissionWrapper.tsx": 1,
+    "src\\components\\ProductDistributionPieChart.tsx": 2,
+    "src\\components\\ProductPriceDistributionChart.tsx": 3,
+    "src\\components\\ProtectedRoute.tsx": 1,
+    "src\\components\\PurchaseDetailModal.tsx": 5,
+    "src\\components\\RefundConfirmModal.tsx": 1,
+    "src\\components\\ReverseSaleModal.tsx": 3,
+    "src\\components\\SalesDetailModal.tsx": 5,
+    "src\\components\\SemiFinishedMatrixView.tsx": 4,
+    "src\\components\\SkuAdjustForm.tsx": 1,
+    "src\\components\\SkuControlModal.tsx": 4,
+    "src\\components\\SkuDestroyForm.tsx": 2,
+    "src\\components\\SkuDetailModal.tsx": 6,
+    "src\\components\\SkuHistoryView.tsx": 3,
+    "src\\components\\SkuRestockForm.tsx": 2,
+    "src\\components\\SkuSellForm.tsx": 1,
+    "src\\components\\SkuTraceView.tsx": 2,
+    "src\\components\\TotalPriceInput.tsx": 1,
+    "src\\components\\TransactionLog.tsx": 3,
+    "src\\hooks\\useAuth.tsx": 2,
+    "src\\pages\\CustomerManagement.tsx": 8,
+    "src\\pages\\Financial.tsx": 5,
+    "src\\pages\\Home.tsx": 3,
+    "src\\pages\\InventoryList.tsx": 5,
+    "src\\pages\\Login.tsx": 2,
+    "src\\pages\\ProductEntry.tsx": 5,
+    "src\\pages\\PurchaseEntry.tsx": 6,
+    "src\\pages\\PurchaseList.tsx": 7,
+    "src\\pages\\SalesList.tsx": 10,
+    "src\\pages\\SupplierManagement.tsx": 1,
+    "src\\pages\\UserManagement.tsx": 1,
+    "src\\pages\\__tests__\\InventoryList.test.tsx": 5,
+    "src\\pages\\__tests__\\PurchaseEntry.test.tsx": 5,
+    "src\\hooks\\__tests__\\useAuth.test.tsx": 2
+  },
+  "detailed_fixes": [
+    {
+      "file": "src\\hooks\\useSkuPermissions.ts",
+      "type": "import_fix",
+      "original": "import { use_auth } from './useAuth'",
+      "fixed": "import {use_auth} from './use_auth'"
+    },
+    {
+      "file": "src\\services\\aiService.ts",
+      "type": "import_fix",
+      "original": "import apiClient from './api'",
+      "fixed": "import api_client from './api'"
+    },
+    {
+      "file": "src\\services\\aiService.ts",
+      "type": "import_fix",
+      "original": "import { AIParseRequest, AIParseResponse, AssistantRequest, AssistantResponse } from '../types'",
+      "fixed": "import {ai_parse_request, ai_parse_response, assistant_request, assistant_response} from '../types'"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "import_fix",
+      "original": "import { ApiResponse } from '../types'",
+      "fixed": "import {api_response} from '../types'"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "type": "import_fix",
+      "original": "import { handleApiError, handleNetworkError, handleTimeoutError, ErrorType } from './errorHandler'",
+      "fixed": "import {handle_api_error, handle_network_error, handle_timeout_error, error_type} from './error_handler'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import { AuthProvider } from './hooks/useAuth'",
+      "fixed": "import {auth_provider} from './hooks/use_auth'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import Layout from './components/Layout'",
+      "fixed": "import layout from './components/layout'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import ProtectedRoute from './components/ProtectedRoute'",
+      "fixed": "import protected_route from './components/protected_route'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import Login from './pages/Login'",
+      "fixed": "import login from './pages/login'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import Home from './pages/Home'",
+      "fixed": "import home from './pages/home'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import PurchaseEntry from './pages/PurchaseEntry'",
+      "fixed": "import purchase_entry from './pages/purchase_entry'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import PurchaseList from './pages/PurchaseList'",
+      "fixed": "import purchase_list from './pages/purchase_list'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import ProductEntry from './pages/ProductEntry'",
+      "fixed": "import product_entry from './pages/product_entry'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import SalesList from './pages/SalesList'",
+      "fixed": "import sales_list from './pages/sales_list'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import InventoryList from './pages/InventoryList'",
+      "fixed": "import inventory_list from './pages/inventory_list'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import SupplierManagement from './pages/SupplierManagement'",
+      "fixed": "import supplier_management from './pages/supplier_management'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import CustomerManagement from './pages/CustomerManagement'",
+      "fixed": "import customer_management from './pages/customer_management'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import UserManagement from './pages/UserManagement'",
+      "fixed": "import user_management from './pages/user_management'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import Settings from './pages/Settings'",
+      "fixed": "import settings from './pages/settings'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import Financial from './pages/Financial'",
+      "fixed": "import financial from './pages/financial'"
+    },
+    {
+      "file": "src\\App.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from './hooks/useAuth'",
+      "fixed": "import {use_auth} from './hooks/use_auth'"
+    },
+    {
+      "file": "src\\main.tsx",
+      "type": "import_fix",
+      "original": "import App from './App.tsx'",
+      "fixed": "import app from './app.tsx'"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api, fixImageUrl } from '@/services/api'",
+      "fixed": "import {inventory_api, fix_image_url} from '@/services/api'"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '@/hooks/useAuth'",
+      "fixed": "import {use_auth} from '@/hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { format_purchase_code } from '../utils/fieldConverter'",
+      "fixed": "import {format_purchase_code} from '../utils/fieldConverter'"
+    },
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { sort_by_pinyin } from '../utils/pinyinSort'",
+      "fixed": "import {sort_by_pinyin} from '../utils/pinyinSort'"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "import_fix",
+      "original": "import { customer_api } from '../services/api';",
+      "fixed": "import {customer_api} from '../services/api';"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { Customer, CustomerPurchase, CustomerNote } from '../types'",
+      "fixed": "import {customer, customer_purchase, customer_note} from '../types'"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { customer_api } from '../services/api'",
+      "fixed": "import {customer_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import RefundConfirmModal, { RefundData } from './RefundConfirmModal'",
+      "fixed": "import RefundConfirmModal, {refund_data} from './refund_confirm_modal'"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "import_fix",
+      "original": "import { Customer, CustomerPurchase } from '../types'",
+      "fixed": "import {customer, customer_purchase} from '../types'"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "import_fix",
+      "original": "import { customer_api } from '../services/api'",
+      "fixed": "import {customer_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "import_fix",
+      "original": "import { format_currency, format_date } from '../utils/format'",
+      "fixed": "import {format_currency, format_date} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "import_fix",
+      "original": "import RefundConfirmModal, { RefundData } from './RefundConfirmModal'",
+      "fixed": "import RefundConfirmModal, {refund_data} from './refund_confirm_modal'"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\FinancialCharts.tsx",
+      "type": "import_fix",
+      "original": "import { format_amount } from '../utils/format'",
+      "fixed": "import {format_amount} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "import_fix",
+      "original": "import { financial_record, create_financial_record_request } from '../types/financial'",
+      "fixed": "import {financial_record, create_financial_record_request} from '../types/financial'"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\FinancialReports.tsx",
+      "type": "import_fix",
+      "original": "import { format_currency, format_date } from '../utils/format'",
+      "fixed": "import {format_currency, format_date} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api, fixImageUrl } from '../services/api'",
+      "fixed": "import {inventory_api, fix_image_url} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '@/hooks/useAuth'",
+      "fixed": "import {use_auth} from '@/hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\FinishedProductGrid.tsx",
+      "type": "import_fix",
+      "original": "import { format_purchase_code } from '../utils/fieldConverter'",
+      "fixed": "import {format_purchase_code} from '../utils/fieldConverter'"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import Material_distribution_pie_chart from './ProductDistributionPieChart'",
+      "fixed": "import material_distribution_pie_chart from './product_distribution_pie_chart'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import Inventory_consumption_chart from './InventoryConsumptionChart'",
+      "fixed": "import inventory_consumption_chart from './inventory_consumption_chart'"
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "type": "import_fix",
+      "original": "import ProductPriceDistributionChart from './ProductPriceDistributionChart'",
+      "fixed": "import product_price_distribution_chart from './product_price_distribution_chart'"
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "import_fix",
+      "original": "import { InventoryStatusData, STALE_PERIOD_LABELS } from '../types/financial'",
+      "fixed": "import {inventory_status_data, stale_period_labels} from '../types/financial'"
+    },
+    {
+      "file": "src\\components\\InventoryStatus.tsx",
+      "type": "import_fix",
+      "original": "import { format_amount } from '../utils/format'",
+      "fixed": "import {format_amount} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth, usePermission } from '../hooks/useAuth'",
+      "fixed": "import {use_auth, use_permission} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\Layout.tsx",
+      "type": "import_fix",
+      "original": "import NetworkInfo from './NetworkInfo'",
+      "fixed": "import network_info from './network_info'"
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\PermissionWrapper.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\ProtectedRoute.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth, usePermission } from '../hooks/useAuth'",
+      "fixed": "import {use_auth, use_permission} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { purchase_api, supplier_api, fixImageUrl } from '../services/api'",
+      "fixed": "import {purchase_api, supplier_api, fix_image_url} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { Purchase } from '../types'",
+      "fixed": "import {purchase} from '../types'"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import Permission_wrapper from './PermissionWrapper'",
+      "fixed": "import permission_wrapper from './permission_wrapper'"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { format_purchase_code } from '../utils/fieldConverter'",
+      "fixed": "import {format_purchase_code} from '../utils/fieldConverter'"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, CustomerPurchase } from '../types'",
+      "fixed": "import {sku_item, customer_purchase} from '../types'"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "import_fix",
+      "original": "import { customer_api, sku_api } from '../services/api'",
+      "fixed": "import {customer_api, sku_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "import_fix",
+      "original": "import { Customer, SkuItem, SellData } from '../types'",
+      "fixed": "import {customer, sku_item, sell_data} from '../types'"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuSellForm from './SkuSellForm'",
+      "fixed": "import sku_sell_form from './sku_sell_form'"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { finished_product_api, fixImageUrl } from '../services/api'",
+      "fixed": "import {finished_product_api, fix_image_url} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { FinishedProduct } from '../types'",
+      "fixed": "import {finished_product} from '../types'"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import Permission_wrapper from './PermissionWrapper'",
+      "fixed": "import permission_wrapper from './permission_wrapper'"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import Portal from './Portal'",
+      "fixed": "import portal from './portal'"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "import_fix",
+      "original": "import { format_purchase_code } from '../utils/fieldConverter'",
+      "fixed": "import {format_purchase_code} from '../utils/fieldConverter'"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "import_fix",
+      "original": "import Portal from './Portal'",
+      "fixed": "import portal from './portal'"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, AdjustData } from '../types'",
+      "fixed": "import {sku_item, adjust_data} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem } from '../types'",
+      "fixed": "import {sku_item} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "import_fix",
+      "original": "import { format_amount } from '../utils/format'",
+      "fixed": "import {format_amount} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api } from '../services/api'",
+      "fixed": "import {sku_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, DestroyData, SkuMaterialInfo } from '../types'",
+      "fixed": "import {sku_item, destroy_data, sku_material_info} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api } from '../services/api'",
+      "fixed": "import {sku_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api, fixImageUrl } from '../services/api'",
+      "fixed": "import {sku_api, fix_image_url} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuSellForm from './SkuSellForm'",
+      "fixed": "import sku_sell_form from './sku_sell_form'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuDestroyForm from './SkuDestroyForm'",
+      "fixed": "import sku_destroy_form from './sku_destroy_form'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuAdjustForm from './SkuAdjustForm'",
+      "fixed": "import sku_adjust_form from './sku_adjust_form'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuTraceView from './SkuTraceView'",
+      "fixed": "import sku_trace_view from './sku_trace_view'"
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "import_fix",
+      "original": "import SkuHistoryView from './SkuHistoryView'",
+      "fixed": "import sku_history_view from './sku_history_view'"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, SkuInventoryLog } from '../types'",
+      "fixed": "import {sku_item, sku_inventory_log} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api } from '../services/api'",
+      "fixed": "import {sku_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "type": "import_fix",
+      "original": "import { extract_and_translate_refund_reason } from '../utils/refundReasons'",
+      "fixed": "import {extract_and_translate_refund_reason} from '../utils/refundReasons'"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "import_fix",
+      "original": "import { RestockData, RestockInfo, SkuItem } from '../types'",
+      "fixed": "import {restock_data, restock_info, sku_item} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "import_fix",
+      "original": "import { get_network_config } from '../utils/network'",
+      "fixed": "import {get_network_config} from '../utils/network'"
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, SellData, Customer } from '../types'",
+      "fixed": "import {sku_item, sell_data, customer} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem } from '../types'",
+      "fixed": "import {sku_item} from '../types'"
+    },
+    {
+      "file": "src\\components\\SkuTraceView.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api } from '../services/api'",
+      "fixed": "import {sku_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\TotalPriceInput.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "import_fix",
+      "original": "import { format_amount, format_date } from '../utils/format'",
+      "fixed": "import {format_amount, format_date} from '../utils/format'"
+    },
+    {
+      "file": "src\\components\\TransactionLog.tsx",
+      "type": "import_fix",
+      "original": "import { extract_and_translate_refund_reason } from '../utils/refundReasons'",
+      "fixed": "import {extract_and_translate_refund_reason} from '../utils/refundReasons'"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "import_fix",
+      "original": "import { User, login_request } from '../types'",
+      "fixed": "import {user, login_request} from '../types'"
+    },
+    {
+      "file": "src\\hooks\\useAuth.tsx",
+      "type": "import_fix",
+      "original": "import { auth_api } from '../services/api'",
+      "fixed": "import {auth_api} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import { customer_api } from '../services/api'",
+      "fixed": "import {customer_api} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import { Customer, CustomerAnalytics } from '../types'",
+      "fixed": "import {customer, customer_analytics} from '../types'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import ReverseSaleModal from '../components/ReverseSaleModal'",
+      "fixed": "import reverse_sale_modal from '../components/ReverseSaleModal'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import CustomerDetailModal from '../components/CustomerDetailModal'",
+      "fixed": "import customer_detail_modal from '../components/CustomerDetailModal'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import Customer_create_modal from '../components/CustomerCreateModal'",
+      "fixed": "import customer_create_modal from '../components/CustomerCreateModal'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import CustomerRefundModal from '../components/CustomerRefundModal'",
+      "fixed": "import customer_refund_modal from '../components/CustomerRefundModal'"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "import_fix",
+      "original": "import Portal from '../components/Portal'",
+      "fixed": "import portal from '../components/Portal'"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "import_fix",
+      "original": "import { financial_api } from '../services/api'",
+      "fixed": "import {financial_api} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "import_fix",
+      "original": "import { financial_overview } from '../types/financial'",
+      "fixed": "import {financial_overview} from '../types/financial'"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "import_fix",
+      "original": "import { format_amount } from '../utils/format'",
+      "fixed": "import {format_amount} from '../utils/format'"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "import_fix",
+      "original": "import FinancialCharts from '../components/FinancialCharts'",
+      "fixed": "import financial_charts from '../components/FinancialCharts'"
+    },
+    {
+      "file": "src\\pages\\Financial.tsx",
+      "type": "import_fix",
+      "original": "import TransactionLog from '../components/TransactionLog'",
+      "fixed": "import transaction_log from '../components/TransactionLog'"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "import_fix",
+      "original": "import { dashboard_api } from '../services/api'",
+      "fixed": "import {dashboard_api} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\Home.tsx",
+      "type": "import_fix",
+      "original": "import { DashboardStats, RecentMaterial } from '../types'",
+      "fixed": "import {dashboard_stats, recent_material} from '../types'"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "import_fix",
+      "original": "import { inventory_api } from '../services/api'",
+      "fixed": "import {inventory_api} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "import_fix",
+      "original": "import FinishedProductGrid from '../components/FinishedProductGrid'",
+      "fixed": "import finished_product_grid from '../components/FinishedProductGrid'"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "import_fix",
+      "original": "import AccessoriesProductGrid from '../components/AccessoriesProductGrid'",
+      "fixed": "import accessories_product_grid from '../components/AccessoriesProductGrid'"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "import_fix",
+      "original": "import SemiFinishedMatrixView from '../components/SemiFinishedMatrixView'",
+      "fixed": "import semi_finished_matrix_view from '../components/SemiFinishedMatrixView'"
+    },
+    {
+      "file": "src\\pages\\InventoryList.tsx",
+      "type": "import_fix",
+      "original": "import InventoryDashboard from '../components/InventoryDashboard'",
+      "fixed": "import inventory_dashboard from '../components/InventoryDashboard'"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "import_fix",
+      "original": "import { login_request } from '../types'",
+      "fixed": "import {login_request} from '../types'"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "import_fix",
+      "original": "import { finished_product_api, fixImageUrl, upload_api, getApiUrl } from '../services/api'",
+      "fixed": "import {finished_product_api, fix_image_url, upload_api, get_api_url} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "import_fix",
+      "original": "import { format_purchase_code } from '../utils/fieldConverter'",
+      "fixed": "import {format_purchase_code} from '../utils/fieldConverter'"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "import_fix",
+      "original": "import { sort_by_pinyin } from '../utils/pinyinSort'",
+      "fixed": "import {sort_by_pinyin} from '../utils/pinyinSort'"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import { purchase_api, upload_api, ai_api, supplier_api, getApiUrl } from '../services/api'",
+      "fixed": "import {purchase_api, upload_api, ai_api, supplier_api, get_api_url} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import { handleApiError } from '../services/errorHandler'",
+      "fixed": "import {handle_api_error} from '../services/errorHandler'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import ProductTypeTab, { ProductType, UnitType } from '../components/ProductTypeTab'",
+      "fixed": "import ProductTypeTab, {product_type, unit_type} from '../components/ProductTypeTab'"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "import_fix",
+      "original": "import { TotalPriceInput } from '../components/TotalPriceInput'",
+      "fixed": "import {total_price_input} from '../components/TotalPriceInput'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import { purchase_api, supplier_api, fixImageUrl, getApiUrl } from '../services/api'",
+      "fixed": "import {purchase_api, supplier_api, fix_image_url, get_api_url} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import { Purchase } from '../types'",
+      "fixed": "import {purchase} from '../types'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import Permission_wrapper from '../components/PermissionWrapper'",
+      "fixed": "import permission_wrapper from '../components/PermissionWrapper'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import PurchaseDetailModal from '../components/PurchaseDetailModal'",
+      "fixed": "import purchase_detail_modal from '../components/PurchaseDetailModal'"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "import_fix",
+      "original": "import Portal from '../components/Portal'",
+      "fixed": "import portal from '../components/Portal'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import { use_device_detection } from '../hooks/useDeviceDetection'",
+      "fixed": "import {use_device_detection} from '../hooks/useDeviceDetection'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import { use_sku_permissions } from '../hooks/useSkuPermissions'",
+      "fixed": "import {use_sku_permissions} from '../hooks/useSkuPermissions'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import { sku_api, fixImageUrl } from '../services/api'",
+      "fixed": "import {sku_api, fix_image_url} from '../services/api'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import { SkuItem, SellData, DestroyData } from '../types'",
+      "fixed": "import {sku_item, sell_data, destroy_data} from '../types'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import SkuSellForm from '../components/SkuSellForm'",
+      "fixed": "import sku_sell_form from '../components/SkuSellForm'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import SkuDestroyForm from '../components/SkuDestroyForm'",
+      "fixed": "import sku_destroy_form from '../components/SkuDestroyForm'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import SkuDetailModal from '../components/SkuDetailModal'",
+      "fixed": "import sku_detail_modal from '../components/SkuDetailModal'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import SkuRestockForm from '../components/SkuRestockForm'",
+      "fixed": "import sku_restock_form from '../components/SkuRestockForm'"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "import_fix",
+      "original": "import SkuControlModal from '../components/SkuControlModal'",
+      "fixed": "import sku_control_modal from '../components/SkuControlModal'"
+    },
+    {
+      "file": "src\\pages\\SupplierManagement.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\UserManagement.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../hooks/useAuth'",
+      "fixed": "import {use_auth} from '../hooks/useAuth'"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "import_fix",
+      "original": "import { render, screen, fireEvent, waitFor } from '@testing-library/react';",
+      "fixed": "import {render, screen, fire_event, wait_for} from '@testing-library/react';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "import_fix",
+      "original": "import userEvent from '@testing-library/user-event';",
+      "fixed": "import user_event from '@testing-library/user-event';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "import_fix",
+      "original": "import InventoryList from '../InventoryList';",
+      "fixed": "import inventory_list from '../InventoryList';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "import_fix",
+      "original": "import { apiClient } from '../../services/api';",
+      "fixed": "import {api_client} from '../../services/api';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../../hooks/useAuth';",
+      "fixed": "import {use_auth} from '../../hooks/useAuth';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "import_fix",
+      "original": "import { render, screen, fireEvent, waitFor } from '@testing-library/react';",
+      "fixed": "import {render, screen, fire_event, wait_for} from '@testing-library/react';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "import_fix",
+      "original": "import userEvent from '@testing-library/user-event';",
+      "fixed": "import user_event from '@testing-library/user-event';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "import_fix",
+      "original": "import PurchaseEntry from '../PurchaseEntry';",
+      "fixed": "import purchase_entry from '../PurchaseEntry';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "import_fix",
+      "original": "import { apiClient } from '../../services/api';",
+      "fixed": "import {api_client} from '../../services/api';"
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../../hooks/useAuth';",
+      "fixed": "import {use_auth} from '../../hooks/useAuth';"
+    },
+    {
+      "file": "src\\hooks\\__tests__\\useAuth.test.tsx",
+      "type": "import_fix",
+      "original": "import { render_hook, act } from '@testing-library/react';",
+      "fixed": "import {render_hook, act} from '@testing-library/react';"
+    },
+    {
+      "file": "src\\hooks\\__tests__\\useAuth.test.tsx",
+      "type": "import_fix",
+      "original": "import { use_auth } from '../useAuth';",
+      "fixed": "import {use_auth} from '../useAuth';"
+    }
+  ],
+  "fix_types": {
+    "import_fix": 176,
+    "export_fix": 0,
+    "dynamic_import_fix": 0,
+    "type_import_fix": 0
+  }
+}

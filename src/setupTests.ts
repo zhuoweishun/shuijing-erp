@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 
 // 模拟localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
+  get_item: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
@@ -15,7 +15,7 @@ Object.defineProperty(window, 'localStorage', {
 
 // 模拟sessionStorage
 const sessionStorageMock = {
-  getItem: jest.fn(),
+  get_item: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
@@ -40,10 +40,10 @@ Object.defineProperty(URL, 'revokeObjectURL', {
   writable: true,
 });
 
-// 模拟window.matchMedia
+// 模拟window.match_media
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mock_implementation(query => ({
     matches: false,
     media: query,
     onchange: null,
@@ -57,5 +57,5 @@ Object.defineProperty(window, 'matchMedia', {
 
 // 清理函数
 afterEach(() => {
-  jest.clearAllMocks();
+  jest.clear_all_mocks();
 });

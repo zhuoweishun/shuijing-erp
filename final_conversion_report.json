@@ -1,0 +1,26 @@
+{
+  "conversion_time": "2025-09-12T15:58:11.792902",
+  "statistics": {
+    "files_scanned": 149,
+    "files_modified": 1,
+    "total_replacements": 2,
+    "fields_converted_count": 1,
+    "fields_converted": [
+      "networkConfig"
+    ]
+  },
+  "field_mappings_used": {
+    "networkConfig": "network_config"
+  },
+  "conversion_details": {
+    "D:\\shuijing ERP\\src\\components\\SkuRestockForm.tsx": {
+      "networkConfig": 2
+    }
+  },
+  "backup_directory": "D:\\shuijing ERP\\backups\\final_conversion_20250912_155758",
+  "scan_directories": [
+    "D:\\shuijing ERP\\src",
+    "D:\\shuijing ERP\\backend\\src",
+    "D:\\shuijing ERP\\shared"
+  ]
+}

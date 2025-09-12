@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试客户购买记录API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试客户购买记录API</h1>
+    
+    <div>
+        <button onclick="testLogin()">1. 测试登录</button>
+        <button onclick="testGetCustomers()">2. 获取客户列表</button>
+        <button onclick="testGetPurchases()">3. 测试获取购买记录</button>
+        <button onclick="clearLogs()">清空日志</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        let authToken = null;
+        let testCustomerId = null;
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            try {
+                log('开始测试登录...');
+                
+                const response = await fetch('http://localhost:3001/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'boss',
+                        password: '123456'
+                    })
+                });
+                
+                const data = await response.json();
+                log(`登录响应: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success && data.data && data.data.token) {
+                    authToken = data.data.token;
+                    log('✅ 登录成功，获取到token', 'success');
+                } else {
+                    log('❌ 登录失败', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ 登录请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGetCustomers() {
+            if (!authToken) {
+                log('❌ 请先登录获取token', 'error');
+                return;
+            }
+            
+            try {
+                log('开始获取客户列表...');
+                
+                const response = await fetch('http://localhost:3001/api/v1/customers', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                log(`客户列表响应: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success && data.data && data.data.customers && data.data.customers.length > 0) {
+                    testCustomerId = data.data.customers[0].id;
+                    log(`✅ 获取客户列表成功，选择测试客户: ${data.data.customers[0].name} (${testCustomerId})`, 'success');
+                } else {
+                    log('❌ 获取客户列表失败或没有客户', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ 获取客户列表请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGetPurchases() {
+            if (!authToken) {
+                log('❌ 请先登录获取token', 'error');
+                return;
+            }
+            
+            if (!testCustomerId) {
+                log('❌ 请先获取客户列表选择测试客户', 'error');
+                return;
+            }
+            
+            try {
+                log(`开始获取客户购买记录... 客户ID: ${testCustomerId}`);
+                
+                const response = await fetch(`http://localhost:3001/api/v1/customers/${testCustomerId}/purchases`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                log(`购买记录响应: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success && data.data && data.data.purchases) {
+                    log(`✅ 获取购买记录成功，共 ${data.data.purchases.length} 条记录`, 'success');
+                    
+                    if (data.data.purchases.length === 0) {
+                        log('⚠️ 该客户暂无购买记录', 'error');
+                    } else {
+                        data.data.purchases.forEach((purchase, index) => {
+                            log(`购买记录 ${index + 1}: ${purchase.skuName} x${purchase.quantity} = ¥${purchase.totalPrice}`);
+                        });
+                    }
+                } else {
+                    log('❌ 获取购买记录失败', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ 获取购买记录请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.onload = function() {
+            log('页面加载完成，可以开始测试');
+        };
+    </script>
+</body>
+</html>

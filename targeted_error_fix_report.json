@@ -1,0 +1,356 @@
+{
+  "timestamp": "2025-09-12T21:41:25.006866",
+  "total_fixes": 68,
+  "total_errors": 0,
+  "fixes_by_type": {
+    "property_naming_fix": 26,
+    "variable_naming_fix": 18,
+    "jsx_prop_fix": 16,
+    "api_method_fix": 6,
+    "specific_fix": 1,
+    "missing_import_fix": 1
+  },
+  "fixes_applied": [
+    {
+      "file": "src\\services\\api.ts",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.for_each\\b -> .forEach"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.for_each\\b -> .forEach"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bpurchaseId\\b -> purchase_id"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bcurrentQuantity\\b -> current_quantity"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bproductId\\b -> product_id"
+    },
+    {
+      "file": "src\\main.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_element_by_id\\b -> .getElementById"
+    },
+    {
+      "file": "src\\components\\CustomerCreateModal.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.add_note\\b -> .addNote"
+    },
+    {
+      "file": "src\\components\\CustomerDetailModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.refund_purchase\\b -> .refundPurchase"
+    },
+    {
+      "file": "src\\components\\CustomerRefundModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.refund_purchase\\b -> .refundPurchase"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.update_record\\b -> .updateRecord"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.create_record\\b -> .createRecord"
+    },
+    {
+      "file": "src\\components\\FinancialRecordModal.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bon_change= -> onChange="
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bon_click= -> onClick="
+    },
+    {
+      "file": "src\\components\\MobileForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.hide_on_mobile\\b -> .hideOnMobile"
+    },
+    {
+      "file": "src\\components\\MobileTable.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.mobile_render\\b -> .mobileRender"
+    },
+    {
+      "file": "src\\components\\Portal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_element_by_id\\b -> .getElementById"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "type": "specific_fix",
+      "description": "添加price_type变量定义"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.editLogs\\b -> .edit_logs"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_locale_date_string\\b -> .toLocaleDateString"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_i_s_o_string\\b -> .toISOString"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_locale_string\\b -> .toLocaleString"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bpurchaseApi\\b -> purchase_api"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bpurchaseId\\b -> purchase_id"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bis_edit_mode\\b -> isEditMode"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\boriginalQuantity\\b -> original_quantity"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bquantity_changed\\b -> quantityChanged"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bon_save\\b -> onSave"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bon_delete\\b -> onDelete"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bpieceCountValue\\b -> piece_count_value"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bcurrentQuantity\\b -> current_quantity"
+    },
+    {
+      "file": "src\\components\\RefundConfirmModal.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.next_element_sibling\\b -> .nextElementSibling"
+    },
+    {
+      "file": "src\\components\\ReverseSaleModal.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "api_method_fix",
+      "description": "修复API方法名: \\.mark_as_sold\\b -> .markAsSold"
+    },
+    {
+      "file": "src\\components\\SalesDetailModal.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bproductId\\b -> product_id"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_locale_date_string\\b -> .toLocaleDateString"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_bounding_client_rect\\b -> .getBoundingClientRect"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.for_each\\b -> .forEach"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.locale_compare\\b -> .localeCompare"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bshow_product_filter\\b -> showProductFilter"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bproduct_typeData\\b -> productTypeData"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bproduct_row\\b -> productRow"
+    },
+    {
+      "file": "src\\components\\SkuAdjustForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\SkuDestroyForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\SkuDetailModal.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bon_submit= -> onSubmit="
+    },
+    {
+      "file": "src\\components\\SkuRestockForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\components\\SkuSellForm.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\hooks\\useDeviceDetection.tsx",
+      "type": "missing_import_fix",
+      "description": "添加缺少的use_device_detection导入"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_locale_date_string\\b -> .toLocaleDateString"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_bounding_client_rect\\b -> .getBoundingClientRect"
+    },
+    {
+      "file": "src\\pages\\Login.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.for_each\\b -> .forEach"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bproductId\\b -> product_id"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_element_by_id\\b -> .getElementById"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_i_s_o_string\\b -> .toISOString"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_locale_string\\b -> .toLocaleString"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.get_bounding_client_rect\\b -> .getBoundingClientRect"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.for_each\\b -> .forEach"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.locale_compare\\b -> .localeCompare"
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "type": "variable_naming_fix",
+      "description": "修复变量命名: \\bis_edit_mode\\b -> isEditMode"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.next_element_sibling\\b -> .nextElementSibling"
+    },
+    {
+      "file": "src\\pages\\SalesList.tsx",
+      "type": "jsx_prop_fix",
+      "description": "修复JSX属性名: \\bonSubmit= -> on_submit="
+    },
+    {
+      "file": "src\\pages\\__tests__\\PurchaseEntry.test.tsx",
+      "type": "property_naming_fix",
+      "description": "修复属性命名: \\.to_i_s_o_string\\b -> .toISOString"
+    }
+  ],
+  "errors_found": []
+}

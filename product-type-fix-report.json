@@ -1,0 +1,121 @@
+{
+  "timestamp": "2025-09-10T10:21:14.062Z",
+  "total_files": 10,
+  "total_changes": 31,
+  "fixes": [
+    {
+      "file": "src\\components\\AccessoriesProductGrid.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 1
+        },
+        {
+          "description": "变量赋值修复",
+          "count": 1
+        },
+        {
+          "description": "属性访问修复",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\InventoryConsumptionChart.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\InventoryDashboard.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\InventoryPieChart.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "changes": [
+        {
+          "description": "API方法名修复",
+          "count": 1
+        },
+        {
+          "description": "对象属性名修复",
+          "count": 2
+        },
+        {
+          "description": "变量名修复",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 2
+        },
+        {
+          "description": "属性访问修复",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry.tsx",
+      "changes": [
+        {
+          "description": "变量赋值修复",
+          "count": 2
+        },
+        {
+          "description": "属性访问修复",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "file": "src\\pages\\PurchaseList.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "src\\pages\\__tests__\\InventoryList.test.tsx",
+      "changes": [
+        {
+          "description": "对象属性名修复",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "file": "src\\utils\\pinyinSort.ts",
+      "changes": [
+        {
+          "description": "属性访问修复",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}

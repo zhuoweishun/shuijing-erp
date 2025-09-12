@@ -1,0 +1,249 @@
+{
+  "conversion_summary": {
+    "timestamp": "2025-09-12T15:49:21.560220",
+    "total_files_scanned": 149,
+    "files_modified": 75,
+    "total_replacements": 1576,
+    "fields_converted": 76
+  },
+  "field_replacements": {
+    "beadDiameter": 224,
+    "materialType": 423,
+    "translateRefundReason": 6,
+    "quantityChange": 81,
+    "quantityBefore": 79,
+    "quantityAfter": 83,
+    "referenceType": 28,
+    "materialUsages": 134,
+    "generateMaterialSignature": 6,
+    "findOrCreateSku": 8,
+    "createSkuInventoryLog": 18,
+    "sellingPrice": 11,
+    "additionalData": 4,
+    "validateProductTypeFields": 8,
+    "calculateBeadsPerString": 10,
+    "decreaseSkuQuantity": 6,
+    "adjustSkuQuantity": 6,
+    "getLocalIP": 8,
+    "publicIP": 14,
+    "localIP": 18,
+    "isValid": 91,
+    "productType": 76,
+    "generateSkuHash": 4,
+    "generateSkuCode": 4,
+    "generateSkuName": 4,
+    "referenceId": 26,
+    "updateImageUrls": 2,
+    "updateCommonOldIps": 2,
+    "validateRange": 4,
+    "isValidDiameter": 2,
+    "isValidSpecification": 2,
+    "saleRecordId": 7,
+    "customerContact": 7,
+    "lossAmount": 9,
+    "refundRecords": 1,
+    "formatAmount": 24,
+    "formatDateOnly": 2,
+    "convertFinancialRecordFromDB": 2,
+    "convertFinancialRecordToDB": 1,
+    "convertCreateFinancialRecordToDB": 1,
+    "convertRefundRecordFromDB": 2,
+    "convertRefundRecordToDB": 1,
+    "convertCreateRefundRecordToDB": 1,
+    "convertFinancialRecordsFromDB": 1,
+    "convertRefundRecordsFromDB": 1,
+    "convertFinancialSummaryFromDB": 1,
+    "convertMonthlyFinancialSummaryFromDB": 1,
+    "formatCurrency": 42,
+    "setLocalIP": 5,
+    "formatPurchaseCode": 10,
+    "validatePrice": 3,
+    "extractAndTranslateRefundReason": 5,
+    "getNetworkConfig": 5,
+    "sortByPinyin": 3,
+    "NetworkConfig": 7,
+    "formatNumber": 1,
+    "formatPercentage": 1,
+    "formatFileSize": 1,
+    "formatRelativeTime": 1,
+    "truncateText": 1,
+    "formatPhone": 1,
+    "formatIdCard": 1,
+    "formatBankCard": 1,
+    "formatAddress": 1,
+    "checkNetworkConnection": 2,
+    "getBestApiEndpoint": 1,
+    "apiBaseUrl": 7,
+    "getFirstLetter": 2,
+    "getPinyinFirstLetter": 5,
+    "sortMaterialsByTypeAndPinyin": 1,
+    "validateDiameter": 4,
+    "validateSpecification": 4,
+    "validateQuantity": 2,
+    "validateWeight": 2,
+    "ImportMetaEnv": 2,
+    "ImportMeta": 1
+  },
+  "top_converted_fields": [
+    [
+      "materialType",
+      423
+    ],
+    [
+      "beadDiameter",
+      224
+    ],
+    [
+      "materialUsages",
+      134
+    ],
+    [
+      "isValid",
+      91
+    ],
+    [
+      "quantityAfter",
+      83
+    ],
+    [
+      "quantityChange",
+      81
+    ],
+    [
+      "quantityBefore",
+      79
+    ],
+    [
+      "productType",
+      76
+    ],
+    [
+      "formatCurrency",
+      42
+    ],
+    [
+      "referenceType",
+      28
+    ],
+    [
+      "referenceId",
+      26
+    ],
+    [
+      "formatAmount",
+      24
+    ],
+    [
+      "createSkuInventoryLog",
+      18
+    ],
+    [
+      "localIP",
+      18
+    ],
+    [
+      "publicIP",
+      14
+    ],
+    [
+      "sellingPrice",
+      11
+    ],
+    [
+      "calculateBeadsPerString",
+      10
+    ],
+    [
+      "formatPurchaseCode",
+      10
+    ],
+    [
+      "lossAmount",
+      9
+    ],
+    [
+      "findOrCreateSku",
+      8
+    ]
+  ],
+  "backup_location": "d:\\shuijing ERP\\backup_final_camel_fields_20250912_154917",
+  "errors": [],
+  "field_mappings_used": {
+    "formatAmount": "format_amount",
+    "formatCurrency": "format_currency",
+    "formatDateOnly": "format_date_only",
+    "formatNumber": "format_number",
+    "formatPercentage": "format_percentage",
+    "formatFileSize": "format_file_size",
+    "formatRelativeTime": "format_relative_time",
+    "truncateText": "truncate_text",
+    "formatPhone": "format_phone",
+    "formatIdCard": "format_id_card",
+    "formatBankCard": "format_bank_card",
+    "formatAddress": "format_address",
+    "formatPurchaseCode": "format_purchase_code",
+    "translateRefundReason": "translate_refund_reason",
+    "extractAndTranslateRefundReason": "extract_and_translate_refund_reason",
+    "getFirstLetter": "get_first_letter",
+    "getPinyinFirstLetter": "get_pinyin_first_letter",
+    "sortByPinyin": "sort_by_pinyin",
+    "sortMaterialsByTypeAndPinyin": "sort_materials_by_type_and_pinyin",
+    "getNetworkConfig": "get_network_config",
+    "getLocalIP": "get_local_ip",
+    "setLocalIP": "set_local_ip",
+    "checkNetworkConnection": "check_network_connection",
+    "getBestApiEndpoint": "get_best_api_endpoint",
+    "validateDiameter": "validate_diameter",
+    "validateSpecification": "validate_specification",
+    "validateRange": "validate_range",
+    "validateProductTypeFields": "validate_product_type_fields",
+    "validateQuantity": "validate_quantity",
+    "validatePrice": "validate_price",
+    "validateWeight": "validate_weight",
+    "calculateBeadsPerString": "calculate_beads_per_string",
+    "isValidDiameter": "is_valid_diameter",
+    "isValidSpecification": "is_valid_specification",
+    "updateImageUrls": "update_image_urls",
+    "generateMaterialSignature": "generate_material_signature",
+    "generateSkuHash": "generate_sku_hash",
+    "generateSkuCode": "generate_sku_code",
+    "generateSkuName": "generate_sku_name",
+    "findOrCreateSku": "find_or_create_sku",
+    "createSkuInventoryLog": "create_sku_inventory_log",
+    "decreaseSkuQuantity": "decrease_sku_quantity",
+    "adjustSkuQuantity": "adjust_sku_quantity",
+    "convertFinancialRecordFromDB": "convert_financial_record_from_db",
+    "convertFinancialRecordToDB": "convert_financial_record_to_db",
+    "convertCreateFinancialRecordToDB": "convert_create_financial_record_to_db",
+    "convertRefundRecordFromDB": "convert_refund_record_from_db",
+    "convertRefundRecordToDB": "convert_refund_record_to_db",
+    "convertCreateRefundRecordToDB": "convert_create_refund_record_to_db",
+    "convertFinancialRecordsFromDB": "convert_financial_records_from_db",
+    "convertRefundRecordsFromDB": "convert_refund_records_from_db",
+    "convertFinancialSummaryFromDB": "convert_financial_summary_from_db",
+    "convertMonthlyFinancialSummaryFromDB": "convert_monthly_financial_summary_from_db",
+    "ImportMetaEnv": "import_meta_env",
+    "ImportMeta": "import_meta",
+    "NetworkConfig": "network_config",
+    "apiBaseUrl": "api_base_url",
+    "publicIP": "public_ip",
+    "localIP": "local_ip",
+    "isValid": "is_valid",
+    "productType": "product_type",
+    "beadDiameter": "bead_diameter",
+    "materialType": "material_type",
+    "materialUsages": "material_usages",
+    "sellingPrice": "selling_price",
+    "additionalData": "additional_data",
+    "quantityChange": "quantity_change",
+    "quantityBefore": "quantity_before",
+    "quantityAfter": "quantity_after",
+    "referenceType": "reference_type",
+    "referenceId": "reference_id",
+    "updateCommonOldIps": "update_common_old_ips",
+    "saleRecordId": "sale_record_id",
+    "customerContact": "customer_contact",
+    "lossAmount": "loss_amount",
+    "refundRecords": "refund_records"
+  }
+}

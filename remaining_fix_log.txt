@@ -1,0 +1,11 @@
+剩余驼峰命名错误修复执行日志
+执行时间: 2025-09-12T16:04:07.170715
+扫描文件数: 2
+修改文件数: 1
+总替换次数: 5
+
+字段替换统计:
+  totalPurchases → total_purchases: 5次
+
+修改的文件:
+  test-customer-labels.js

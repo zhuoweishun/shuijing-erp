@@ -1,0 +1,8 @@
+[2025-09-12 15:57:58] [INFO] 开始最终驼峰转蛇形批量转换
+[2025-09-12 15:57:58] [INFO] 扫描目录: D:\shuijing ERP\src
+[2025-09-12 15:58:02] [INFO] 在 D:\shuijing ERP\src\components\SkuRestockForm.tsx 中替换: networkConfig -> network_config
+[2025-09-12 15:58:02] [INFO] 在 D:\shuijing ERP\src\components\SkuRestockForm.tsx 中替换: networkConfig -> network_config
+[2025-09-12 15:58:02] [INFO] 已备份文件: D:\shuijing ERP\src\components\SkuRestockForm.tsx -> D:\shuijing ERP\backups\final_conversion_20250912_155758\src\components\SkuRestockForm.tsx
+[2025-09-12 15:58:02] [INFO] 已修改文件: D:\shuijing ERP\src\components\SkuRestockForm.tsx，替换次数: 2
+[2025-09-12 15:58:07] [INFO] 扫描目录: D:\shuijing ERP\backend\src
+[2025-09-12 15:58:11] [INFO] 扫描目录: D:\shuijing ERP\shared

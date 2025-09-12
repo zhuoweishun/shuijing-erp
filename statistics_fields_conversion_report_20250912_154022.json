@@ -1,0 +1,518 @@
+{
+  "timestamp": "2025-09-12T15:40:12.718941",
+  "total_files_processed": 147,
+  "total_files_modified": 46,
+  "total_replacements": 558,
+  "field_conversions": {
+    "pieceCount → piece_count": 150,
+    "totalValue → total_value": 64,
+    "totalRemainingQuantity → total_remaining_quantity": 14,
+    "priceType → price_type": 20,
+    "totalVariants → total_variants": 30,
+    "batchCount → batch_count": 14,
+    "totalCost → total_cost": 68,
+    "totalAmount → total_amount": 22,
+    "operationType → operation_type": 12,
+    "totalCustomers → total_customers": 26,
+    "repeatPurchaseRate → repeat_purchase_rate": 20,
+    "averageOrderValue → average_order_value": 28,
+    "averageProfitMargin → average_profit_margin": 16,
+    "calculateCost → calculate_cost": 10,
+    "retryCount → retry_count": 5,
+    "debugCount → debug_count": 2,
+    "getStatistics → get_statistics": 2,
+    "getConsumptionAnalysis → get_consumption_analysis": 1,
+    "getRetryCount → get_retry_count": 2,
+    "variantCount → variant_count": 8,
+    "consumedQuantity → consumed_quantity": 4,
+    "newTotalQuantity → new_total_quantity": 10,
+    "totalCostPerSku → total_cost_per_sku": 8,
+    "returnedMaterialsCount → returned_materials_count": 6,
+    "discountAmount → discount_amount": 6,
+    "failedCount → failed_count": 2,
+    "totalPriceMin → total_price_min": 2,
+    "totalPriceMax → total_price_max": 2,
+    "purchaseCount → purchase_count": 4
+  },
+  "modified_files": [
+    {
+      "file": "src\\components\\FinishedProductGrid_backup.tsx",
+      "replacements": 2,
+      "field_conversions": {
+        "pieceCount → piece_count": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\FinishedProductGrid_backup.tsx"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart.tsx",
+      "replacements": 3,
+      "field_conversions": {
+        "totalValue → total_value": 1,
+        "totalRemainingQuantity → total_remaining_quantity": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\ProductDistributionPieChart.tsx"
+    },
+    {
+      "file": "src\\components\\ProductDistributionPieChart_backup.tsx",
+      "replacements": 3,
+      "field_conversions": {
+        "totalValue → total_value": 1,
+        "totalRemainingQuantity → total_remaining_quantity": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\ProductDistributionPieChart_backup.tsx"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart.tsx",
+      "replacements": 10,
+      "field_conversions": {
+        "priceType → price_type": 10
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\ProductPriceDistributionChart.tsx"
+    },
+    {
+      "file": "src\\components\\ProductPriceDistributionChart_backup.tsx",
+      "replacements": 10,
+      "field_conversions": {
+        "priceType → price_type": 10
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\ProductPriceDistributionChart_backup.tsx"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal.tsx",
+      "replacements": 1,
+      "field_conversions": {
+        "pieceCount → piece_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\PurchaseDetailModal.tsx"
+    },
+    {
+      "file": "src\\components\\PurchaseDetailModal_backup.tsx",
+      "replacements": 23,
+      "field_conversions": {
+        "pieceCount → piece_count": 23
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\PurchaseDetailModal_backup.tsx"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView.tsx",
+      "replacements": 3,
+      "field_conversions": {
+        "totalVariants → total_variants": 2,
+        "batchCount → batch_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\SemiFinishedMatrixView.tsx"
+    },
+    {
+      "file": "src\\components\\SemiFinishedMatrixView_backup.tsx",
+      "replacements": 3,
+      "field_conversions": {
+        "totalVariants → total_variants": 2,
+        "batchCount → batch_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\SemiFinishedMatrixView_backup.tsx"
+    },
+    {
+      "file": "src\\components\\SkuControlModal.tsx",
+      "replacements": 2,
+      "field_conversions": {
+        "totalCost → total_cost": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\SkuControlModal.tsx"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView.tsx",
+      "replacements": 6,
+      "field_conversions": {
+        "totalAmount → total_amount": 3,
+        "operationType → operation_type": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\SkuHistoryView.tsx"
+    },
+    {
+      "file": "src\\components\\SkuHistoryView_backup.tsx",
+      "replacements": 6,
+      "field_conversions": {
+        "totalAmount → total_amount": 3,
+        "operationType → operation_type": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\components\\SkuHistoryView_backup.tsx"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement.tsx",
+      "replacements": 12,
+      "field_conversions": {
+        "totalCustomers → total_customers": 3,
+        "repeatPurchaseRate → repeat_purchase_rate": 3,
+        "averageOrderValue → average_order_value": 3,
+        "averageProfitMargin → average_profit_margin": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\pages\\CustomerManagement.tsx"
+    },
+    {
+      "file": "src\\pages\\CustomerManagement_backup.tsx",
+      "replacements": 12,
+      "field_conversions": {
+        "totalCustomers → total_customers": 3,
+        "repeatPurchaseRate → repeat_purchase_rate": 3,
+        "averageOrderValue → average_order_value": 3,
+        "averageProfitMargin → average_profit_margin": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\pages\\CustomerManagement_backup.tsx"
+    },
+    {
+      "file": "src\\pages\\ProductEntry.tsx",
+      "replacements": 15,
+      "field_conversions": {
+        "totalCost → total_cost": 11,
+        "calculateCost → calculate_cost": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\pages\\ProductEntry.tsx"
+    },
+    {
+      "file": "src\\pages\\ProductEntry_backup.tsx",
+      "replacements": 15,
+      "field_conversions": {
+        "totalCost → total_cost": 11,
+        "calculateCost → calculate_cost": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\pages\\ProductEntry_backup.tsx"
+    },
+    {
+      "file": "src\\pages\\PurchaseEntry_backup.tsx",
+      "replacements": 7,
+      "field_conversions": {
+        "pieceCount → piece_count": 7
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\pages\\PurchaseEntry_backup.tsx"
+    },
+    {
+      "file": "src\\services\\api.ts",
+      "replacements": 3,
+      "field_conversions": {
+        "calculateCost → calculate_cost": 1,
+        "retryCount → retry_count": 1,
+        "debugCount → debug_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\services\\api.ts"
+    },
+    {
+      "file": "src\\services\\api_backup.ts",
+      "replacements": 6,
+      "field_conversions": {
+        "getStatistics → get_statistics": 2,
+        "getConsumptionAnalysis → get_consumption_analysis": 1,
+        "calculateCost → calculate_cost": 1,
+        "retryCount → retry_count": 1,
+        "debugCount → debug_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\services\\api_backup.ts"
+    },
+    {
+      "file": "src\\services\\errorHandler.ts",
+      "replacements": 5,
+      "field_conversions": {
+        "retryCount → retry_count": 3,
+        "getRetryCount → get_retry_count": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\services\\errorHandler.ts"
+    },
+    {
+      "file": "src\\types\\index.ts",
+      "replacements": 11,
+      "field_conversions": {
+        "totalAmount → total_amount": 1,
+        "totalCustomers → total_customers": 1,
+        "totalRemainingQuantity → total_remaining_quantity": 2,
+        "variantCount → variant_count": 1,
+        "consumedQuantity → consumed_quantity": 1,
+        "newTotalQuantity → new_total_quantity": 1,
+        "repeatPurchaseRate → repeat_purchase_rate": 1,
+        "averageOrderValue → average_order_value": 1,
+        "averageProfitMargin → average_profit_margin": 1,
+        "operationType → operation_type": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\types\\index.ts"
+    },
+    {
+      "file": "src\\types\\index_backup.ts",
+      "replacements": 11,
+      "field_conversions": {
+        "totalAmount → total_amount": 1,
+        "totalCustomers → total_customers": 1,
+        "totalRemainingQuantity → total_remaining_quantity": 2,
+        "variantCount → variant_count": 1,
+        "consumedQuantity → consumed_quantity": 1,
+        "newTotalQuantity → new_total_quantity": 1,
+        "repeatPurchaseRate → repeat_purchase_rate": 1,
+        "averageOrderValue → average_order_value": 1,
+        "averageProfitMargin → average_profit_margin": 1,
+        "operationType → operation_type": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\types\\index_backup.ts"
+    },
+    {
+      "file": "src\\utils\\fieldConverter.ts",
+      "replacements": 26,
+      "field_conversions": {
+        "totalAmount → total_amount": 2,
+        "totalCustomers → total_customers": 2,
+        "totalVariants → total_variants": 2,
+        "totalValue → total_value": 2,
+        "totalCostPerSku → total_cost_per_sku": 4,
+        "batchCount → batch_count": 2,
+        "newTotalQuantity → new_total_quantity": 2,
+        "returnedMaterialsCount → returned_materials_count": 2,
+        "repeatPurchaseRate → repeat_purchase_rate": 2,
+        "averageOrderValue → average_order_value": 2,
+        "discountAmount → discount_amount": 2,
+        "operationType → operation_type": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\utils\\fieldConverter.ts"
+    },
+    {
+      "file": "src\\utils\\fieldConverter_backup.ts",
+      "replacements": 28,
+      "field_conversions": {
+        "totalAmount → total_amount": 2,
+        "totalCustomers → total_customers": 2,
+        "totalVariants → total_variants": 2,
+        "totalValue → total_value": 2,
+        "totalCostPerSku → total_cost_per_sku": 4,
+        "pieceCount → piece_count": 2,
+        "batchCount → batch_count": 2,
+        "newTotalQuantity → new_total_quantity": 2,
+        "returnedMaterialsCount → returned_materials_count": 2,
+        "repeatPurchaseRate → repeat_purchase_rate": 2,
+        "averageOrderValue → average_order_value": 2,
+        "discountAmount → discount_amount": 2,
+        "operationType → operation_type": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\src\\utils\\fieldConverter_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\customers.ts",
+      "replacements": 21,
+      "field_conversions": {
+        "totalCustomers → total_customers": 7,
+        "totalValue → total_value": 1,
+        "totalCost → total_cost": 1,
+        "repeatPurchaseRate → repeat_purchase_rate": 4,
+        "averageOrderValue → average_order_value": 4,
+        "averageProfitMargin → average_profit_margin": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\customers.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\customers_backup.ts",
+      "replacements": 21,
+      "field_conversions": {
+        "totalCustomers → total_customers": 7,
+        "totalValue → total_value": 1,
+        "totalCost → total_cost": 1,
+        "repeatPurchaseRate → repeat_purchase_rate": 4,
+        "averageOrderValue → average_order_value": 4,
+        "averageProfitMargin → average_profit_margin": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\customers_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\financial.ts",
+      "replacements": 8,
+      "field_conversions": {
+        "totalCost → total_cost": 4,
+        "pieceCount → piece_count": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\financial.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\financial_backup.ts",
+      "replacements": 13,
+      "field_conversions": {
+        "totalCost → total_cost": 4,
+        "pieceCount → piece_count": 9
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\financial_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\inventory.ts",
+      "replacements": 24,
+      "field_conversions": {
+        "totalVariants → total_variants": 9,
+        "totalValue → total_value": 5,
+        "totalRemainingQuantity → total_remaining_quantity": 3,
+        "batchCount → batch_count": 4,
+        "variantCount → variant_count": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\inventory.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\inventory_backup.ts",
+      "replacements": 93,
+      "field_conversions": {
+        "totalVariants → total_variants": 9,
+        "totalValue → total_value": 5,
+        "totalRemainingQuantity → total_remaining_quantity": 3,
+        "pieceCount → piece_count": 69,
+        "batchCount → batch_count": 4,
+        "variantCount → variant_count": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\inventory_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\materials.ts",
+      "replacements": 3,
+      "field_conversions": {
+        "totalValue → total_value": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\materials.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\materials_backup.ts",
+      "replacements": 3,
+      "field_conversions": {
+        "totalValue → total_value": 3
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\materials_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\products.ts",
+      "replacements": 13,
+      "field_conversions": {
+        "totalValue → total_value": 5,
+        "totalCost → total_cost": 7,
+        "failedCount → failed_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\products.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\products_backup.ts",
+      "replacements": 13,
+      "field_conversions": {
+        "totalValue → total_value": 5,
+        "totalCost → total_cost": 7,
+        "failedCount → failed_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\products_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\purchases.ts",
+      "replacements": 5,
+      "field_conversions": {
+        "totalCost → total_cost": 2,
+        "pieceCount → piece_count": 1,
+        "totalPriceMin → total_price_min": 1,
+        "totalPriceMax → total_price_max": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\purchases.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\purchases_backup.ts",
+      "replacements": 25,
+      "field_conversions": {
+        "totalCost → total_cost": 2,
+        "pieceCount → piece_count": 21,
+        "totalPriceMin → total_price_min": 1,
+        "totalPriceMax → total_price_max": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\purchases_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\skus.ts",
+      "replacements": 18,
+      "field_conversions": {
+        "totalValue → total_value": 7,
+        "totalCost → total_cost": 6,
+        "consumedQuantity → consumed_quantity": 1,
+        "newTotalQuantity → new_total_quantity": 2,
+        "returnedMaterialsCount → returned_materials_count": 1,
+        "discountAmount → discount_amount": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\skus.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\skus_backup.ts",
+      "replacements": 18,
+      "field_conversions": {
+        "totalValue → total_value": 7,
+        "totalCost → total_cost": 6,
+        "consumedQuantity → consumed_quantity": 1,
+        "newTotalQuantity → new_total_quantity": 2,
+        "returnedMaterialsCount → returned_materials_count": 1,
+        "discountAmount → discount_amount": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\skus_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\users.ts",
+      "replacements": 2,
+      "field_conversions": {
+        "purchaseCount → purchase_count": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\users.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\users_backup.ts",
+      "replacements": 2,
+      "field_conversions": {
+        "purchaseCount → purchase_count": 2
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\users_backup.ts"
+    },
+    {
+      "file": "backend\\src\\services\\ai.ts",
+      "replacements": 1,
+      "field_conversions": {
+        "pieceCount → piece_count": 1
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\services\\ai.ts"
+    },
+    {
+      "file": "backend\\src\\services\\ai_backup.ts",
+      "replacements": 6,
+      "field_conversions": {
+        "pieceCount → piece_count": 6
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\services\\ai_backup.ts"
+    },
+    {
+      "file": "backend\\src\\utils\\fieldConverter.ts",
+      "replacements": 16,
+      "field_conversions": {
+        "totalVariants → total_variants": 2,
+        "totalValue → total_value": 8,
+        "totalCost → total_cost": 2,
+        "averageOrderValue → average_order_value": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\utils\\fieldConverter.ts"
+    },
+    {
+      "file": "backend\\src\\utils\\fieldConverter_backup.ts",
+      "replacements": 20,
+      "field_conversions": {
+        "totalVariants → total_variants": 2,
+        "totalValue → total_value": 8,
+        "totalCost → total_cost": 2,
+        "pieceCount → piece_count": 4,
+        "averageOrderValue → average_order_value": 4
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\utils\\fieldConverter_backup.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\__tests__\\purchases.test.ts",
+      "replacements": 5,
+      "field_conversions": {
+        "totalAmount → total_amount": 5
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\__tests__\\purchases.test.ts"
+    },
+    {
+      "file": "backend\\src\\routes\\__tests__\\purchases.test_backup.ts",
+      "replacements": 5,
+      "field_conversions": {
+        "totalAmount → total_amount": 5
+      },
+      "backup_path": "backups\\statistics_fields_backup_20250912_154012\\backend\\src\\routes\\__tests__\\purchases.test_backup.ts"
+    }
+  ],
+  "errors": []
+}

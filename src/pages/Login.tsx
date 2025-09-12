@@ -1,77 +1,84 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Gem, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { LoginRequest } from '../types'
+import { login_request } from '../types'
 
 export default function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [errors, setErrors] = useState({ username: '', password: '' })
+  const [user_name, set_user_name] = useState('')
+  const [pass_word, set_pass_word] = useState('')
+  const [show_password, set_show_password] = useState(false)
+  const [isLoading, set_is_loading] = useState(false)
+  const [error_message, set_error_message] = useState('')
+  const [error_messages, set_error_messages] = useState({ user_name: '', password: '' })
   
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  // const deviceInfo = getDeviceInfo()
+  // 使用useMemo稳定化from值，避免location对象变化导致的无限循环
+  const from = useMemo(() => {
+    return (location.state as any)?.from || '/'
+  }, [location.state])
+
+  // 稳定化navigate函数
+  const stable_navigate = useCallback((to: string, options?: any) => {
+    navigate(to, options)
+  }, [navigate])
 
   // 如果已经登录，重定向到目标页面
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as any)?.from || '/'
-      navigate(from, { replace: true })
+      stable_navigate(from, { replace: true })
     }
-  }, [isAuthenticated, navigate, location])
+  }, [isAuthenticated, stable_navigate, from])
 
 
 
   // 简单的表单验证
-  const validateForm = () => {
-    const newErrors = { username: '', password: '' }
+  const validate_form = () => {
+    const newErrors = { user_name: '', password: '' }
     
-    if (!username.trim()) {
-      newErrors.username = '请输入用户名'
-    } else if (username.trim().length < 2) {
-      newErrors.username = '用户名至少2个字符'
+    if (!user_name.trim()) {
+      newErrors.user_name = '请输入用户名'
+    } else if (user_name.trim().length < 2) {
+      newErrors.user_name = '用户名至少2个字符'
     }
     
-    if (!password) {
+    if (!pass_word) {
       newErrors.password = '请输入密码'
-    } else if (password.length < 6) {
+    } else if (pass_word.length < 6) {
       newErrors.password = '密码至少6个字符'
     }
     
-    setErrors(newErrors)
-    return !newErrors.username && !newErrors.password
+    set_error_messages(newErrors)
+    return !newErrors.user_name && !newErrors.password
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validate_form()) return
     
     try {
-      setIsLoading(true)
-      setError('')
+      set_is_loading(true)
+      set_error_message('')
       
-      const loginRequest: LoginRequest = {
-        username: username.trim(),
-        password: password
+      const login_request: login_request = {
+        user_name: user_name.trim(),
+        password: pass_word
       }
       
-      await login(loginRequest)
+      await login(login_request)
     } catch (err: any) {
-      setError(err.message || '登录失败，请重试')
+      set_error_message(err.message || '登录失败，请重试')
     } finally {
-      setIsLoading(false)
+      set_is_loading(false)
     }
   }
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
+  const toggle_password_visibility = () => {
+    set_show_password(!show_password)
   }
 
   return (
@@ -93,11 +100,11 @@ export default function Login() {
 
         {/* 登录表单 */}
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handle_submit}>
             {/* 错误提示 */}
-            {error && (
+            {error_message && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm text-red-600">{error_message}</p>
               </div>
             )}
             
@@ -105,22 +112,22 @@ export default function Login() {
 
             {/* 用户名输入 */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="user_name" className="block text-sm font-medium text-gray-700 mb-2">
                 用户名
               </label>
               <input
-                id="username"
+                id="user_name"
                 type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="user_name"
+                value={user_name}
+                onChange={(e) => set_user_name(e.target.value)}
                 className={`input-apple ${
-                  errors.username ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                  error_messages.user_name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
                 }`}
                 placeholder="请输入用户名"
               />
-              {errors.username && (
-                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+              {error_messages.user_name && (
+                <p className="mt-1 text-sm text-red-600">{error_messages.user_name}</p>
               )}
             </div>
 
@@ -132,29 +139,29 @@ export default function Login() {
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={show_password ? 'text' : 'password'}
                   autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={pass_word}
+                  onChange={(e) => set_pass_word(e.target.value)}
                   className={`input-apple pr-10 ${
-                    errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
+                    error_messages.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
                   placeholder="请输入密码"
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  onClick={togglePasswordVisibility}
+                  onClick={toggle_password_visibility}
                 >
-                  {showPassword ? (
+                  {show_password ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
                     <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              {error_messages.password && (
+                <p className="mt-1 text-sm text-red-600">{error_messages.password}</p>
               )}
             </div>
 
