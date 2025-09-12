@@ -18,7 +18,7 @@ export default function FinancialRecordModal({ is_open, onClose, onSuccess, reco
     description: '',
     reference_type: 'MANUAL',
     reference_id: '',
-    item.category: '',
+    item_category: '',
     transaction_date: new Date().toISOString().split('T')[0],
     notes: ''
   })
@@ -31,7 +31,7 @@ export default function FinancialRecordModal({ is_open, onClose, onSuccess, reco
         description: record.description,
         reference_type: record.reference_type,
         reference_id: record.reference_id || '',
-        item.category: record.item.category || '',
+        item_category: record.item_category || '',
         transaction_date: record.transaction_date.split('T')[0],
         notes: record.notes || ''
       })
@@ -42,7 +42,7 @@ export default function FinancialRecordModal({ is_open, onClose, onSuccess, reco
         description: '',
         reference_type: 'MANUAL',
         reference_id: '',
-        item.category: '',
+        item_category: '',
         transaction_date: new Date().toISOString().split('T')[0],
         notes: ''
       })
@@ -200,8 +200,8 @@ export default function FinancialRecordModal({ is_open, onClose, onSuccess, reco
             </label>
             <input
               type="text"
-              value={formData.item.category}
-              onChange={(e) => handleInputChange('item.category', e.target.value)}
+              value={formData.item_category}
+              onChange={(e) => handleInputChange('item_category', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="财务分类（可选）"
             />

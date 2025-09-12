@@ -108,7 +108,7 @@ const get_quality_color = (quality: string) => {
 
 export default function SemiFinishedMatrixView({ data, loading, on_cell_click }: Props) {
   const { user } = useAuth()
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const [selectedCell, setSelectedCell] = useState<MatrixCell | null>(null)
   const [viewMode, set_view_mode] = useState<MatrixViewMode>('size')
   
@@ -613,7 +613,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
 
       {/* 矩阵表格 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className={`overflow-x-auto ${isMobile ? 'max-w-full' : ''}`}>
+        <div className={`overflow-x-auto ${is_mobile ? 'max-w-full' : ''}`}>
           <table className="min-w-full">
             <thead className="bg-gray-50">
               <tr>

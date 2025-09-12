@@ -30,7 +30,7 @@ export function TotalPriceInput({
   price_per_bead,
   total_price
 }: TotalPriceInputProps) {
-  const { isMobile: isMobile } = useDeviceDetection()
+  const { is_mobile: isMobile } = useDeviceDetection()
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const num_value = parseFloat(e.target.value)

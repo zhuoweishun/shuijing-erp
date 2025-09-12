@@ -115,7 +115,7 @@ interface SalesListState { sku_list: SkuItem[]
 export default function SalesList() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const permissions = use_sku_permissions()
   
   // 格式化价格
@@ -494,7 +494,7 @@ export default function SalesList() {
   }
 
   // 移动端渲染
-  if (isMobile) {
+  if (is_mobile) {
     return (
       <div className="space-y-4 p-4">
         {/* 页面标题 */}
@@ -1231,7 +1231,7 @@ export default function SalesList() {
               <SkuSellForm
                 sku={state.selected_sku}
                 on_submit={handleSkuSell}
-                on_cancel={close_detail_modal}
+                onCancel={close_detail_modal}
                 loading={false}
               />
             </div>
@@ -1264,7 +1264,7 @@ export default function SalesList() {
               <SkuDestroyForm
                 sku={state.selected_sku}
                 on_submit={handleSkuDestroy}
-                on_cancel={close_detail_modal}
+                onCancel={close_detail_modal}
                 loading={false}
               />
             </div>

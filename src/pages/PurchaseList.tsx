@@ -133,7 +133,7 @@ interface PurchaseListState {
 export default function PurchaseList() {
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   
   // 格式化产品类型
   const format_product_type = (product_type?: string) => {
@@ -2403,7 +2403,7 @@ export default function PurchaseList() {
             </div>
           ) : (
             <>
-              {isMobile ? renderMobileCards() : renderDesktopTable()}
+              {is_mobile ? renderMobileCards() : renderDesktopTable()}
               {renderPagination()}
             </>
           )}

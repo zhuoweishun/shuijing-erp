@@ -696,7 +696,7 @@ export default function PurchaseDetailModal({
       }
       if (field === 'piece_count') {
         const piece_countValue = typeof value === 'object' && value !== null ? (value.piece_count || value.value || '') : value
-        return piece_countValue ? `${piece_count}` : '-'
+        return piece_countValue ? `${piece_countValue}` : '-'
       }
       if (field === 'supplier_name') {
         return value || '-'

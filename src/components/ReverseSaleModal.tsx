@@ -390,7 +390,7 @@ export default function ReverseSaleModal({ customer, is_open, onClose, onSuccess
                   sale_source="CUSTOMER_PAGE"
                   customer={customer}
                   on_submit={handleSaleSubmit}
-                  on_cancel={handleBackToSelect}
+                  onCancel={handleBackToSelect}
                   loading={state.submitting}
                 />
               </div>

@@ -75,7 +75,7 @@ import {
 
 export default function ProductEntry() {
   const { user, isAuthenticated } = useAuth()
-  const { isMobile: isMobile } = useDeviceDetection()
+  const { is_mobile: isMobile } = useDeviceDetection()
   const [current_step, set_current_step] = useState<'mode' | 'materials' | 'info' | 'batch_details' | 'review'>('mode')
   const [production_mode, set_production_mode] = useState<ProductionMode>('DIRECT_TRANSFORM')
   const [formData, set_form_data] = useState<ProductionFormData>({
@@ -318,7 +318,7 @@ export default function ProductEntry() {
       }
     }, [onFilesAccepted])
     
-    const { getRootProps, get_input_props, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
       onDrop: onDrop,
       accept: {
         'image/*': ['.jpeg', '.jpg', '.png', '.gif']

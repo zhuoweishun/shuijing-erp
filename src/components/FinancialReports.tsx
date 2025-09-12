@@ -9,8 +9,8 @@ interface FinancialReportData {
   total_income: number
   total_expense: number
   net_profit: number
-  incomeByCategory: { item.category: string; amount: number }[]
-  expenseByCategory: { item.category: string; amount: number }[]
+  incomeByCategory: { item_category: string; amount: number }[]
+  expenseByCategory: { item_category: string; amount: number }[]
   monthlyTrend: { month: string; income: number; expense: number; profit: number }[]
 }
 
@@ -76,10 +76,10 @@ export default function FinancialReports({ className = '' }: FinancialReportsPro
       ['净利润', format_currency(reportData.net_profit)],
       [''],
       ['收入分类'],
-      ...reportData.incomeByCategory.map(item => [item.item.category, format_currency(item.amount)]),
+      ...reportData.incomeByCategory.map(item => [item.item_category, format_currency(item.amount)]),
       [''],
       ['支出分类'],
-      ...reportData.expenseByCategory.map(item => [item.item.category, format_currency(item.amount)])
+      ...reportData.expenseByCategory.map(item => [item.item_category, format_currency(item.amount)])
     ]
     
     const csvString = csvContent.map(row => row.join(',')).join('\n')
@@ -214,7 +214,7 @@ export default function FinancialReports({ className = '' }: FinancialReportsPro
                 {reportData.incomeByCategory.length > 0 ? (
                   reportData.incomeByCategory.map((item, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">{item.item.category || '未分类'}</span>
+                      <span className="text-sm font-medium text-gray-700">{item.item_category || '未分类'}</span>
                       <span className="text-sm font-bold text-green-600">
                         {format_currency(item.amount)}
                       </span>
@@ -233,7 +233,7 @@ export default function FinancialReports({ className = '' }: FinancialReportsPro
                 {reportData.expenseByCategory.length > 0 ? (
                   reportData.expenseByCategory.map((item, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">{item.item.category || '未分类'}</span>
+                      <span className="text-sm font-medium text-gray-700">{item.item_category || '未分类'}</span>
                       <span className="text-sm font-bold text-red-600">
                         {format_currency(item.amount)}
                       </span>

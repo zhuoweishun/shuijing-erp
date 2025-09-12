@@ -43,7 +43,7 @@ Object.defineProperty(URL, 'revokeObjectURL', {
 // 模拟window.match_media
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mock_implementation(query => ({
+  value: jest.fn().mockImplementation((query: any) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -57,5 +57,5 @@ Object.defineProperty(window, 'matchMedia', {
 
 // 清理函数
 afterEach(() => {
-  jest.clear_all_mocks();
+  jest.clearAllMocks();
 });

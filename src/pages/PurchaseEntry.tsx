@@ -97,7 +97,7 @@ export default function PurchaseEntry() {
   // const navigate = useNavigate() // 暂时注释掉未使用的变量
   
   // 设备检测
-  const { isMobile: isMobile } = useDeviceDetection()
+  const { is_mobile: isMobile } = useDeviceDetection()
   
   // 用户认证信息
   const { user, isBoss } = useAuth()
@@ -208,7 +208,7 @@ export default function PurchaseEntry() {
       }
     }, [onFilesAccepted])
 
-    const { getRootProps, get_input_props, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
       onDrop: onDrop,
       accept: {
         'image/jpeg': ['.jpg', '.jpeg'],
@@ -1635,7 +1635,7 @@ export default function PurchaseEntry() {
                             type="checkbox"
                             id="force_enable_camera"
                             checked={force_enable_camera}
-                            on_change={(e) => set_force_enable_camera(e.target.checked)}
+                            onChange={(e: any) => set_force_enable_camera(e.target.checked)}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                           <label htmlFor="force_enable_camera" className="text-sm text-yellow-800">
@@ -2082,7 +2082,7 @@ export default function PurchaseEntry() {
                 value={watch('bead_diameter') || ''}
                 on_change={(e) => setValue('bead_diameter', parseFloat(e.target.value) || undefined)}
                 error={errors.bead_diameter?.message}
-                inputMode="decimal"
+                input_mode="decimal"
               />
             )}
             
@@ -2097,7 +2097,7 @@ export default function PurchaseEntry() {
                 value={watch('specification') || ''}
                 on_change={(e) => setValue('specification', parseFloat(e.target.value) || undefined)}
                 error={errors.specification?.message}
-                inputMode="decimal"
+                input_mode="decimal"
               />
             )}
             
@@ -2112,7 +2112,7 @@ export default function PurchaseEntry() {
                 value={watch('specification') || ''}
                 on_change={(e) => setValue('specification', parseFloat(e.target.value) || undefined)}
                 error={errors.specification?.message}
-                inputMode="decimal"
+                input_mode="decimal"
               />
             )}
             
@@ -2127,7 +2127,7 @@ export default function PurchaseEntry() {
                 value={watch('quantity') || ''}
                 on_change={(e) => setValue('quantity', parseInt(e.target.value) || undefined)}
                 error={errors.quantity?.message}
-                inputMode="numeric"
+                input_mode="numeric"
               />
             )}
             
@@ -2141,7 +2141,7 @@ export default function PurchaseEntry() {
                 value={watch('piece_count') || ''}
                 on_change={(e) => setValue('piece_count', parseInt(e.target.value) || undefined)}
                 error={errors.piece_count?.message}
-                inputMode="numeric"
+                input_mode="numeric"
               />
             )}
             
@@ -2176,7 +2176,7 @@ export default function PurchaseEntry() {
               value={watch('price_per_gram') || ''}
               on_change={(e) => setValue('price_per_gram', parseFloat(e.target.value) || undefined)}
               error={errors.price_per_gram?.message}
-              inputMode="decimal"
+              input_mode="decimal"
             />
             
             {/* 总价 */}
@@ -2184,7 +2184,7 @@ export default function PurchaseEntry() {
               label={`总价 (元)${selected_material_type !== 'BRACELET' ? '' : ' (与克价、重量三选二)'}`}
               required={selected_material_type !== 'BRACELET'}
               value={watch('total_price') || ''}
-              on_change={(value) => setValue('total_price', value)}
+              onChange={(value: any) => setValue('total_price', value)}
               error={errors.total_price?.message}
               placeholder="采购总价"
               selected_material_type={selected_material_type}
@@ -2205,7 +2205,7 @@ export default function PurchaseEntry() {
               value={watch('weight') || ''}
               on_change={(e) => setValue('weight', parseFloat(e.target.value) || undefined)}
               error={errors.weight?.message}
-              inputMode="decimal"
+              input_mode="decimal"
             />
             
             {/* 最低预警颗数 */}
@@ -2217,7 +2217,7 @@ export default function PurchaseEntry() {
               value={watch('min_stock_alert') || ''}
               on_change={(e) => setValue('min_stock_alert', parseInt(e.target.value) || undefined)}
               error={errors.min_stock_alert?.message}
-              inputMode="numeric"
+              input_mode="numeric"
             />
           </MobileFormRow>
         </MobileFormGroup>
@@ -2375,7 +2375,7 @@ export default function PurchaseEntry() {
             variant="secondary"
             size={isMobile ? 'lg' : 'md'}
             fullWidth={isMobile}
-            onClick={() => {
+            on_click={() => {
               reset()
               set_photos([])
               const textarea = document.getElementById('ai_description') as HTMLTextAreaElement

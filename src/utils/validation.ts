@@ -111,7 +111,7 @@ export const validate_product_type_fields = (data: {
   // 散珠和手串需要珠子直径
   if (data.product_type === 'LOOSE_BEADS' || data.product_type === 'BRACELET') {
     const diameter_validation = validate_diameter(data.bead_diameter)
-    if (!diameter_validation.isValid) {
+    if (!diameter_validation.is_valid) {
       errors.push(diameter_validation.error!)
     }
   }
@@ -119,7 +119,7 @@ export const validate_product_type_fields = (data: {
   // 饰品配件和成品需要规格
   if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED') {
     const spec_validation = validate_specification(data.specification)
-    if (!spec_validation.isValid) {
+    if (!spec_validation.is_valid) {
       errors.push(spec_validation.error!)
     }
   }

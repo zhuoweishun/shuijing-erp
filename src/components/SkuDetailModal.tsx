@@ -465,7 +465,7 @@ export default function SkuDetailModal({
                 <SkuSellForm
                   sku={state.sku}
                   on_submit={(data) => onSell(state.sku!.id, data)}
-                  on_cancel={onClose}
+                  onCancel={onClose}
                 />
               )}
 
@@ -473,7 +473,7 @@ export default function SkuDetailModal({
                 <SkuDestroyForm
                   sku={state.sku}
                   on_submit={(data) => onDestroy(state.sku!.id, data)}
-                  on_cancel={onClose}
+                  onCancel={onClose}
                 />
               )}
 
@@ -481,7 +481,7 @@ export default function SkuDetailModal({
                 <SkuAdjustForm
                   sku={state.sku}
                   on_submit={(data) => onAdjust(state.sku!.id, data)}
-                  on_cancel={onClose}
+                  onCancel={onClose}
                 />
               )}
             </div>

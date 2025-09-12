@@ -904,7 +904,7 @@ export interface CustomerNote {
   id: string
   customer_id: string
   content: string
-  item.category: 'PREFERENCE' | 'BEHAVIOR' | 'CONTACT' | 'OTHER'
+  item_category: 'PREFERENCE' | 'BEHAVIOR' | 'CONTACT' | 'OTHER'
   created_at: string
   created_by: string
   creator?: User
@@ -937,12 +937,7 @@ export interface CustomerPurchase {
     specification?: string
     photos?: string[]
   }
-  // 兼容字段
-  sale_channel?: string // 兼容字段
-  original_price?: number // 兼容字段
-  refund_date?: string // 兼容字段
-  refund_reason?: string // 兼容字段
-  refund_notes?: string // 兼容字段
+
 }
 
 // 客户创建请求

@@ -15,7 +15,7 @@ import { financial_overview } from '../types/financial'
 import { format_amount } from '../utils/format'
 import FinancialCharts from '../components/FinancialCharts'
 import TransactionLog from '../components/TransactionLog'
-import inventory_status from '../components/InventoryStatus'
+import InventoryStatus from '../components/InventoryStatus'
 
 interface FinancialState {
   overview: financial_overview | null
@@ -208,7 +208,7 @@ const Financial: React.FC = () => {
               <h2 className="text-lg font-semibold">财务概览</h2>
               
               {/* 库存状况表 */}
-              <inventory_status />
+              <InventoryStatus />
 
               {/* 快速操作 */}
               <div className="bg-gray-50 rounded-lg p-6">

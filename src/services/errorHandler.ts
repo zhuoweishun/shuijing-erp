@@ -59,7 +59,7 @@ interface ErrorHandlerConfig {
 const DEFAULT_CONFIG: ErrorHandlerConfig = {
   showToast: true,
   logError: true,
-  redirect_on_auth: true,
+  redirectOnAuth: true,
   retryable: false
 }
 
@@ -183,7 +183,7 @@ export class ErrorHandler {
     }
     
     // 处理认证错误
-    if (finalConfig.redirect_on_auth && errorResponse.error?.code && AUTH_REDIRECT_ERRORS.has(errorResponse.error.code as ErrorType)) {
+    if (finalConfig.redirectOnAuth && errorResponse.error?.code && auth_redirect_errors.has(errorResponse.error.code as ErrorType)) {
       this.handleAuthError()
       return
     }
@@ -262,7 +262,7 @@ export class ErrorHandler {
     }
     
     // 根据错误类型选择不同的toast样式
-    if (AUTH_REDIRECT_ERRORS.has(error_code as ErrorType)) {
+    if (auth_redirect_errors.has(error_code as ErrorType)) {
       toast.error(userMessage, {
         duration: 5000,
         description: '即将跳转到登录页面'
@@ -363,24 +363,24 @@ export class ErrorHandler {
   
   // 获取重试次数
   getRetryCount(key: string): number {
-    return this.retry_count.get(key) || 0
+    return this.retryCount.get(key) || 0
   }
   
   // 增加重试次数
   incrementRetryCount(key: string): number {
-    const count = this.get_retry_count(key) + 1
-    this.retry_count.set(key, count)
+    const count = this.getRetryCount(key) + 1
+    this.retryCount.set(key, count)
     return count
   }
   
   // 重置重试次数
   resetRetryCount(key: string): void {
-    this.retry_count.delete(key)
+    this.retryCount.delete(key)
   }
   
   // 检查是否可以重试
   canRetry(key: string): boolean {
-    return this.get_retry_count(key) < this.maxRetries
+    return this.getRetryCount(key) < this.maxRetries
   }
 }
 

@@ -385,13 +385,13 @@ const TransactionLog: React.FC = () => {
                           {transaction.description}
                         </h4>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          TRANSACTION_CATEGORY_COLORS[transaction.item.category]
+                          TRANSACTION_CATEGORY_COLORS[transaction.item_category]
                         } bg-gray-100`}>
-                          {TRANSACTION_CATEGORY_LABELS[transaction.item.category]}
+                          {TRANSACTION_CATEGORY_LABELS[transaction.item_category]}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        {transaction.item.category === 'refund' ? extract_and_translate_refund_reason(transaction.details) : transaction.details}
+                        {transaction.item_category === 'refund' ? extract_and_translate_refund_reason(transaction.details) : transaction.details}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {format_date(transaction.created_at)}
