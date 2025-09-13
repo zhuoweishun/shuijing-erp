@@ -63,6 +63,9 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
+      external: [
+        'es-toolkit/compat/sort_by'
+      ],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],

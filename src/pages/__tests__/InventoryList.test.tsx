@@ -125,9 +125,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-    isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
 
       render(
@@ -154,9 +154,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-    isBoss: false
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: false
       });
 
       render(
@@ -185,9 +185,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-         isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -287,9 +287,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -348,9 +348,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -387,9 +387,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-         isBoss: false
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: false
       });
 
       render(
@@ -422,9 +422,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -459,9 +459,9 @@ describe('InventoryList 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 

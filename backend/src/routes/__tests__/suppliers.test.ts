@@ -50,16 +50,16 @@ const mockSuppliers = [
   {
     id: '1',
     name: '测试供应商1',
-    isActive: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
+    is_active: true,
+    created_at: new Date('2024-01-01'),
+    updated_at: new Date('2024-01-01')
   },
   {
     id: '2',
     name: '测试供应商2',
-    isActive: true,
-    createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02')
+    is_active: true,
+    created_at: new Date('2024-01-02'),
+    updated_at: new Date('2024-01-02')
   }
 ];
 
@@ -73,9 +73,9 @@ describe('Suppliers API 测试', () => {
     mockPrisma.supplier.create.mockResolvedValue({
       id: '3',
       name: '新供应商',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date()
     });
   });
 
@@ -91,7 +91,7 @@ describe('Suppliers API 测试', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toEqual(mockSuppliers);
       expect(mockPrisma.supplier.findMany).toHaveBeenCalledWith({
-        where: { isActive: true },
+        where: { is_active: true },
         orderBy: { name: 'asc' }
       });
     });
@@ -158,7 +158,7 @@ describe('Suppliers API 测试', () => {
       expect(mockPrisma.supplier.create).toHaveBeenCalledWith({
         data: {
           name: '新供应商',
-          isActive: true
+          is_active: true
         }
       });
     });
@@ -355,9 +355,9 @@ describe('Suppliers API 测试', () => {
       const largeSupplierList = Array.from({ length: 1000 }, (_, i) => ({
         id: `${i + 1}`,
         name: `供应商${i + 1}`,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date()
       }));
       
       mockPrisma.supplier.findMany.mockResolvedValue(largeSupplierList);
@@ -389,7 +389,7 @@ describe('Suppliers API 测试', () => {
       expect(mockPrisma.supplier.create).toHaveBeenCalledWith({
         data: {
           name: '测试供应商', // 应该清理掉HTML标签和前后空格
-          isActive: true
+          is_active: true
         }
       });
     });

@@ -32,9 +32,9 @@ function App() {
 
 // 内部应用组件，在AuthProvider内部使用
 function AppContent() {
-  const { isLoading } = useAuth()
+  const { is_loading } = useAuth()
 
-  if (isLoading) {
+  if (is_loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

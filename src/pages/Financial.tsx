@@ -19,14 +19,14 @@ import InventoryStatus from '../components/InventoryStatus'
 
 interface FinancialState {
   overview: financial_overview | null
-  isLoading: boolean
+  is_loading: boolean
   error: string | null
 }
 
 const Financial: React.FC = () => {
   const [state, setState] = useState<FinancialState>({
     overview: null,
-    isLoading: false,
+    is_loading: false,
     error: null
   })
 
@@ -35,7 +35,7 @@ const Financial: React.FC = () => {
   // 获取财务概览
   const fetchOverview = async () => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }))
+      setState(prev => ({ ...prev, is_loading: true }))
       const response = await financial_api.get_overview()
       if (response.success) {
         setState(prev => ({ 
@@ -56,7 +56,7 @@ const Financial: React.FC = () => {
         error: '获取财务概览失败' 
       }))
     } finally {
-      setState(prev => ({ ...prev, isLoading: false }))
+      setState(prev => ({ ...prev, is_loading: false }))
     }
   }
 
@@ -94,11 +94,11 @@ const Financial: React.FC = () => {
         <div className="flex items-center space-x-2">
           <button 
             onClick={fetchOverview}
-            disabled={state.isLoading}
+            disabled={state.is_loading}
             className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${state.isLoading ? 'animate-spin' : ''}`} />
-            {state.isLoading ? '刷新中...' : '刷新数据'}
+            <RefreshCw className={`h-4 w-4 mr-2 ${state.is_loading ? 'animate-spin' : ''}`} />
+            {state.is_loading ? '刷新中...' : '刷新数据'}
           </button>
           <button className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
             <Download className="h-4 w-4 mr-2" />

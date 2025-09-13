@@ -3,7 +3,7 @@ import { Eye, Package, Ruler, DollarSign, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { inventory_api, fixImageUrl } from '../services/api'
 import { useAuth } from '@/hooks/useAuth'
-import { format_purchase_code } from '../utils/fieldConverter'
+import { format_purchase_code } from '../utils/format'
 
 // 成品数据类型定义
 interface FinishedProduct {

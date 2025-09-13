@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-09-13T12:40:57.560899",
+  "total_changes": 5,
+  "files_processed": 5,
+  "backup_location": "D:\\shuijing ERP\\backend\\backups\\syntax_fix_20250913_124057",
+  "changes_log": [
+    "customers.ts: 1 处语法修改",
+    "financial.ts: 1 处语法修改",
+    "materials.ts: 1 处语法修改",
+    "products.ts: 1 处语法修改",
+    "skus.ts: 1 处语法修改"
+  ]
+}

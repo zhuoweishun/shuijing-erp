@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '@prisma/client'
-import { logger } from '../utils/logger'
+import { logger } from '../utils/logger.js'
 import { prisma } from '../lib/prisma'
 
 // 扩展Request类型以包含用户信息
@@ -10,7 +9,7 @@ declare global {
     interface Request {
       user?: {
         id: string
-        username: string
+        user_name: string
         role: 'BOSS' | 'EMPLOYEE'
         name: string
       }
@@ -39,13 +38,13 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     
     // 从数据库获取用户信息
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.user_id },
       select: {
         id: true,
-        username: true,
+        user_name: true,
         role: true,
         name: true,
-        isActive: true
+        is_active: true
       }
     })
 
@@ -56,7 +55,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       })
     }
 
-    if (!user.isActive) {
+    if (!user.is_active) {
       return res.status(401).json({
         success: false,
         message: '用户账户已被禁用'
@@ -66,12 +65,12 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     // 将用户信息添加到请求对象
     req.user = {
       id: user.id,
-      username: user.username,
+      user_name: user.user_name,
       role: user.role,
       name: user.name
     }
 
-    next()
+    return next()
   } catch (error) {
     logger.error('Token验证失败:', error)
     
@@ -113,14 +112,14 @@ export const requireRole = (roles: ('BOSS' | 'EMPLOYEE')[]) => {
       })
     }
 
-    next()
+    return next()
   }
 }
 
 // 生成JWT token
-export const generateToken = (userId: string): string => {
+export const generateToken = (user_id: string): string => {
   return jwt.sign(
-    { userId },
+    { user_id },
     JWT_SECRET,
     { expiresIn: '24h' }
   )

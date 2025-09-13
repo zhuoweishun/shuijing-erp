@@ -59,7 +59,7 @@ export default function SkuControlModal({
   const [operationLogs, setOperationLogs] = useState<OperationLog[]>([])
   const [logsLoading, setLogsLoading] = useState(false)
   const [logsError, setLogsError] = useState<string | null>(null)
-  const { isBoss } = useAuth()
+  const { is_boss } = useAuth()
 
   // 获取操作日志
   const fetchOperationLogs = async () => {
@@ -201,7 +201,7 @@ export default function SkuControlModal({
   const currentProfitMargin = calculateProfitMargin(currentPrice, recipeCost)
   const newProfitMargin = calculateProfitMargin(newPrice, recipeCost)
 
-  if (!isBoss) {
+  if (!is_boss) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">

@@ -12,12 +12,12 @@ export default function ProtectedRoute({
   children, 
   required_role 
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { is_authenticated, is_loading } = useAuth()
   const { has_permission } = usePermission()
   const location = useLocation()
 
   // 显示加载状态
-  if (isLoading) {
+  if (is_loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -29,7 +29,7 @@ export default function ProtectedRoute({
   }
 
   // 未认证，重定向到登录页
-  if (!isAuthenticated) {
+  if (!is_authenticated) {
     return (
       <Navigate 
         to="/login" 

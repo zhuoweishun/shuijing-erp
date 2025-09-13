@@ -108,7 +108,7 @@ describe('Purchases API 测试', () => {
     mockPrisma.supplier.findUnique.mockResolvedValue({
       id: '1',
       name: '测试供应商',
-      isActive: true
+      is_active: true
     });
   });
 
@@ -352,7 +352,7 @@ describe('Purchases API 测试', () => {
       mockPrisma.supplier.create.mockResolvedValueOnce({
         id: '2',
         name: '新供应商',
-        isActive: true
+        is_active: true
       });
       
       const newSupplierData = { ...validPurchaseData, supplier_name: '新供应商' };
@@ -365,7 +365,7 @@ describe('Purchases API 测试', () => {
       expect(mockPrisma.supplier.create).toHaveBeenCalledWith({
         data: {
           name: '新供应商',
-          isActive: true
+          is_active: true
         }
       });
     });

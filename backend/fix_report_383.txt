@@ -1,0 +1,19 @@
+
+=== 修复报告 ===
+处理文件数: 5
+总修复数: 17
+
+主要修复类型:
+- 字段命名规范化 (username -> user_name)
+- 函数参数修复 (_ -> req)
+- 类型错误修复 (undefined -> Decimal(0))
+- Prisma字段修复 (purchase_id -> purchase_code)
+- 变量声明补充
+- 状态值修正 (INACTIVE -> ACTIVE)
+- 错误类型断言
+- 缺失字段添加 (material_id)
+
+建议:
+1. 运行 npm run check 验证修复效果
+2. 预期错误数量减少到100个以内
+3. 手动处理剩余的个性问题

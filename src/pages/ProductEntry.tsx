@@ -19,7 +19,7 @@ if (import.meta.env.MODE === 'development') {
 import { useDropzone } from 'react-dropzone'
 import { finished_product_api, fixImageUrl, upload_api, get_api_url } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
-import { format_purchase_code } from '../utils/fieldConverter'
+import { format_purchase_code } from '../utils/format'
 import { sort_by_pinyin } from '../utils/pinyinSort'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
@@ -74,7 +74,7 @@ import {
 } from '../types'
 
 export default function ProductEntry() {
-  const { user, isAuthenticated } = useAuth()
+  const { user, is_authenticated } = useAuth()
   const { is_mobile: isMobile } = useDeviceDetection()
   const [current_step, set_current_step] = useState<'mode' | 'materials' | 'info' | 'batch_details' | 'review'>('mode')
   const [production_mode, set_production_mode] = useState<ProductionMode>('DIRECT_TRANSFORM')
@@ -372,12 +372,12 @@ export default function ProductEntry() {
       
       // 添加认证状态调试信息
       console.log('🔍 [DEBUG] 认证状态检查:', {
-        isAuthenticated,
+        is_authenticated,
         user: user ? { id: user.id, user_name: user.user_name, role: user.role } : null,
-        token: localStorage.get_item('auth_token') ? '有token' : '无token'
+        token: localStorage.getItem('auth_token') ? '有token' : '无token'
       })
       
-      if (!isAuthenticated) {
+      if (!is_authenticated) {
         console.error('❌ 用户未认证，无法获取原材料')
         toast.error('请先登录')
         set_available_materials([])

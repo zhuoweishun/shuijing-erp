@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-09-13T13:38:32.008069",
+  "processed_files": 0,
+  "total_fixes": 0,
+  "modified_files": 0,
+  "backup_files": [],
+  "fixes_by_category": {
+    "prisma_field_naming": 0,
+    "function_returns": 0,
+    "type_annotations": 0,
+    "import_exports": 0,
+    "enum_comparisons": 0,
+    "variable_references": 0,
+    "optional_chaining": 0,
+    "boolean_comparisons": 0,
+    "array_types": 0
+  },
+  "detailed_fixes": []
+}

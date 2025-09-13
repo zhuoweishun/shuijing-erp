@@ -8,7 +8,7 @@ async function main() {
 
   // 检查是否已存在boss用户
   const existingBoss = await prisma.user.findUnique({
-    where: { username: 'boss' }
+    where: { user_name: 'boss' }
   })
 
   if (!existingBoss) {
@@ -17,12 +17,12 @@ async function main() {
     
     const bossUser = await prisma.user.create({
       data: {
-        username: 'boss',
+        user_name: 'boss',
         password: hashedBossPassword,
         email: 'boss@crystal-erp.com',
         name: '系统管理员',
         role: 'BOSS',
-        isActive: true
+        is_active: true
       }
     })
 
@@ -33,7 +33,7 @@ async function main() {
 
   // 检查是否已存在employee用户
   const existingEmployee = await prisma.user.findUnique({
-    where: { username: 'employee' }
+    where: { user_name: 'employee' }
   })
 
   if (!existingEmployee) {
@@ -42,12 +42,12 @@ async function main() {
     
     const employeeUser = await prisma.user.create({
       data: {
-        username: 'employee',
+        user_name: 'employee',
         password: hashedEmployeePassword,
         email: 'employee@crystal-erp.com',
         name: '普通员工',
         role: 'EMPLOYEE',
-        isActive: true
+        is_active: true
       }
     })
 

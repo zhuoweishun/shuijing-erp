@@ -137,16 +137,16 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 
 数量识别规则：
 - "2串"、"3串" → quantity: 2或3（仅用于BRACELET）
-- "2件"、"3件" → pieceCount: 2或3（用于FINISHED）
-- "2颗"、"3颗" → pieceCount: 2或3（用于LOOSE_BEADS）
-- "2片"、"3片" → pieceCount: 2或3（用于ACCESSORIES）
+- "2件"、"3件" → piece_count: 2或3（用于FINISHED）
+- "2颗"、"3颗" → piece_count: 2或3（用于LOOSE_BEADS）
+- "2片"、"3片" → piece_count: 2或3（用于ACCESSORIES）
 
 价格识别规则（重要）：
-- 成品和饰品："2000块一串"、"500元一件" → unitPrice: 2000或500
-- 散珠和手串："50元一克"、"客价100"、"克价50" → pricePerGram: 50或100
+- 成品和饰品："2000块一串"、"500元一件" → unit_price: 2000或500
+- 散珠和手串："50元一克"、"客价100"、"克价50" → price_per_gram: 50或100
 - 克价表述："客价"、"克价"、"每克"、"一克"都表示pricePerGram
-- 总价识别："200块钱"、"500元"、"1000块"、"总共200"、"一共500元"、"花了300块"、"总价1000"、"合计500元" → totalPrice: 200、500、1000、200、500、300、1000、500
-- 单独价格表述：当描述中只出现一个价格且没有明确单位指示时，如"200块钱"、"300元"、"500块" → totalPrice: 200、300、500
+- 总价识别："200块钱"、"500元"、"1000块"、"总共200"、"一共500元"、"花了300块"、"总价1000"、"合计500元" → total_price: 200、500、1000、200、500、300、1000、500
+- 单独价格表述：当描述中只出现一个价格且没有明确单位指示时，如"200块钱"、"300元"、"500块" → total_price: 200、300、500
 - 价格单位："块"、"元"、"块钱"都表示人民币
 
 珠子直径识别规则（重要）：
@@ -155,7 +155,7 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 - 口语表述：6的、8的、10的、12的、14的、16的、18的、20的等
 - 带"的"表述："16米的"、"8毫米的"、"12的" → 提取数字部分
 - 特殊表述：六毫米、八毫米、十毫米、十二毫米、十四毫米等
-- 注意："X米的"格式中，X就是直径数值（毫米），如"16米的" → beadDiameter: 16
+- 注意："X米的"格式中，X就是直径数值（毫米），如"16米的" → bead_diameter: 16
 
 供应商名称识别规则（重要）：
 - 直接提及："供应商张三"、"张三水晶"、"李四珠宝" → supplierName: "张三"、"张三水晶"、"李四珠宝"
@@ -193,7 +193,7 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 15. 【重要】总价识别：当描述中出现"200块钱"、"500元"等单独价格表述时，应识别为totalPrice，特别是散珠类型应优先使用totalPrice而非pricePerGram
 16. 【重要】价格字段优先级：如果同时出现总价和克价，散珠类型优先使用totalPrice；如果只有总价，所有类型都使用totalPrice
 17. 【重要】测试案例："在咯咯珠宝买的黑曜石五串" → 必须识别出 supplierName: "咯咯珠宝"
-18. 【重要】测试案例："拉拉水晶买的单珠，黄耀石一颗，200块钱，品质还不错的。18米。" → 必须识别出 supplierName: "拉拉水晶", totalPrice: 200`
+18. 【重要】测试案例："拉拉水晶买的单珠，黄耀石一颗，200块钱，品质还不错的。18米。" → 必须识别出 supplierName: "拉拉水晶", total_price: 200`
 
     const response = await fetch(`${DOUBAO_CONFIG.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -370,7 +370,7 @@ export const parsePurchaseDescription = async (description: string): Promise<{
 }
 
 // 智能助理对话
-export const chatWithAssistant = async (message: string, context?: any): Promise<{
+export const chatWithAssistant = async (message: string, _context?: any): Promise<{
   success: boolean
   data?: {
     response: string

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { logger } from '../utils/logger'
+import { logger } from '../utils/logger.js'
 
 // 自定义错误类
 export class AppError extends Error {
@@ -20,7 +20,7 @@ export const errorHandler = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   let statusCode = 500
   let message = '服务器内部错误'
@@ -213,7 +213,7 @@ export const asyncHandler = (
 }
 
 // 404错误处理
-export const notFound = (req: Request, res: Response, next: NextFunction) => {
+export const notFound = (req: Request, _res: Response, next: NextFunction) => {
   const error = new AppError(`路由 ${req.originalUrl} 不存在`, 404)
   next(error)
 }

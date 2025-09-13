@@ -94,7 +94,7 @@ const Customer_create_modal: React.FC<CustomerCreateModalProps> = ({
     set_is_submitting(true);
     
     try {
-      const token = localStorage.get_item('token');
+      const token = localStorage.getItem('token');
       if (!token) {
         toast.error('请先登录');
         return;

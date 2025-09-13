@@ -100,7 +100,7 @@ export default function PurchaseEntry() {
   const { is_mobile: isMobile } = useDeviceDetection()
   
   // 用户认证信息
-  const { user, isBoss } = useAuth()
+  const { user, is_boss } = useAuth()
   
   // 表单状态
   const { register, handleSubmit, setValue, watch, reset, formState, formState: { errors } } = useForm<PurchaseFormData>({
@@ -254,7 +254,7 @@ export default function PurchaseEntry() {
         console.log('检测到页面刷新，已清除localStorage中的图片数据')
         return []
       } else {
-        const saved = localStorage.get_item(PHOTOS_STORAGE_KEY)
+        const saved = localStorage.getItem(PHOTOS_STORAGE_KEY)
         const savedPhotos = saved ? JSON.parse(saved) : []
         console.log('从localStorage恢复photos状态:', savedPhotos)
         return savedPhotos
@@ -360,7 +360,7 @@ export default function PurchaseEntry() {
       } else {
         set_suppliers([])
         set_filtered_suppliers([])
-        if (!isBoss && response.message?.includes('权限')) {
+        if (!is_boss && response.message?.includes('权限')) {
           console.log('雇员角色无法查看供应商列表，这是正常行为')
         }
       }
@@ -410,7 +410,7 @@ export default function PurchaseEntry() {
       set_creating_supplier(true)
       
       // 权限检查：只有BOSS角色才能创建供应商
-      if (!isBoss) {
+      if (!is_boss) {
         toast.error('权限不足，仅老板可创建新供应商')
         console.log('权限不足：当前用户角色为', user?.role, '，无法创建供应商')
         return false
@@ -2292,14 +2292,14 @@ export default function PurchaseEntry() {
                           
                           {/* 如果输入的内容不在现有供应商中，显示创建新供应商选项 */}
                           {supplier_input.trim() && !filtered_suppliers.some(s => s.name.toLowerCase() === supplier_input.toLowerCase()) && (
-                            <div className={`px-4 py-3 border-t ${isBoss ? 'bg-blue-50 border-blue-100' : 'bg-yellow-50 border-yellow-100'}`}>
-                              <div className={`flex items-center ${isBoss ? 'text-blue-600' : 'text-yellow-600'}`}>
+                            <div className={`px-4 py-3 border-t ${is_boss ? 'bg-blue-50 border-blue-100' : 'bg-yellow-50 border-yellow-100'}`}>
+                              <div className={`flex items-center ${is_boss ? 'text-blue-600' : 'text-yellow-600'}`}>
                                 {creating_supplier ? (
                                   <>
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                     创建新供应商中...
                                   </>
-                                ) : isBoss ? (
+                                ) : is_boss ? (
                                   <>
                                     <Plus className="h-4 w-4 mr-2" />
                                     提交时创建: "{supplier_input}"
@@ -2319,7 +2319,7 @@ export default function PurchaseEntry() {
                           {supplier_input.trim() ? (
                             <div>
                               <div>未找到匹配的供应商</div>
-                              {isBoss ? (
+                              {is_boss ? (
                                 <div className="text-sm mt-1 text-blue-600">
                                   提交时将创建新供应商: "{supplier_input}"
                                 </div>

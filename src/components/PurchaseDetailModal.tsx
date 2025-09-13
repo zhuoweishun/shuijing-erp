@@ -14,7 +14,7 @@ import { purchase_api, supplier_api, fixImageUrl } from '../services/api'
 import { Purchase } from '../types'
 import Permission_wrapper from './PermissionWrapper'
 import { toast } from 'sonner'
-import { format_purchase_code } from '../utils/fieldConverter'
+import { format_purchase_code } from '../utils/format'
 
 interface PurchaseDetailModalProps {
   is_open: boolean
@@ -665,7 +665,7 @@ export default function PurchaseDetailModal({
   }
 
   // 渲染编辑字段
-  const renderEditField = (field: string, Label: string, value: any, type: 'text' | 'number' | 'select' = 'text', options?: string[]) => {
+  const renderEditField = (field: string, value: any, type: 'text' | 'number' | 'select' = 'text', options?: string[]) => {
     if (!isEditMode) {
       // 显示模式
       if (field === 'price_per_gram' || field === 'total_price') {
@@ -926,25 +926,25 @@ export default function PurchaseDetailModal({
                           <div className="flex items-center justify-between">
                             <span className="text-gray-500 text-xs">产品</span>
                             <span className="font-medium text-gray-900 truncate text-xs max-w-20">
-                              {renderEditField('material_name', '产品名称', purchase.material_name)}
+                              {renderEditField('material_name', purchase.material_name)}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-500 text-xs">数量</span>
                             <span className="font-medium text-gray-900 text-xs">
-                              {renderEditField('quantity', '数量', purchase.quantity, 'number')}
+                              {renderEditField('quantity', purchase.quantity, 'number')}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-500 text-xs">直径</span>
                             <span className="font-medium text-gray-900 text-xs">
-                              {renderEditField('bead_diameter', '直径', purchase.bead_diameter, 'number')}
+                              {renderEditField('bead_diameter', purchase.bead_diameter, 'number')}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-500 text-xs">品相</span>
                             <span className="font-medium text-gray-900 text-xs">
-                              {renderEditField('quality', '品相', purchase.quality, 'select', ['AA', 'A', 'AB', 'B', 'C'])}
+                              {renderEditField('quality', purchase.quality, 'select', ['AA', 'A', 'AB', 'B', 'C'])}
                             </span>
                           </div>
                           {user?.role === 'BOSS' && (
@@ -952,7 +952,7 @@ export default function PurchaseDetailModal({
                               <div className="flex items-center justify-between">
                                 <span className="text-gray-500 text-xs">克价</span>
                                 <div className="font-medium text-gray-900 text-right flex-1 ml-1 text-xs">
-                                  {renderEditField('price_per_gram', '克价', purchase.price_per_gram, 'number')}
+                                  {renderEditField('price_per_gram', purchase.price_per_gram, 'number')}
                                   {/* 建议值显示 */}
                                   {isEditMode && suggestions.price_per_gram && (
                                     <div className="text-xs text-red-600 mt-0.5">
@@ -964,7 +964,7 @@ export default function PurchaseDetailModal({
                               <div className="flex items-center justify-between">
                                 <span className="text-gray-500 text-xs">总价</span>
                                 <div className="font-medium text-gray-900 text-right flex-1 ml-1 text-xs">
-                                  {renderEditField('total_price', '总价', purchase.total_price, 'number')}
+                                  {renderEditField('total_price', purchase.total_price, 'number')}
                                   {/* 建议值显示 */}
                                   {isEditMode && suggestions.total_price && (
                                     <div className="text-xs text-red-600 mt-0.5">
@@ -976,7 +976,7 @@ export default function PurchaseDetailModal({
                               <div className="flex items-center justify-between">
                                 <span className="text-gray-500 text-xs">重量</span>
                                 <div className="font-medium text-gray-900 text-right flex-1 ml-1 text-xs">
-                                  {renderEditField('weight', '重量', purchase.weight, 'number')}
+                                  {renderEditField('weight', purchase.weight, 'number')}
                                   {/* 建议值显示 */}
                                   {isEditMode && suggestions.weight && (
                                     <div className="text-xs text-red-600 mt-0.5">
@@ -988,7 +988,7 @@ export default function PurchaseDetailModal({
                               <div className="flex items-center justify-between">
                                 <span className="text-gray-500 text-xs">供应商</span>
                                 <span className="font-medium text-gray-900 text-right flex-1 ml-1 text-xs truncate max-w-16">
-                                  {renderEditField('supplier_name', '供应商', purchase.supplier?.name || '')}
+                                  {renderEditField('supplier_name', purchase.supplier?.name || '')}
                                 </span>
                               </div>
                             </>
@@ -1159,7 +1159,7 @@ export default function PurchaseDetailModal({
                           <div className="flex justify-between items-center">
                             <span className="text-gray-500">产品名称</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('material_name', '产品名称', purchase.material_name)}
+                              {renderEditField('material_name', purchase.material_name)}
                             </div>
                           </div>
                           
@@ -1171,7 +1171,7 @@ export default function PurchaseDetailModal({
                                  purchase.material_type === 'ACCESSORIES' ? '片数' : '件数'}
                               </span>
                               <div className="font-medium text-gray-900">
-                                {renderEditField('piece_count', '数量', purchase.piece_count, 'number')}
+                                {renderEditField('piece_count', purchase.piece_count, 'number')}
                               </div>
                             </div>
                           )}
@@ -1180,7 +1180,7 @@ export default function PurchaseDetailModal({
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">串数</span>
                               <div className="font-medium text-gray-900">
-                                {renderEditField('quantity', '数量', purchase.quantity, 'number')}
+                                {renderEditField('quantity', purchase.quantity, 'number')}
                               </div>
                             </div>
                           )}
@@ -1190,7 +1190,7 @@ export default function PurchaseDetailModal({
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">直径</span>
                               <div className="font-medium text-gray-900">
-                                {renderEditField('bead_diameter', '直径', purchase.bead_diameter, 'number')}
+                                {renderEditField('bead_diameter', purchase.bead_diameter, 'number')}
                               </div>
                             </div>
                           )}
@@ -1199,14 +1199,14 @@ export default function PurchaseDetailModal({
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">规格</span>
                               <div className="font-medium text-gray-900">
-                                {renderEditField('specification', '规格', purchase.specification, 'number')}
+                                {renderEditField('specification', purchase.specification, 'number')}
                               </div>
                             </div>
                           )}
                           <div className="flex justify-between items-center">
                             <span className="text-gray-500">品相</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('quality', '品相', purchase.quality, 'select', ['AA', 'A', 'AB', 'B', 'C'])}
+                              {renderEditField('quality', purchase.quality, 'select', ['AA', 'A', 'AB', 'B', 'C'])}
                             </div>
                           </div>
                           {user?.role === 'BOSS' && (
@@ -1214,7 +1214,7 @@ export default function PurchaseDetailModal({
                               <div className="flex justify-between items-center">
                             <span className="text-gray-500">克价</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('price_per_gram', '克价', purchase.price_per_gram, 'number')}
+                              {renderEditField('price_per_gram', purchase.price_per_gram, 'number')}
                               {/* 建议值显示 */}
                               {isEditMode && suggestions.price_per_gram && (
                                 <div className="text-xs text-red-600 mt-1">
@@ -1233,7 +1233,7 @@ export default function PurchaseDetailModal({
                           <div className="flex justify-between items-center">
                             <span className="text-gray-500">总价</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('total_price', '总价', purchase.total_price, 'number')}
+                              {renderEditField('total_price', purchase.total_price, 'number')}
                               {/* 建议值显示 */}
                               {isEditMode && suggestions.total_price && (
                                 <div className="text-xs text-red-600 mt-1">
@@ -1252,7 +1252,7 @@ export default function PurchaseDetailModal({
                           <div className="flex justify-between items-center">
                             <span className="text-gray-500">重量</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('weight', '重量', purchase.weight, 'number')}
+                              {renderEditField('weight', purchase.weight, 'number')}
                               {/* 建议值显示 */}
                               {isEditMode && suggestions.weight && (
                                 <div className="text-xs text-red-600 mt-1">
@@ -1271,7 +1271,7 @@ export default function PurchaseDetailModal({
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-500">供应商</span>
                                 <div className="font-medium text-gray-900">
-                                  {renderEditField('supplier_name', '供应商', purchase.supplier?.name || '')}
+                                  {renderEditField('supplier_name', purchase.supplier?.name || '')}
                                 </div>
                               </div>
                             </>

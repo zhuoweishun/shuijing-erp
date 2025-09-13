@@ -998,11 +998,11 @@ export interface CustomerAnalyticsParams {
 // 主页仪表板相关类型
 export interface DashboardStats {
   total_purchases: number // 总采购数量
-  total_materials: number // 总原材料数量
+  total_products: number // 总成品数量
   total_inventory_value: number // 总库存价值
   low_stock_items: number // 低库存商品数量
   recent_purchases: RecentPurchase[] // 最近采购记录
-  recent_materials: RecentMaterial[] // 最近成品记录
+  recent_products: RecentProduct[] // 最近成品记录
   supplier_stats: SupplierStat[] // 供应商统计
 }
 
@@ -1015,12 +1015,18 @@ export interface RecentPurchase {
 }
 
 // 最近成品记录类型
-export interface RecentMaterial {
+export interface RecentProduct {
   id: number
-  material_name: string // 成品名称
-  created_at: string // 创建时间
+  product_name: string // 成品名称
+  created_date: string // 创建时间
   total_cost: number // 总成本
   status: 'in_stock' | 'sold' // 状态
+}
+
+// 保持向后兼容的别名
+export interface RecentMaterial extends RecentProduct {
+  material_name: string // 成品名称（别名）
+  created_at: string // 创建时间（别名）
   specification: string // 规格
   quantity: number // 数量
 }

@@ -89,28 +89,30 @@ router.get('/detailed', asyncHandler(async (req, res) => {
 }))
 
 // 就绪检查（用于容器编排）
-router.get('/ready', asyncHandler(async (req, res) => {
+router.get('/ready', asyncHandler(async (_req, res) => {
   const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET']
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
   
   if (missingVars.length > 0) {
-    return res.status(503).json({
+    res.status(503).json({
       status: 'not_ready',
       message: '缺少必要的环境变量',
       missing: missingVars,
       timestamp: new Date().toISOString()
     })
+    return
   }
   
   // 检查数据库连接
   const dbHealth = await checkDatabaseHealth()
   if (dbHealth.status !== 'healthy') {
-    return res.status(503).json({
+    res.status(503).json({
       status: 'not_ready',
       message: '数据库连接异常',
       details: dbHealth,
       timestamp: new Date().toISOString()
     })
+    return
   }
   
   res.json({

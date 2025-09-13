@@ -1,68 +1,87 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
 import { authenticateToken } from '../middleware/auth.js'
+import { PrismaClient } from '@prisma/client'
 
 const router = Router()
+const prisma = new PrismaClient()
 
 // 获取仪表板数据
-router.get('/', authenticateToken, asyncHandler(async (req, res) => {
-  // 模拟数据，后续替换为真实数据库查询
-  const mockData = {
-    totalPurchases: 156,
-    totalProducts: 89,
-    totalInventoryValue: 125680.50,
-    lowStockItems: 12,
-    recentPurchases: [
-      {
-        id: 1,
-        productName: '紫水晶手链',
-        purchaseDate: new Date().toISOString(),
-        totalPrice: 1200.00
+router.get('/', authenticateToken, asyncHandler(async (_req, res) => {
+  try {
+    // 获取真实数据库统计
+    const total_purchases = await prisma.purchase.count()
+    const total_products = await prisma.product.count()
+    
+    // 获取最近的采购记录
+    const recent_purchases = await prisma.purchase.findMany({
+      take: 5,
+      orderBy: {
+        created_at: 'desc'
       },
-      {
-        id: 2,
-        productName: '白水晶项链',
-        purchaseDate: new Date(Date.now() - 86400000).toISOString(),
-        totalPrice: 800.00
+      select: {
+        id: true,
+        product_name: true,
+        created_at: true,
+        total_price: true
       }
-    ],
-    recentProducts: [
-      {
-        id: 1,
-        productName: '紫水晶手链成品',
-        createdDate: new Date().toISOString(),
-        totalCost: 1500.00,
-        status: 'in_stock'
+    })
+    
+    // 获取最近的成品记录
+    const recent_products = await prisma.product.findMany({
+      take: 5,
+      orderBy: {
+        created_at: 'desc'
       },
-      {
-        id: 2,
-        productName: '白水晶项链成品',
-        createdDate: new Date(Date.now() - 86400000).toISOString(),
-        totalCost: 1000.00,
-        status: 'sold'
+      select: {
+        id: true,
+        name: true,
+        created_at: true,
+        total_value: true
       }
-    ],
-    supplierStats: [
-      {
-        supplierId: 1,
-        supplierName: '水晶供应商A',
-        totalSpent: 25000.00,
-        purchaseCount: 45
-      },
-      {
-        supplierId: 2,
-        supplierName: '水晶供应商B',
-        totalSpent: 18500.00,
-        purchaseCount: 32
+    })
+    
+    // 计算库存总价值
+    const inventory_value_result = await prisma.product.aggregate({
+      _sum: {
+        total_value: true
       }
-    ]
-  }
+    })
+    
+    const dashboard_data = {
+      total_purchases,
+      total_products,
+      total_inventory_value: inventory_value_result._sum.total_value || 0,
+      low_stock_items: 0, // 暂时设为0，后续可以根据库存阈值计算
+      recent_purchases: recent_purchases.map(purchase => ({
+        id: purchase.id,
+        product_name: purchase.product_name,
+        purchase_date: purchase.created_at,
+        total_price: purchase.total_price
+      })),
+      recent_products: recent_products.map(product => ({
+        id: product.id,
+        product_name: product.name,
+        created_date: product.created_at,
+        total_cost: product.total_value,
+        status: 'in_stock' // 暂时默认为库存中
+      })),
+      supplier_stats: [] // 暂时为空数组，后续可以添加供应商统计
+    }
 
-  res.json({
-    success: true,
-    data: mockData,
-    message: '仪表板数据获取成功'
-  })
+    res.json({
+      success: true,
+      data: dashboard_data,
+      message: '仪表板数据获取成功'
+    })
+  } catch (error) {
+    console.error('获取仪表板数据失败:', error)
+    res.status(500).json({
+      success: false,
+      message: '获取仪表板数据失败',
+      error: (error as Error).message
+    })
+  }
 }))
 
 export default router

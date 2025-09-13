@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import helmet from 'helmet'
+// import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { createServer } from 'http'
 import { createServer as createHttpsServer } from 'https'
@@ -8,7 +8,7 @@ import { Server as SocketIOServer } from 'socket.io'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { networkInterfaces } from 'os'
+// import { networkInterfaces } from 'os'
 import fs from 'fs'
 
 // 导入路由
@@ -32,7 +32,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { validateApiResponse } from './middleware/responseValidator.js'
 import { logger } from './utils/logger.js'
 import { testDatabaseConnection, closeDatabaseConnection } from './services/database.js'
-import { getAccessUrls, getLocalIP, getPublicIP } from './utils/network.js'
+import { getAccessUrls, getLocalIP } from './utils/network.js'
 
 // 获取当前文件目录
 const __filename = fileURLToPath(import.meta.url)
@@ -70,7 +70,7 @@ if (process.env.NODE_ENV === 'development') {
     useHttps = true
     logger.info('生产环境：HTTPS服务器配置成功')
   } catch (error) {
-    logger.warn('SSL证书文件不存在，使用HTTP服务器:', error.message)
+    logger.warn('SSL证书文件不存在，使用HTTP服务器:', (error as Error).message)
     server = createServer(app)
     useHttps = false
   }
@@ -111,7 +111,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   // 开发环境跳过限流
-  skip: (req) => {
+  skip: (_req) => {
     return process.env.NODE_ENV === 'development'
   }
 })
@@ -163,7 +163,7 @@ app.use('/uploads', (req, res, next) => {
 }, express.static(path.join(__dirname, '../uploads')))
 
 // 请求日志
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   logger.info(`${req.method} ${req.path} - ${req.ip}`)
   next()
 })
@@ -206,13 +206,13 @@ app.use('/api/v1/ai', aiRoutes)
 app.use('/api/v1/assistant', assistantRoutes)
 
 // 测试路由
-app.get('/api/v1/test-server', (req, res) => {
+app.get('/api/v1/test-server', (_req, res) => {
   console.log('🔥 [SERVER TEST] 服务器测试路由被调用!')
   res.json({ success: true, message: '服务器测试路由正常工作' })
 })
 
 // 根路径
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     success: true,
     message: '水晶ERP系统API服务',
@@ -267,7 +267,7 @@ const startServer = async () => {
       process.exit(1)
     }
     
-    server.listen(PORT, '0.0.0.0', async () => {
+    server.listen(Number(PORT), '0.0.0.0', async () => {
       const protocol = useHttps ? 'https' : 'http'
       const urls = await getAccessUrls(Number(PORT), protocol)
       
@@ -292,7 +292,7 @@ const startServer = async () => {
 startServer()
 
 // 优雅关闭
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = (signal: string) => {
   logger.info(`收到 ${signal} 信号，开始优雅关闭服务器...`)
   
   server.close(async () => {
@@ -324,7 +324,7 @@ process.on('uncaughtException', (error) => {
   process.exit(1)
 })
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, _promise) => {
   logger.error('未处理的Promise拒绝:', reason)
   process.exit(1)
 })

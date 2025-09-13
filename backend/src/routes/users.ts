@@ -4,7 +4,7 @@ import { authenticateToken, requireRole } from '../middleware/auth.js'
 import { prisma } from '../lib/prisma.js'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { ErrorResponses, createSuccessResponse } from '../utils/errorResponse.js'
+import { ErrorResponses } from '../utils/errorResponse.js'
 
 const router = Router()
 
@@ -36,10 +36,10 @@ const updateProfileSchema = z.object({
   avatar: z.string().optional()
 })
 
-import { convertToApiFormat, convertFromApiFormat, filterSensitiveFields } from '../utils/fieldConverter'
+// 移除fieldConverter导入，直接使用snake_case
 
 // 获取用户列表（仅老板权限）
-router.get('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req, res) => {
+router.get('/', authenticateToken, requireRole(['BOSS']), asyncHandler(async (req, res) => {
   try {
     const { page = 1, limit = 10, role, active } = req.query
     
@@ -53,7 +53,7 @@ router.get('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req,
       where.role = role
     }
     if (active !== undefined) {
-      where.isActive = active === 'true'
+      where.is_active = active === 'true'
     }
 
     // 获取用户列表
@@ -62,25 +62,31 @@ router.get('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req,
         where,
         skip,
         take: limitNum,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         select: {
           id: true,
-          username: true,
+          user_name: true,
           email: true,
           name: true,
           phone: true,
           role: true,
           avatar: true,
-          isActive: true,
-          lastLoginAt: true,
-          createdAt: true,
-          updatedAt: true
+          is_active: true,
+          last_login_at: true,
+          created_at: true,
+          updated_at: true
         }
       }),
       prisma.user.count({ where })
     ])
 
-    const convertedUsers = users.map(convertToApiFormat)
+    // 直接使用蛇形命名，无需转换
+    const convertedUsers = users.map(user => ({
+      ...user,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      last_login_at: user.last_login_at
+    }))
 
     res.json({
       success: true,
@@ -97,7 +103,7 @@ router.get('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req,
     })
   } catch (error: any) {
     res.status(500).json(
-      ErrorResponses.internal('获取用户列表失败', error.message)
+      ErrorResponses.internal('获取用户列表失败', (error as Error).message)
     )
   }
 }))
@@ -105,27 +111,27 @@ router.get('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req,
 // 获取用户资料
 router.get('/profile', authenticateToken, asyncHandler(async (req, res) => {
   try {
-    const userId = req.user?.id
-    if (!userId) {
+    const user_id = req.user?.id
+    if (!user_id) {
       return res.status(401).json(
         ErrorResponses.unauthorized('用户未认证')
       )
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: user_id },
       select: {
         id: true,
-        username: true,
+        user_name: true,
         email: true,
         name: true,
         phone: true,
         role: true,
         avatar: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true
+        is_active: true,
+        last_login_at: true,
+        created_at: true,
+        updated_at: true
       }
     })
 
@@ -135,20 +141,25 @@ router.get('/profile', authenticateToken, asyncHandler(async (req, res) => {
       )
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: '获取用户资料成功',
       data: {
-        user: convertToApiFormat(user)
+        user: {
+          ...user,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          last_login_at: user.last_login_at
+        }
       }
     })
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '获取用户资料失败',
       error: {
         code: 'PROFILE_ERROR',
-        details: error.message
+        details: (error as Error).message
       }
     })
   }
@@ -157,8 +168,8 @@ router.get('/profile', authenticateToken, asyncHandler(async (req, res) => {
 // 更新用户资料
 router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
   try {
-    const userId = req.user?.id
-    if (!userId) {
+    const user_id = req.user?.id
+    if (!user_id) {
       return res.status(401).json({
         success: false,
         message: '用户未认证',
@@ -171,7 +182,7 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
     const validatedData = updateProfileSchema.parse(req.body)
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: user_id },
       data: {
         ...(validatedData.name && { name: validatedData.name }),
         ...(validatedData.phone !== undefined && { phone: validatedData.phone }),
@@ -180,29 +191,34 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
       },
       select: {
         id: true,
-        username: true,
+        user_name: true,
         email: true,
         name: true,
         phone: true,
         role: true,
         avatar: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true
+        is_active: true,
+        last_login_at: true,
+        created_at: true,
+        updated_at: true
       }
     })
 
-    res.json({
+    return res.json({
       success: true,
       message: '更新用户资料成功',
       data: {
-        user: convertToApiFormat(updatedUser)
+        user: {
+          ...updatedUser,
+          created_at: updatedUser.created_at,
+          updated_at: updatedUser.updated_at,
+          last_login_at: updatedUser.last_login_at
+        }
       }
     })
   } catch (error: any) {
     if (error.name === 'ZodError') {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: '请求参数验证失败',
         error: {
@@ -211,7 +227,7 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
         }
       })
     } else if (error.code === 'P2002') {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: '邮箱已被使用',
         error: {
@@ -219,12 +235,12 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
         }
       })
     } else {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新用户资料失败',
         error: {
           code: 'UPDATE_PROFILE_ERROR',
-          details: error.message
+          details: (error as Error).message
         }
       })
     }
@@ -232,13 +248,13 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
 }))
 
 // 创建用户（仅老板权限）
-router.post('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req, res) => {
+router.post('/', authenticateToken, requireRole(['BOSS']), asyncHandler(async (req, res) => {
   try {
     const validatedData = createUserSchema.parse(req.body)
 
     // 检查用户名是否已存在
     const existingUser = await prisma.user.findUnique({
-      where: { username: validatedData.username }
+      where: { user_name: validatedData.username }
     })
 
     if (existingUser) {
@@ -274,7 +290,7 @@ router.post('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req
     // 创建用户
     const newUser = await prisma.user.create({
       data: {
-        username: validatedData.username,
+        user_name: validatedData.username,
         email: validatedData.email,
         password: hashedPassword,
         name: validatedData.name,
@@ -283,29 +299,34 @@ router.post('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req
       },
       select: {
         id: true,
-        username: true,
+        user_name: true,
         email: true,
         name: true,
         phone: true,
         role: true,
         avatar: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true
+        is_active: true,
+        last_login_at: true,
+        created_at: true,
+        updated_at: true
       }
     })
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: '创建用户成功',
       data: {
-        user: convertToApiFormat(newUser)
+        user: {
+          ...newUser,
+          created_at: newUser.created_at,
+          updated_at: newUser.updated_at,
+          last_login_at: newUser.last_login_at
+        }
       }
     })
   } catch (error: any) {
     if (error.name === 'ZodError') {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: '请求参数验证失败',
         error: {
@@ -314,12 +335,12 @@ router.post('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req
         }
       })
     } else {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建用户失败',
         error: {
           code: 'CREATE_USER_ERROR',
-          details: error.message
+          details: (error as Error).message
         }
       })
     }
@@ -327,7 +348,7 @@ router.post('/', authenticateToken, requireRole('BOSS'), asyncHandler(async (req
 }))
 
 // 更新用户（仅老板权限）
-router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (req, res) => {
+router.put('/:id', authenticateToken, requireRole(['BOSS']), asyncHandler(async (req, res) => {
   try {
     const { id } = req.params
     const validatedData = updateUserSchema.parse(req.body)
@@ -338,32 +359,34 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
     })
 
     if (!existingUser) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: '用户不存在',
         error: {
           code: 'USER_NOT_FOUND'
         }
       })
+      return
     }
 
     // 检查用户名是否已被其他用户使用
     if (validatedData.username) {
       const usernameExists = await prisma.user.findFirst({
         where: {
-          username: validatedData.username,
+          user_name: validatedData.username,
           id: { not: id }
         }
       })
 
       if (usernameExists) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: '用户名已被使用',
           error: {
             code: 'USERNAME_EXISTS'
           }
         })
+        return
       }
     }
 
@@ -377,13 +400,14 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
       })
 
       if (emailExists) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: '邮箱已被使用',
           error: {
             code: 'EMAIL_EXISTS'
           }
         })
+        return
       }
     }
 
@@ -391,25 +415,25 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        ...(validatedData.username && { username: validatedData.username }),
+        ...(validatedData.username && { user_name: validatedData.username }),
         ...(validatedData.email !== undefined && { email: validatedData.email }),
         ...(validatedData.name && { name: validatedData.name }),
         ...(validatedData.phone !== undefined && { phone: validatedData.phone }),
         ...(validatedData.role && { role: validatedData.role }),
-        ...(validatedData.is_active !== undefined && { isActive: validatedData.is_active })
+        ...(validatedData.is_active !== undefined && { is_active: validatedData.is_active })
       },
       select: {
         id: true,
-        username: true,
+        user_name: true,
         email: true,
         name: true,
         phone: true,
         role: true,
         avatar: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true
+        is_active: true,
+        last_login_at: true,
+        created_at: true,
+        updated_at: true
       }
     })
 
@@ -417,7 +441,12 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
       success: true,
       message: '更新用户成功',
       data: {
-        user: convertToApiFormat(updatedUser)
+        user: {
+          ...updatedUser,
+          created_at: updatedUser.created_at,
+          updated_at: updatedUser.updated_at,
+          last_login_at: updatedUser.last_login_at
+        }
       }
     })
   } catch (error: any) {
@@ -436,7 +465,7 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
         message: '更新用户失败',
         error: {
           code: 'UPDATE_USER_ERROR',
-          details: error.message
+          details: (error as Error).message
         }
       })
     }
@@ -444,20 +473,21 @@ router.put('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (r
 }))
 
 // 删除用户（仅老板权限）
-router.delete('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async (req, res) => {
+router.delete('/:id', authenticateToken, requireRole(['BOSS']), asyncHandler(async (req, res) => {
   try {
     const { id } = req.params
     const currentUserId = req.user?.id
 
     // 不能删除自己
     if (id === currentUserId) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: '不能删除自己的账户',
         error: {
           code: 'CANNOT_DELETE_SELF'
         }
       })
+      return
     }
 
     // 检查用户是否存在
@@ -466,23 +496,24 @@ router.delete('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async
     })
 
     if (!existingUser) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: '用户不存在',
         error: {
           code: 'USER_NOT_FOUND'
         }
       })
+      return
     }
 
     // 检查用户是否有关联数据
     const [purchaseCount, productCount] = await Promise.all([
-      prisma.purchase.count({ where: { userId: id } }),
-      prisma.product.count({ where: { userId: id } })
+      prisma.purchase.count({ where: { user_id: id } }),
+      prisma.product.count({ where: { user_id: id } })
     ])
 
     if (purchaseCount > 0 || productCount > 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: '该用户有关联的采购或产品记录，无法删除',
         error: {
@@ -493,6 +524,7 @@ router.delete('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async
           }
         }
       })
+      return
     }
 
     // 删除用户
@@ -513,7 +545,7 @@ router.delete('/:id', authenticateToken, requireRole('BOSS'), asyncHandler(async
       message: '删除用户失败',
       error: {
         code: 'DELETE_USER_ERROR',
-        details: error.message
+        details: (error as Error).message
       }
     })
   }

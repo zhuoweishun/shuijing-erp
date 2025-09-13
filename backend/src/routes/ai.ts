@@ -12,7 +12,7 @@ const parseDescriptionSchema = z.object({
 })
 
 // AI健康检查
-router.get('/health', asyncHandler(async (req, res) => {
+router.get('/health', asyncHandler(async (_req, res) => {
   const healthStatus = await checkAIHealth()
   res.json({
     success: healthStatus.status === 'healthy',
@@ -22,7 +22,7 @@ router.get('/health', asyncHandler(async (req, res) => {
 }))
 
 // AI配置信息
-router.get('/config', asyncHandler(async (req, res) => {
+router.get('/config', asyncHandler(async (_req, res) => {
   const config = getAIConfig()
   res.json({
     success: true,

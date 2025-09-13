@@ -5,11 +5,11 @@ import { auth_api } from '../services/api'
 interface auth_context_type {
   user: User | null
   token: string | null
-  isLoading: boolean
+  is_loading: boolean
   login: (credentials: login_request) => Promise<void>
   logout: () => void
-  isAuthenticated: boolean
-  isBoss: boolean
+  is_authenticated: boolean
+  is_boss: boolean
 }
 
 const AuthContext = createContext<auth_context_type | undefined>(undefined)
@@ -21,15 +21,15 @@ interface auth_provider_props {
 export function AuthProvider({ children }: auth_provider_props) {
   const [user, set_user] = useState<User | null>(null)
   const [token, set_token] = useState<string | null>(null)
-  const [isLoading, set_is_loading] = useState(true)
+  const [is_loading, set_is_loading] = useState(true)
 
   // 初始化时检查本地存储的认证信息
   useEffect(() => {
     const initAuth = async () => {
       console.log('🔄 [认证初始化] 开始初始化认证状态')
       try {
-        const storedToken = localStorage.get_item('auth_token')
-        const storedUser = localStorage.get_item('auth_user')
+        const storedToken = localStorage.getItem('auth_token')
+    const storedUser = localStorage.getItem('auth_user')
         
         console.log('🔍 [认证初始化] 检查本地存储:', {
           hasToken: !!storedToken,
@@ -155,12 +155,12 @@ export function AuthProvider({ children }: auth_provider_props) {
   const value: auth_context_type = useMemo(() => ({
     user,
     token,
-    isLoading,
+    is_loading,
     login,
     logout,
-    isAuthenticated: !!user && !!token,
-    isBoss: user?.role === 'BOSS'
-  }), [user, token, isLoading, login, logout])
+    is_authenticated: !!user && !!token,
+    is_boss: user?.role === 'BOSS'
+  }), [user, token, is_loading, login, logout])
 
   return (
     <AuthContext.Provider value={value}>
@@ -179,38 +179,38 @@ export function useAuth() {
 
 // 权限检查Hook
 export function usePermission() {
-  const { user, isBoss } = useAuth()
+  const { user, is_boss } = useAuth()
   
   const has_permission = (required_role?: 'BOSS' | 'EMPLOYEE') => {
     if (!user) return false
     if (!required_role) return true
-    if (required_role === 'BOSS') return isBoss
+    if (required_role === 'BOSS') return is_boss
     return true // employee权限所有认证用户都有
   }
   
   const can_view_sensitive_data = () => {
-    return isBoss
+    return is_boss
   }
   
   const can_manage_users = () => {
-    return isBoss
+    return is_boss
   }
   
   const can_manage_suppliers = () => {
-    return isBoss
+    return is_boss
   }
   
   const can_use_batch_import = () => {
-    return isBoss
+    return is_boss
   }
   
   const can_use_assistant = () => {
-    return isBoss
+    return is_boss
   }
 
   // 敏感数据过滤（递归处理嵌套字段）
   const filter_sensitive_data = <T,>(data: T): T => {
-    if (isBoss) return data
+    if (is_boss) return data
 
     const sensitiveFields = [
       'price_per_gram', 'total_price', 'weight', 'supplier_info',
@@ -245,6 +245,6 @@ export function usePermission() {
     can_use_batch_import,
     can_use_assistant,
     filter_sensitive_data,
-    isBoss
+    is_boss
   }
 }

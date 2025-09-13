@@ -390,7 +390,7 @@ interface CustomerManagementState {
 }
 
 export default function CustomerManagement() {
-  const { isAuthenticated } = useAuth()
+  const { is_authenticated } = useAuth()
   const [state, setState] = useState<CustomerManagementState>({
     customers: [],
     analytics: null,
@@ -854,8 +854,8 @@ export default function CustomerManagement() {
      return (
        <div className="grid grid-cols-4 gap-2">
          {Object.entries(categoryGroups).map(([categoryName, types]) => (
-           <div key={item.category.name} className="space-y-1.5">
-             <h4 className="text-xs font-medium text-gray-700 text-center border-b border-gray-200 pb-0.5 mb-1">{item.category.name}</h4>
+           <div key={categoryName} className="space-y-1.5">
+             <h4 className="text-xs font-medium text-gray-700 text-center border-b border-gray-200 pb-0.5 mb-1">{categoryName}</h4>
              <div className="space-y-0.5">
                {types.map(type => {
                  const config = CUSTOMER_TYPE_LABELS[type]
@@ -1276,7 +1276,7 @@ export default function CustomerManagement() {
   const fetchCustomers = async (customState?: Partial<CustomerManagementState>) => {
     try {
       // 使用传入的状态或当前状态
-      const currentState = customState ? { ...state, ...item.custom_status } : state
+      const currentState = customState ? { ...state, ...customState } : state
       
       // 只有在没有数据时才显示loading，避免闪烁
       setState(prev => ({ 
@@ -1461,13 +1461,13 @@ export default function CustomerManagement() {
 
   // 初始化数据
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       fetchCustomers()
       fetchAnalytics()
       
       // 添加页面可见性监听，当用户返回页面时自动刷新数据
       const handleVisibilityChange = () => {
-        if (!document.hidden && isAuthenticated) {
+        if (!document.hidden && is_authenticated) {
           // 页面变为可见时刷新客户数据
           fetchCustomers()
           fetchAnalytics()
@@ -1482,7 +1482,7 @@ export default function CustomerManagement() {
       }
     }
   }, [
-    isAuthenticated, 
+    is_authenticated, 
     state.pagination.page, 
     state.search_term, 
     state.selected_type, 
@@ -1493,7 +1493,7 @@ export default function CustomerManagement() {
 
   // 筛选条件变化时重新获取数据
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       console.log('🔄 筛选条件变化，准备重新获取数据', {
         customer_type: state.filters.customer_type,
         city_filter: state.filters.city_filter,
@@ -1775,7 +1775,7 @@ export default function CustomerManagement() {
     })
   }
 
-  if (!isAuthenticated) {
+  if (!is_authenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

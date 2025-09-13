@@ -50,7 +50,7 @@ describe('useAuth Hook 测试', () => {
       const { result } = renderHook(() => useAuth());
       
       expect(result.current.user).toBeNull();
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.is_loading).toBe(false);
     });
 
     test('有有效token时应该自动获取用户信息', async () => {
@@ -62,7 +62,7 @@ describe('useAuth Hook 测试', () => {
       const { result } = renderHook(() => useAuth());
       
       // 初始加载状态
-      expect(result.current.isLoading).toBe(true);
+      expect(result.current.is_loading).toBe(true);
       
       // 等待异步操作完成
       await act(async () => {
@@ -70,7 +70,7 @@ describe('useAuth Hook 测试', () => {
       });
       
       expect(result.current.user).toEqual(mockBossUser);
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.is_loading).toBe(false);
       expect(mockApi.auth_api.verify).toHaveBeenCalled();
     });
 
@@ -87,7 +87,7 @@ describe('useAuth Hook 测试', () => {
       });
       
       expect(result.current.user).toBeNull();
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.is_loading).toBe(false);
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_token');
     });
   });

@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-09-13T12:55:26.694013",
+  "total_files_processed": 6,
+  "total_changes": 182,
+  "changes_by_type": {
+    "field_names": 126,
+    "duplicate_properties": 2,
+    "type_assertions": 4,
+    "unused_variables": 7,
+    "missing_returns": 39,
+    "prisma_models": 2,
+    "variable_names": 2
+  },
+  "changes_by_file": {
+    "products.ts": 65,
+    "purchases.ts": 33,
+    "skus.ts": 61,
+    "customers.ts": 13,
+    "financial.ts": 9,
+    "materials.ts": 1
+  },
+  "detailed_changes": [
+    {
+      "file": "products.ts",
+      "type": "field_names",
+      "changes": 54,
+      "description": "修复了54个字段名称"
+    },
+    {
+      "file": "products.ts",
+      "type": "duplicate_properties",
+      "changes": 2,
+      "description": "移除了2个重复属性"
+    },
+    {
+      "file": "products.ts",
+      "type": "type_assertions",
+      "changes": 1,
+      "description": "修复了1个类型断言问题"
+    },
+    {
+      "file": "products.ts",
+      "type": "unused_variables",
+      "changes": 1,
+      "description": "修复了1个未使用变量"
+    },
+    {
+      "file": "products.ts",
+      "type": "missing_returns",
+      "changes": 7,
+      "description": "添加了7个缺失的返回语句"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "field_names",
+      "changes": 19,
+      "description": "修复了19个字段名称"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "prisma_models",
+      "changes": 2,
+      "description": "修复了2个Prisma模型名称"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "variable_names",
+      "changes": 2,
+      "description": "修复了2个变量名称"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "type_assertions",
+      "changes": 2,
+      "description": "修复了2个类型断言问题"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "unused_variables",
+      "changes": 2,
+      "description": "修复了2个未使用变量"
+    },
+    {
+      "file": "purchases.ts",
+      "type": "missing_returns",
+      "changes": 6,
+      "description": "添加了6个缺失的返回语句"
+    },
+    {
+      "file": "skus.ts",
+      "type": "field_names",
+      "changes": 53,
+      "description": "修复了53个字段名称"
+    },
+    {
+      "file": "skus.ts",
+      "type": "type_assertions",
+      "changes": 1,
+      "description": "修复了1个类型断言问题"
+    },
+    {
+      "file": "skus.ts",
+      "type": "unused_variables",
+      "changes": 1,
+      "description": "修复了1个未使用变量"
+    },
+    {
+      "file": "skus.ts",
+      "type": "missing_returns",
+      "changes": 6,
+      "description": "添加了6个缺失的返回语句"
+    },
+    {
+      "file": "customers.ts",
+      "type": "unused_variables",
+      "changes": 1,
+      "description": "修复了1个未使用变量"
+    },
+    {
+      "file": "customers.ts",
+      "type": "missing_returns",
+      "changes": 12,
+      "description": "添加了12个缺失的返回语句"
+    },
+    {
+      "file": "financial.ts",
+      "type": "unused_variables",
+      "changes": 1,
+      "description": "修复了1个未使用变量"
+    },
+    {
+      "file": "financial.ts",
+      "type": "missing_returns",
+      "changes": 8,
+      "description": "添加了8个缺失的返回语句"
+    },
+    {
+      "file": "materials.ts",
+      "type": "unused_variables",
+      "changes": 1,
+      "description": "修复了1个未使用变量"
+    }
+  ]
+}

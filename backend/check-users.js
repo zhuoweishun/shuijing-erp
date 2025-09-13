@@ -7,20 +7,20 @@ async function checkUsers() {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        username: true,
+        user_name: true,
         role: true,
         name: true,
-        isActive: true
+        is_active: true
       }
     })
     
     console.log('📋 用户列表:')
     users.forEach(user => {
       console.log(`  ID: ${user.id}`)
-      console.log(`  用户名: ${user.username}`)
+      console.log(`  用户名: ${user.user_name}`)
       console.log(`  角色: ${user.role}`)
       console.log(`  姓名: ${user.name}`)
-      console.log(`  状态: ${user.isActive ? '激活' : '禁用'}`)
+      console.log(`  状态: ${user.is_active ? '激活' : '禁用'}`)
       console.log('  ---')
     })
     

@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { Package, AlertTriangle, TrendingUp, ToggleRight, Filter, Search, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
-import { format_purchase_code } from '../utils/fieldConverter'
+import { format_purchase_code } from '../utils/format'
 import Portal from './Portal'
 
 // 半成品库存矩阵数据类型

@@ -8,11 +8,11 @@ export default function Login() {
   const [user_name, set_user_name] = useState('')
   const [pass_word, set_pass_word] = useState('')
   const [show_password, set_show_password] = useState(false)
-  const [isLoading, set_is_loading] = useState(false)
+  const [is_loading, set_is_loading] = useState(false)
   const [error_message, set_error_message] = useState('')
   const [error_messages, set_error_messages] = useState({ user_name: '', password: '' })
   
-  const { login, isAuthenticated } = useAuth()
+  const { login, is_authenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -28,10 +28,10 @@ export default function Login() {
 
   // 如果已经登录，重定向到目标页面
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       stable_navigate(from, { replace: true })
     }
-  }, [isAuthenticated, stable_navigate, from])
+  }, [is_authenticated, stable_navigate, from])
 
 
 
@@ -169,10 +169,10 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={is_loading}
                 className="w-full btn-primary flex items-center justify-center space-x-2 py-3"
               >
-                {isLoading ? (
+                {is_loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     <span>登录中...</span>

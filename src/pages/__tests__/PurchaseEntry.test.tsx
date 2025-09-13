@@ -86,9 +86,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
 
       render(
@@ -114,9 +114,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: false
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: false
       });
 
       // 模拟权限不足的API响应
@@ -148,9 +148,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -241,9 +241,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -321,9 +321,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 
@@ -354,9 +354,9 @@ describe('PurchaseEntry 组件测试', () => {
         token: 'mock-token',
         login: jest.fn(),
         logout: jest.fn(),
-        isLoading: false,
-        isAuthenticated: true,
-        isBoss: true
+        is_loading: false,
+      is_authenticated: true,
+      is_boss: true
       });
     });
 

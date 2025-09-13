@@ -3,7 +3,7 @@ import { Eye, Package, Ruler, DollarSign, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { inventory_api, fixImageUrl } from '@/services/api'
 import { useAuth } from '@/hooks/useAuth'
-import { format_purchase_code } from '../utils/fieldConverter'
+import { format_purchase_code } from '../utils/format'
 import { sort_by_pinyin } from '../utils/pinyinSort'
 
 // 配件数据类型定义

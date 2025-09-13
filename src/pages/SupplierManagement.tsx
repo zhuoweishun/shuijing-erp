@@ -3,10 +3,10 @@ import { Building2, AlertCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 export default function SupplierManagement() {
-  const { user, isBoss } = useAuth()
+  const { user, is_boss } = useAuth()
   
   // 权限检查：只有BOSS可以访问
-  if (!isBoss) {
+  if (!is_boss) {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3">

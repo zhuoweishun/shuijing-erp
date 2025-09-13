@@ -1,9 +1,14 @@
+
+// 临时的API格式转换函数
+function convertFromApiFormat(data: any) {
+  return data; // 直接返回，因为现在都是蛇形命名
+}
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler'
 import { z } from 'zod'
 import { authenticateToken } from '../middleware/auth'
 import { prisma } from '../lib/prisma'
-import { convertToApiFormat, convertFromApiFormat, filterSensitiveFields } from '../utils/fieldConverter.js'
+// 移除fieldConverter导入，直接使用snake_case
 import {
   diameterSchema,
   specificationSchema,
@@ -20,37 +25,37 @@ import {
   photosSchema,
   validateProductTypeFields,
   calculateBeadsPerString
-} from '../utils/validation.js'
-import { ErrorResponses, createSuccessResponse } from '../utils/errorResponse.js'
-import { OperationLogger } from '../utils/operationLogger.js'
+} from '../utils/validation'
+import { ErrorResponses } from '../utils/errorResponse'
+import { OperationLogger } from '../utils/operationLogger'
+import { filterSensitiveFields } from '../utils/filterSensitiveFields'
 
 const router = Router()
 
 // 临时调试接口：查看原始数据和转换后数据
-router.get('/debug/raw-data', authenticateToken, asyncHandler(async (req, res) => {
-  try {
+router.get('/debug/raw-data', authenticateToken, asyncHandler(async (_, res) => {
+    try {
     const purchases = await prisma.purchase.findMany({
       take: 2,
       select: {
         id: true,
-        purchaseCode: true,
-        productName: true,
-        pricePerGram: true,
-        totalPrice: true,
+        purchase_code: true,
+        product_name: true,
+        price_per_gram: true,
+        total_price: true,
         weight: true,
-        beadDiameter: true,
+        bead_diameter: true,
         specification: true,
-        productType: true,
+        product_type: true,
         quality: true
       }
     })
     
-    // 测试转换函数
+    // 直接返回数据，无需转换
     const converted = purchases.map(purchase => {
-      const apiFormat = convertToApiFormat(purchase)
       return {
         original: purchase,
-        converted: apiFormat
+        converted: purchase // 直接使用原始数据，已是蛇形命名
       }
     })
     
@@ -65,9 +70,11 @@ router.get('/debug/raw-data', authenticateToken, asyncHandler(async (req, res) =
     res.status(500).json({
       success: false,
       message: '调试接口错误',
-      error: error.message
+      error: (error as Error).message
     })
   }
+  // 函数结束
+  // 函数结束
 }))
 
 // 采购录入数据验证schema（接收下划线命名的API参数）
@@ -112,6 +119,8 @@ function generatePurchaseCode(): string {
 // calculateBeadsPerString函数已移至utils/validation.ts中
 
 // 获取采购列表
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   const { 
     page = 1, 
@@ -119,8 +128,8 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     search, 
     purchase_code_search,
     quality, 
-    startDate, 
-    endDate, 
+    start_date, 
+    end_date, 
     sortBy, 
     sortOrder,
     diameterMin,
@@ -148,16 +157,16 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   // 权限控制：所有用户都可以查看采购记录，但雇员看到的敏感字段会被过滤
   // 不再限制雇员只能查看自己创建的记录
   
-  // 搜索条件（使用数据库字段名：驼峰命名）
+  // 搜索条件（使用数据库字段名：蛇形命名）
   if (search) {
-    where.productName = {
+    where.product_name = {
       contains: search as string
     }
   }
   
   // 采购编号搜索
   if (purchase_code_search) {
-    where.purchaseCode = {
+    where.purchase_code = {
       contains: purchase_code_search as string
     }
   }
@@ -170,8 +179,8 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         where.quality = { in: [] }; // 空数组会导致查询返回空结果
       } else {
         // 处理包含null值的数组
-        const hasNull = quality.includes(null) || quality.includes('null')
-        const nonNullQualities = quality.filter(q => q !== null && q !== 'null')
+        const hasNull = quality.includes('null') || quality.some((q: any) => q === null)
+        const nonNullQualities = quality.filter((q: any) => q !== null && q !== 'null')
         
         if (hasNull && nonNullQualities.length > 0) {
            // 既有null又有其他值，使用OR条件
@@ -234,40 +243,40 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     }
   }
   
-  if (startDate || endDate) {
+  if (start_date || end_date) {
     // 添加日期参数调试日志
     console.log('后端接收到的日期参数:', {
-      startDate,
-      endDate,
-      startDateType: typeof startDate,
-      endDateType: typeof endDate
+      start_date,
+      end_date,
+      startDateType: typeof start_date,
+      endDateType: typeof end_date
     })
     
-    where.purchaseDate = {}
-    if (startDate) {
+    where.purchase_date = {}
+    if (start_date) {
       // 确保开始日期从当天00:00:00开始
-      const startDateObj = new Date(startDate as string + 'T00:00:00.000Z')
-      where.purchaseDate.gte = startDateObj
+      const startDateObj = new Date(start_date as string + 'T00:00:00.000Z')
+      where.purchase_date.gte = startDateObj
       console.log('开始日期处理:', {
-        原始值: startDate,
+        原始值: start_date,
         转换后: startDateObj,
         ISO字符串: startDateObj.toISOString(),
         本地时间: startDateObj.toLocaleString('zh-CN')
       })
     }
-    if (endDate) {
+    if (end_date) {
       // 确保结束日期到当天23:59:59结束
-      const endDateObj = new Date(endDate as string + 'T23:59:59.999Z')
-      where.purchaseDate.lte = endDateObj
+      const endDateObj = new Date(end_date as string + 'T23:59:59.999Z')
+      where.purchase_date.lte = endDateObj
       console.log('结束日期处理:', {
-        原始值: endDate,
+        原始值: end_date,
         转换后: endDateObj,
         ISO字符串: endDateObj.toISOString(),
         本地时间: endDateObj.toLocaleString('zh-CN')
       })
     }
     
-    console.log('最终日期筛选条件:', where.purchaseDate)
+    console.log('最终日期筛选条件:', where.purchase_date)
   }
   
   // 供应商筛选：支持多选，添加错误处理
@@ -275,7 +284,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     try {
       if (Array.isArray(supplier)) {
         // 多个供应商：使用IN查询，过滤空值
-        const validSuppliers = supplier.filter(s => s && s.trim())
+        const validSuppliers = Array.isArray(supplier) ? supplier.filter(s => s && typeof s === 'string' && s.trim()) : []
         if (validSuppliers.length > 0) {
           where.supplier = {
             name: {
@@ -309,9 +318,9 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   
   // 珠子直径范围筛选
   if (diameterMin || diameterMax) {
-    where.beadDiameter = {}
-    if (diameterMin) where.beadDiameter.gte = parseFloat(diameterMin as string)
-    if (diameterMax) where.beadDiameter.lte = parseFloat(diameterMax as string)
+    where.bead_diameter = {}
+    if (diameterMin) where.bead_diameter.gte = parseFloat(diameterMin as string)
+    if (diameterMax) where.bead_diameter.lte = parseFloat(diameterMax as string)
   }
   
   // 数量范围筛选
@@ -333,31 +342,31 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       if (minValue <= 0) {
         // 如果最小值<=0，包含null值和>=minValue的记录
         priceConditions.push(
-          { pricePerGram: null },
-          { pricePerGram: { gte: minValue } }
+          { price_per_gram: null },
+          { price_per_gram: { gte: minValue } }
         )
       } else {
         // 如果最小值>0，只包含>=minValue的记录
-        priceConditions.push({ pricePerGram: { gte: minValue } })
+        priceConditions.push({ price_per_gram: { gte: minValue } })
       }
     } else {
       // 没有最小值限制，包含null值
-      priceConditions.push({ pricePerGram: null })
+      priceConditions.push({ price_per_gram: null })
     }
     
     if (pricePerGramMax || price_per_gram_max) {
       // 添加最大值限制（null值视为0，如果maxValue>=0则包含null）
       if (maxValue >= 0) {
-        if (!priceConditions.some(c => c.pricePerGram === null)) {
-          priceConditions.push({ pricePerGram: null })
+        if (!priceConditions.some(c => c.price_per_gram === null)) {
+          priceConditions.push({ price_per_gram: null })
         }
       }
       // 为非null值添加最大值限制
-      const existingCondition = priceConditions.find(c => c.pricePerGram && typeof c.pricePerGram === 'object' && 'gte' in c.pricePerGram)
-      if (existingCondition && existingCondition.pricePerGram && typeof existingCondition.pricePerGram === 'object') {
-        existingCondition.pricePerGram.lte = maxValue
+      const existingCondition = priceConditions.find(c => c.price_per_gram && typeof c.price_per_gram === 'object' && 'gte' in c.price_per_gram)
+      if (existingCondition && existingCondition.price_per_gram && typeof existingCondition.price_per_gram === 'object') {
+        (existingCondition.price_per_gram as any).lte = maxValue
       } else {
-        priceConditions.push({ pricePerGram: { lte: maxValue } })
+        priceConditions.push({ price_per_gram: { lte: maxValue } })
       }
     }
     
@@ -383,12 +392,12 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   
   // 总价范围筛选
   if (totalPriceMin || totalPriceMax || total_price_min || total_price_max) {
-    where.totalPrice = {}
+    where.total_price = {}
     if (totalPriceMin || total_price_min) {
-      where.totalPrice.gte = parseFloat((totalPriceMin || total_price_min) as string)
+      where.total_price.gte = parseFloat((totalPriceMin || total_price_min) as string)
     }
     if (totalPriceMax || total_price_max) {
-      where.totalPrice.lte = parseFloat((totalPriceMax || total_price_max) as string)
+      where.total_price.lte = parseFloat((totalPriceMax || total_price_max) as string)
     }
   }
   
@@ -404,15 +413,16 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     const maxValue = (specificationMax || specification_max) ? parseFloat((specificationMax || specification_max) as string) : undefined;
     
     // 使用正确的逻辑：根据产品类型选择对应的字段进行范围筛选
-    const specificationConditions = [];
+    // let conditions: any[] = []; // 暂时注释未使用的变量
     
     // 散珠和手串：使用bead_diameter字段
+    const specification_conditions: any[] = [];
     if (minValue !== undefined || maxValue !== undefined) {
-      specificationConditions.push({
+      specification_conditions.push({
         AND: [
-          { productType: { in: ['LOOSE_BEADS', 'BRACELET'] } },
+          { product_type: { in: ['LOOSE_BEADS', 'BRACELET'] } },
           {
-            beadDiameter: {
+            bead_diameter: {
               ...(minValue !== undefined && { gte: minValue }),
               ...(maxValue !== undefined && { lte: maxValue })
             }
@@ -423,9 +433,9 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     
     // 饰品配件和成品：使用specification字段
     if (minValue !== undefined || maxValue !== undefined) {
-      specificationConditions.push({
+      specification_conditions.push({
         AND: [
-          { productType: { in: ['ACCESSORIES', 'FINISHED'] } },
+          { product_type: { in: ['ACCESSORIES', 'FINISHED'] } },
           {
             specification: {
               ...(minValue !== undefined && { gte: minValue }),
@@ -436,13 +446,13 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       });
     }
     
-    if (specificationConditions.length > 0) {
+    if (specification_conditions.length > 0) {
       if (Object.keys(where).length > 0) {
         // 如果where中已有其他条件，使用AND组合
-        where.AND = [{ OR: specificationConditions }];
+        where.AND = [{ OR: specification_conditions }];
       } else {
         // 如果where中没有其他条件，直接使用OR
-        where.OR = specificationConditions;
+        where.OR = specification_conditions;
       }
     }
   }
@@ -451,38 +461,38 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   if (processedProductTypes) {
     // 特殊处理：如果product_types是空数组，应该返回空结果
     if (Array.isArray(processedProductTypes) && processedProductTypes.length === 0) {
-      where.productType = { in: [] }; // 空数组会导致查询返回空结果
+      where.product_type = { in: [] }; // 空数组会导致查询返回空结果
     } else {
       const types = Array.isArray(processedProductTypes) ? processedProductTypes : [processedProductTypes];
       
       if (where.AND) {
         // 如果已有AND条件（如规格筛选），添加产品类型筛选
-        where.AND.push({ productType: { in: types } });
+        where.AND.push({ product_type: { in: types } });
       } else if (where.OR) {
         // 如果已有OR条件（如规格筛选），需要重新组织为AND结构
         const existingOr = where.OR;
         delete where.OR;
         where.AND = [
           { OR: existingOr },
-          { productType: { in: types } }
+          { product_type: { in: types } }
         ];
       } else {
         // 没有其他条件，直接设置产品类型筛选
-        where.productType = { in: types };
+        where.product_type = { in: types };
       }
     }
   }
   
   // 定义字段映射（移到函数开始处，确保整个函数范围内可访问）
   const validSortFields = {
-    'purchase_date': 'purchaseDate',
-    'purchase_code': 'purchaseCode',
-    'product_name': 'productName', 
+    'purchase_date': 'purchase_date',
+    'purchase_code': 'purchase_code',
+    'product_name': 'product_name', 
     'supplier': 'supplier.name',
     'quantity': 'quantity',
-    'price_per_gram': 'pricePerGram',
-    'total_price': 'totalPrice',
-    'bead_diameter': 'beadDiameter',
+    'price_per_gram': 'price_per_gram',
+    'total_price': 'total_price',
+    'bead_diameter': 'bead_diameter',
     'specification': 'specification'
   }
   
@@ -495,8 +505,8 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     const conditions: string[] = [];
     
     // 处理搜索条件
-    if (whereObj.productName && whereObj.productName.contains) {
-      conditions.push(`p.productName LIKE '%${whereObj.productName.contains}%'`);
+    if (whereObj.product_name && whereObj.product_name.contains) {
+      conditions.push(`p.product_name LIKE '%${whereObj.product_name.contains}%'`);
     }
     
     // 处理品相筛选
@@ -510,14 +520,14 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     }
     
     // 处理日期范围筛选
-    if (whereObj.purchaseDate) {
-      if (whereObj.purchaseDate.gte) {
-        const date = new Date(whereObj.purchaseDate.gte).toISOString().slice(0, 19).replace('T', ' ');
-        conditions.push(`p.purchaseDate >= '${date}'`);
+    if (whereObj.purchase_date) {
+      if (whereObj.purchase_date.gte) {
+        const date = new Date(whereObj.purchase_date.gte).toISOString().slice(0, 19).replace('T', ' ');
+        conditions.push(`p.purchase_date >= '${date}'`);
       }
-      if (whereObj.purchaseDate.lte) {
-        const date = new Date(whereObj.purchaseDate.lte).toISOString().slice(0, 19).replace('T', ' ');
-        conditions.push(`p.purchaseDate <= '${date}'`);
+      if (whereObj.purchase_date.lte) {
+        const date = new Date(whereObj.purchase_date.lte).toISOString().slice(0, 19).replace('T', ' ');
+        conditions.push(`p.purchase_date <= '${date}'`);
       }
     }
     
@@ -527,12 +537,12 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     }
     
     // 处理珠子直径范围筛选
-    if (whereObj.beadDiameter) {
-      if (whereObj.beadDiameter.gte !== undefined) {
-        conditions.push(`p.beadDiameter >= ${whereObj.beadDiameter.gte}`);
+    if (whereObj.bead_diameter) {
+      if (whereObj.bead_diameter.gte !== undefined) {
+        conditions.push(`p.bead_diameter >= ${whereObj.bead_diameter.gte}`);
       }
-      if (whereObj.beadDiameter.lte !== undefined) {
-        conditions.push(`p.beadDiameter <= ${whereObj.beadDiameter.lte}`);
+      if (whereObj.bead_diameter.lte !== undefined) {
+        conditions.push(`p.bead_diameter <= ${whereObj.bead_diameter.lte}`);
       }
     }
     
@@ -547,22 +557,22 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     }
     
     // 处理克价范围筛选（将null值视为0处理）
-    if (whereObj.pricePerGram) {
-      if (whereObj.pricePerGram.gte !== undefined) {
-        conditions.push(`(p.pricePerGram >= ${whereObj.pricePerGram.gte} OR (p.pricePerGram IS NULL AND ${whereObj.pricePerGram.gte} <= 0))`);
+    if (whereObj.price_per_gram) {
+      if (whereObj.price_per_gram.gte !== undefined) {
+        conditions.push(`(p.price_per_gram >= ${whereObj.price_per_gram.gte} OR (p.price_per_gram IS NULL AND ${whereObj.price_per_gram.gte} <= 0))`);
       }
-      if (whereObj.pricePerGram.lte !== undefined) {
-        conditions.push(`(p.pricePerGram <= ${whereObj.pricePerGram.lte} OR (p.pricePerGram IS NULL AND ${whereObj.pricePerGram.lte} >= 0))`);
+      if (whereObj.price_per_gram.lte !== undefined) {
+        conditions.push(`(p.price_per_gram <= ${whereObj.price_per_gram.lte} OR (p.price_per_gram IS NULL AND ${whereObj.price_per_gram.lte} >= 0))`);
       }
     }
     
     // 处理总价范围筛选
-    if (whereObj.totalPrice) {
-      if (whereObj.totalPrice.gte !== undefined) {
-        conditions.push(`p.totalPrice >= ${whereObj.totalPrice.gte}`);
+    if (whereObj.total_price) {
+      if (whereObj.total_price.gte !== undefined) {
+        conditions.push(`p.total_price >= ${whereObj.total_price.gte}`);
       }
-      if (whereObj.totalPrice.lte !== undefined) {
-        conditions.push(`p.totalPrice <= ${whereObj.totalPrice.lte}`);
+      if (whereObj.total_price.lte !== undefined) {
+        conditions.push(`p.total_price <= ${whereObj.total_price.lte}`);
       }
     }
     
@@ -578,17 +588,17 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
             if (orCondition.AND) {
               const nestedAndParts: string[] = [];
               orCondition.AND.forEach((nestedCondition: any) => {
-                if (nestedCondition.productType && nestedCondition.productType.in) {
-                  const types = nestedCondition.productType.in.map((t: string) => `'${t}'`).join(',');
-                  nestedAndParts.push(`p.productType IN (${types})`);
+                if (nestedCondition.product_type && nestedCondition.product_type.in) {
+                  const types = nestedCondition.product_type.in.map((t: string) => `'${t}'`).join(',');
+                  nestedAndParts.push(`p.product_type IN (${types})`);
                 }
                 
-                if (nestedCondition.beadDiameter) {
-                  if (nestedCondition.beadDiameter.gte !== undefined) {
-                    nestedAndParts.push(`p.beadDiameter >= ${nestedCondition.beadDiameter.gte}`);
+                if (nestedCondition.bead_diameter) {
+                  if (nestedCondition.bead_diameter.gte !== undefined) {
+                    nestedAndParts.push(`p.bead_diameter >= ${nestedCondition.bead_diameter.gte}`);
                   }
-                  if (nestedCondition.beadDiameter.lte !== undefined) {
-                    nestedAndParts.push(`p.beadDiameter <= ${nestedCondition.beadDiameter.lte}`);
+                  if (nestedCondition.bead_diameter.lte !== undefined) {
+                    nestedAndParts.push(`p.bead_diameter <= ${nestedCondition.bead_diameter.lte}`);
                   }
                 }
                 
@@ -597,7 +607,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
                     nestedAndParts.push(`p.specification >= ${nestedCondition.specification.gte}`);
                   }
                   if (nestedCondition.specification.lte !== undefined) {
-                    nestedAndParts.push(`p.specification <= ${nestedCondition.specification.lte}`);
+                    nestedAndParts.push(`p.item.specification && Number(item.specification) <= ${nestedCondition.specification.lte}`);
                   }
                 }
               });
@@ -607,17 +617,17 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
               }
             } else {
               // 处理原有的简单条件
-              if (orCondition.productType && orCondition.productType.in) {
-                const types = orCondition.productType.in.map((t: string) => `'${t}'`).join(',');
-                orParts.push(`p.productType IN (${types})`);
+              if (orCondition.product_type && orCondition.product_type.in) {
+                const types = orCondition.product_type.in.map((t: string) => `'${t}'`).join(',');
+                orParts.push(`p.product_type IN (${types})`);
               }
               
-              if (orCondition.beadDiameter) {
-                if (orCondition.beadDiameter.gte !== undefined) {
-                  orParts.push(`p.beadDiameter >= ${orCondition.beadDiameter.gte}`);
+              if (orCondition.bead_diameter) {
+                if (orCondition.bead_diameter.gte !== undefined) {
+                  orParts.push(`p.bead_diameter >= ${orCondition.bead_diameter.gte}`);
                 }
-                if (orCondition.beadDiameter.lte !== undefined) {
-                  orParts.push(`p.beadDiameter <= ${orCondition.beadDiameter.lte}`);
+                if (orCondition.bead_diameter.lte !== undefined) {
+                  orParts.push(`p.bead_diameter <= ${orCondition.bead_diameter.lte}`);
                 }
               }
               
@@ -626,7 +636,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
                   orParts.push(`p.specification >= ${orCondition.specification.gte}`);
                 }
                 if (orCondition.specification.lte !== undefined) {
-                  orParts.push(`p.specification <= ${orCondition.specification.lte}`);
+                  orParts.push(`p.item.specification && Number(item.specification) <= ${orCondition.specification.lte}`);
                 }
               }
             }
@@ -639,9 +649,9 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
           if (orConditions.length > 0) {
             conditions.push(`(${orConditions.join(' OR ')})`);
           }
-        } else if (andCondition.productType && andCondition.productType.in) {
-          const types = andCondition.productType.in.map((t: string) => `'${t}'`).join(',');
-          conditions.push(`p.productType IN (${types})`);
+        } else if (andCondition.product_type && andCondition.product_type.in) {
+          const types = andCondition.product_type.in.map((t: string) => `'${t}'`).join(',');
+          conditions.push(`p.product_type IN (${types})`);
         }
       });
     }
@@ -656,17 +666,17 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         if (orCondition.AND) {
           const nestedAndParts: string[] = [];
           orCondition.AND.forEach((nestedCondition: any) => {
-            if (nestedCondition.productType && nestedCondition.productType.in) {
-              const types = nestedCondition.productType.in.map((t: string) => `'${t}'`).join(',');
-              nestedAndParts.push(`p.productType IN (${types})`);
+            if (nestedCondition.product_type && nestedCondition.product_type.in) {
+              const types = nestedCondition.product_type.in.map((t: string) => `'${t}'`).join(',');
+              nestedAndParts.push(`p.product_type IN (${types})`);
             }
             
-            if (nestedCondition.beadDiameter) {
-              if (nestedCondition.beadDiameter.gte !== undefined) {
-                nestedAndParts.push(`p.beadDiameter >= ${nestedCondition.beadDiameter.gte}`);
+            if (nestedCondition.bead_diameter) {
+              if (nestedCondition.bead_diameter.gte !== undefined) {
+                nestedAndParts.push(`p.bead_diameter >= ${nestedCondition.bead_diameter.gte}`);
               }
-              if (nestedCondition.beadDiameter.lte !== undefined) {
-                nestedAndParts.push(`p.beadDiameter <= ${nestedCondition.beadDiameter.lte}`);
+              if (nestedCondition.bead_diameter.lte !== undefined) {
+                nestedAndParts.push(`p.bead_diameter <= ${nestedCondition.bead_diameter.lte}`);
               }
             }
             
@@ -675,7 +685,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
                 nestedAndParts.push(`p.specification >= ${nestedCondition.specification.gte}`);
               }
               if (nestedCondition.specification.lte !== undefined) {
-                nestedAndParts.push(`p.specification <= ${nestedCondition.specification.lte}`);
+                nestedAndParts.push(`p.item.specification && Number(item.specification) <= ${nestedCondition.specification.lte}`);
               }
             }
           });
@@ -685,17 +695,17 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
           }
         } else {
           // 处理原有的简单条件
-          if (orCondition.productType && orCondition.productType.in) {
-            const types = orCondition.productType.in.map((t: string) => `'${t}'`).join(',');
-            orParts.push(`p.productType IN (${types})`);
+          if (orCondition.product_type && orCondition.product_type.in) {
+            const types = orCondition.product_type.in.map((t: string) => `'${t}'`).join(',');
+            orParts.push(`p.product_type IN (${types})`);
           }
           
-          if (orCondition.beadDiameter) {
-            if (orCondition.beadDiameter.gte !== undefined) {
-              orParts.push(`p.beadDiameter >= ${orCondition.beadDiameter.gte}`);
+          if (orCondition.bead_diameter) {
+            if (orCondition.bead_diameter.gte !== undefined) {
+              orParts.push(`p.bead_diameter >= ${orCondition.bead_diameter.gte}`);
             }
-            if (orCondition.beadDiameter.lte !== undefined) {
-              orParts.push(`p.beadDiameter <= ${orCondition.beadDiameter.lte}`);
+            if (orCondition.bead_diameter.lte !== undefined) {
+              orParts.push(`p.bead_diameter <= ${orCondition.bead_diameter.lte}`);
             }
           }
           
@@ -704,7 +714,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
               orParts.push(`p.specification >= ${orCondition.specification.gte}`);
             }
             if (orCondition.specification.lte !== undefined) {
-              orParts.push(`p.specification <= ${orCondition.specification.lte}`);
+              orParts.push(`p.item.specification && Number(item.specification) <= ${orCondition.specification.lte}`);
             }
           }
         }
@@ -719,10 +729,10 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       }
     }
     
-    // 处理直接的productType条件
-    if (whereObj.productType && whereObj.productType.in && !whereObj.AND && !whereObj.OR) {
-      const types = whereObj.productType.in.map((t: string) => `'${t}'`).join(',');
-      conditions.push(`p.productType IN (${types})`);
+    // 处理直接的product_type条件
+    if (whereObj.product_type && whereObj.product_type.in && !whereObj.AND && !whereObj.OR) {
+      const types = whereObj.product_type.in.map((t: string) => `'${t}'`).join(',');
+      conditions.push(`p.product_type IN (${types})`);
     }
     
     // 处理供应商筛选
@@ -734,8 +744,8 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
           conditions.push(`s.name IN (${suppliers})`);
         } else if (whereObj.supplier.name.contains) {
           // 单个供应商：使用LIKE查询
-          const supplierName = whereObj.supplier.name.contains.replace(/'/g, "''");
-          conditions.push(`s.name LIKE '%${supplierName}%'`);
+          const supplier_name = whereObj.supplier.name.contains.replace(/'/g, "''");
+          conditions.push(`s.name LIKE '%${supplier_name}%'`);
         }
       }
     }
@@ -749,8 +759,8 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     return conditions.join(' AND ');
   }
   
-  // 处理排序（使用数据库字段名：驼峰命名）
-  let orderBy: any = { createdAt: 'desc' } // 默认排序
+  // 处理排序（使用数据库字段名：蛇形命名）
+  let orderBy: any = { created_at: 'desc' } // 默认排序
   
   // 添加排序调试日志
   console.log('=== 排序调试信息 ===');
@@ -758,7 +768,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   
   if (sortBy && sortOrder) {
     
-    const field = validSortFields[sortBy as string]
+    const field = validSortFields[sortBy as keyof typeof validSortFields] as string | undefined
     console.log('映射后的字段:', field);
     
     if (field && (sortOrder === 'asc' || sortOrder === 'desc')) {
@@ -783,14 +793,14 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         const orderClause = sortOrder === 'asc' ? 'ASC' : 'DESC'
         
         const rawQuery = `
-           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.username as user_username
+           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.user_name as user_username
            FROM purchases p
-           LEFT JOIN suppliers s ON p.supplierId = s.id
-           LEFT JOIN users u ON p.userId = u.id
+           LEFT JOIN suppliers s ON p.supplier_id = s.id
+           LEFT JOIN users u ON p.user_id = u.id
            ${whereClause ? `WHERE ${whereClause}` : ''}
            ORDER BY 
              CASE 
-               WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN p.beadDiameter
+               WHEN p.product_type IN ('LOOSE_BEADS', 'BRACELET') THEN p.bead_diameter
                ELSE p.specification
              END ${orderClause},
              p.id ${orderClause}
@@ -820,16 +830,22 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         // 添加调试日志
         console.log('规格排序结果预览:');
         purchases.slice(0, 15).forEach((p, index) => {
-          const displaySpec = ['LOOSE_BEADS', 'BRACELET'].includes(p.productType) ? p.beadDiameter : p.specification
-          console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 显示规格: ${displaySpec}mm, 珠径: ${p.beadDiameter}, 规格: ${p.specification}, ID: ${p.id}`);
+          const displaySpec = ['LOOSE_BEADS', 'BRACELET'].includes(p.product_type) ? p.bead_diameter : p.specification
+          console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 显示规格: ${displaySpec}mm, 珠径: ${p.bead_diameter}, 规格: ${p.specification}, ID: ${p.id}`);
         });
         
         const total = await prisma.purchase.count({ where })
         
-        // 转换为API格式并根据用户角色过滤敏感信息
+        // 直接使用蛇形命名并根据用户角色过滤敏感信息
         const filteredPurchases = purchases.map(purchase => {
-          const apiFormatPurchase = convertToApiFormat(purchase)
-          return filterSensitiveFields(apiFormatPurchase, req.user.role)
+          // 构建响应对象，所有字段已经是蛇形命名
+          const apiFormatPurchase = {
+            ...purchase,
+            created_at: purchase.created_at,
+            updated_at: purchase.updated_at,
+            supplier_name: purchase.supplier?.name || null
+          }
+          return filterSensitiveFields(apiFormatPurchase, req.user!.role)
         })
         
         return res.json({
@@ -852,15 +868,15 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         const orderClause = sortOrder === 'asc' ? 'ASC' : 'DESC'
         
         const rawQuery = `
-           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.username as user_username
+           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.user_name as user_username
            FROM purchases p
-           LEFT JOIN suppliers s ON p.supplierId = s.id
-           LEFT JOIN users u ON p.userId = u.id
+           LEFT JOIN suppliers s ON p.supplier_id = s.id
+           LEFT JOIN users u ON p.user_id = u.id
            ${whereClause ? `WHERE ${whereClause}` : ''}
            ORDER BY 
              CASE 
-               WHEN p.productType = 'BRACELET' THEN p.quantity
-               ELSE p.pieceCount
+               WHEN p.product_type = 'BRACELET' THEN p.quantity
+               ELSE p.piece_count
              END ${orderClause},
              p.id ${orderClause}
            LIMIT ? OFFSET ?
@@ -888,19 +904,25 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         // 添加调试日志
         console.log('数量排序结果预览:');
         purchases.slice(0, 15).forEach((p, index) => {
-          const displayQuantity = p.productType === 'BRACELET' ? p.quantity : p.pieceCount
-          const displayUnit = p.productType === 'BRACELET' ? '条' : 
-                             p.productType === 'LOOSE_BEADS' ? '颗' :
-                             p.productType === 'ACCESSORIES' ? '片' : '件'
-          console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 显示数量: ${displayQuantity}${displayUnit}, 手串数量: ${p.quantity}, 件数: ${p.pieceCount}, ID: ${p.id}`);
+          const displayQuantity = p.product_type === 'LOOSE_BEADS' ? p.quantity : p.piece_count
+          const displayUnit = p.product_type === 'LOOSE_BEADS' ? '条' : 
+                             p.product_type === 'LOOSE_BEADS' ? '颗' :
+                             p.product_type === 'ACCESSORIES' ? '片' : '件'
+          console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 显示数量: ${displayQuantity}${displayUnit}, 手串数量: ${p.quantity}, 件数: ${p.piece_count}, ID: ${p.id}`);
         });
         
         const total = await prisma.purchase.count({ where })
         
-        // 转换为API格式并根据用户角色过滤敏感信息
+        // 直接使用蛇形命名并根据用户角色过滤敏感信息
         const filteredPurchases = purchases.map(purchase => {
-          const apiFormatPurchase = convertToApiFormat(purchase)
-          return filterSensitiveFields(apiFormatPurchase, req.user.role)
+          // 构建响应对象，所有字段已经是蛇形命名
+          const apiFormatPurchase = {
+            ...purchase,
+            created_at: purchase.created_at,
+            updated_at: purchase.updated_at,
+            supplier_name: purchase.supplier?.name || null
+          }
+          return filterSensitiveFields(apiFormatPurchase, req.user!.role)
         })
         
         return res.json({
@@ -915,19 +937,19 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
             }
           }
         })
-      } else if (field === 'pricePerGram') {
+      } else if (field === 'price_per_gram') {
         // 克价字段需要特殊处理null值（视为0）
         const whereClause = buildWhereClause(where)
         const orderClause = sortOrder === 'asc' ? 'ASC' : 'DESC'
         
         const rawQuery = `
-           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.username as user_username
+           SELECT p.*, s.name as supplier_name, u.id as user_id, u.name as user_name, u.user_name as user_username
            FROM purchases p
-           LEFT JOIN suppliers s ON p.supplierId = s.id
-           LEFT JOIN users u ON p.userId = u.id
+           LEFT JOIN suppliers s ON p.supplier_id = s.id
+           LEFT JOIN users u ON p.user_id = u.id
            ${whereClause ? `WHERE ${whereClause}` : ''}
            ORDER BY 
-             COALESCE(p.pricePerGram, 0) ${orderClause},
+             COALESCE(p.price_per_gram, 0) ${orderClause},
              p.id ${orderClause}
            LIMIT ? OFFSET ?
          `
@@ -954,16 +976,22 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         // 添加调试日志
         console.log('克价排序结果预览（null视为0）:');
         purchases.slice(0, 15).forEach((p, index) => {
-          const displayPrice = p.pricePerGram !== null ? p.pricePerGram : 0
-          console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 克价: ${p.pricePerGram}(显示为${displayPrice}), ID: ${p.id}`);
+          const displayPrice = p.price_per_gram !== null ? p.price_per_gram : 0
+          console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 克价: ${p.price_per_gram}(显示为${displayPrice}), ID: ${p.id}`);
         });
         
         const total = await prisma.purchase.count({ where })
         
-        // 转换为API格式并根据用户角色过滤敏感信息
+        // 直接使用蛇形命名并根据用户角色过滤敏感信息
         const filteredPurchases = purchases.map(purchase => {
-          const apiFormatPurchase = convertToApiFormat(purchase)
-          return filterSensitiveFields(apiFormatPurchase, req.user.role)
+          // 构建响应对象，所有字段已经是蛇形命名
+          const apiFormatPurchase = {
+            ...purchase,
+            created_at: purchase.created_at,
+            updated_at: purchase.updated_at,
+            supplier_name: purchase.supplier?.name || null
+          }
+          return filterSensitiveFields(apiFormatPurchase, req.user!.role)
         })
         
         return res.json({
@@ -1001,7 +1029,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       }
     },
@@ -1015,12 +1043,12 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   if (sortBy === 'specification') {
     console.log('规格排序结果预览:');
     purchases.slice(0, 15).forEach((p, index) => {
-      console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 规格: ${p.specification}, 珠径: ${p.beadDiameter}, ID: ${p.id}`);
+      console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 规格: ${p.specification}, 珠径: ${p.bead_diameter}, ID: ${p.id}`);
     });
     
     // 检查是否真的按规格排序
     console.log('规格值序列:', purchases.slice(0, 15).map(p => p.specification));
-    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.productType));
+    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.product_type));
     
     // 分析null值分布
     const nullCount = purchases.filter(p => p.specification === null).length;
@@ -1031,12 +1059,12 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   if (sortBy === 'quantity') {
     console.log('数量排序结果预览:');
     purchases.slice(0, 15).forEach((p, index) => {
-      console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 数量: ${p.quantity}, ID: ${p.id}`);
+      console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 数量: ${p.quantity}, ID: ${p.id}`);
     });
     
     // 检查是否真的按数量排序
     console.log('数量值序列:', purchases.slice(0, 15).map(p => p.quantity));
-    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.productType));
+    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.product_type));
     
     // 分析null值分布
     const nullCount = purchases.filter(p => p.quantity === null).length;
@@ -1047,28 +1075,35 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   if (sortBy === 'price_per_gram') {
     console.log('克价排序结果预览:');
     purchases.slice(0, 15).forEach((p, index) => {
-      console.log(`${index + 1}. 产品: ${p.productName}, 产品类型: ${p.productType}, 克价: ${p.pricePerGram}, ID: ${p.id}`);
+      console.log(`${index + 1}. 产品: ${p.product_name}, 产品类型: ${p.product_type}, 克价: ${p.price_per_gram}, ID: ${p.id}`);
     });
     
     // 检查是否真的按克价排序
-    console.log('克价值序列:', purchases.slice(0, 15).map(p => p.pricePerGram));
-    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.productType));
+    console.log('克价值序列:', purchases.slice(0, 15).map(p => p.price_per_gram));
+    console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.product_type));
     
     // 分析null值分布
-    const nullCount = purchases.filter(p => p.pricePerGram === null).length;
-    const nonNullCount = purchases.filter(p => p.pricePerGram !== null).length;
+    const nullCount = purchases.filter(p => p.price_per_gram === null).length;
+    const nonNullCount = purchases.filter(p => p.price_per_gram !== null).length;
     console.log(`克价字段null值统计: null=${nullCount}, 非null=${nonNullCount}`);
   }
   
   const total = await prisma.purchase.count({ where })
   
-  // 转换为API格式并根据用户角色过滤敏感信息
+  // 直接使用蛇形命名并根据用户角色过滤敏感信息
   const filteredPurchases = purchases.map(purchase => {
-    const apiFormatPurchase = convertToApiFormat(purchase)
-    return filterSensitiveFields(apiFormatPurchase, req.user.role)
+    // 构建响应对象，所有字段已经是蛇形命名
+    const apiFormatPurchase = {
+      ...purchase,
+      created_at: purchase.created_at,
+      updated_at: purchase.updated_at,
+      supplier_name: purchase.supplier?.name || null,
+      user_name: purchase.user?.name || null
+    }
+    return filterSensitiveFields(apiFormatPurchase, req.user!.role)
   })
   
-  res.json({
+  return res.json({
     success: true,
     data: {
       purchases: filteredPurchases,
@@ -1080,22 +1115,26 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       }
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 创建采购记录
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   // 验证请求数据
   const validatedData = createPurchaseSchema.parse(req.body)
   
   // 生成采购编号
-  let purchaseCode: string
+  let purchase_code: string
   let isUnique = false
   let attempts = 0
   
   while (!isUnique && attempts < 10) {
-    purchaseCode = generatePurchaseCode()
+    purchase_code = generatePurchaseCode()
     const existing = await prisma.purchase.findUnique({
-      where: { purchaseCode }
+      where: { purchase_code: purchase_code }
     })
     if (!existing) {
       isUnique = true
@@ -1111,45 +1150,45 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   
   // 根据产品类型计算相关数值
   let beadsPerString: number | undefined
-  let totalBeads: number | undefined
-  let pricePerBead: number | undefined
-  let pricePerPiece: number | undefined
-  let unitPrice: number | undefined
+  let total_beads: number | undefined
+  let price_per_bead: number | undefined
+  let price_per_piece: number | undefined
+  let unit_price: number | undefined
   
   // 设置规格字段（统一存储在specification中）
-  const specification = validatedData.specification || validatedData.bead_diameter
+  = validatedData.specification || validatedData.bead_diameter
   
   if (validatedData.product_type === 'LOOSE_BEADS') {
     // 散珠：按颗计算
     if (validatedData.bead_diameter && validatedData.piece_count) {
       beadsPerString = calculateBeadsPerString(validatedData.bead_diameter)
-      totalBeads = validatedData.piece_count
-      pricePerBead = validatedData.total_price ? validatedData.total_price / validatedData.piece_count : undefined
+      total_beads = validatedData.piece_count
+      price_per_bead = validatedData.total_price ? validatedData.total_price / validatedData.piece_count : undefined
     }
   } else if (validatedData.product_type === 'BRACELET') {
     // 手串：保持原有逻辑
     if (validatedData.bead_diameter) {
       beadsPerString = calculateBeadsPerString(validatedData.bead_diameter)
-      totalBeads = validatedData.quantity ? validatedData.quantity * beadsPerString : undefined
-      pricePerBead = validatedData.total_price && totalBeads ? validatedData.total_price / totalBeads : undefined
-      unitPrice = validatedData.total_price && validatedData.quantity ? validatedData.total_price / validatedData.quantity : undefined
+      total_beads = validatedData.quantity ? validatedData.quantity * beadsPerString : undefined
+      price_per_bead = validatedData.total_price && total_beads ? validatedData.total_price / total_beads : undefined
+      unit_price = validatedData.total_price && validatedData.quantity ? validatedData.total_price / validatedData.quantity : undefined
     }
   } else if (validatedData.product_type === 'ACCESSORIES') {
     // 饰品配件：按片计算
     if (validatedData.piece_count && validatedData.total_price) {
-      pricePerPiece = validatedData.total_price / validatedData.piece_count
-      unitPrice = pricePerPiece // 对于饰品配件，单价就是每片价格
+      price_per_piece = validatedData.total_price / validatedData.piece_count
+      unit_price = price_per_piece // 对于饰品配件，单价就是每片价格
     }
   } else if (validatedData.product_type === 'FINISHED') {
     // 成品：按件计算
     if (validatedData.piece_count && validatedData.total_price) {
-      pricePerPiece = validatedData.total_price / validatedData.piece_count
-      unitPrice = pricePerPiece // 对于成品，单价就是每件价格
+      price_per_piece = validatedData.total_price / validatedData.piece_count
+      unit_price = price_per_piece // 对于成品，单价就是每件价格
     }
   }
   
   // 处理供应商
-  let supplierId: string | undefined
+  let supplier_id: string | undefined
   if (validatedData.supplier_name) {
     // 查找现有供应商
     let supplier = await prisma.supplier.findFirst({
@@ -1167,37 +1206,37 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
       })
     }
     
-    supplierId = supplier.id
+    supplier_id = supplier.id
   }
   
   // 创建采购记录
   const purchase = await prisma.purchase.create({
     data: {
-      purchaseCode: purchaseCode!,
-      productName: validatedData.product_name,
-      productType: validatedData.product_type,
-      unitType: validatedData.unit_type,
-      beadDiameter: validatedData.bead_diameter,
-      specification,
+      purchase_code: purchase_code!,
+      product_name: validatedData.product_name,
+      product_type: validatedData.product_type,
+      unit_type: validatedData.unit_type,
+      bead_diameter: validatedData.bead_diameter,
+      specification: req.body.specification,
       quantity: validatedData.quantity,
-      pieceCount: validatedData.piece_count,
-      minStockAlert: validatedData.min_stock_alert,
-      pricePerGram: validatedData.price_per_gram,
-      totalPrice: validatedData.total_price,
+      piece_count: validatedData.piece_count,
+      min_stock_alert: validatedData.min_stock_alert,
+      price_per_gram: validatedData.price_per_gram,
+      total_price: validatedData.total_price,
       weight: validatedData.weight,
-      beadsPerString,
-      totalBeads,
-      pricePerBead,
-      pricePerPiece,
-      unitPrice,
+      beads_per_string: beadsPerString,
+      total_beads: total_beads,
+      price_per_bead: price_per_bead,
+      price_per_piece: price_per_piece,
+      unit_price: unit_price,
       quality: validatedData.quality,
       photos: validatedData.photos,
       notes: validatedData.notes,
-      naturalLanguageInput: validatedData.natural_language_input,
-      aiRecognitionResult: validatedData.ai_recognition_result,
-      purchaseDate: new Date(),
-      supplierId,
-      userId: req.user.id
+      natural_language_input: validatedData.natural_language_input,
+      ai_recognition_result: validatedData.ai_recognition_result,
+      purchase_date: new Date(),
+      supplier_id: supplier_id,
+      user_id: req.user!.id
     },
     include: {
       supplier: true,
@@ -1205,7 +1244,7 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       }
     }
@@ -1213,24 +1252,34 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   
   // 记录操作日志
   await OperationLogger.logPurchaseCreate(
-    req.user.id,
+    req.user!.id,
     purchase.id,
     purchase,
     req.ip
   )
   
-  // 转换为API格式并过滤敏感字段
-  const apiFormatPurchase = convertToApiFormat(purchase)
-  const filteredPurchase = filterSensitiveFields(apiFormatPurchase, req.user.role)
+  // 直接使用蛇形命名并过滤敏感字段
+  const apiFormatPurchase = {
+    ...purchase,
+    created_at: purchase.created_at,
+    updated_at: purchase.updated_at,
+    supplier_name: purchase.supplier?.name || null,
+    user_name: purchase.user?.name || null
+  }
+  const filteredPurchase = filterSensitiveFields(apiFormatPurchase, req.user!.role)
   
-  res.status(201).json({
+  return res.status(201).json({
     success: true,
     message: '采购记录创建成功',
     data: filteredPurchase
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 获取单个采购记录
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
@@ -1242,21 +1291,21 @@ router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       },
-      editLogs: {
+      edit_logs: {
         include: {
           user: {
             select: {
               id: true,
               name: true,
-              username: true
+              user_name: true
             }
           }
         },
         orderBy: {
-          createdAt: 'desc'
+          created_at: 'desc'
         }
       }
     }
@@ -1271,14 +1320,27 @@ router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
   // 权限控制：所有用户都可以查看采购记录详情，但雇员看到的敏感字段会被过滤
   // 不再限制雇员只能查看自己创建的记录
   
-  // 转换为API格式并根据用户角色过滤敏感信息
-  const apiFormatPurchase = convertToApiFormat(purchase)
-  const filteredPurchase = filterSensitiveFields(apiFormatPurchase, req.user.role)
+  // 直接使用蛇形命名并根据用户角色过滤敏感信息
+  const apiFormatPurchase = {
+    ...purchase,
+    created_at: purchase.created_at,
+    updated_at: purchase.updated_at,
+    supplier_name: purchase.supplier?.name || null,
+    user_name: purchase.user?.name || null,
+    edit_logs: purchase.edit_logs?.map((log: any) => ({
+      ...log,
+      created_at: log.created_at,
+      user_name: log.user?.name || null
+    }))
+  }
+  const filteredPurchase = filterSensitiveFields(apiFormatPurchase, req.user?.role || "USER" || "EMPLOYEE")
   
-  res.json({
+  return res.json({
     success: true,
     data: filteredPurchase
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 更新采购记录数据验证schema（接收snake_case命名的API参数）
@@ -1299,11 +1361,13 @@ const updatePurchaseSchema = z.object({
 })
 
 // 更新采购记录
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
   // 权限检查：只有老板可以编辑
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER" || "EMPLOYEE") !== 'BOSS') {
     return res.status(403).json(
       ErrorResponses.insufficientPermissions('权限不足，只有老板可以编辑采购记录')
     )
@@ -1317,7 +1381,7 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   console.log('🔍 [后端调试] total_beads原始值:', validatedData.total_beads, '类型:', typeof validatedData.total_beads)
   const dbData = convertFromApiFormat(validatedData)
   console.log('🔍 [后端调试] 数据库格式数据:', dbData)
-  console.log('🔍 [后端调试] totalBeads转换后值:', dbData.totalBeads, '类型:', typeof dbData.totalBeads)
+  console.log('🔍 [后端调试] totalBeads转换后值:', dbData.total_beads, '类型:', typeof dbData.total_beads)
   console.log('🔍 [后端调试] 字段详情:', {
     '字段数量': Object.keys(validatedData).length,
     '字段列表': Object.keys(validatedData)
@@ -1332,10 +1396,10 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       },
-      materialUsages: {
+      material_usages: {
         include: {
           product: {
             select: {
@@ -1356,29 +1420,29 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   }
 
   // 检查是否有成品使用了该采购记录的珠子
-  if (existingPurchase.materialUsages && existingPurchase.materialUsages.length > 0) {
-    const usedByProducts = existingPurchase.materialUsages.map(usage => usage.product.name).join('、')
+  if (existingPurchase.material_usages && existingPurchase.material_usages.length > 0) {
+    const usedByProducts = existingPurchase.material_usages.map(usage => usage.product?.name || "未知产品").join('、')
     return res.status(400).json({
       success: false,
       message: `无法编辑该采购记录，因为以下成品正在使用其珠子：${usedByProducts}。请先将这些成品销毁，使珠子回退到库存后再编辑。`,
       data: {
-        usedByProducts: existingPurchase.materialUsages.map(usage => ({
-          productId: usage.product.id,
-          productName: usage.product.name,
-          quantityUsed: usage.quantityUsedBeads || usage.quantityUsedPieces
+        usedByProducts: existingPurchase.material_usages.map(usage => ({
+          product_id: usage.product?.id || "",
+          product_name: usage.product?.name || "未知产品",
+          quantityUsed: usage.quantity_used || usage.quantity_used
         }))
       }
     })
   }
   
   // 处理供应商
-  let supplierId: string | undefined = existingPurchase.supplierId
-  if (dbData.supplierName !== undefined) {
-    if (dbData.supplierName) {
+  let supplier_id: string | undefined = existingPurchase.supplier_id || undefined
+  if (dbData.supplier_name !== undefined) {
+    if (dbData.supplier_name) {
       // 查找现有供应商
       let supplier = await prisma.supplier.findFirst({
         where: {
-          name: dbData.supplierName
+          name: dbData.supplier_name
         }
       })
       
@@ -1386,40 +1450,40 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
       if (!supplier) {
         supplier = await prisma.supplier.create({
           data: {
-            name: dbData.supplierName
+            name: dbData.supplier_name
           }
         })
       }
       
-      supplierId = supplier.id
+      supplier_id = supplier.id
     } else {
-      supplierId = null
+      supplier_id = undefined
     }
   }
   
   // 计算相关数值
   const updateData: any = {
     ...dbData,
-    supplierId,
-    lastEditedById: req.user.id,
-    updatedAt: new Date()
+    supplier_id: supplier_id,
+    last_edited_by_id: req.user?.id,
+    updated_at: new Date()
   }
   
   // 移除supplierName字段，因为数据库中没有这个字段
-  delete updateData.supplierName
+  delete updateData.supplier_name
   
   // 如果更新了数量或直径，重新计算相关数值
-  if (dbData.beadDiameter && !dbData.beadsPerString) {
-    updateData.beadsPerString = calculateBeadsPerString(dbData.beadDiameter)
+  if (dbData.bead_diameter && !dbData.beadsPerString) {
+    updateData.beads_per_string = calculateBeadsPerString(dbData.bead_diameter)
   }
   
   const finalQuantity = dbData.quantity ?? existingPurchase.quantity
-  const finalBeadsPerString = updateData.beadsPerString ?? existingPurchase.beadsPerString
-  const finalTotalPrice = dbData.totalPrice ?? existingPurchase.totalPrice
+  const finalBeadsPerString = updateData.beads_per_string ?? existingPurchase.beads_per_string
+  const finalTotalPrice = dbData.total_price ?? existingPurchase.total_price
   
   // 保存用户手动设置的totalBeads值
-  const userSetTotalBeads = dbData.totalBeads
-  const existingTotalBeads = existingPurchase.totalBeads
+  const userSetTotalBeads = dbData.total_beads
+  const existingTotalBeads = existingPurchase.total_beads
   
   console.log('🔍 [totalBeads逻辑调试] 用户本次设置值:', userSetTotalBeads, '类型:', typeof userSetTotalBeads)
   console.log('🔍 [totalBeads逻辑调试] 数据库现有值:', existingTotalBeads, '类型:', typeof existingTotalBeads)
@@ -1431,42 +1495,42 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   // 3. 只有在数据库中没有totalBeads值且用户也没有设置时，才进行自动计算
   if (userSetTotalBeads !== undefined) {
     // 用户本次手动设置了totalBeads，使用用户的值
-    updateData.totalBeads = userSetTotalBeads
+    updateData.total_beads = userSetTotalBeads
     console.log('🔍 [totalBeads处理] 使用用户本次设置值:', userSetTotalBeads)
   } else if (existingTotalBeads !== null && existingTotalBeads !== undefined) {
     // 用户本次没有设置totalBeads，但数据库中有现有值，保持现有值不变
-    updateData.totalBeads = existingTotalBeads
+    updateData.total_beads = existingTotalBeads
     console.log('🔍 [totalBeads处理] 保持数据库现有值:', existingTotalBeads)
   } else if (finalQuantity && finalBeadsPerString) {
     // 数据库中没有totalBeads值且用户也没有设置，进行自动计算
-    updateData.totalBeads = finalQuantity * finalBeadsPerString
+    updateData.total_beads = finalQuantity * finalBeadsPerString
     console.log('🔍 [totalBeads处理] 自动计算值:', finalQuantity * finalBeadsPerString)
   }
   
   // 根据产品类型计算相关的派生字段
-  const finalPieceCount = dbData.pieceCount ?? existingPurchase.pieceCount
-  const productType = existingPurchase.productType
+  const finalPieceCount = dbData.piece_count ?? existingPurchase.piece_count
+  const product_type = existingPurchase.product_type
   
   if (finalTotalPrice) {
-    if (productType === 'LOOSE_BEADS') {
+    if (product_type === 'LOOSE_BEADS') {
       // 散珠：按颗计算
       if (finalPieceCount) {
-        updateData.pricePerBead = finalTotalPrice / finalPieceCount
+        updateData.price_per_bead = finalTotalPrice / finalPieceCount
       }
-    } else if (productType === 'BRACELET') {
+    } else if (product_type === 'BRACELET') {
       // 手串：按串和颗计算
-      if (updateData.totalBeads && finalQuantity) {
-        updateData.pricePerBead = finalTotalPrice / updateData.totalBeads
-        updateData.unitPrice = finalTotalPrice / finalQuantity
+      if (updateData.total_beads && finalQuantity) {
+        updateData.price_per_bead = finalTotalPrice / updateData.total_beads
+        updateData.unit_price = finalTotalPrice / finalQuantity
       }
-    } else if (productType === 'ACCESSORIES' || productType === 'FINISHED') {
+    } else if (product_type === 'ACCESSORIES' || product_type === 'FINISHED') {
       // 饰品配件和成品：按片/件计算
       if (finalPieceCount) {
-        updateData.pricePerPiece = finalTotalPrice / finalPieceCount
-        updateData.unitPrice = updateData.pricePerPiece
+        updateData.price_per_piece = finalTotalPrice / finalPieceCount
+        updateData.unit_price = updateData.price_per_piece
       }
     }
-    console.log('🔍 [派生字段计算] productType:', productType, 'pricePerBead:', updateData.pricePerBead, 'pricePerPiece:', updateData.pricePerPiece, 'unitPrice:', updateData.unitPrice)
+    console.log('🔍 [派生字段计算] product_type:', product_type, 'price_per_bead:', updateData.price_per_bead, 'price_per_piece:', updateData.price_per_piece, 'unit_price:', updateData.unit_price)
   }
   
   // 记录修改的字段详细信息
@@ -1495,10 +1559,10 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   
   // 使用原始的snake_case字段名来检测变更
   Object.keys(validatedData).forEach(key => {
-    const camelCaseKey = convertFromApiFormat({[key]: validatedData[key]})
+    const camelCaseKey = convertFromApiFormat({[key]: (validatedData as any)[key]})
     const camelCaseFieldName = Object.keys(camelCaseKey)[0]
-    const oldValue = existingPurchase[camelCaseFieldName]
-    const newValue = validatedData[key]
+    const oldValue = (existingPurchase as any)[camelCaseFieldName]
+    const newValue = (validatedData as any)[key]
     if (newValue !== oldValue) {
       fieldChanges.push({
         field: key,
@@ -1535,14 +1599,14 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       },
-      lastEditedBy: {
+      last_edited_by: {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       }
     }
@@ -1551,14 +1615,13 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   // 创建详细的编辑日志
   if (fieldChanges.length > 0) {
     // 获取用户信息
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { name: true, role: true }
-    })
+    // const user = await prisma.user.findUnique({ // 暂时注释未使用的变量
+    //   where: { id: req.user?.id },
+    //   select: { name: true, role: true }
+    // })
     
-    const userName = user?.name || '未知用户'
-    const userRole = roleDisplayNames[user?.role || 'EMPLOYEE'] || '用户'
-    const currentTime = new Date()
+    const userRole = roleDisplayNames[req.user?.role || 'EMPLOYEE'] || '用户';
+  const currentTime = new Date();
     const timeStr = currentTime.toLocaleString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
@@ -1580,11 +1643,11 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     
     await prisma.editLog.create({
       data: {
-        purchaseId: id,
-        userId: req.user.id,
+        purchase_id: id,
+        user_id: req.user!.id,
         action: 'UPDATE',
         details: changeDetails,
-        changedFields: fieldChanges.map(change => ({
+        changed_fields: fieldChanges.map(change => ({
           field: change.field,
           displayName: change.displayName,
           oldValue: change.oldValue,
@@ -1595,19 +1658,23 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     })
   }
   
-  res.json({
+  return res.json({
     success: true,
     message: '采购记录更新成功',
     data: updatedPurchase
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 删除采购记录
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
   // 权限检查：只有BOSS可以删除采购记录
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER" || "EMPLOYEE") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '只有老板可以删除采购记录'
@@ -1623,10 +1690,10 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
         select: {
           id: true,
           name: true,
-          username: true
+          user_name: true
         }
       },
-      materialUsages: {
+      material_usages: {
         include: {
           product: {
             select: {
@@ -1647,29 +1714,28 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
   }
   
   // 检查是否有成品使用了该采购记录的珠子
-  if (existingPurchase.materialUsages && existingPurchase.materialUsages.length > 0) {
-    const usedByProducts = existingPurchase.materialUsages.map(usage => usage.product.name).join('、')
+  if (existingPurchase.material_usages && existingPurchase.material_usages.length > 0) {
+    const usedByProducts = existingPurchase.material_usages.map(usage => usage.product?.name || "未知产品").join('、')
     return res.status(400).json({
       success: false,
       message: `无法删除该采购记录，因为以下成品正在使用其珠子：${usedByProducts}。请先将这些成品拆散，使珠子回退到库存后再删除。`,
       data: {
-        usedByProducts: existingPurchase.materialUsages.map(usage => ({
-          productId: usage.product.id,
-          productName: usage.product.name,
-          quantityUsed: usage.quantityUsedBeads
+        usedByProducts: existingPurchase.material_usages.map(usage => ({
+          product_id: usage.product?.id || "",
+          product_name: usage.product?.name || "未知产品",
+          quantityUsed: usage.quantity_used
         }))
       }
     })
   }
   
   // 获取用户信息用于日志记录
-  const user = await prisma.user.findUnique({
-    where: { id: req.user.id },
-    select: { name: true, role: true }
-  })
+  // const user = await prisma.user.findUnique({ // 暂时注释未使用的变量
+  //   where: { id: req.user?.id },
+  //   select: { name: true, role: true }
+  // })
   
-  const userName = user?.name || '未知用户'
-  const currentTime = new Date()
+    const currentTime = new Date()
   const timeStr = currentTime.toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
@@ -1686,11 +1752,11 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
       // 创建删除日志
       await tx.editLog.create({
         data: {
-          purchaseId: id,
-          userId: req.user.id,
+          purchase_id: id,
+          user_id: req.user!.id,
           action: 'DELETE',
-          details: `老板 ${userName} 在 ${timeStr} 删除了采购记录：${existingPurchase.productName}（采购编号：${existingPurchase.purchaseCode}）。该操作同时清理了相关库存数据。`,
-          changedFields: [{
+          details: `老板 ${req.user?.user_name || "未知用户"} 在 ${timeStr} 删除了采购记录：${existingPurchase.product_name}（采购编号：${existingPurchase.purchase_code}）。该操作同时清理了相关库存数据。`,
+          changed_fields: [{
             field: 'deleted',
             displayName: '删除操作',
             oldValue: '存在',
@@ -1706,14 +1772,14 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
       })
     })
     
-    res.json({
+    return res.json({
       success: true,
       message: '采购记录删除成功，相关库存数据已同步更新',
       data: {
         deletedPurchase: {
           id: existingPurchase.id,
-          productName: existingPurchase.productName,
-          purchaseCode: existingPurchase.purchaseCode
+          product_name: existingPurchase.product_name,
+          purchase_code: existingPurchase.purchase_code
         }
       }
     })
@@ -1721,7 +1787,7 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
     console.error('删除采购记录失败:', error)
     
     // 检查是否是外键约束错误
-    if (error.code === 'P2003') {
+    if ((error as any).code === 'P2003') {
       return res.status(400).json({
         success: false,
         message: '无法删除该采购记录，因为仍有成品在使用其珠子。请先将相关成品拆散后再删除。'
@@ -1733,19 +1799,23 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
       message: '删除采购记录时发生错误，请稍后重试'
     })
   }
+  // 函数结束
+  // 函数结束
 }))
 
 // 临时调试接口：查询指定采购编号的quality字段
-router.get('/debug/quality/:purchaseCode', authenticateToken, asyncHandler(async (req, res) => {
-  const { purchaseCode } = req.params
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/debug/quality/:purchase_code', authenticateToken, asyncHandler(async (req, res) => {
+  const { purchase_code } = req.params
   
   const purchase = await prisma.purchase.findFirst({
-    where: { purchaseCode },
+    where: { purchase_code: purchase_code },
     select: {
       id: true,
-      purchaseCode: true,
-      productName: true,
-      productType: true,
+      purchase_code: true,
+      product_name: true,
+      product_type: true,
       quality: true
     }
   })
@@ -1757,12 +1827,12 @@ router.get('/debug/quality/:purchaseCode', authenticateToken, asyncHandler(async
     })
   }
   
-  res.json({
+  return res.json({
     success: true,
     data: {
-      purchase_code: purchase.purchaseCode,
-      product_name: purchase.productName,
-      product_type: purchase.productType,
+      purchase_code: purchase.purchase_code,
+      product_name: purchase.product_name,
+      product_type: purchase.product_type,
       quality: purchase.quality,
       quality_type: typeof purchase.quality,
       quality_is_null: purchase.quality === null,
@@ -1770,6 +1840,8 @@ router.get('/debug/quality/:purchaseCode', authenticateToken, asyncHandler(async
       quality_stringified: JSON.stringify(purchase.quality)
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 export default router

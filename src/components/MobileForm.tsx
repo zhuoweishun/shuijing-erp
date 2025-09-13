@@ -10,12 +10,12 @@ interface MobileFormProps {
 }
 
 export function MobileForm({ children, className = '', on_submit }: MobileFormProps) {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   
   return (
     <form 
       onSubmit={on_submit}
-      className={`space-mobile-lg ${isMobile ? 'pb-20' : ''} ${className}`}
+      className={`space-mobile-lg ${is_mobile ? 'pb-20' : ''} ${className}`}
     >
       {children}
     </form>
@@ -56,7 +56,7 @@ export function MobileInput({
   auto_complete,
   input_mode
 }: MobileInputProps) {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   
   return (
     <div className="space-mobile-sm">
@@ -77,7 +77,7 @@ export function MobileInput({
         inputMode={input_mode}
         className={`input-mobile ${error ? 'border-red-300 bg-red-50' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         style={{
-          fontSize: isMobile ? '16px' : '14px' // 防止iOS缩放
+          fontSize: is_mobile ? '16px' : '14px' // 防止iOS缩放
         }}
       />
       {error && (
@@ -166,7 +166,7 @@ export function MobileTextarea({
   disabled = false,
   maxLength
 }: MobileTextareaProps) {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   
   return (
     <div className="space-mobile-sm">
@@ -182,8 +182,8 @@ export function MobileTextarea({
         maxLength={maxLength}
         className={`textarea-mobile ${error ? 'border-red-300 bg-red-50' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         style={{
-          fontSize: isMobile ? '16px' : '14px', // 防止iOS缩放
-          minHeight: isMobile ? '120px' : '100px'
+          fontSize: is_mobile ? '16px' : '14px', // 防止iOS缩放
+          minHeight: is_mobile ? '120px' : '100px'
         }}
       />
       <div className="flex justify-between items-center">

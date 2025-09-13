@@ -321,7 +321,7 @@ export class ErrorHandler {
       },
       user_agent: navigator.userAgent,
       url: window.location.href,
-      user_id: localStorage.get_item('')
+      user_id: localStorage.getItem('')
     }
     
     // 根据环境控制日志输出级别

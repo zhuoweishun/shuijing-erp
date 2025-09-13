@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
-import { authenticate_token } from '../middleware/auth.js'
+import { authenticateToken } from '../middleware/auth.js'
 import { prisma } from '../lib/prisma.js'
 import { z } from 'zod'
-import { convertToApiFormat, convertFromApiFormat } from '../utils/fieldConverter.js'
+// 移除fieldConverter导入，直接使用snake_case
 
 const router = Router()
 
@@ -28,7 +28,9 @@ const statisticsQuerySchema = z.object({
 })
 
 // 财务记录路由 - 包含采购支出、制作成本和销毁退回记录
-router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
   const query = financialQuerySchema.parse(req.query)
   const page = parseInt(query.page || '1')
   const limit = parseInt(query.limit || '20')
@@ -57,7 +59,7 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
   })
 
   // 获取SKU制作记录
-  const skuCreations = await prisma.product_sku.findMany({
+  const skuCreations = await prisma.productSku.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { created_at: timeWhere } : {})
     },
@@ -67,7 +69,7 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
   })
 
   // 获取补货操作记录（从库存变更日志中获取）
-  const restockLogs = await prisma.sku_inventory_log.findMany({
+  const restockLogs = await prisma.skuInventoryLog.findMany({
     where: {
       action: 'ADJUST',
       notes: {
@@ -76,34 +78,31 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
       ...(Object.keys(timeWhere).length > 0 ? { created_at: timeWhere } : {})
     },
     include: {
-      sku: { select: { sku_code: true, sku_name: true } },
       user: { select: { id: true, user_name: true, name: true } }
     }
   })
-
-  // 销毁记录不再涉及财务 - 已移除相关查询
 
   // 获取财务记录（销售收入和退货记录）
-  const financial_records = await prisma.financial_record.findMany({
-    where: {
-      record_type: {
-        in: ['INCOME', 'REFUND']
-      },
-      ...(Object.keys(timeWhere).length > 0 ? { transaction_date: timeWhere } : {})
-    },
-    include: {
-      user: { select: { id: true, user_name: true, name: true } }
-    }
-  })
+  // const financial_records = await prisma.financialRecords.findMany({
+  //   where: {
+  //     record_type: {
+  //       in: ['INCOME', 'REFUND']
+  //     },
+  //     ...(Object.keys(timeWhere).length > 0 ? { transaction_date: timeWhere } : {})
+  //   },
+  //   include: {
+  //     users: { select: { id: true, user_name: true, name: true } }
+  //   }
+  // })
 
   // 获取客户购买记录（销售收入）
-  const customerPurchases = await prisma.customer_purchase.findMany({
+  const customerPurchases = await prisma.customerPurchases.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { purchase_date: timeWhere } : {})
     },
     include: {
-      customer: { select: { name: true } },
-      sku: { select: { sku_name: true, sku_code: true } }
+      customers: { select: { name: true } },
+      product_skus: { select: { sku_name: true, sku_code: true } }
     }
   })
 
@@ -133,11 +132,11 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
       const labor_cost = Number(sku.labor_cost || 0)
       const craft_cost = Number(sku.craft_cost || 0)
       const quantity = Number(sku.total_quantity || 0)
-      const total_cost = (labor_cost + craft_cost) * quantity
+      const total_price = (labor_cost + craft_cost) * quantity
       return {
         id: `production_${sku.id}`,
         record_type: 'EXPENSE',
-        amount: total_cost,
+        amount: total_price,
         description: `制作成本 - ${sku.sku_name}`,
         reference_type: 'PRODUCTION',
         reference_id: sku.id,
@@ -154,22 +153,22 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
       }
     }),
     // 补货制作成本记录
-    ...restockLogs.map(log => {
+    ...restockLogs.map((log: any) => {
       // 从notes中提取成本信息
       const notes = log.notes || ''
       const laborCostMatch = notes.match(/人工成本: ¥([\d.]+)/)
       const craftCostMatch = notes.match(/工艺成本: ¥([\d.]+)/)
-      const materialCostMatch = notes.match(/消耗原材料成本: ¥([\d.]+)/)
+      // const materialCostMatch = notes.match(/消耗原材料成本: ¥([\d.]+)/)
       
       const labor_cost = laborCostMatch ? Number(laborCostMatch[1]) : 0
       const craft_cost = craftCostMatch ? Number(craftCostMatch[1]) : 0
-      const material_cost = materialCostMatch ? Number(materialCostMatch[1]) : 0
-      const total_cost = labor_cost + craft_cost
+      // const material_cost = materialCostMatch ? Number(materialCostMatch[1]) : 0
+      const total_price = labor_cost + craft_cost
       
       return {
         id: `restock_${log.id}`,
         record_type: 'EXPENSE',
-        amount: total_cost,
+        amount: total_price,
         description: `补货制作成本 - ${log.sku.sku_name}`,
         reference_type: 'RESTOCK',
         reference_id: log.id,
@@ -184,34 +183,34 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
           real_name: log.user.name
         } : null
       }
-    }).filter(record => record.amount > 0), // 只包含有成本的记录
+    }).filter((record: any) => record.amount > 0), // 只包含有成本的记录
     // 销毁退回不涉及财务 - 已移除
     // 客户购买收入记录
-    ...customerPurchases.filter(purchase => purchase.status === 'ACTIVE').map(purchase => ({
+    ...customerPurchases.filter((purchase: any) => purchase.status === 'ACTIVE').map((purchase: any) => ({
       id: `customer_sale_${purchase.id}`,
       record_type: 'INCOME',
       amount: Number(purchase.total_price),
-      description: `销售收入 - ${purchase.sku.sku_name}`,
+      description: `销售收入 - ${purchase.product_skus.sku_name}`,
       reference_type: 'CUSTOMER_SALE',
       reference_id: purchase.id,
       category: '销售收入',
       transaction_date: purchase.purchase_date.toISOString().split('T')[0],
-      notes: `客户: ${purchase.customer.name}, SKU编码: ${purchase.sku.sku_code}, 数量: ${purchase.quantity}件, 单价: ¥${Number(purchase.unit_price).toFixed(2)}`,
+      notes: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 数量: ${purchase.quantity}件, 单价: ¥${Number(purchase.unit_price).toFixed(2)}`,
       created_at: purchase.created_at,
       updated_at: purchase.updated_at,
       user: null
     })),
     // 客户退货记录
-    ...customerPurchases.filter(purchase => purchase.status === 'REFUNDED').map(purchase => ({
+    ...customerPurchases.filter((purchase: any) => purchase.status === 'REFUNDED').map((purchase: any) => ({
       id: `customer_refund_${purchase.id}`,
       record_type: 'REFUND',
       amount: Number(purchase.total_price),
-      description: `客户退货退款 - ${purchase.sku.sku_name}`,
+      description: `客户退货退款 - ${purchase.product_skus.sku_name}`,
       reference_type: 'CUSTOMER_REFUND',
       reference_id: purchase.id,
       category: '客户退货',
       transaction_date: purchase.refund_date ? purchase.refund_date.toISOString().split('T')[0] : purchase.purchase_date.toISOString().split('T')[0],
-      notes: `客户: ${purchase.customer.name}, SKU编码: ${purchase.sku.sku_code}, 退货数量: ${purchase.quantity}件, 退款金额: ¥${Number(purchase.total_price).toFixed(2)}${purchase.refund_reason ? `, 退货原因: ${purchase.refund_reason}` : ''}`,
+      notes: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 退货数量: ${purchase.quantity}件, 退款金额: ¥${Number(purchase.total_price).toFixed(2)}${purchase.refund_reason ? `, 退货原因: ${purchase.refund_reason}` : ''}`,
       created_at: purchase.refund_date || purchase.created_at,
       updated_at: purchase.updated_at,
       user: null
@@ -240,7 +239,7 @@ router.get('/records', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 流水账路由 - 与records路由功能相同，但返回格式符合前端期望
-router.get('/transactions', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => {
   const query = financialQuerySchema.parse(req.query)
   const page = parseInt(query.page || '1')
   const limit = parseInt(query.limit || '20')
@@ -269,7 +268,7 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
   })
 
   // 获取SKU制作记录
-  const skuCreations = await prisma.product_sku.findMany({
+  const skuCreations = await prisma.productSku.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { created_at: timeWhere } : {})
     },
@@ -279,7 +278,7 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
   })
 
   // 获取补货操作记录（从库存变更日志中获取）
-  const restockLogs = await prisma.sku_inventory_log.findMany({
+  const restockLogs = await prisma.skuInventoryLog.findMany({
     where: {
       action: 'ADJUST',
       notes: {
@@ -288,28 +287,25 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
       ...(Object.keys(timeWhere).length > 0 ? { created_at: timeWhere } : {})
     },
     include: {
-      sku: { select: { sku_code: true, sku_name: true } },
       user: { select: { id: true, user_name: true, name: true } }
     }
   })
 
-  // 销毁记录不再涉及财务 - 已移除相关查询
-
   // 获取财务记录（销售收入和退货记录）
-  const financial_records = await prisma.financial_record.findMany({
+  const financial_records = await prisma.financialRecords.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { transaction_date: timeWhere } : {})
     }
   })
 
   // 获取客户购买记录（销售收入）
-  const customerPurchases = await prisma.customer_purchase.findMany({
+  const customerPurchases = await prisma.customerPurchases.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { purchase_date: timeWhere } : {})
     },
     include: {
-      customer: { select: { name: true } },
-      sku: { select: { sku_name: true, sku_code: true } }
+      customers: { select: { name: true } },
+      product_skus: { select: { sku_name: true, sku_code: true } }
     }
   })
 
@@ -320,7 +316,7 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
       // 格式化规格显示（根据产品类型使用正确的字段）
       let specificationDisplay = '无';
       
-      switch (purchase.material_type) {
+      switch (purchase.product_type) {
         case 'LOOSE_BEADS':
         case 'BRACELET':
           // 散珠和手串使用bead_diameter字段
@@ -355,7 +351,7 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
       
       // 根据产品类型使用不同的数量字段
       let qty = null;
-      switch (purchase.material_type) {
+      switch (purchase.product_type) {
         case 'BRACELET':
           // 手串使用quantity字段
           qty = purchase.quantity;
@@ -365,28 +361,28 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
           break;
         case 'LOOSE_BEADS':
           // 散珠使用piece_count字段
-          qty = purchase.piece_count;
+          qty = purchase?.piece_count;
           if (qty) {
             quantityDisplay = `数量: ${qty}颗`;
           }
           break;
         case 'ACCESSORIES':
           // 配件使用piece_count字段
-          qty = purchase.piece_count;
+          qty = purchase?.piece_count;
           if (qty) {
             quantityDisplay = `数量: ${qty}片`;
           }
           break;
         case 'FINISHED':
           // 成品使用piece_count字段
-          qty = purchase.piece_count;
+          qty = purchase?.piece_count;
           if (qty) {
             quantityDisplay = `数量: ${qty}件`;
           }
           break;
         default:
           // 其他类型优先使用quantity，其次使用piece_count
-          qty = purchase.quantity || purchase.piece_count;
+          qty = purchase.quantity || purchase?.piece_count;
           if (qty) {
             quantityDisplay = `数量: ${qty}`;
           }
@@ -422,12 +418,12 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
       const labor_cost = Number(sku.labor_cost || 0)
       const craft_cost = Number(sku.craft_cost || 0)
       const quantity = Number(sku.total_quantity || 0)
-      const total_cost = (labor_cost + craft_cost) * quantity
+      const total_price = (labor_cost + craft_cost) * quantity
       return {
         id: `production_${sku.id}`,
         type: 'expense' as const,
         category: 'production' as const,
-        amount: total_cost,
+        amount: total_price,
         description: `制作成本 - ${sku.sku_name}`,
         details: `SKU编码: ${sku.sku_code}, 人工成本: ¥${labor_cost.toFixed(2)}, 工艺成本: ¥${craft_cost.toFixed(2)}, 数量: ${quantity}件`,
         reference_id: sku.id,
@@ -437,23 +433,23 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
       }
     }),
     // 补货制作成本记录
-    ...restockLogs.map(log => {
+    ...restockLogs.map((log: any) => {
       // 从notes中提取成本信息
       const notes = log.notes || ''
       const laborCostMatch = notes.match(/人工成本: ¥([\d.]+)/)
       const craftCostMatch = notes.match(/工艺成本: ¥([\d.]+)/)
-      const materialCostMatch = notes.match(/消耗原材料成本: ¥([\d.]+)/)
+      // const materialCostMatch = notes.match(/消耗原材料成本: ¥([\d.]+)/)
       
       const labor_cost = laborCostMatch ? Number(laborCostMatch[1]) : 0
       const craft_cost = craftCostMatch ? Number(craftCostMatch[1]) : 0
-      const material_cost = materialCostMatch ? Number(materialCostMatch[1]) : 0
-      const total_cost = labor_cost + craft_cost
+      // const material_cost = materialCostMatch ? Number(materialCostMatch[1]) : 0
+      const total_price = labor_cost + craft_cost
       
       return {
         id: `restock_${log.id}`,
         type: 'expense' as const,
         category: 'production' as const,
-        amount: total_cost,
+        amount: total_price,
         description: `补货制作成本 - ${log.sku.sku_name}`,
         details: `SKU编码: ${log.sku.sku_code}, 补货数量: ${log.quantity_change}件, 人工成本: ¥${labor_cost.toFixed(2)}, 工艺成本: ¥${craft_cost.toFixed(2)}`,
         reference_id: log.id,
@@ -461,36 +457,36 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
         transaction_date: log.created_at.toISOString().split('T')[0],
         created_at: log.created_at.toISOString()
       }
-    }).filter(record => record.amount > 0), // 只包含有成本的记录
+    }).filter((record: any) => record.amount > 0), // 只包含有成本的记录
     // 销毁退回不涉及财务 - 已移除
     // 客户购买收入记录
-    ...customerPurchases.filter(purchase => purchase.status === 'ACTIVE').map(purchase => ({
+    ...customerPurchases.filter((purchase: any) => purchase.status === 'ACTIVE').map((purchase: any) => ({
       id: `customer_sale_${purchase.id}`,
       type: 'income' as const,
       category: 'sale' as const,
       amount: Number(purchase.total_price),
-      description: `销售收入 - ${purchase.sku.sku_name}`,
-      details: `客户: ${purchase.customer.name}, SKU编码: ${purchase.sku.sku_code}, 数量: ${purchase.quantity}件, 单价: ¥${Number(purchase.unit_price).toFixed(2)}`,
+      description: `销售收入 - ${purchase.product_skus.sku_name}`,
+      details: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 数量: ${purchase.quantity}件, 单价: ¥${Number(purchase.unit_price).toFixed(2)}`,
       reference_id: purchase.id,
       reference_type: 'CUSTOMER_SALE' as const,
       transaction_date: purchase.purchase_date.toISOString().split('T')[0],
       created_at: purchase.created_at.toISOString()
     })),
     // 客户退货记录
-    ...customerPurchases.filter(purchase => purchase.status === 'REFUNDED').map(purchase => ({
+    ...customerPurchases.filter((purchase: any) => purchase.status === 'REFUNDED').map((purchase: any) => ({
       id: `customer_refund_${purchase.id}`,
       type: 'expense' as const,
       category: 'refund' as const,
       amount: Number(purchase.total_price),
-      description: `客户退货退款 - ${purchase.sku.sku_name}`,
-      details: `客户: ${purchase.customer.name}, SKU编码: ${purchase.sku.sku_code}, 退货数量: ${purchase.quantity}件, 退款金额: ¥${Number(purchase.total_price).toFixed(2)}${purchase.refund_reason ? `, 退货原因: ${purchase.refund_reason}` : ''}`,
+      description: `客户退货退款 - ${purchase.product_skus.sku_name}`,
+      details: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 退货数量: ${purchase.quantity}件, 退款金额: ¥${Number(purchase.total_price).toFixed(2)}${purchase.refund_reason ? `, 退货原因: ${purchase.refund_reason}` : ''}`,
       reference_id: purchase.id,
       reference_type: 'CUSTOMER_REFUND' as const,
       transaction_date: purchase.refund_date ? purchase.refund_date.toISOString().split('T')[0] : purchase.purchase_date.toISOString().split('T')[0],
       created_at: purchase.refund_date ? purchase.refund_date.toISOString() : purchase.created_at.toISOString()
     })),
     // 财务记录（其他销售收入和退货记录）
-    ...financial_records.map(record => {
+    ...financial_records.map((record: any) => {
       // 根据reference_type和description来确定正确的显示标签
       let displayDescription = record.description
       if (record.record_type === 'REFUND') {
@@ -555,16 +551,22 @@ router.get('/transactions', authenticate_token, asyncHandler(async (req, res) =>
 }))
 
 // 根路径重定向到records
-router.get('/', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/debug', authenticateToken, asyncHandler(async (req, res) => {
   // 重定向到 /records 路由
   const queryString = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''
   res.redirect(`/api/v1/financial/records${queryString}`)
+  // 函数结束
+  // 函数结束
 }))
 
 
 
 // 财务概览路由 - 统计采购支出和制作成本
-router.get('/overview', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/overview', authenticateToken, asyncHandler(async (req, res) => {
   const { timeRange = 'month' } = req.query
   
   let start_date: Date
@@ -590,7 +592,7 @@ router.get('/overview', authenticate_token, asyncHandler(async (req, res) => {
   })
   
   // 统计制作成本支出（人工成本+工艺成本）×制作数量
-  const productionCosts = await prisma.product_sku.findMany({
+  const productionCosts = await prisma.productSku.findMany({
     where: {
       created_at: {
         gte: start_date,
@@ -631,7 +633,9 @@ router.get('/overview', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 财务概览 - 月度和年度统计（包含制作成本）
-router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res) => {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfYear = new Date(now.getFullYear(), 0, 1)
@@ -661,7 +665,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   })
 
   // 获取本月制作成本
-  const monthlyProductionCosts = await prisma.product_sku.findMany({
+  const monthlyProductionCosts = await prisma.productSku.findMany({
     where: {
       created_at: {
         gte: startOfMonth
@@ -675,7 +679,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   })
 
   // 获取年度制作成本
-  const yearlyProductionCosts = await prisma.product_sku.findMany({
+  const yearlyProductionCosts = await prisma.productSku.findMany({
     where: {
       created_at: {
         gte: startOfYear
@@ -711,7 +715,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   const yearlyTotalExpense = yearlyPurchaseAmount + yearlyProductionExpense
 
   // 获取本月销售收入（从财务记录中）
-  const monthlyIncomeRecords = await prisma.financial_record.aggregate({
+  const monthlyIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -724,7 +728,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   })
 
   // 获取年度销售收入（从财务记录中）
-  const yearlyIncomeRecords = await prisma.financial_record.aggregate({
+  const yearlyIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -737,7 +741,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   })
 
   // 获取本月退款金额（从财务记录中）
-  const monthlyRefundRecords = await prisma.financial_record.aggregate({
+  const monthlyRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -750,7 +754,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   })
 
   // 获取年度退款金额（从财务记录中）
-  const yearlyRefundRecords = await prisma.financial_record.aggregate({
+  const yearlyRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -773,7 +777,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
   // 获取今日数据
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  const todayIncomeRecords = await prisma.financial_record.aggregate({
+  const todayIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -785,7 +789,7 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
     }
   })
 
-  const todayRefundRecords = await prisma.financial_record.aggregate({
+  const todayRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -839,16 +843,15 @@ router.get('/overview/summary', authenticate_token, asyncHandler(async (req, res
 }))
 
 // 财务统计路由 - 兼容前端调用
-router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
-  // 使用convertFromApiFormat转换前端传来的snake_case参数为camelCase
-  const convertedQuery = convertFromApiFormat(req.query)
-  
-  // 解析参数
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
+  // 直接解析参数，无需转换
   const query = statisticsQuerySchema.parse({
-    start_date: req.query.start_date || convertedQuery.start_date,
-    end_date: req.query.end_date || convertedQuery.end_date,
-    groupBy: req.query.groupBy || convertedQuery.groupBy || 'day',
-    period: req.query.period || convertedQuery.period
+    start_date: req.query.start_date as string,
+    end_date: req.query.end_date as string,
+    groupBy: (req.query.groupBy as string) || 'day',
+    period: req.query.period as string
   })
   
   // 默认查询最近30天
@@ -856,8 +859,10 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
   const start_date = query.start_date ? new Date(query.start_date) : new Date(end_date.getTime() - 30 * 24 * 60 * 60 * 1000)
   const groupBy = query.groupBy || 'day'
 
-  // 获取时间范围内的采购记录
-  const purchases = await prisma.purchase.findMany({
+  // 获取所有相关数据
+  const [purchases, productionCosts, destroyRefunds] = await Promise.all([
+  // 获取采购记录
+  prisma.purchase.findMany({
     where: {
       purchase_date: {
         gte: start_date,
@@ -867,10 +872,9 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
     orderBy: {
       purchase_date: 'asc'
     }
-  })
-
+  }),
   // 获取时间范围内的制作成本
-  const productionCosts = await prisma.product_sku.findMany({
+  prisma.productSku.findMany({
     where: {
       created_at: {
         gte: start_date,
@@ -883,10 +887,9 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
       total_quantity: true,
       created_at: true
     }
-  })
-
+  }),
   // 获取时间范围内的销毁退回
-  const destroyRefunds = await prisma.sku_inventory_log.findMany({
+  prisma.skuInventoryLog.findMany({
     where: {
       action: 'DESTROY',
       created_at: {
@@ -897,17 +900,20 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
     include: {
       sku: {
         select: {
+          sku_name: true,
+          sku_code: true,
           craft_cost: true
         }
       }
     }
   })
+])
 
   // 按时间分组统计
   const groupedData = new Map()
   
   // 统计采购支出
-  purchases.forEach(purchase => {
+  purchases.forEach((purchase: any) => {
     const date = new Date(purchase.purchase_date)
     let key: string
     
@@ -934,7 +940,7 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
   })
 
   // 统计制作成本支出
-  productionCosts.forEach(sku => {
+  productionCosts.forEach((sku: any) => {
     const date = new Date(sku.created_at)
     let key: string
     
@@ -964,7 +970,7 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
   })
 
   // 统计销毁退回
-  destroyRefunds.forEach(log => {
+  destroyRefunds.forEach((log: any) => {
     const date = new Date(log.created_at)
     let key: string
     
@@ -1033,7 +1039,9 @@ router.get('/statistics', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 财务统计数据 - 包含采购和制作成本
-router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) => {
   const query = statisticsQuerySchema.parse(req.query)
   
   // 默认查询最近30天
@@ -1055,7 +1063,7 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
   })
 
   // 获取时间范围内的制作成本
-  const productionCosts = await prisma.product_sku.findMany({
+  const productionCosts = await prisma.productSku.findMany({
     where: {
       created_at: {
         gte: start_date,
@@ -1071,7 +1079,7 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
   })
 
   // 获取时间范围内的销毁退回
-  const destroyRefunds = await prisma.sku_inventory_log.findMany({
+  const destroyRefunds = await prisma.skuInventoryLog.findMany({
     where: {
       action: 'DESTROY',
       created_at: {
@@ -1082,6 +1090,8 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
     include: {
       sku: {
         select: {
+          sku_name: true,
+          sku_code: true,
           craft_cost: true
         }
       }
@@ -1149,7 +1159,7 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
   })
 
   // 统计销毁退回
-  destroyRefunds.forEach(log => {
+  destroyRefunds.forEach((log: any) => {
     const date = new Date(log.created_at)
     let key: string
     
@@ -1191,7 +1201,7 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
 
   // 按产品类型统计采购支出
   const expenseByCategory = await prisma.purchase.groupBy({
-    by: ['material_type'],
+    by: ['product_type'],
     where: {
       purchase_date: {
         gte: start_date,
@@ -1228,7 +1238,7 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
       net_profit: total_income - total_expense - total_refund - total_loss,
       incomeByCategory: [], // 目前没有收入分类
       expenseByCategory: expenseByCategory.map(item => ({
-        category: item.material_type || '未分类',
+        category: item.product_type || '未分类',
         amount: item._sum?.total_price || 0
       }))
     }
@@ -1236,7 +1246,9 @@ router.get('/statistics/data', authenticate_token, asyncHandler(async (req, res)
 }))
 
 // 获取库存状况统计
-router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res) => {
+  // 默认返回
+  //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
+router.get('/inventory/status', authenticateToken, asyncHandler(async (req, res) => {
   const query = inventoryQuerySchema.parse(req.query)
   const stale_period_months = parseInt(query.stalePeriod)
   
@@ -1252,7 +1264,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
     select: {
       id: true,
       product_name: true,
-      total_price: true,
+      // total_price: true, // 字段不存在，已注释
       quantity: true,
       piece_count: true,
       created_at: true,
@@ -1265,8 +1277,9 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
   let staleMaterialCost = 0
   let staleMaterialCount = 0
   
-  material_inventory.forEach(material => {
-    const cost = Number(material.total_price || 0)
+  material_inventory.forEach((material: any) => {
+    // total_price字段已移除，使用0作为默认值
+    const cost = 0 // Number(material.total_price || 0)
     totalMaterialCost += cost
     
     // 判断是否为滞销（基于最后更新时间）
@@ -1278,7 +1291,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
   })
   
   // 2. 计算剩余SKU库存成本
-  const sku_inventory = await prisma.product_sku.findMany({
+  const sku_inventory = await prisma.productSku.findMany({
     where: {
       status: 'ACTIVE',
       available_quantity: {
@@ -1290,7 +1303,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
       sku_code: true,
       sku_name: true,
       available_quantity: true,
-      total_cost: true,
+      // total_price: true, // 字段不存在，已注释
       material_cost: true,
       labor_cost: true,
       craft_cost: true,
@@ -1315,7 +1328,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
   let staleSkuCost = 0
   let staleSkuCount = 0
   
-  sku_inventory.forEach(sku => {
+  sku_inventory.forEach((sku: any) => {
     const availableQty = Number(sku.available_quantity || 0)
     const material_cost = Number(sku.material_cost || 0)
     const labor_cost = Number(sku.labor_cost || 0)
@@ -1323,8 +1336,8 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
     
     // 计算单个SKU的成本
     const unit_cost = material_cost + labor_cost + craft_cost
-    const total_cost = unit_cost * availableQty
-    totalSkuCost += total_cost
+    const total_price = unit_cost * availableQty
+    totalSkuCost += total_price
     
     // 判断是否为滞销（基于最后销售或调整时间）
     let lastActivityDate = sku.created_at
@@ -1333,7 +1346,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
     }
     
     if (lastActivityDate < stale_threshold_date) {
-      staleSkuCost += total_cost
+      staleSkuCost += total_price
       staleSkuCount += 1
     }
   })
@@ -1351,7 +1364,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
       
       // 原材料库存
       material_inventory: {
-        total_cost: totalMaterialCost,
+        total_price: totalMaterialCost,
         stale_cost: staleMaterialCost,
         stale_count: staleMaterialCount,
         total_count: material_inventory.length,
@@ -1360,7 +1373,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
       
       // SKU库存
       sku_inventory: {
-        total_cost: totalSkuCost,
+        total_price: totalSkuCost,
         stale_cost: staleSkuCost,
         stale_count: staleSkuCount,
         total_count: sku_inventory.length,
@@ -1369,7 +1382,7 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
       
       // 总计
       total_inventory: {
-        total_cost: totalInventoryCost,
+        total_price: totalInventoryCost,
         stale_cost: totalStaleInventoryCost,
         stale_count: staleMaterialCount + staleSkuCount,
         total_count: material_inventory.length + sku_inventory.length,
@@ -1377,6 +1390,8 @@ router.get('/inventory/status', authenticate_token, asyncHandler(async (req, res
       }
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 export default router

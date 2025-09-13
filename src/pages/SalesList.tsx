@@ -114,7 +114,7 @@ interface SalesListState { sku_list: SkuItem[]
 
 export default function SalesList() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { is_authenticated } = useAuth()
   const { is_mobile } = useDeviceDetection()
   const permissions = use_sku_permissions()
   
@@ -272,10 +272,10 @@ export default function SalesList() {
 
   // 初始加载（仅在组件首次挂载时加载）
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       fetchSkuList()
     }
-  }, [isAuthenticated])
+  }, [is_authenticated])
 
   // 立即应用筛选
   const apply_filters_immediately = useCallback((newFilters: any, newSorting?: any) => {
@@ -475,7 +475,7 @@ export default function SalesList() {
   // }
 
   // 如果未认证，显示登录提示
-  if (!isAuthenticated) {
+  if (!is_authenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

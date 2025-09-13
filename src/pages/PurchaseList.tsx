@@ -75,7 +75,7 @@ declare global {
 
 interface PurchaseListState {
   purchases: Purchase[]
-  isLoading: boolean
+  is_loading: boolean
   error: string | null
   pagination: {
     current_page: number
@@ -125,14 +125,14 @@ interface PurchaseListState {
   }
   // Excel导出状态
   export_excel: {
-    isLoading: boolean
+    is_loading: boolean
     error: string | null
   }
 }
 
 export default function PurchaseList() {
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user, is_authenticated } = useAuth()
   const { is_mobile } = useDeviceDetection()
   
   // 格式化产品类型
@@ -181,7 +181,7 @@ export default function PurchaseList() {
   
   const [state, setState] = useState<PurchaseListState>({
     purchases: [],
-    isLoading: true,
+    is_loading: true,
     error: null,
     pagination: {
       current_page: 1,
@@ -237,7 +237,7 @@ export default function PurchaseList() {
       alt_text: null
     },
     export_excel: {
-      isLoading: false,
+      is_loading: false,
       error: null
     }
   })
@@ -276,7 +276,7 @@ export default function PurchaseList() {
   // 获取采购列表
   const fetch_purchases = async (custom_params?: any) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }))
+      setState(prev => ({ ...prev, is_loading: true, error: null }))
       
       const currentState = custom_params || state
       const params: any = {
@@ -365,19 +365,19 @@ export default function PurchaseList() {
             total_count: data.pagination?.total || 0,
             total_pages: data.pagination?.pages || 0
           },
-          isLoading: false
+          is_loading: false
         }))
       } else {
         setState(prev => ({
           ...prev,
           error: response.message || '获取数据失败',
-          isLoading: false
+          is_loading: false
         }))
       }
     } catch (error) {
       setState(prev => ({
         ...prev,
-        isLoading: false,
+        is_loading: false,
         error: error instanceof Error ? error.message : '获取采购列表失败'
       }))
     }
@@ -421,18 +421,18 @@ export default function PurchaseList() {
 
   // 初始加载（仅在组件首次挂载时加载）
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       fetch_purchases()
       fetch_all_suppliers() // 同时获取所有供应商数据
     }
-  }, [isAuthenticated])
+  }, [is_authenticated])
   
   // 监听分页变化，确保页码和每页条数变化时重新获取数据
   useEffect(() => {
-    if (isAuthenticated) {
+    if (is_authenticated) {
       fetch_purchases()
     }
-  }, [state.pagination.current_page, state.pagination.page_size, isAuthenticated])
+  }, [state.pagination.current_page, state.pagination.page_size, is_authenticated])
   
   // 移除自动触发机制，恢复手动点击"应用"按钮的交互方式
 
@@ -597,7 +597,7 @@ export default function PurchaseList() {
   const handle_export_excel = async () => {
     setState(prev => ({
       ...prev,
-      export_excel: { isLoading: true, error: null }
+      export_excel: { is_loading: true, error: null }
     }))
     
     try {
@@ -659,7 +659,7 @@ export default function PurchaseList() {
       }
       
       // 获取token
-      const token = localStorage.get_item('auth_token')
+      const token = localStorage.getItem('auth_token')
       if (!token) {
         throw new Error('未找到认证token')
       }
@@ -706,7 +706,7 @@ export default function PurchaseList() {
       
       setState(prev => ({
         ...prev,
-        export_excel: { isLoading: false, error: null }
+        export_excel: { is_loading: false, error: null }
       }))
       
     } catch (error) {
@@ -714,7 +714,7 @@ export default function PurchaseList() {
       setState(prev => ({
         ...prev,
         export_excel: {
-          isLoading: false,
+          is_loading: false,
           error: error instanceof Error ? error.message : '导出失败'
         }
       }))
@@ -2021,15 +2021,15 @@ export default function PurchaseList() {
         <div className="flex items-center space-x-3">
           <button
             onClick={handle_export_excel}
-            disabled={state.export_excel.isLoading}
+            disabled={state.export_excel.is_loading}
             className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {state.export_excel.isLoading ? (
+            {state.export_excel.is_loading ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Download className="h-4 w-4 mr-2" />
             )}
-            {state.export_excel.isLoading ? '导出中...' : '导出Excel'}
+            {state.export_excel.is_loading ? '导出中...' : '导出Excel'}
           </button>
           <button
             onClick={() => navigate('/purchase-entry')}
@@ -2356,7 +2356,7 @@ export default function PurchaseList() {
       </div>
 
       {/* 加载状态 */}
-      {state.isLoading && (
+      {state.is_loading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           <span className="ml-2 text-gray-500">加载中...</span>
@@ -2376,7 +2376,7 @@ export default function PurchaseList() {
 
 
       {/* 未认证状态 */}
-      {!isAuthenticated && (
+      {!is_authenticated && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center">
             <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
@@ -2386,7 +2386,7 @@ export default function PurchaseList() {
       )}
 
       {/* 数据列表 */}
-      {isAuthenticated && !state.isLoading && !state.error && (
+      {is_authenticated && !state.is_loading && !state.error && (
         <>
           {state.purchases.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">

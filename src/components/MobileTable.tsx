@@ -53,7 +53,7 @@ export function MobileTable({
   onSearch,
   pagination
 }: MobileTableProps) {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const [search_value, setSearchValue] = useState('')
   const [expanded_rows, setExpandedRows] = useState<Set<string>>(new Set())
 
@@ -224,7 +224,7 @@ export function MobileTable({
 
   // 桌面端/平板端表格布局
   const renderDesktopTable = () => {
-    const visibleColumns = columns.filter(col => !col.hideOnMobile || !isMobile)
+    const visibleColumns = columns.filter(col => !col.hideOnMobile || !is_mobile)
 
     return (
       <div className="table-container-mobile">
@@ -310,7 +310,7 @@ export function MobileTable({
         </div>
       ) : (
         // 根据设备类型渲染不同布局
-        isMobile ? renderMobileCards() : renderDesktopTable()
+        is_mobile ? renderMobileCards() : renderDesktopTable()
       )}
 
       {/* 分页 */}
@@ -332,7 +332,7 @@ interface MobilePaginationProps {
 }
 
 function MobilePagination({ current, total, page_size, onChange }: MobilePaginationProps) {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const total_pages = Math.ceil(total / page_size)
   
   if (total_pages <= 1) return null
@@ -340,7 +340,7 @@ function MobilePagination({ current, total, page_size, onChange }: MobilePaginat
   const startItem = (current - 1) * page_size + 1
   const endItem = Math.min(current * page_size, total)
 
-  if (isMobile) {
+  if (is_mobile) {
     // 移动端简化分页
     return (
       <div className="flex items-center justify-between">

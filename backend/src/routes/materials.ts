@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticate_token } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 import { z } from 'zod';
 
 const router = Router();
@@ -9,13 +9,13 @@ const prisma = new PrismaClient();
 // 验证schemas
 const createMaterialSchema = z.object({
   material_name: z.string().min(1, '原材料名称不能为空'),
-  material_type: z.enum(['SEMI_FINISHED', 'FINISHED']),
+  product_type: z.enum(['BRACELET', 'FINISHED']),
   specification: z.string().optional(),
   unit: z.string().min(1, '计量单位不能为空'),
   total_quantity: z.number().int().min(0, '总数量不能为负数'),
   available_quantity: z.number().int().min(0, '可用数量不能为负数'),
   unit_cost: z.number().min(0, '单位成本不能为负数'),
-  total_cost: z.number().min(0, '总成本不能为负数'),
+  total_price: z.number().min(0, '总成本不能为负数'),
   quality: z.enum(['AA', 'A', 'AB', 'B', 'C']).optional(),
   photos: z.array(z.string()).optional(),
   notes: z.string().optional(),
@@ -28,24 +28,24 @@ const updateMaterialSchema = z.object({
   unit: z.string().min(1, '计量单位不能为空').optional(),
   available_quantity: z.number().int().min(0, '可用数量不能为负数').optional(),
   unit_cost: z.number().min(0, '单位成本不能为负数').optional(),
-  total_cost: z.number().min(0, '总成本不能为负数').optional(),
+  total_price: z.number().min(0, '总成本不能为负数').optional(),
   quality: z.enum(['AA', 'A', 'AB', 'B', 'C']).optional(),
   photos: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  status: z.enum(['ACTIVE', 'DEPLETED', 'INACTIVE']).optional()
+  status: z.enum(['ACTIVE', 'USED']).optional()
 });
 
 const querySchema = z.object({
   page: z.string().optional().transform(val => val ? parseInt(val) : 1),
   limit: z.string().optional().transform(val => val ? parseInt(val) : 20),
   search: z.string().optional(),
-  material_type: z.enum(['SEMI_FINISHED', 'FINISHED']).optional(),
-  status: z.enum(['ACTIVE', 'DEPLETED', 'INACTIVE']).optional(),
+  product_type: z.enum(['BRACELET', 'FINISHED']).optional(),
+  status: z.enum(['ACTIVE', 'USED']).optional(),
   purchase_id: z.string().optional()
 });
 
 // 生成原材料编号
-function generateMaterialCode(): string {
+const generateMaterialCode = (): string => {
   const now = new Date();
   const date_str = now.toISOString().slice(0, 10).replace(/-/g, '');
   const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
@@ -53,10 +53,10 @@ function generateMaterialCode(): string {
 }
 
 // 获取原材料列表
-router.get('/', authenticate_token, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const query = querySchema.parse(req.query);
-    const { page, limit, search, material_type, status, purchase_id } = query;
+    const { page, limit, search, product_type, status, purchase_id } = query;
     const skip = (page - 1) * limit;
 
     // 构建查询条件
@@ -65,14 +65,14 @@ router.get('/', authenticate_token, async (req, res) => {
     if (search) {
       where.OR = [
         { material_name: { contains: search } },
-        { material_code: { contains: search } },
+        { id: { contains: search } },
         { specification: { contains: search } },
         { notes: { contains: search } }
       ];
     }
     
-    if (material_type) {
-      where.material_type = material_type;
+    if (product_type) {
+      where.product_type = product_type;
     }
     
     if (status) {
@@ -84,20 +84,12 @@ router.get('/', authenticate_token, async (req, res) => {
     }
 
     // 查询数据
+
     const [materials, total] = await Promise.all([
-      prisma.material.findMany({
+      prisma.purchase.findMany({
         where,
         include: {
-          purchase: {
-            select: {
-              id: true,
-              purchase_code: true,
-              product_name: true,
-              material_type: true,
-              purchase_date: true
-            }
-          },
-          creator: {
+          user: {
             select: {
               id: true,
               name: true,
@@ -114,7 +106,7 @@ router.get('/', authenticate_token, async (req, res) => {
         skip,
         take: limit
       }),
-      prisma.material.count({ where })
+      prisma.purchase.count({ where })
     ]);
 
     res.json({
@@ -134,35 +126,20 @@ router.get('/', authenticate_token, async (req, res) => {
     res.status(500).json({
       success: false,
       message: '获取原材料列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
   }
 });
 
 // 获取单个原材料详情
-router.get('/:id', authenticate_token, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const material = await prisma.material.findUnique({
+    const material = await prisma.purchase.findUnique({
       where: { id },
       include: {
-        purchase: {
-          select: {
-            id: true,
-            purchase_code: true,
-            product_name: true,
-            material_type: true,
-            purchase_date: true,
-            supplier: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
-          }
-        },
-        creator: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -170,15 +147,6 @@ router.get('/:id', authenticate_token, async (req, res) => {
           }
         },
         material_usages: {
-          include: {
-            sku: {
-              select: {
-                id: true,
-                sku_code: true,
-                sku_name: true
-              }
-            }
-          },
           orderBy: { created_at: 'desc' }
         }
       }
@@ -191,24 +159,22 @@ router.get('/:id', authenticate_token, async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: material
     });
-    return
   } catch (error) {
     console.error('获取原材料详情失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '获取原材料详情失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
-    return
   }
 });
 
 // 创建原材料（从采购记录转换）
-router.post('/', authenticate_token, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const data = createMaterialSchema.parse(req.body);
     const user_id = req.user?.id;
@@ -233,8 +199,8 @@ router.post('/', authenticate_token, async (req, res) => {
     }
 
     // 检查是否已经转换过
-    const existingMaterial = await prisma.material.findFirst({
-      where: { purchase_id: data.purchase_id }
+    const existingMaterial = await prisma.purchase.findFirst({
+      where: { id: data.purchase_id }
     });
 
     if (existingMaterial) {
@@ -251,8 +217,8 @@ router.post('/', authenticate_token, async (req, res) => {
     
     while (!isUnique && attempts < 10) {
       material_code = generateMaterialCode();
-      const existing = await prisma.material.findUnique({
-        where: { material_code: material_code }
+      const existing = await prisma.purchase.findUnique({
+        where: { id: material_code }
       });
       if (!existing) {
         isUnique = true;
@@ -268,35 +234,24 @@ router.post('/', authenticate_token, async (req, res) => {
     }
 
     // 创建原材料记录
-    const material = await prisma.material.create({
+    const material = await prisma.purchase.create({
       data: {
-        material_code: material_code!,
-        material_name: data.material_name,
-        material_type: data.material_type,
+        id: material_code!,
+        purchase_code: material_code!,
+        product_name: data.material_name,
+        product_type: data.product_type,
         specification: data.specification,
-        unit: data.unit,
-        total_quantity: data.total_quantity,
-        available_quantity: data.available_quantity,
-        used_quantity: 0,
-        unit_cost: data.unit_cost,
-        total_cost: data.total_cost,
+        quantity: data.total_quantity,
+        unit_price: data.unit_cost,
+        total_price: data.total_price,
         quality: data.quality,
         photos: data.photos || [],
         notes: data.notes,
-        purchase_id: data.purchase_id,
-        created_by: user_id
+        purchase_date: new Date(),
+        user_id: user_id
       },
       include: {
-        purchase: {
-          select: {
-            id: true,
-            purchase_code: true,
-            product_name: true,
-            material_type: true,
-            purchase_date: true
-          }
-        },
-        creator: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -307,24 +262,21 @@ router.post('/', authenticate_token, async (req, res) => {
     });
 
     // 创建原材料使用记录（CREATE操作）
-    await prisma.material_usage.create({
+    await prisma.materialUsage.create({
       data: {
         material_id: material.id,
+        purchase_id: data.purchase_id,
+        product_id: material.id,
         quantity_used: data.total_quantity,
-        unit_cost: data.unit_cost,
-        total_cost: data.total_cost,
-        action: 'CREATE',
-        notes: `从采购记录 ${purchase.purchase_code} 转换创建`,
-        purchase_id: data.purchase_id
+        notes: `从采购记录 ${purchase.purchase_code} 转换创建`
       }
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: '原材料创建成功',
       data: material
     });
-    return
   } catch (error) {
     console.error('创建原材料失败:', error);
     if (error instanceof z.ZodError) {
@@ -334,23 +286,22 @@ router.post('/', authenticate_token, async (req, res) => {
         errors: error.issues
       });
     }
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '创建原材料失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
-    return
   }
 });
 
 // 更新原材料
-router.put('/:id', authenticate_token, async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const data = updateMaterialSchema.parse(req.body);
 
     // 检查原材料是否存在
-    const existingMaterial = await prisma.material.findUnique({
+    const existingMaterial = await prisma.purchase.findUnique({
       where: { id }
     });
 
@@ -362,20 +313,11 @@ router.put('/:id', authenticate_token, async (req, res) => {
     }
 
     // 更新原材料
-    const material = await prisma.material.update({
+    const material = await prisma.purchase.update({
       where: { id },
       data,
       include: {
-        purchase: {
-          select: {
-            id: true,
-            purchase_code: true,
-            product_name: true,
-            material_type: true,
-            purchase_date: true
-          }
-        },
-        creator: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -385,12 +327,11 @@ router.put('/:id', authenticate_token, async (req, res) => {
       }
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: '原材料更新成功',
       data: material
     });
-    return
   } catch (error) {
     console.error('更新原材料失败:', error);
     if (error instanceof z.ZodError) {
@@ -400,22 +341,21 @@ router.put('/:id', authenticate_token, async (req, res) => {
         errors: error.issues
       });
     }
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '更新原材料失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
-    return
   }
 });
 
 // 删除原材料
-router.delete('/:id', authenticate_token, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
     // 检查原材料是否存在
-    const material = await prisma.material.findUnique({
+    const material = await prisma.purchase.findUnique({
       where: { id },
       include: {
         material_usages: {
@@ -444,69 +384,67 @@ router.delete('/:id', authenticate_token, async (req, res) => {
     // 删除原材料及相关记录
     await prisma.$transaction(async (tx) => {
       // 删除使用记录
-      await tx.material_usage.deleteMany({
+      await tx.materialUsage.deleteMany({
         where: { material_id: id }
       });
       
       // 删除原材料
-      await tx.material.delete({
+      await tx.purchase.delete({
         where: { id }
       });
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: '原材料删除成功'
     });
-    return
   } catch (error) {
     console.error('删除原材料失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '删除原材料失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
-    return
   }
 });
 
 // 获取原材料统计信息
-router.get('/stats/overview', authenticate_token, async (req, res) => {
+router.get('/stats/overview', authenticateToken, async (_req, res) => {
   try {
-    const [total_count, active_count, depleted_count, semi_finished_count, finished_count] = await Promise.all([
-      prisma.material.count(),
-      prisma.material.count({ where: { status: 'ACTIVE' } }),
-      prisma.material.count({ where: { status: 'DEPLETED' } }),
-      prisma.material.count({ where: { material_type: 'SEMI_FINISHED' } }),
-      prisma.material.count({ where: { material_type: 'FINISHED' } })
+    const [total_count, active_count, used_count, semi_finished_count, finished_count] = await Promise.all([
+      prisma.purchase.count(),
+      prisma.purchase.count({ where: { status: 'ACTIVE' } }),
+      prisma.purchase.count({ where: { status: 'USED' } }),
+      prisma.purchase.count({ where: { product_type: 'BRACELET' } }),
+      prisma.purchase.count({ where: { product_type: 'FINISHED' } })
     ]);
 
-    const total_value = await prisma.material.aggregate({
+    const total_value = await prisma.purchase.aggregate({
       _sum: {
-        total_cost: true
+        total_price: true
       },
       where: {
         status: 'ACTIVE'
       }
     });
 
-    res.json({
-      success: true,
-      data: {
-        total_count,
-        active_count,
-        depleted_count,
-        semi_finished_count,
-        finished_count,
-        total_value: total_value._sum.total_cost || 0
-      }
-    });
+    return res.json({
+        success: true,
+        data: {
+          total_count,
+          active_count,
+          used_count,
+          semi_finished_count,
+          finished_count,
+          total_value: total_value._sum.total_price || 0
+        }
+      });
   } catch (error) {
     console.error('获取原材料统计失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '获取原材料统计失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? (error as Error).message : '未知错误'
     });
   }
 });

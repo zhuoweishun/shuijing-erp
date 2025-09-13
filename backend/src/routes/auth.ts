@@ -17,10 +17,10 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h'
 
 // 用户登录
 router.post('/login', asyncHandler(async (req, res) => {
-  const { username, password } = req.body
+  const { user_name, password } = req.body
 
   // 验证输入
-  if (!username || !password) {
+  if (!user_name || !password) {
     return res.status(400).json(
       ErrorResponses.badRequest('用户名和密码不能为空')
     )
@@ -29,7 +29,7 @@ router.post('/login', asyncHandler(async (req, res) => {
   try {
     // 查找用户
     const user = await prisma.user.findUnique({
-      where: { username }
+      where: { user_name: user_name }
     })
 
     if (!user) {
@@ -39,7 +39,7 @@ router.post('/login', asyncHandler(async (req, res) => {
     }
 
     // 检查用户状态
-    if (!user.isActive) {
+    if (!user.is_active) {
       return res.status(401).json(
         ErrorResponses.unauthorized('账户已被禁用')
       )
@@ -56,23 +56,23 @@ router.post('/login', asyncHandler(async (req, res) => {
     // 生成JWT token
     const token = jwt.sign(
       {
-        userId: user.id,
-        username: user.username,
+        user_id: user.id,
+        user_name: user.user_name,
         role: user.role
       },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
     )
 
     // 更新最后登录时间
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() }
+      data: { last_login_at: new Date() }
     })
 
     // 记录登录日志
-    logger.info(`用户登录成功: ${username}`, {
-      userId: user.id,
+    logger.info(`用户登录成功: ${user_name}`, {
+      user_id: user.id,
       ip: req.ip,
       userAgent: req.get('User-Agent')
     })
@@ -85,35 +85,35 @@ router.post('/login', asyncHandler(async (req, res) => {
     )
 
     // 返回成功响应
-    res.json(
+    return res.json(
       createSuccessResponse('登录成功', {
         token,
         user: {
           id: user.id,
-          username: user.username,
+          user_name: user.user_name,
           real_name: user.name,
           name: user.name,
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          status: user.isActive ? 'active' : 'inactive',
-          created_at: user.createdAt.toISOString(),
-          updated_at: user.updatedAt.toISOString()
+          status: user.is_active ? 'active' : 'inactive',
+          created_at: user.created_at.toISOString(),
+          updated_at: user.updated_at.toISOString()
         }
       })
     )
   } catch (error) {
     logger.error('登录失败:', error)
-    res.status(500).json(
+    return res.status(500).json(
       ErrorResponses.internal('登录失败，请稍后重试')
     )
   }
 }))
 
 // 用户注册
-router.post('/register', asyncHandler(async (req, res) => {
+router.post('/register', asyncHandler(async (_req, res) => {
   // TODO: 实现用户注册逻辑
-  res.json(
+  return res.json(
     ErrorResponses.badRequest('注册功能正在开发中...')
   )
 }))
@@ -134,42 +134,42 @@ router.get('/verify', asyncHandler(async (req, res) => {
     
     // 查找用户
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
+      where: { id: decoded.user_id }
     })
 
-    if (!user || !user.isActive) {
+    if (!user || !user.is_active) {
       return res.status(401).json(
         ErrorResponses.unauthorized('用户不存在或已被禁用')
       )
     }
 
     // 返回用户信息
-    res.json(
+    return res.json(
       createSuccessResponse('Token验证成功', {
         id: user.id,
-        username: user.username,
+        user_name: user.user_name,
         real_name: user.name,
         name: user.name,
         email: user.email,
         role: user.role,
         avatar: user.avatar,
-        status: user.isActive ? 'active' : 'inactive',
-        created_at: user.createdAt.toISOString(),
-        updated_at: user.updatedAt.toISOString()
+        status: user.is_active ? 'active' : 'inactive',
+        created_at: user.created_at.toISOString(),
+        updated_at: user.updated_at.toISOString()
       })
     )
   } catch (error) {
     logger.error('Token验证失败:', error)
-    res.status(401).json(
+    return res.status(401).json(
       ErrorResponses.invalidToken('Token无效或已过期')
     )
   }
 }))
 
 // 刷新token
-router.post('/refresh', asyncHandler(async (req, res) => {
+router.post('/refresh', asyncHandler(async (_req, res) => {
   // TODO: 实现token刷新逻辑
-  res.json(
+  return res.json(
     ErrorResponses.badRequest('Token刷新功能正在开发中...')
   )
 }))
@@ -178,12 +178,12 @@ router.post('/refresh', asyncHandler(async (req, res) => {
 router.post('/logout', authenticateToken, asyncHandler(async (req, res) => {
   // 记录登出操作日志
   await OperationLogger.logUserLogout(
-    req.user.id,
+    req.user!.id,
     req.ip
   )
   
   // TODO: 实现token黑名单逻辑
-  res.json(
+  return res.json(
     createSuccessResponse('登出成功')
   )
 }))

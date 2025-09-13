@@ -448,7 +448,7 @@ export default function SkuDetailModal({
                   {state.active_tab === 'trace' && permissions.canViewTrace && state.sku && (
                     <SkuTraceView
                       sku={state.sku}
-                      loading={false}
+
                     />
                   )}
 

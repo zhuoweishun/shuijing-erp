@@ -67,7 +67,7 @@ router.post('/chat', authenticateToken, asyncHandler(async (req, res) => {
 }))
 
 // 获取业务洞察（仅老板权限）
-router.post('/insights', authenticateToken, requireRole('BOSS'), asyncHandler(async (req, res) => {
+router.post('/insights', authenticateToken, requireRole(['BOSS']), asyncHandler(async (req, res) => {
   try {
     const validatedData = insightsRequestSchema.parse(req.body)
     const { query, timeRange, includeFinancial } = validatedData
@@ -75,7 +75,7 @@ router.post('/insights', authenticateToken, requireRole('BOSS'), asyncHandler(as
     const result = await getBusinessInsights(query, {
       timeRange,
       includeFinancial,
-      userId: req.user?.id
+      userId: req.user?.id ? parseInt(req.user.id) : undefined
     })
 
     if (result.success) {

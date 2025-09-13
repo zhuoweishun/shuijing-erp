@@ -41,7 +41,7 @@ interface ConsumptionData {
 }
 
 const Inventory_consumption_chart: React.FC = () => {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const [selected_time_range, set_selected_time_range] = useState<TimeRange>('30d')
   const [data, setData] = useState<ConsumptionData | null>(null)
   const [loading, set_loading] = useState(false)
@@ -127,18 +127,18 @@ const Inventory_consumption_chart: React.FC = () => {
   }, [selected_time_range])
 
   return (
-    <div className={isMobile ? '' : 'bg-white rounded-lg shadow-sm border border-gray-200 p-6'}>
+    <div className={is_mobile ? '' : 'bg-white rounded-lg shadow-sm border border-gray-200 p-6'}>
       <div className="mb-4">
-        <div className={`flex items-center ${isMobile ? 'flex-col space-y-3' : 'justify-between'} mb-3`}>
-          <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900`}>
+        <div className={`flex items-center ${is_mobile ? 'flex-col space-y-3' : 'justify-between'} mb-3`}>
+          <h3 className={`${is_mobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900`}>
             库存消耗分析 - 前10名
           </h3>
           
           {/* 视图切换按钮 */}
-          <div className={`flex bg-gray-100 rounded-md ${isMobile ? 'w-full' : 'p-1'}`}>
+          <div className={`flex bg-gray-100 rounded-md ${is_mobile ? 'w-full' : 'p-1'}`}>
             <button
               onClick={() => set_view_mode('chart')}
-              className={`${isMobile ? 'flex-1 py-2' : 'px-3 py-1'} rounded text-sm font-medium transition-colors ${
+              className={`${is_mobile ? 'flex-1 py-2' : 'px-3 py-1'} rounded text-sm font-medium transition-colors ${
                 viewMode === 'chart'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -148,7 +148,7 @@ const Inventory_consumption_chart: React.FC = () => {
             </button>
             <button
               onClick={() => set_view_mode('table')}
-              className={`${isMobile ? 'flex-1 py-2' : 'px-3 py-1'} rounded text-sm font-medium transition-colors ${
+              className={`${is_mobile ? 'flex-1 py-2' : 'px-3 py-1'} rounded text-sm font-medium transition-colors ${
                 viewMode === 'table'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -160,12 +160,12 @@ const Inventory_consumption_chart: React.FC = () => {
         </div>
         
         {/* 时间维度切换按钮 */}
-        <div className={`flex flex-wrap ${isMobile ? 'gap-mobile-xs' : 'gap-2'}`}>
+        <div className={`flex flex-wrap ${is_mobile ? 'gap-mobile-xs' : 'gap-2'}`}>
           {TIME_RANGES.map((range) => (
             <button
               key={range.key}
               onClick={() => set_selected_time_range(range.key)}
-              className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
+              className={`${is_mobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
                 selected_time_range === range.key
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -178,7 +178,7 @@ const Inventory_consumption_chart: React.FC = () => {
         
         {/* 统计信息 */}
         {data && (
-          <div className={`mt-3 flex flex-wrap ${isMobile ? 'gap-mobile-xs' : 'gap-4'} ${isMobile ? 'text-mobile-caption' : 'text-sm'} text-gray-600`}>
+          <div className={`mt-3 flex flex-wrap ${is_mobile ? 'gap-mobile-xs' : 'gap-4'} ${is_mobile ? 'text-mobile-caption' : 'text-sm'} text-gray-600`}>
             <span>总消耗量: {Number(data.totalConsumption).toLocaleString()} 件</span>
             <span>消耗次数: {data.totalConsumptionCount} 次</span>
             <span>分析时间: {format_date(data.analysisDate)}</span>
@@ -187,42 +187,42 @@ const Inventory_consumption_chart: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'}`}>
+        <div className={`flex items-center justify-center ${is_mobile ? 'h-48' : 'h-64'}`}>
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span className={`ml-2 text-gray-600 ${isMobile ? 'text-mobile-caption' : 'text-sm'}`}>加载中...</span>
+          <span className={`ml-2 text-gray-600 ${is_mobile ? 'text-mobile-caption' : 'text-sm'}`}>加载中...</span>
         </div>
       ) : (data?.topConsumedProducts?.length || 0) > 0 ? (
-        <div className={isMobile ? 'h-80 w-full' : 'h-80'} style={{ minHeight: isMobile ? '320px' : '320px' }}>
+        <div className={is_mobile ? 'h-80 w-full' : 'h-80'} style={{ minHeight: is_mobile ? '320px' : '320px' }}>
           {viewMode === 'chart' ? (
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <BarChart 
                 data={formatChartData()} 
                 margin={{ 
                   top: 20, 
-                  right: isMobile ? 5 : 30, 
-                  left: isMobile ? 5 : 20, 
-                  bottom: isMobile ? 80 : 60 
+                  right: is_mobile ? 5 : 30, 
+                  left: is_mobile ? 5 : 20, 
+                  bottom: is_mobile ? 80 : 60 
                 }}
-                width={isMobile ? 350 : 600}
-                height={isMobile ? 320 : 320}
+                width={is_mobile ? 350 : 600}
+                height={is_mobile ? 320 : 320}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
                   dataKey="name" 
-                  angle={isMobile ? -45 : 0}
-                  textAnchor={isMobile ? "end" : "middle"}
-                  height={isMobile ? 80 : 60}
-                  fontSize={isMobile ? 10 : 12}
+                  angle={is_mobile ? -45 : 0}
+                  textAnchor={is_mobile ? "end" : "middle"}
+                  height={is_mobile ? 80 : 60}
+                  fontSize={is_mobile ? 10 : 12}
                   interval={0}
-                  tick={{ fontSize: isMobile ? 10 : 12, fill: '#666' }}
+                  tick={{ fontSize: is_mobile ? 10 : 12, fill: '#666' }}
                 />
                 <YAxis 
-                  fontSize={isMobile ? 10 : 12}
-                  tick={{ fontSize: isMobile ? 10 : 12, fill: '#666' }}
-                  width={isMobile ? 40 : 60}
+                  fontSize={is_mobile ? 10 : 12}
+                  tick={{ fontSize: is_mobile ? 10 : 12, fill: '#666' }}
+                  width={is_mobile ? 40 : 60}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                {!isMobile && <Legend />}
+                {!is_mobile && <Legend />}
                 <Bar 
                   dataKey="consumed" 
                   fill="#3B82F6" 
@@ -234,8 +234,8 @@ const Inventory_consumption_chart: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className={isMobile ? 'space-mobile' : 'overflow-x-auto'}>
-              {isMobile ? (
+            <div className={is_mobile ? 'space-mobile' : 'overflow-x-auto'}>
+              {is_mobile ? (
                 // 移动端卡片式布局
                 <div className="space-mobile">
                   {data?.topConsumedProducts?.map((item, index) => (
@@ -371,10 +371,10 @@ const Inventory_consumption_chart: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'} text-gray-500`}>
+        <div className={`flex items-center justify-center ${is_mobile ? 'h-48' : 'h-64'} text-gray-500`}>
           <div className="text-center">
-            <p className={`${isMobile ? 'text-mobile-caption' : 'text-sm'} mb-1`}>暂无消耗数据</p>
-            <p className={isMobile ? 'text-mobile-small' : 'text-xs'}>当前时间范围内没有库存消耗记录</p>
+            <p className={`${is_mobile ? 'text-mobile-caption' : 'text-sm'} mb-1`}>暂无消耗数据</p>
+            <p className={is_mobile ? 'text-mobile-small' : 'text-xs'}>当前时间范围内没有库存消耗记录</p>
           </div>
         </div>
       )}

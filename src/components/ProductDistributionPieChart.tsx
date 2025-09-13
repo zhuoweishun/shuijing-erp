@@ -32,7 +32,7 @@ interface ChartDataItem {
 }
 
 const Material_distribution_pie_chart: React.FC = () => {
-  const { isMobile } = useDeviceDetection()
+  const { is_mobile } = useDeviceDetection()
   const [selected_type, set_selected_type] = useState<MaterialType>('LOOSE_BEADS')
   const [loading, set_loading] = useState(false)
   const [chart_data, set_chart_data] = useState<ChartDataItem[]>([])
@@ -48,14 +48,11 @@ const Material_distribution_pie_chart: React.FC = () => {
       
       if (response.success && response.data && (response.data as any).items) {
         // 转换为图表数据格式
-        const type_config = MATERIAL_TYPES.find(t => t.key === material_type)
-        const base_color = type_config?.color || '#3B82F6'
-        
         const chart_items: ChartDataItem[] = (response.data as any).items.map((item: any, index: number) => ({
           name: item.material_type || '未知类型',
           value: item.total_remaining_quantity || 0,
           percentage: 0, // 需要计算百分比
-          color: generate_color(base_color, index, (response.data as any).items.length)
+          color: generate_color(index)
         }))
         
         // 计算百分比
@@ -92,7 +89,7 @@ const Material_distribution_pie_chart: React.FC = () => {
   ]
 
   // 生成颜色
-  const generate_color = (base_color: string, index: number, total: number): string => {
+  const generate_color = (index: number): string => {
     // 使用预定义颜色数组，确保每个产品都有不同的颜色
     return CHART_COLORS[index % CHART_COLORS.length]
   }
@@ -122,20 +119,20 @@ const Material_distribution_pie_chart: React.FC = () => {
   }, [selected_type])
 
   return (
-    <div className={isMobile ? '' : 'bg-white rounded-lg shadow-sm border border-gray-200 p-6'}>
-      <div className={isMobile ? '' : ''}>
+    <div className={is_mobile ? '' : 'bg-white rounded-lg shadow-sm border border-gray-200 p-6'}>
+      <div className={is_mobile ? '' : ''}>
         <div className="mb-4">
-          <h3 className={`${isMobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900 mb-3`}>
+          <h3 className={`${is_mobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900 mb-3`}>
             原材料库存分布 - 前10名
           </h3>
           
           {/* 原材料类型切换按钮 */}
-          <div className={`flex flex-wrap ${isMobile ? 'gap-mobile-xs' : 'gap-2'}`}>
+          <div className={`flex flex-wrap ${is_mobile ? 'gap-mobile-xs' : 'gap-2'}`}>
             {MATERIAL_TYPES.map((type) => (
               <button
                 key={type.key}
                 onClick={() => set_selected_type(type.key)}
-                className={`${isMobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
+                className={`${is_mobile ? 'btn-mobile text-xs' : 'px-3 py-1'} rounded-md font-medium transition-colors ${
                   selected_type === type.key
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -148,23 +145,23 @@ const Material_distribution_pie_chart: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'}`}>
+          <div className={`flex items-center justify-center ${is_mobile ? 'h-48' : 'h-64'}`}>
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-            <span className={`ml-2 text-gray-600 ${isMobile ? 'text-mobile-caption' : 'text-sm'}`}>加载中...</span>
+            <span className={`ml-2 text-gray-600 ${is_mobile ? 'text-mobile-caption' : 'text-sm'}`}>加载中...</span>
           </div>
         ) : chart_data.length > 0 ? (
-          <div className={isMobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: isMobile ? '256px' : '256px' }}>
+          <div className={is_mobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: is_mobile ? '256px' : '256px' }}>
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-              <PieChart width={isMobile ? 300 : 400} height={isMobile ? 256 : 256}>
+              <PieChart width={is_mobile ? 300 : 400} height={is_mobile ? 256 : 256}>
                 <Pie
                   data={chart_data}
                   cx="50%"
                   cy="50%"
-                  outerRadius={isMobile ? 70 : 80}
-                  innerRadius={isMobile ? 20 : 0}
+                  outerRadius={is_mobile ? 70 : 80}
+                  innerRadius={is_mobile ? 20 : 0}
                   fill="#8884d8"
                   dataKey="value"
-                  label={isMobile ? false : ({ payload }) => `${payload.percentage}%`}
+                  label={is_mobile ? false : ({ payload }) => `${payload.percentage}%`}
                   stroke="#fff"
                   strokeWidth={2}
                 >
@@ -173,7 +170,7 @@ const Material_distribution_pie_chart: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                {!isMobile && (
+                {!is_mobile && (
                   <Legend 
                     wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
                     formatter={(value) => (
@@ -187,10 +184,10 @@ const Material_distribution_pie_chart: React.FC = () => {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className={`flex items-center justify-center ${isMobile ? 'h-48' : 'h-64'} text-gray-500`}>
+          <div className={`flex items-center justify-center ${is_mobile ? 'h-48' : 'h-64'} text-gray-500`}>
             <div className="text-center">
-            <p className={isMobile ? 'text-mobile-caption mb-1' : 'text-sm mb-1'}>暂无数据</p>
-            <p className={isMobile ? 'text-mobile-small' : 'text-xs'}>当前原材料类型下没有库存数据</p>
+            <p className={is_mobile ? 'text-mobile-caption mb-1' : 'text-sm mb-1'}>暂无数据</p>
+            <p className={is_mobile ? 'text-mobile-small' : 'text-xs'}>当前原材料类型下没有库存数据</p>
           </div>
           </div>
         )}

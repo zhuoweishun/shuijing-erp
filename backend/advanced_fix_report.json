@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-09-13T12:36:57.609087",
+  "total_changes": 26,
+  "backup_location": "D:\\shuijing ERP\\backend\\backups\\advanced_fix_20250913_123657",
+  "changes_log": [
+    "materials.ts: 9 处修改",
+    "products.ts: 10 处修改",
+    "purchases.ts: 7 处修改"
+  ]
+}

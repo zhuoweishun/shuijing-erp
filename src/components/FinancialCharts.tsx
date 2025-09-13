@@ -25,7 +25,7 @@ interface PieData {
 
 const FinancialCharts: React.FC = () => {
   const [chartData, setChartData] = useState<ChartData[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [is_loading, set_is_loading] = useState(false)
   const [period, setPeriod] = useState<'daily' | 'monthly'>('daily')
   const [dateRange, setDateRange] = useState({
     start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -35,7 +35,7 @@ const FinancialCharts: React.FC = () => {
   // 获取统计数据
   const fetchStatistics = async () => {
     try {
-      setIsLoading(true)
+      set_is_loading(true)
       const response = await financial_api.get_statistics({
         period,
         start_date: dateRange.start_date,
@@ -51,7 +51,7 @@ const FinancialCharts: React.FC = () => {
       console.error('获取统计数据失败:', error)
       toast.error('获取统计数据失败')
     } finally {
-      setIsLoading(false)
+      set_is_loading(false)
     }
   }
 
@@ -160,16 +160,16 @@ const FinancialCharts: React.FC = () => {
             
             <button
               onClick={fetchStatistics}
-              disabled={isLoading}
+              disabled={is_loading}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? '加载中...' : '刷新数据'}
+              {is_loading ? '加载中...' : '刷新数据'}
             </button>
           </div>
         </div>
       </div>
 
-      {isLoading ? (
+      {is_loading ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-center py-8">
             <p>加载中...</p>

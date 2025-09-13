@@ -55,7 +55,7 @@ export default function NetworkInfo({ className = '' }: NetworkInfoProps) {
       setIsDetecting(true)
       
       // 先尝试从缓存获取
-      const cachedIP = localStorage.get_item('cached_local_ip')
+      const cachedIP = localStorage.getItem('cached_local_ip')
       if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
         set_local_ip(cachedIP)
       }

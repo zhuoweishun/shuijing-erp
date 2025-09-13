@@ -1,0 +1,426 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  user_name           String              @unique
+  email               String?             @unique
+  password            String
+  role                UserRole            @default(EMPLOYEE)
+  name                String
+  phone               String?
+  avatar              String?
+  is_active           Boolean             @default(true)
+  last_login_at       DateTime?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  customer_notes      customer_notes[]
+  edit_logs           EditLog[]
+  financial_records   financial_records[]
+  created_skus        ProductSku[]
+  products            Product[]
+  last_edited_purchases Purchase[]        @relation("PurchaseLastEditedBy")
+  purchases           Purchase[]
+  sku_inventory_logs  SkuInventoryLog[]
+
+  @@map("users")
+}
+
+model Supplier {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  contact     String?
+  phone       String?
+  email       String?
+  address     String?
+  description String?    @db.Text
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  purchases   Purchase[]
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id                     String           @id @default(cuid())
+  purchase_code          String           @unique
+  product_name           String
+  quantity               Int?
+  min_stock_alert        Int?
+  price_per_gram         Decimal?         @db.Decimal(10, 1)
+  unit_price             Decimal?         @db.Decimal(10, 1)
+  total_price            Decimal?         @db.Decimal(10, 1)
+  weight                 Decimal?         @db.Decimal(10, 1)
+  bead_diameter          Decimal?         @db.Decimal(10, 1)
+  beads_per_string       Int?
+  total_beads            Int?
+  price_per_bead         Decimal?         @db.Decimal(10, 4)
+  price_per_piece        Decimal?         @db.Decimal(10, 4)
+  quality                Quality?
+  product_type           ProductType      @default(BRACELET)
+  unit_type              UnitType         @default(STRINGS)
+  specification          Decimal?         @db.Decimal(10, 1)
+  piece_count            Int?
+  purchase_date          DateTime
+  natural_language_input String?          @db.Text
+  photos                 Json
+  notes                  String?          @db.Text
+  ai_recognition_result  Json?
+  status                 purchases_status @default(ACTIVE)
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+  supplier_id            String?
+  user_id                String
+  last_edited_by_id      String?
+  edit_logs              EditLog[]
+  material_usages        MaterialUsage[]
+  last_edited_by         User?            @relation("PurchaseLastEditedBy", fields: [last_edited_by_id], references: [id])
+  supplier               Supplier?        @relation(fields: [supplier_id], references: [id])
+  user                   User             @relation(fields: [user_id], references: [id])
+
+  @@index([last_edited_by_id], map: "purchases_lastEditedById_fkey")
+  @@index([supplier_id], map: "purchases_supplierId_fkey")
+  @@index([user_id], map: "purchases_userId_fkey")
+  @@map("purchases")
+}
+
+model Product {
+  id               String          @id @default(cuid())
+  name             String
+  description      String?         @db.Text
+  category         String?
+  quantity         Int             @default(0)
+  unit             String
+  unit_price       Decimal         @db.Decimal(10, 2)
+  total_value      Decimal         @db.Decimal(10, 2)
+  status           ProductStatus   @default(AVAILABLE)
+  location         String?
+  notes            String?         @db.Text
+  images           String?         @db.Text
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  user_id          String
+  product_code     String?
+  sku_id           String?
+  material_usages  MaterialUsage[]
+  sku              ProductSku?     @relation(fields: [sku_id], references: [id])
+  user             User            @relation(fields: [user_id], references: [id])
+
+  @@index([sku_id], map: "products_skuId_fkey")
+  @@index([user_id], map: "products_userId_fkey")
+  @@map("products")
+}
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("system_configs")
+}
+
+model EditLog {
+  id             String   @id @default(cuid())
+  purchase_id    String
+  user_id        String
+  action         String
+  details        String?  @db.Text
+  changed_fields Json?
+  created_at     DateTime @default(now())
+  purchase       Purchase @relation(fields: [purchase_id], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([purchase_id], map: "edit_logs_purchaseId_fkey")
+  @@index([user_id], map: "edit_logs_userId_fkey")
+  @@map("edit_logs")
+}
+
+model MaterialUsage {
+  id            String                @id @default(cuid())
+  purchase_id   String?
+  product_id    String?
+  created_at    DateTime              @default(now())
+  updated_at    DateTime              @updatedAt
+  total_cost    Decimal?              @db.Decimal(10, 2)
+  unit_cost     Decimal?              @db.Decimal(10, 4)
+  action        material_usage_action @default(CREATE)
+  material_id   String
+  notes         String?               @db.Text
+  quantity_used Int
+  sku_id        String?
+  product       Product?              @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  purchase      Purchase?             @relation(fields: [purchase_id], references: [id], onDelete: Restrict)
+
+  @@index([product_id], map: "material_usage_productId_fkey")
+  @@index([purchase_id], map: "material_usage_purchaseId_fkey")
+  @@map("material_usage")
+}
+
+model ProductSku {
+  id                      String               @id @default(cuid())
+  sku_code                String               @unique
+  sku_name                String
+  material_signature_hash String
+  material_signature      Json
+  total_quantity          Int                  @default(0)
+  available_quantity      Int                  @default(0)
+  unit_price              Decimal              @db.Decimal(10, 2)
+  total_value             Decimal              @db.Decimal(10, 2)
+  photos                  Json?
+  description             String?              @db.Text
+  specification           String?
+  material_cost           Decimal?             @db.Decimal(10, 2)
+  labor_cost              Decimal?             @db.Decimal(10, 2)
+  craft_cost              Decimal?             @db.Decimal(10, 2)
+  total_cost              Decimal?             @db.Decimal(10, 2)
+  selling_price           Decimal              @db.Decimal(10, 2)
+  profit_margin           Decimal?             @db.Decimal(5, 2)
+  status                  SkuStatus            @default(ACTIVE)
+  created_at              DateTime             @default(now())
+  updated_at              DateTime             @updatedAt
+  created_by              String
+  customer_purchases      customer_purchases[]
+  creator                 User                 @relation(fields: [created_by], references: [id])
+  products                Product[]
+  inventory_logs          SkuInventoryLog[]
+
+  @@index([material_signature_hash])
+  @@index([sku_code])
+  @@index([status])
+  @@index([created_by], map: "product_skus_createdBy_fkey")
+  @@map("product_skus")
+}
+
+model SkuInventoryLog {
+  id              String                           @id @default(cuid())
+  sku_id          String
+  action          sku_inventory_logs_action
+  quantity_change Int
+  quantity_before Int
+  quantity_after  Int
+  reference_type  sku_inventory_logs_referenceType
+  reference_id    String?
+  notes           String?                          @db.Text
+  created_at      DateTime                         @default(now())
+  user_id         String
+  sku             ProductSku                       @relation(fields: [sku_id], references: [id])
+  user            User                             @relation(fields: [user_id], references: [id])
+
+  @@index([sku_id])
+  @@index([action])
+  @@index([created_at])
+  @@index([user_id], map: "sku_inventory_logs_userId_fkey")
+  @@map("sku_inventory_logs")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  user_id     String?
+  action      String
+  resource    String
+  resource_id String?
+  details     String?  @db.Text
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model customer_notes {
+  id          String                  @id
+  customer_id String
+  category    customer_notes_category
+  content     String                  @db.Text
+  created_at  DateTime                @default(now())
+  updated_at  DateTime
+  created_by  String
+  users       User                    @relation(fields: [created_by], references: [id])
+  customers   customers               @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([created_by], map: "customer_notes_createdBy_fkey")
+  @@index([customer_id])
+}
+
+model customer_purchases {
+  id             String                    @id
+  customer_id    String
+  sku_id         String
+  sku_name       String
+  quantity       Int
+  unit_price     Decimal                   @db.Decimal(10, 2)
+  original_price Decimal?                  @db.Decimal(10, 2)
+  total_price    Decimal                   @db.Decimal(10, 2)
+  status         customer_purchases_status @default(ACTIVE)
+  refund_date    DateTime?
+  refund_reason  String?
+  refund_notes   String?                   @db.Text
+  sale_channel   String?
+  notes          String?                   @db.Text
+  purchase_date  DateTime                  @default(now())
+  created_at     DateTime                  @default(now())
+  updated_at     DateTime
+  customers      customers                 @relation(fields: [customer_id], references: [id])
+  product_skus   ProductSku                @relation(fields: [sku_id], references: [id])
+
+  @@index([customer_id])
+  @@index([purchase_date])
+  @@index([sku_id])
+  @@index([status])
+}
+
+model customers {
+  id                        String               @id
+  name                      String
+  phone                     String               @unique
+  address                   String?              @db.Text
+  notes                     String?              @db.Text
+  total_purchases           Decimal              @default(0.00) @db.Decimal(10, 2)
+  total_orders              Int                  @default(0)
+  first_purchase_date       DateTime?
+  last_purchase_date        DateTime?
+  created_at                DateTime             @default(now())
+  updated_at                DateTime
+  birthday                  DateTime?
+  wechat                    String?
+  average_order_value       Decimal              @default(0.00) @db.Decimal(10, 2)
+  city                      String?
+  customer_labels           Json?
+  days_since_first_purchase Int?
+  days_since_last_purchase  Int?
+  primary_label             String?
+  province                  String?
+  refund_count              Int                  @default(0)
+  refund_rate               Decimal              @default(0.00) @db.Decimal(5, 2)
+  total_all_orders          Int                  @default(0)
+  customer_notes            customer_notes[]
+  customer_purchases        customer_purchases[]
+
+  @@index([name])
+  @@index([phone])
+}
+
+model financial_records {
+  id               String                          @id
+  record_type      financial_records_recordType
+  amount           Decimal                         @db.Decimal(10, 2)
+  description      String
+  reference_type   financial_records_referenceType
+  reference_id     String?
+  category         String?
+  transaction_date DateTime
+  notes            String?                         @db.Text
+  created_at       DateTime                        @default(now())
+  updated_at       DateTime
+  user_id          String
+  users            User                            @relation(fields: [user_id], references: [id])
+
+  @@index([created_at])
+  @@index([record_type])
+  @@index([reference_type, reference_id])
+  @@index([transaction_date])
+  @@index([user_id])
+}
+
+enum UserRole {
+  BOSS
+  EMPLOYEE
+}
+
+enum Quality {
+  AA
+  A
+  AB
+  B
+  C
+}
+
+enum ProductType {
+  LOOSE_BEADS
+  BRACELET
+  ACCESSORIES
+  FINISHED
+}
+
+enum UnitType {
+  PIECES
+  STRINGS
+  SLICES
+  ITEMS
+}
+
+enum ProductStatus {
+  MAKING
+  AVAILABLE
+  SOLD
+  OFFLINE
+}
+
+enum SkuStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum financial_records_recordType {
+  INCOME
+  EXPENSE
+  REFUND
+  LOSS
+}
+
+enum customer_notes_category {
+  PREFERENCE
+  BEHAVIOR
+  CONTACT
+  OTHER
+}
+
+enum sku_inventory_logs_action {
+  CREATE
+  SELL
+  ADJUST
+  DESTROY
+}
+
+enum financial_records_referenceType {
+  PURCHASE
+  SALE
+  REFUND
+  MANUAL
+}
+
+enum sku_inventory_logs_referenceType {
+  PRODUCT
+  SALE
+  MANUAL
+  DESTROY
+  REFUND
+}
+
+enum material_usage_action {
+  CREATE
+  USE
+  RETURN
+  ADJUST
+}
+
+enum customer_purchases_status {
+  ACTIVE
+  REFUNDED
+}
+
+enum purchases_status {
+  ACTIVE
+  USED
+}

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,310 +7,424 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 用户表
 model User {
-  id          String   @id @default(cuid())
-  username    String   @unique
-  email       String?  @unique
-  password    String
-  role        UserRole @default(EMPLOYEE)
-  name        String
-  phone       String?
-  avatar      String?
-  isActive    Boolean  @default(true)
-  lastLoginAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String              @id @default(cuid())
+  user_name           String              @unique
+  email               String?             @unique
+  password            String
+  role                UserRole            @default(EMPLOYEE)
+  name                String
+  phone               String?
+  avatar              String?
+  is_active           Boolean             @default(true)
+  last_login_at       DateTime?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  customer_notes      CustomerNotes[]
+  edit_logs           EditLog[]
+  financial_records   FinancialRecords[]
+  created_skus        ProductSku[]
+  products            Product[]
+  last_edited_purchases Purchase[]        @relation("PurchaseLastEditedBy")
+  purchases           Purchase[]
+  sku_inventory_logs  SkuInventoryLog[]
 
-  // 关联关系
-  purchases         Purchase[]
-  products          Product[]
-  lastEditedPurchases Purchase[] @relation("PurchaseLastEditedBy")
-  editLogs          EditLog[]
-  createdSkus       ProductSku[]
-  skuInventoryLogs  SkuInventoryLog[]
-  
   @@map("users")
 }
 
-// 用户角色枚举
-enum UserRole {
-  BOSS     // 老板
-  EMPLOYEE // 员工
-}
-
-// 供应商表
 model Supplier {
-  id          String   @id @default(cuid())
-  name        String   @unique // 供应商名称必须唯一
+  id          String     @id @default(cuid())
+  name        String     @unique
   contact     String?
   phone       String?
   email       String?
   address     String?
-  description String?  @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // 关联关系
+  description String?    @db.Text
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
   purchases   Purchase[]
-  
+
   @@map("suppliers")
 }
 
-// 采购表
 model Purchase {
-  id                    String        @id @default(cuid())
-  purchaseCode         String        @unique // 采购编号 CG+YYYYMMDD+6位序号
-  productName          String        // 珠子名称（如：白水晶、紫水晶等）
-  quantity             Int?          // 采购数量（串数），整数
-  minStockAlert        Int?          // 最低预警颗数
-  pricePerGram         Decimal?      @db.Decimal(10, 1) // 克价，精度1位小数
-  unitPrice            Decimal?      @db.Decimal(10, 1) // 每串单价
-  totalPrice           Decimal?      @db.Decimal(10, 1) // 总价，精度1位小数
-  weight               Decimal?      @db.Decimal(10, 1) // 重量（克），精度1位小数
-  beadDiameter         Decimal?      @db.Decimal(10, 1) // 单珠直径（毫米），散珠和手串必填
-  beadsPerString       Int?          // 每串珠子数量（自动计算：Math.floor(160/直径)）
-  totalBeads           Int?          // 总颗数（自动计算：串数×每串颗数）
-  pricePerBead         Decimal?      @db.Decimal(10, 4) // 每颗单价，精度4位小数
-  pricePerPiece        Decimal?      @db.Decimal(10, 4) // 每片/每件单价，精度4位小数
-  quality              Quality?      // 品相等级
-  productType          ProductType   @default(BRACELET) // 产品类型，默认为手串（兼容现有数据）
-  unitType             UnitType      @default(STRINGS) // 计量单位，默认为条（兼容现有数据）
-  specification        Decimal?      @db.Decimal(10, 1) // 规格：散珠直径/饰品配件使用边规格/成品平均直径
-  pieceCount           Int?          // 数量：散珠颗数/饰品配件片数/成品件数
-  purchaseDate         DateTime      // 采购日期（自动生成）
-  naturalLanguageInput String?       @db.Text // 自然语言输入（AI识别源）
-  photos               Json          // 产品图片URL数组（必填）
-  notes                String?       @db.Text // 备注信息
-  aiRecognitionResult  Json?         // AI自然语言识别结果
-  status               PurchaseStatus @default(PENDING)
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  id                     String           @id @default(cuid())
+  purchase_code          String           @unique
+  product_name           String
+  quantity               Int?
+  min_stock_alert        Int?
+  price_per_gram         Decimal?         @db.Decimal(10, 1)
+  unit_price             Decimal?         @db.Decimal(10, 1)
+  total_price            Decimal?         @db.Decimal(10, 1)
+  weight                 Decimal?         @db.Decimal(10, 1)
+  bead_diameter          Decimal?         @db.Decimal(10, 1)
+  beads_per_string       Int?
+  total_beads            Int?
+  price_per_bead         Decimal?         @db.Decimal(10, 4)
+  price_per_piece        Decimal?         @db.Decimal(10, 4)
+  quality                Quality?
+  product_type           ProductType      @default(BRACELET)
+  unit_type              UnitType         @default(STRINGS)
+  specification          Decimal?         @db.Decimal(10, 1)
+  piece_count            Int?
+  purchase_date          DateTime
+  natural_language_input String?          @db.Text
+  photos                 Json
+  notes                  String?          @db.Text
+  ai_recognition_result  Json?
+  status                 purchases_status @default(ACTIVE)
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+  supplier_id            String?
+  user_id                String
+  last_edited_by_id      String?
+  edit_logs              EditLog[]
+  material_usages        MaterialUsage[]
+  last_edited_by         User?            @relation("PurchaseLastEditedBy", fields: [last_edited_by_id], references: [id])
+  supplier               Supplier?        @relation(fields: [supplier_id], references: [id])
+  user                   User             @relation(fields: [user_id], references: [id])
 
-  // 关联关系
-  supplierId      String?
-  supplier        Supplier?     @relation(fields: [supplierId], references: [id])
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  lastEditedById  String?
-  lastEditedBy    User?         @relation("PurchaseLastEditedBy", fields: [lastEditedById], references: [id])
-  editLogs        EditLog[]
-  materialUsages  MaterialUsage[]
-  
+  @@index([last_edited_by_id], map: "purchases_lastEditedById_fkey")
+  @@index([supplier_id], map: "purchases_supplierId_fkey")
+  @@index([user_id], map: "purchases_userId_fkey")
   @@map("purchases")
 }
 
-// 采购状态枚举
-enum PurchaseStatus {
-  PENDING    // 待处理
-  CONFIRMED  // 已确认
-  DELIVERED  // 已交付
-  CANCELLED  // 已取消
-}
-
-// 品相等级枚举
-enum Quality {
-  AA  // AA级
-  A   // A级
-  AB  // AB级
-  B   // B级
-  C   // C级
-}
-
-// 产品类型枚举
-enum ProductType {
-  LOOSE_BEADS    // 散珠
-  BRACELET       // 手串
-  ACCESSORIES    // 饰品配件
-  FINISHED       // 成品
-}
-
-// 计量单位枚举
-enum UnitType {
-  PIECES         // 颗（散珠）
-  STRINGS        // 条（手串）
-  SLICES         // 片（饰品配件）
-  ITEMS          // 件（成品）
-}
-
-// 成品表
 model Product {
-  id          String        @id @default(cuid())
-  productCode String?       // 成品编号 FP+YYYYMMDD+3位序号
-  name        String
-  description String?       @db.Text
-  category    String?
-  quantity    Int           @default(0)
-  unit        String
-  unitPrice   Decimal       @db.Decimal(10, 2)
-  totalValue  Decimal       @db.Decimal(10, 2)
-  status      ProductStatus @default(AVAILABLE)
-  location    String?
-  notes       String?       @db.Text
-  images      String?       @db.Text // JSON格式存储图片URL数组
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id               String          @id @default(cuid())
+  name             String
+  description      String?         @db.Text
+  category         String?
+  quantity         Int             @default(0)
+  unit             String
+  unit_price       Decimal         @db.Decimal(10, 2)
+  total_value      Decimal         @db.Decimal(10, 2)
+  status           ProductStatus   @default(AVAILABLE)
+  location         String?
+  notes            String?         @db.Text
+  images           String?         @db.Text
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  user_id          String
+  product_code     String?
+  sku_id           String?
+  material_usages  MaterialUsage[]
+  sku              ProductSku?     @relation(fields: [sku_id], references: [id])
+  user             User            @relation(fields: [user_id], references: [id])
 
-  // SKU关联
-  skuId       String?       // SKU ID
-  sku         ProductSku?   @relation(fields: [skuId], references: [id])
-
-  // 关联关系
-  userId      String
-  user        User          @relation(fields: [userId], references: [id])
-  materialUsages MaterialUsage[]
-  
+  @@index([sku_id], map: "products_skuId_fkey")
+  @@index([user_id], map: "products_userId_fkey")
   @@map("products")
 }
 
-// 成品状态枚举
-enum ProductStatus {
-  MAKING      // 制作中
-  AVAILABLE   // 可售
-  SOLD        // 已售出
-  OFFLINE     // 下架
-}
-
-// 系统配置表
 model SystemConfig {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String   @db.Text
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
   description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
   @@map("system_configs")
 }
 
-// 编辑日志表
 model EditLog {
-  id            String   @id @default(cuid())
-  purchaseId    String
-  userId        String
-  action        String
-  details       String?  @db.Text
-  changedFields Json?
-  createdAt     DateTime @default(now())
-  
-  // 关联关系
-  purchase      Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id             String   @id @default(cuid())
+  purchase_id    String
+  user_id        String
+  action         String
+  details        String?  @db.Text
+  changed_fields Json?
+  created_at     DateTime @default(now())
+  purchase       Purchase @relation(fields: [purchase_id], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([purchase_id], map: "edit_logs_purchaseId_fkey")
+  @@index([user_id], map: "edit_logs_userId_fkey")
   @@map("edit_logs")
 }
 
-// 原材料使用记录表
 model MaterialUsage {
-  id                 String   @id @default(cuid())
-  purchaseId         String   // 采购记录ID
-  productId          String   // 成品ID
-  quantityUsedBeads  Int      @default(0) // 使用的珠子颗数（散珠、手串）
-  quantityUsedPieces Int      @default(0) // 使用的片/件数量（饰品配件、成品）
-  unitCost           Decimal? @db.Decimal(10, 4) // 单位成本（每颗/每片/每件）
-  totalCost          Decimal? @db.Decimal(10, 2) // 该原材料的总成本
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  
-  // 关联关系
-  purchase           Purchase @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
-  product            Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  
+  id            String                @id @default(cuid())
+  purchase_id   String?
+  product_id    String?
+  created_at    DateTime              @default(now())
+  updated_at    DateTime              @updatedAt
+  total_cost    Decimal?              @db.Decimal(10, 2)
+  unit_cost     Decimal?              @db.Decimal(10, 4)
+  action        material_usage_action @default(CREATE)
+  material_id   String
+  notes         String?               @db.Text
+  quantity_used Int
+  sku_id        String?
+  product       Product?              @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  purchase      Purchase?             @relation(fields: [purchase_id], references: [id], onDelete: Restrict)
+
+  @@index([product_id], map: "material_usage_productId_fkey")
+  @@index([purchase_id], map: "material_usage_purchaseId_fkey")
   @@map("material_usage")
 }
 
-// SKU表
 model ProductSku {
-  id                    String   @id @default(cuid())
-  skuCode               String   @unique // SKU编号 SKU+YYYYMMDD+3位序号
-  skuName               String   // SKU名称
-  materialSignatureHash String   // 原材料标识哈希值
-  materialSignature     Json     // 原材料标识JSON
-  totalQuantity         Int      @default(0) // 总数量
-  availableQuantity     Int      @default(0) // 可售数量
-  unitPrice             Decimal  @db.Decimal(10, 2) // 单价
-  totalValue            Decimal  @db.Decimal(10, 2) // 总价值
-  photos                Json?    // 图片URL数组
-  description           String?  @db.Text // 描述
-  specification         String?  // 规格
-  materialCost          Decimal? @db.Decimal(10, 2) // 原材料成本
-  laborCost             Decimal? @db.Decimal(10, 2) // 人工成本
-  craftCost             Decimal? @db.Decimal(10, 2) // 工艺成本
-  totalCost             Decimal? @db.Decimal(10, 2) // 总成本
-  sellingPrice          Decimal  @db.Decimal(10, 2) // 销售价格
-  profitMargin          Decimal? @db.Decimal(5, 2) // 利润率
-  status                SkuStatus @default(ACTIVE) // SKU状态
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  // 关联关系
-  createdBy             String
-  creator               User     @relation(fields: [createdBy], references: [id])
-  products              Product[] // 关联的成品
-  inventoryLogs         SkuInventoryLog[] // 库存变更日志
-  
-  @@index([materialSignatureHash])
-  @@index([skuCode])
+  id                      String               @id @default(cuid())
+  sku_code                String               @unique
+  sku_name                String
+  material_signature_hash String
+  material_signature      Json
+  total_quantity          Int                  @default(0)
+  available_quantity      Int                  @default(0)
+  unit_price              Decimal              @db.Decimal(10, 2)
+  total_value             Decimal              @db.Decimal(10, 2)
+  photos                  Json?
+  description             String?              @db.Text
+  specification           String?
+  material_cost           Decimal?             @db.Decimal(10, 2)
+  labor_cost              Decimal?             @db.Decimal(10, 2)
+  craft_cost              Decimal?             @db.Decimal(10, 2)
+  total_cost              Decimal?             @db.Decimal(10, 2)
+  selling_price           Decimal              @db.Decimal(10, 2)
+  profit_margin           Decimal?             @db.Decimal(5, 2)
+  status                  SkuStatus            @default(ACTIVE)
+  created_at              DateTime             @default(now())
+  updated_at              DateTime             @updatedAt
+  created_by              String
+  customer_purchases      CustomerPurchases[]
+  creator                 User                 @relation(fields: [created_by], references: [id])
+  products                Product[]
+  inventory_logs          SkuInventoryLog[]
+
+  @@index([material_signature_hash])
+  @@index([sku_code])
   @@index([status])
+  @@index([created_by], map: "product_skus_createdBy_fkey")
   @@map("product_skus")
 }
 
-// SKU状态枚举
-enum SkuStatus {
-  ACTIVE    // 活跃
-  INACTIVE  // 停用
-}
-
-// SKU库存变更日志表
 model SkuInventoryLog {
-  id              String   @id @default(cuid())
-  skuId           String   // SKU ID
-  action          SkuAction // 操作类型
-  quantityChange  Int      // 数量变化
-  quantityBefore  Int      // 变更前数量
-  quantityAfter   Int      // 变更后数量
-  referenceType   ReferenceType // 引用类型
-  referenceId     String?  // 引用ID
-  notes           String?  @db.Text // 备注
-  createdAt       DateTime @default(now())
-  
-  // 关联关系
-  sku             ProductSku @relation(fields: [skuId], references: [id])
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
-  
-  @@index([skuId])
+  id              String                           @id @default(cuid())
+  sku_id          String
+  action          sku_inventory_logs_action
+  quantity_change Int
+  quantity_before Int
+  quantity_after  Int
+  reference_type  sku_inventory_logs_referenceType
+  reference_id    String?
+  notes           String?                          @db.Text
+  created_at      DateTime                         @default(now())
+  user_id         String
+  sku             ProductSku                       @relation(fields: [sku_id], references: [id])
+  user            User                             @relation(fields: [user_id], references: [id])
+
+  @@index([sku_id])
   @@index([action])
-  @@index([createdAt])
+  @@index([created_at])
+  @@index([user_id], map: "sku_inventory_logs_userId_fkey")
   @@map("sku_inventory_logs")
 }
 
-// SKU操作类型枚举
-enum SkuAction {
-  CREATE  // 创建
-  SELL    // 销售
-  ADJUST  // 调整
-}
-
-// 引用类型枚举
-enum ReferenceType {
-  PRODUCT // 成品
-  SALE    // 销售
-  MANUAL  // 手动
-}
-
-// 操作日志表
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String
-  resource  String
-  resourceId String?
-  details   String?  @db.Text
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  
+  id          String   @id @default(cuid())
+  user_id     String?
+  action      String
+  resource    String
+  resource_id String?
+  details     String?  @db.Text
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+
   @@map("audit_logs")
+}
+
+model CustomerNotes {
+  id          String                  @id
+  customer_id String
+  category    customer_notes_category
+  content     String                  @db.Text
+  created_at  DateTime                @default(now())
+  updated_at  DateTime
+  created_by  String
+  users       User                    @relation(fields: [created_by], references: [id])
+  customers   Customers               @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([created_by], map: "customer_notes_createdBy_fkey")
+  @@index([customer_id])
+  @@map("customer_notes")
+}
+
+model CustomerPurchases {
+  id             String                    @id
+  customer_id    String
+  sku_id         String
+  sku_name       String
+  quantity       Int
+  unit_price     Decimal                   @db.Decimal(10, 2)
+  original_price Decimal?                  @db.Decimal(10, 2)
+  total_price    Decimal                   @db.Decimal(10, 2)
+  status         customer_purchases_status @default(ACTIVE)
+  refund_date    DateTime?
+  refund_reason  String?
+  refund_notes   String?                   @db.Text
+  sale_channel   String?
+  notes          String?                   @db.Text
+  purchase_date  DateTime                  @default(now())
+  created_at     DateTime                  @default(now())
+  updated_at     DateTime
+  customers      Customers                 @relation(fields: [customer_id], references: [id])
+  product_skus   ProductSku                @relation(fields: [sku_id], references: [id])
+
+  @@index([customer_id])
+  @@index([purchase_date])
+  @@index([sku_id])
+  @@index([status])
+  @@map("customer_purchases")
+}
+
+model Customers {
+  id                        String               @id
+  name                      String
+  phone                     String               @unique
+  address                   String?              @db.Text
+  notes                     String?              @db.Text
+  total_purchases           Decimal              @default(0.00) @db.Decimal(10, 2)
+  total_orders              Int                  @default(0)
+  first_purchase_date       DateTime?
+  last_purchase_date        DateTime?
+  created_at                DateTime             @default(now())
+  updated_at                DateTime
+  birthday                  DateTime?
+  wechat                    String?
+  average_order_value       Decimal              @default(0.00) @db.Decimal(10, 2)
+  city                      String?
+  customer_labels           Json?
+  days_since_first_purchase Int?
+  days_since_last_purchase  Int?
+  primary_label             String?
+  province                  String?
+  refund_count              Int                  @default(0)
+  refund_rate               Decimal              @default(0.00) @db.Decimal(5, 2)
+  total_all_orders          Int                  @default(0)
+  customer_notes            CustomerNotes[]
+  customer_purchases        CustomerPurchases[]
+
+  @@index([name])
+  @@index([phone])
+  @@map("customers")
+}
+
+model FinancialRecords {
+  id               String                          @id
+  record_type      financial_records_recordType
+  amount           Decimal                         @db.Decimal(10, 2)
+  description      String
+  reference_type   financial_records_referenceType
+  reference_id     String?
+  category         String?
+  transaction_date DateTime
+  notes            String?                         @db.Text
+  created_at       DateTime                        @default(now())
+  updated_at       DateTime
+  user_id          String
+  users            User                            @relation(fields: [user_id], references: [id])
+
+  @@index([created_at])
+  @@index([record_type])
+  @@index([reference_type, reference_id])
+  @@index([transaction_date])
+  @@index([user_id])
+  @@map("financial_records")
+}
+
+enum UserRole {
+  BOSS
+  EMPLOYEE
+}
+
+enum Quality {
+  AA
+  A
+  AB
+  B
+  C
+}
+
+enum ProductType {
+  LOOSE_BEADS
+  BRACELET
+  ACCESSORIES
+  FINISHED
+}
+
+enum UnitType {
+  PIECES
+  STRINGS
+  SLICES
+  ITEMS
+}
+
+enum ProductStatus {
+  MAKING
+  AVAILABLE
+  SOLD
+  OFFLINE
+}
+
+enum SkuStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum financial_records_recordType {
+  INCOME
+  EXPENSE
+  REFUND
+  LOSS
+}
+
+enum customer_notes_category {
+  PREFERENCE
+  BEHAVIOR
+  CONTACT
+  OTHER
+}
+
+enum sku_inventory_logs_action {
+  CREATE
+  SELL
+  ADJUST
+  DESTROY
+}
+
+enum financial_records_referenceType {
+  PURCHASE
+  SALE
+  REFUND
+  MANUAL
+}
+
+enum sku_inventory_logs_referenceType {
+  PRODUCT
+  SALE
+  MANUAL
+  DESTROY
+  REFUND
+}
+
+enum material_usage_action {
+  CREATE
+  USE
+  RETURN
+  ADJUST
+}
+
+enum customer_purchases_status {
+  ACTIVE
+  REFUNDED
+}
+
+enum purchases_status {
+  ACTIVE
+  USED
 }

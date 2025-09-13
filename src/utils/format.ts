@@ -194,3 +194,21 @@ export function format_address(address: string | { province?: string; city?: str
   const parts = [province, city, district, detail].filter(Boolean)
   return parts.join('')
 }
+
+/**
+ * 格式化采购编号
+ * @param code 采购编号或ID
+ * @returns 格式化后的采购编号
+ */
+export function format_purchase_code(code: string | number): string {
+  if (!code) return ''
+  
+  // 如果已经是格式化的编号，直接返回
+  if (typeof code === 'string' && code.startsWith('P')) {
+    return code
+  }
+  
+  // 否则格式化为 P + 6位数字
+  const numericCode = typeof code === 'string' ? parseInt(code) : code
+  return `P${String(numericCode).padStart(6, '0')}`
+}

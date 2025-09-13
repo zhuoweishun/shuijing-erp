@@ -8,7 +8,7 @@ async function checkData() {
     console.log('采购记录总数:', total_count)
     
     // 检查样本数据
-    const samples = await prisma.purchase.find_many({
+    const samples = await prisma.purchase.findMany({
       take: 5,
       select: {
         id: true,
@@ -21,9 +21,9 @@ async function checkData() {
     console.log('样本数据:', samples)
     
     // 检查材料类型分布
-    const material_types = await prisma.purchase.group_by({
+    const material_types = await prisma.purchase.groupBy({
       by: ['material_type'],
-      Count: {
+      _count: {
         material_type: true
       },
       where: {

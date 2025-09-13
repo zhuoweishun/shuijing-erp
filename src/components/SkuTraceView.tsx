@@ -5,20 +5,19 @@ import { sku_api } from '../services/api'
 
 interface SkuTraceViewProps {
   sku: SkuItem
-  loading?: boolean
 }
 
-export default function SkuTraceView({ sku, loading = false }: SkuTraceViewProps) {
+export default function SkuTraceView({ sku }: SkuTraceViewProps) {
   const [recipeData, setRecipeData] = useState<any[]>([])
   const [, setSkuInfo] = useState<any>(null)
   const [, setSummary] = useState<any>(null)
   const [expandedMaterials, setExpandedMaterials] = useState<Set<string>>(new Set())
-  const [isLoading, setIsLoading] = useState(false)
+  const [is_loading, set_is_loading] = useState(false)
 
   // 获取SKU制作配方数据
   useEffect(() => {
     const fetchRecipeData = async () => {
-      setIsLoading(true)
+      set_is_loading(true)
       try {
         const response = await sku_api.get_traces(sku.id)
         
@@ -35,7 +34,7 @@ export default function SkuTraceView({ sku, loading = false }: SkuTraceViewProps
         console.error('获取制作配方失败:', error)
         setRecipeData([])
       } finally {
-        setIsLoading(false)
+        set_is_loading(false)
       }
     }
 
@@ -74,7 +73,7 @@ export default function SkuTraceView({ sku, loading = false }: SkuTraceViewProps
 
 
 
-  if (isLoading) {
+  if (is_loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

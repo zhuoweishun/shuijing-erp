@@ -3,8 +3,8 @@ import { asyncHandler } from '../middleware/errorHandler'
 import { authenticateToken } from '../middleware/auth'
 import { prisma } from '../lib/prisma'
 import { z } from 'zod'
-import { convertToApiFormat, convertFromApiFormat, filterSensitiveFields } from '../utils/fieldConverter'
-import { OperationLogger } from '../utils/operationLogger.js'
+// 移除fieldConverter导入，直接使用snake_case
+import { OperationLogger } from '../utils/operationLogger'
 
 const router = Router()
 
@@ -21,7 +21,7 @@ const createSupplierSchema = z.object({
 // 获取供应商列表
 router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以查看供应商信息
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可查看供应商信息',
@@ -38,11 +38,11 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     page: Number(page),
     limit: Number(limit),
     search,
-    userRole: req.user.role
+    userRole: req.user?.role || "USER"
   })
   
   const where: any = {
-    isActive: true
+    is_active: true
   }
   
   if (search) {
@@ -70,7 +70,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   const total = await prisma.supplier.count({ where })
   
   console.log('📊 [供应商API] 数据库查询结果详情:', {
-    查询到的供应商: suppliers.map(s => ({ id: s.id, name: s.name, isActive: s.isActive })),
+    查询到的供应商: suppliers.map(s => ({ id: s.id, name: s.name, is_active: s.is_active })),
     实际返回数量: suppliers.length,
     数据库总数量: total,
     查询条件: where
@@ -86,10 +86,14 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     }
   })
   
-  // 转换字段命名
-  const convertedSuppliers = suppliers.map(convertToApiFormat)
+  // 直接使用蛇形命名，无需转换
+  const convertedSuppliers = suppliers.map(supplier => ({
+    ...supplier,
+    created_at: supplier.created_at,
+    updated_at: supplier.updated_at
+  }))
   
-  res.json({
+  return res.json({
     success: true,
     message: '获取供应商列表成功',
     data: {
@@ -102,12 +106,14 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       }
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 获取供应商统计
 router.get('/stats', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以查看供应商统计
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可查看供应商统计',
@@ -118,16 +124,18 @@ router.get('/stats', authenticateToken, asyncHandler(async (req, res) => {
     })
   }
   
-  res.json({
+  return res.json({
     success: false,
     message: '供应商统计功能正在开发中...'
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 临时调试端点：检查重复供应商
 router.get('/debug/duplicates', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以访问调试端点
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可访问调试功能',
@@ -141,21 +149,23 @@ router.get('/debug/duplicates', authenticateToken, asyncHandler(async (req, res)
   const duplicates = await prisma.$queryRaw`
     SELECT name, COUNT(*) as count, GROUP_CONCAT(id) as ids
     FROM suppliers 
-    WHERE isActive = 1 
+    WHERE is_active = 1 
     GROUP BY name 
     HAVING count > 1
   `
   
-  res.json({
+  return res.json({
     success: true,
     data: duplicates
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 临时调试端点：查询数据库中所有供应商统计
 router.get('/debug/count', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以访问调试端点
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可访问调试功能',
@@ -167,13 +177,13 @@ router.get('/debug/count', authenticateToken, asyncHandler(async (req, res) => {
   }
   
   const totalSuppliers = await prisma.supplier.count()
-  const activeSuppliers = await prisma.supplier.count({ where: { isActive: true } })
-  const inactiveSuppliers = await prisma.supplier.count({ where: { isActive: false } })
+  const activeSuppliers = await prisma.supplier.count({ where: { is_active: true } })
+  const inactiveSuppliers = await prisma.supplier.count({ where: { is_active: false } })
   
   // 获取所有活跃供应商的详细信息
   const allActiveSuppliers = await prisma.supplier.findMany({
-    where: { isActive: true },
-    select: { id: true, name: true, isActive: true, createdAt: true },
+    where: { is_active: true },
+    select: { id: true, name: true, is_active: true, created_at: true },
     orderBy: { name: 'asc' }
   })
   
@@ -184,21 +194,27 @@ router.get('/debug/count', authenticateToken, asyncHandler(async (req, res) => {
     活跃供应商列表: allActiveSuppliers
   })
   
-  res.json({
+  return res.json({
     success: true,
     data: {
       total_suppliers: totalSuppliers,
       active_suppliers: activeSuppliers,
       inactive_suppliers: inactiveSuppliers,
-      all_active_suppliers: allActiveSuppliers.map(convertToApiFormat)
+      all_active_suppliers: allActiveSuppliers.map(supplier => ({
+        ...supplier,
+        created_at: supplier.created_at,
+        updated_at: supplier.created_at
+      }))
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 创建供应商
 router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以创建供应商
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可创建供应商',
@@ -216,14 +232,14 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     name: validatedData.name,
     contact: validatedData.contact,
     phone: validatedData.phone,
-    userRole: req.user.role
+    userRole: req.user?.role || "USER"
   })
   
   // 数据一致性检查：确保供应商名称唯一性
   const existingSupplier = await prisma.supplier.findFirst({
     where: {
       name: validatedData.name,
-      isActive: true
+      is_active: true
     }
   })
   
@@ -233,9 +249,9 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
       已存在供应商: {
         id: existingSupplier.id,
         name: existingSupplier.name,
-        createdAt: existingSupplier.createdAt
+        created_at: existingSupplier.created_at
       },
-      操作用户: req.user.username
+      操作用户: req.user?.user_name
     })
     
     return res.status(400).json({
@@ -252,7 +268,7 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   const normalizedName = validatedData.name.toLowerCase().trim()
   const similarSuppliers = await prisma.supplier.findMany({
     where: {
-      isActive: true
+      is_active: true
     }
   })
   
@@ -296,33 +312,39 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     name: supplier.name,
     contact: supplier.contact,
     phone: supplier.phone,
-    createdAt: supplier.createdAt,
-    操作用户: req.user.username,
+    created_at: supplier.created_at,
+    操作用户: req.user?.user_name,
     数据一致性: 'ID和名称已确保唯一性'
   })
   
   // 记录操作日志
   await OperationLogger.logSupplierCreate(
-    req.user.id,
+    req.user?.id || '',
     supplier.id,
     supplier,
     req.ip
   )
   
-  // 转换字段命名
-  const convertedSupplier = convertToApiFormat(supplier)
+  // 直接使用蛇形命名，无需转换
+  const convertedSupplier = {
+    ...supplier,
+    created_at: supplier.created_at,
+    updated_at: supplier.updated_at
+  }
   
-  res.status(201).json({
+  return res.status(201).json({
     success: true,
     message: '供应商创建成功',
     data: convertedSupplier
   })
+  // 函数结束
+  // 函数结束
 }))
 
 // 更新供应商
 router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   // 检查权限：只有老板可以更新供应商
-  if (req.user.role !== 'BOSS') {
+  if ((req.user?.role || "USER") !== 'BOSS') {
     return res.status(403).json({
       success: false,
       message: '权限不足，仅老板可更新供应商',
@@ -333,7 +355,7 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     })
   }
   
-  res.json({
+  return res.json({
     success: false,
     message: '更新供应商功能正在开发中...',
     error: {
@@ -341,6 +363,8 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
       details: '该功能尚未实现'
     }
   })
+  // 函数结束
+  // 函数结束
 }))
 
 export default router

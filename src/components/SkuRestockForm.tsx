@@ -15,7 +15,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
     quantity: 1
   })
   const [restockInfo, setRestockInfo] = useState<RestockInfo | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [is_loading, set_is_loading] = useState(false)
   const [is_submitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
@@ -24,7 +24,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
   const fetchRestockInfo = async () => {
     if (!sku.id) return
     
-    setIsLoading(true)
+    set_is_loading(true)
     setError('')
     
     try {
@@ -33,7 +33,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.get_item('auth_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       })
       
@@ -48,7 +48,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
       console.error('获取补货信息失败:', err)
       setError('网络错误，请检查连接')
     } finally {
-      setIsLoading(false)
+      set_is_loading(false)
     }
   }
 
@@ -85,7 +85,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.get_item('auth_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(formData)
       })
@@ -162,7 +162,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
           </div>
 
           {/* 加载状态 */}
-          {isLoading && (
+          {is_loading && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
               <span className="ml-2 text-gray-600">正在获取补货信息...</span>
@@ -181,7 +181,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
           )}
 
           {/* 补货信息 */}
-          {restockInfo && !isLoading && (
+          {restockInfo && !is_loading && (
             <>
               {/* 补货状态 */}
               <div className={`rounded-lg p-4 mb-6 ${

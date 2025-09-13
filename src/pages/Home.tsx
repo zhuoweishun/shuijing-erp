@@ -16,12 +16,12 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { dashboard_api } from '../services/api'
-import { DashboardStats, RecentMaterial } from '../types'
+import { DashboardStats } from '../types'
 import { toast } from 'sonner'
 
 export default function Home() {
   const [stats, set_stats] = useState<DashboardStats | null>(null)
-  const [isLoading, set_is_loading] = useState(true)
+  const [is_loading, set_is_loading] = useState(true)
   const [error, set_error] = useState<string | null>(null)
   const [messages, set_messages] = useState<Array<{type: 'user' | 'assistant', content: string}>>([{
     type: 'assistant',
@@ -162,7 +162,7 @@ export default function Home() {
   const filtered_quick_actions = quick_actions
 
   // 只在初始加载且没有数据时显示loading
-  if (isLoading && !stats) {
+  if (is_loading && !stats) {
     return (
       <div className="space-y-6">
         <div className="text-center py-12">
@@ -201,6 +201,59 @@ export default function Home() {
         </div>
       )}
 
+      {/* 数据统计 */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <ShoppingCart className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">采购记录</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.total_purchases}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Package className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">成品数量</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.total_products}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">库存价值</p>
+                <p className="text-2xl font-semibold text-gray-900">¥{stats.total_inventory_value?.toFixed(2) || '0.00'}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">低库存</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.low_stock_items}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 主要内容 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 快捷操作 */}
@@ -231,18 +284,18 @@ export default function Home() {
             <Package className="h-5 w-5 mr-2 text-green-500" />
             最近成品
           </h2>
-          {stats?.recent_materials && stats.recent_materials.length > 0 ? (
+          {stats?.recent_products && stats.recent_products.length > 0 ? (
             <div className="space-y-3">
-              {stats.recent_materials.slice(0, 5).map((material: RecentMaterial) => (
-                <div key={material.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {stats.recent_products.slice(0, 5).map((product: any) => (
+                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{material.material_name}</div>
+                    <div className="font-medium text-gray-900">{product.product_name}</div>
                     <div className="text-sm text-gray-500">
-                      规格: {material.specification} | 数量: {material.quantity}
+                      状态: {product.status === 'in_stock' ? '库存中' : '已售出'} | 成本: ¥{product.total_cost}
                     </div>
                   </div>
                   <div className="text-sm text-gray-400">
-                    {new Date(material.created_at).toLocaleDateString()}
+                    {new Date(product.created_date).toLocaleDateString()}
                   </div>
                 </div>
               ))}

@@ -25,14 +25,14 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
     operator: 'all'
   })
   const [showFilters, setShowFilters] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [is_loading, set_is_loading] = useState(false)
   const [current_page, setCurrentPage] = useState(1)
   const [page_size] = useState(10)
 
   // 获取真实的历史数据
   useEffect(() => {
     const fetchHistoryData = async () => {
-      setIsLoading(true)
+      set_is_loading(true)
       try {
         const response = await sku_api.get_history(sku.sku_id || sku.id, {
           page: 1,
@@ -122,7 +122,7 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
         setHistoryData([])
         setFilteredData([])
       } finally {
-        setIsLoading(false)
+        set_is_loading(false)
       }
     }
 
@@ -222,7 +222,7 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
 
   const total_pages = Math.ceil(filteredData.length / page_size)
 
-  if (loading || isLoading) {
+  if (loading || is_loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

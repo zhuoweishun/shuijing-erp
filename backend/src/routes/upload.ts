@@ -23,10 +23,10 @@ if (!fs.existsSync(uploadDir)) {
 
 // 配置multer存储
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir)
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     // 生成唯一文件名：时间戳_随机数.扩展名
     const timestamp = Date.now()
     const randomNum = Math.floor(Math.random() * 1000)
@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
 })
 
 // 文件过滤器
-const fileFilter = (req: any, file: any, cb: any) => {
+const fileFilter = (_req: any, file: any, cb: any) => {
   // 只允许图片文件
   if (file.mimetype.startsWith('image/')) {
     cb(null, true)
@@ -77,7 +77,7 @@ router.post('/purchase-images', authenticateToken, upload.array('images', 5), as
     return `${baseUrl}/uploads/purchases/${file.filename}`
   })
 
-  res.json({
+  return res.json({
     success: true,
     message: '图片上传成功',
     data: {

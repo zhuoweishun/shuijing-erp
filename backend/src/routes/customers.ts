@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
-import { authenticate_token } from '../middleware/auth.js'
+import { authenticateToken } from '../middleware/auth.js'
 import { prisma } from '../lib/prisma.js'
 import { z } from 'zod'
 import * as crypto from 'crypto'
 
 // 生成客户编码
-function generateCustomerCode(created_at: Date, customer_id: string): string {
+const generateCustomerCode = (created_at: Date, customer_id: string): string => {
   const date_str = created_at.toISOString().slice(0, 10).replace(/-/g, '')
   // 使用客户ID的后3位作为序号
   const sequence = customer_id.slice(-3)
@@ -31,7 +31,7 @@ const translate_refund_reason = (reason: string): string => {
 const router = Router()
 
 // 计算客户类型的函数（返回主要类型，前端会计算所有标签）
-function calculateCustomerType(customer: any): string {
+const calculateCustomerType = (customer: any): string => {
   const totalActiveOrders = customer.totalActiveOrders || customer.total_orders || 0
   const total_purchases = Number(customer.total_purchases) || 0
   const refund_rate = customer.refund_rate || 0
@@ -70,7 +70,7 @@ function calculateCustomerType(customer: any): string {
 }
 
 // 获取客户分析数据 (前端调用的接口) - 必须在动态路由之前
-router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
   try {
     const { time_period = 'all' } = req.query
     
@@ -121,20 +121,20 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
    // 总客户数（根据时间筛选）
     const [total_customers, currentPurchases, totalRevenue, new_customers, repeat_customers, vip_customers, active_customers, total_refunds, active_purchases] = await Promise.all([
       // 总客户数（根据时间筛选）
-      prisma.customer.count({
+      prisma.customers.count({
         where: dateFilter
       }),
       // 总订单数（根据时间筛选，包括所有状态）
-      prisma.customer_purchase.count({
+      prisma.customerPurchases.count({
         where: purchaseDateFilter
       }),
       // 总销售额（根据时间筛选）
-      prisma.customer_purchase.aggregate({
+      prisma.customerPurchases.aggregate({
         where: purchaseDateFilter,
         _sum: { total_price: true }
       }),
       // 30天内新客户
-      prisma.customer.count({
+      prisma.customers.count({
         where: {
           ...dateFilter,
           created_at: {
@@ -143,7 +143,7 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
         }
       }),
       // 复购客户（订单数≥3）
-      prisma.customer.count({
+      prisma.customers.count({
         where: {
           ...dateFilter,
           total_orders: {
@@ -152,7 +152,7 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
         }
       }),
       // VIP客户（累计购买≥5000元）
-      prisma.customer.count({
+      prisma.customers.count({
         where: {
           ...dateFilter,
           total_purchases: {
@@ -161,7 +161,7 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
         }
       }),
       // 活跃客户（90天内购买）
-      prisma.customer.count({
+      prisma.customers.count({
         where: {
           ...dateFilter,
           last_purchase_date: {
@@ -170,36 +170,29 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
         }
       }),
       // 总退货次数（根据时间筛选，通过购买记录状态统计）
-      prisma.customer_purchase.count({
+      prisma.customerPurchases.count({
         where: {
           ...purchaseDateFilter,
           status: 'REFUNDED'
         }
       }),
       // 正常销售记录（用于毛利率计算，排除已退货记录）
-      prisma.customer_purchase.findMany({
+      prisma.customerPurchases.findMany({
         where: {
           ...purchaseDateFilter,
           status: 'ACTIVE' // 只包含正常销售记录
-        },
-        include: {
-          sku: {
-            select: {
-              total_cost: true
-            }
-          }
         }
       })
     ])
     
     // 计算正常销售记录的总成本和总售价
-    let total_costAmount = 0
+    let total_priceAmount = 0
     let totalActiveSalesAmount = 0
     
-    active_purchases.forEach((purchase) => {
-      if (purchase.sku && purchase.sku.total_cost) {
-        const costForThisPurchase = Number(purchase.sku.total_cost) * purchase.quantity
-        total_costAmount += costForThisPurchase
+    active_purchases.forEach((purchase: any) => {
+      if (purchase.product_skus && purchase.product_skus.total_cost) {
+        const costForThisPurchase = Number(purchase.product_skus.total_cost) * purchase.quantity
+        total_priceAmount += costForThisPurchase
       }
       totalActiveSalesAmount += Number(purchase.total_price)
     })
@@ -214,13 +207,13 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
     
     // 平均毛利率计算：(总实际售价 - 总实际成本) / 总实际售价 * 100%
     // 只计算正常销售记录，不包括已退货的记录
-    const average_profit_margin = totalActiveSalesAmount > 0 ? ((totalActiveSalesAmount - total_costAmount) / totalActiveSalesAmount) * 100 : 0
+    const average_profit_margin = totalActiveSalesAmount > 0 ? ((totalActiveSalesAmount - total_priceAmount) / totalActiveSalesAmount) * 100 : 0
     
 
     
-    const totalSalesAmount = totalRevenue._sum?.total_price || 0
+    // const totalSalesAmount = totalRevenue._sum?.total_price || 0
     
-    res.json({
+    return res.json({
       success: true,
       message: '客户分析数据获取成功',
       data: {
@@ -240,7 +233,7 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
   } catch (error) {
     // 即使出错也返回空数据，不返回404
     console.error('获取客户分析数据失败:', error)
-    res.json({
+    return res.json({
         success: true,
         message: '客户分析数据获取成功',
         data: {
@@ -250,48 +243,50 @@ router.get('/analytics', authenticate_token, asyncHandler(async (req, res) => {
           vip_customers: 0,
           active_customers: 0,
           inactive_customers: 0,
-        average_order_value: 0,
-         repeat_purchase_rate: 0,
-        refund_rate: 0,
-         average_profit_margin: 0,
-        time_period: 'all'
-      }
+          average_order_value: 0,
+          repeat_purchase_rate: 0,
+          refund_rate: 0,
+          average_profit_margin: 0,
+          time_period: 'all'
+        }
     })
   }
 }))
 
 // 获取客户统计信息
-router.get('/stats/overview', authenticate_token, asyncHandler(async (req, res) => {const [total_customers, total_purchases, totalRevenue, recentCustomers] = await Promise.all([
-    prisma.customer.count(),
-    prisma.customer_purchase.count(),
-    prisma.customer_purchase.aggregate({
+router.get('/stats/overview', authenticateToken, asyncHandler(async (_req, res) => {
+  const [total_customers, total_purchases, total_revenue, recent_customers] = await Promise.all([
+    prisma.customers.count(),
+    prisma.customerPurchases.count(),
+    prisma.customerPurchases.aggregate({
       _sum: { total_price: true }
     }),
-    prisma.customer.findMany({
+    prisma.customers.findMany({
       orderBy: { created_at: 'desc' },
       take: 5,
       include: {
         _count: {
-          select: { purchases: true }
+          select: { customer_purchases: true }
         }
       }
     })
   ])
   
-  res.json({
+  return res.json({
     success: true,
     message: '客户统计信息获取成功',
     data: {
       total_customers: total_customers,
       total_purchases: total_purchases,
-      totalRevenue: totalRevenue._sum.total_price || 0,
-      recentCustomers: recentCustomers
+      total_revenue: total_revenue._sum.total_price || 0,
+      recent_customers: recent_customers
     }
   })
+  return
 }))
 
 // 获取可用SKU列表（用于销售录入）- 必须在动态路由之前
-router.get('/available-skus', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/available-skus', authenticateToken, asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, search = '' } = req.query
   
   const skip = (Number(page) - 1) * Number(limit)
@@ -312,7 +307,7 @@ router.get('/available-skus', authenticate_token, asyncHandler(async (req, res) 
   }
   
   const [skus, total] = await Promise.all([
-    prisma.product_sku.findMany({
+    prisma.productSku.findMany({
       where,
       skip,
       take: Number(limit),
@@ -322,29 +317,29 @@ router.get('/available-skus', authenticate_token, asyncHandler(async (req, res) 
         sku_code: true,
         sku_name: true,
         specification: true,
-        unit_price: true,
+        selling_price: true,
         available_quantity: true,
         photos: true,
         status: true
       }
     }),
-    prisma.product_sku.count({ where })
+    prisma.productSku.count({ where })
   ])
   
   // 转换字段格式以匹配前端期望的下划线格式
   const skusWithMapping = skus.map(sku => ({
     id: sku.id,
     sku_code: sku.sku_code,
-      sku_name: sku.sku_name,
-      specification: sku.specification,
-      unit_price: sku.unit_price,
-      selling_price: sku.unit_price, // 兼容字段
+    sku_name: sku.sku_name,
+    specification: sku.specification,
+    unit_price: sku.selling_price,
+    selling_price: sku.selling_price, // 兼容字段
     available_quantity: sku.available_quantity,
     photos: sku.photos,
     status: sku.status
   }))
   
-  res.json({
+  return res.json({
     success: true,
     message: '可用SKU列表获取成功',
     data: {
@@ -357,6 +352,7 @@ router.get('/available-skus', authenticate_token, asyncHandler(async (req, res) 
       }
     }
   })
+  return
 }))
 
 // 全中国主要城市列表
@@ -393,7 +389,7 @@ const extractCityFromAddress = (address: string) => {
 }
 
 // 获取客户列表
-router.get('/', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   const { 
     page = 1, 
     limit = 20, 
@@ -546,16 +542,16 @@ router.get('/', authenticate_token, asyncHandler(async (req, res) => {
   }
   
   const [customers, total] = await Promise.all([
-    prisma.customer.findMany({
+    prisma.customers.findMany({
       where,
       skip,
       take: Number(limit),
       orderBy: order_by,
       include: {
         _count: {
-          select: { purchases: true }
+          select: { customer_purchases: true }
         },
-        purchases: {
+        customer_purchases: {
           select: {
             id: true,
             status: true
@@ -563,20 +559,20 @@ router.get('/', authenticate_token, asyncHandler(async (req, res) => {
         }
       }
     }),
-    prisma.customer.count({ where })
+    prisma.customers.count({ where })
   ])
   
   // 为前端添加字段映射，确保兼容性
-  let customersWithMapping = customers.map((customer, index) => {
+  let customersWithMapping = customers.map((customer, _index) => {
     // 计算总订单量（包含所有状态的订单）
-    const total_all_orders = customer.purchases ? customer.purchases.length : 0
+    const total_all_orders = customer.customer_purchases ? customer.customer_purchases.length : 0
     
     // 计算有效订单量（排除已退货的订单）
-    const totalActiveOrders = customer.purchases ? 
-      customer.purchases.filter((purchase: any) => purchase.status === 'ACTIVE').length : 0
+    const totalActiveOrders = customer.customer_purchases ? 
+      customer.customer_purchases.filter((purchase: any) => purchase.status === 'ACTIVE').length : 0
     
     // 计算退货相关统计
-    const totalRefundedOrders = customer._count?.purchases || 0
+    const totalRefundedOrders = customer._count?.customer_purchases || 0
     const refund_rate = total_all_orders > 0 ? (totalRefundedOrders / total_all_orders) * 100 : 0
     
     // 动态生成客户编码（基于创建日期和索引）
@@ -674,7 +670,7 @@ router.get('/', authenticate_token, asyncHandler(async (req, res) => {
   let city_stats = null
   if (get_city_stats === 'true') {
     // 获取所有客户的城市信息
-    const allCustomers = await prisma.customer.findMany({
+    const allCustomers = await prisma.customers.findMany({
       select: {
         address: true
       }
@@ -728,28 +724,19 @@ router.get('/', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 获取客户详情
-router.get('/:id', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id },
     include: {
-      purchases: {
-        orderBy: { purchase_date: 'desc' },
-        include: {
-          sku: {
-            select: {
-              id: true,
-              sku_code: true,
-              sku_name: true,
-              specification: true
-            }
-          }
-        }
+      customer_purchases: {
+        orderBy: { purchase_date: 'desc' }
       }
     }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -779,7 +766,7 @@ router.get('/:id', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 创建客户
-router.post('/', authenticate_token, asyncHandler(async (req, res) => {
+router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   const { name, phone, address, wechat, birthday, notes } = req.body
   
   // 验证输入
@@ -802,7 +789,7 @@ router.post('/', authenticate_token, asyncHandler(async (req, res) => {
   })
   
   // 检查手机号是否已存在
-  const existingCustomer = await prisma.customer.findUnique({
+  const existingCustomer = await prisma.customers.findUnique({
     where: { phone: validatedData.phone }
   })
   
@@ -813,7 +800,7 @@ router.post('/', authenticate_token, asyncHandler(async (req, res) => {
     })
   }
   
-  const customer = await prisma.customer.create({
+  const customer = await prisma.customers.create({
     data: {
       id: crypto.randomUUID(),
       name: validatedData.name,
@@ -851,7 +838,7 @@ router.post('/', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 更新客户信息
-router.put('/:id', authenticate_token, asyncHandler(async (req, res) => {
+router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   const { name, phone, address, wechat, birthday, notes } = req.body
   
@@ -875,10 +862,11 @@ router.put('/:id', authenticate_token, asyncHandler(async (req, res) => {
   })
   
   // 检查客户是否存在
-  const existingCustomer = await prisma.customer.findUnique({
+  const existingCustomer = await prisma.customers.findUnique({
     where: { id }
   })
   
+
   if (!existingCustomer) {
     return res.status(404).json({
       success: false,
@@ -888,7 +876,7 @@ router.put('/:id', authenticate_token, asyncHandler(async (req, res) => {
   
   // 如果手机号有变化，检查新手机号是否已被其他客户使用
   if (validatedData.phone !== existingCustomer.phone) {
-    const phoneExists = await prisma.customer.findUnique({
+    const phoneExists = await prisma.customers.findUnique({
       where: { phone: validatedData.phone }
     })
     
@@ -900,7 +888,7 @@ router.put('/:id', authenticate_token, asyncHandler(async (req, res) => {
     }
   }
   
-  const customer = await prisma.customer.update({
+  const customer = await prisma.customers.update({
     where: { id },
     data: {
       name: validatedData.name,
@@ -935,21 +923,22 @@ router.put('/:id', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 删除客户
-router.delete('/:id', authenticate_token, asyncHandler(async (req, res) => {
+router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
   // 检查客户是否存在
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id },
     include: {
       _count: {
         select: {
-          purchases: true
+          customer_purchases: true
         }
       }
     }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -958,14 +947,14 @@ router.delete('/:id', authenticate_token, asyncHandler(async (req, res) => {
   }
   
   // 如果客户有购买记录，不允许删除
-  if (customer._count?.purchases > 0) {
+  if (customer._count?.customer_purchases > 0) {
     return res.status(400).json({
       success: false,
       message: '该客户有购买记录，无法删除'
     })
   }
   
-  await prisma.customer.delete({
+  await prisma.customers.delete({
     where: { id }
   })
   
@@ -977,17 +966,18 @@ router.delete('/:id', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 获取客户购买历史
-router.get('/:id/purchases', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/:id/purchases', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   const { page = 1, limit = 20 } = req.query
   
   const skip = (Number(page) - 1) * Number(limit)
   
   // 检查客户是否存在
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -996,7 +986,7 @@ router.get('/:id/purchases', authenticate_token, asyncHandler(async (req, res) =
   }
   
   const [purchases, total] = await Promise.all([
-    prisma.customer_purchase.findMany({
+    prisma.customerPurchases.findMany({
       where: { customer_id: id },
       skip,
       take: Number(limit),
@@ -1017,19 +1007,10 @@ router.get('/:id/purchases', authenticate_token, asyncHandler(async (req, res) =
         sale_channel: true,
         notes: true,
         purchase_date: true,
-        created_at: true,
-        sku: {
-          select: {
-            id: true,
-            sku_code: true,
-            sku_name: true,
-            specification: true,
-            photos: true
-          }
-        }
+        created_at: true
       }
     }),
-    prisma.customer_purchase.count({
+    prisma.customerPurchases.count({
       where: { customer_id: id }
     })
   ])
@@ -1054,7 +1035,7 @@ router.get('/:id/purchases', authenticate_token, asyncHandler(async (req, res) =
 
 
 // 添加客户购买记录
-router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) => {
+router.post('/:id/purchases', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   const { sku_id, quantity, unit_price, total_price, sale_channel, notes } = req.body
   
@@ -1076,10 +1057,11 @@ router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) 
   })
   
   // 检查客户是否存在
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -1088,10 +1070,11 @@ router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) 
   }
   
   // 检查SKU是否存在
-  const sku = await prisma.product_sku.findUnique({
+  const sku = await prisma.productSku.findUnique({
     where: { id: validatedData.sku_id }
   })
   
+
   if (!sku) {
     return res.status(404).json({
       success: false,
@@ -1100,7 +1083,7 @@ router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) 
   }
   
   // 创建客户购买记录
-  const purchase = await prisma.customer_purchase.create({
+  const purchase = await prisma.customerPurchases.create({
     data: {
       id: crypto.randomUUID(),
       customer_id: id,
@@ -1113,7 +1096,8 @@ router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) 
       sale_channel: validatedData.sale_channel,
       notes: validatedData.notes,
       purchase_date: new Date(),
-      created_at: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }
   })
   
@@ -1126,14 +1110,15 @@ router.post('/:id/purchases', authenticate_token, asyncHandler(async (req, res) 
 }))
 
 // 获取客户备注
-router.get('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
+router.get('/:id/notes', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   
   // 检查客户是否存在
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -1141,11 +1126,11 @@ router.get('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
     })
   }
   
-  const notes = await prisma.customer_note.findMany({
+  const notes = await prisma.customerNotes.findMany({
     where: { customer_id: id },
     orderBy: { created_at: 'desc' },
     include: {
-      creator: {
+      users: {
         select: {
           id: true,
           name: true,
@@ -1164,7 +1149,7 @@ router.get('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 添加客户备注
-router.post('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
+router.post('/:id/notes', authenticateToken, asyncHandler(async (req, res) => {
   const { id } = req.params
   const { category, content } = req.body
   
@@ -1182,10 +1167,11 @@ router.post('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
   })
   
   // 检查客户是否存在
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customers.findUnique({
     where: { id }
   })
   
+
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -1193,15 +1179,17 @@ router.post('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
     })
   }
   
-  const note = await prisma.customer_note.create({
+  const note = await prisma.customerNotes.create({
     data: {
+      id: `note_${id}_${Date.now()}`,
       customer_id: id,
       category: validatedData.category as any,
       content: validatedData.content,
-      created_by: req.user!.id
+      created_by: req.user!.id,
+      updated_at: new Date()
     },
     include: {
-      creator: {
+      users: {
         select: {
           id: true,
           name: true,
@@ -1220,7 +1208,7 @@ router.post('/:id/notes', authenticate_token, asyncHandler(async (req, res) => {
 }))
 
 // 客户购买记录退货
-router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, asyncHandler(async (req, res) => {
+router.post('/:customer_id/purchases/:purchase_id/refund', authenticateToken, asyncHandler(async (req, res) => {
   const { customer_id, purchase_id } = req.params
   const { quantity, reason, refund_amount, notes } = req.body
   
@@ -1241,25 +1229,27 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
   
   const result = await prisma.$transaction(async (tx) => {
     // 1. 检查客户是否存在
-    const customer = await tx.customer.findUnique({
+    const customer = await tx.customers.findUnique({
       where: { id: customer_id }
     })
     
+
     if (!customer) {
       throw new Error('客户不存在')
     }
     
     // 2. 检查购买记录是否存在
-    const purchase = await tx.customer_purchase.findUnique({
+    const purchase = await tx.customerPurchases.findUnique({
       where: { 
         id: purchase_id,
         customer_id: customer_id
       },
       include: {
-        sku: true
+        product_skus: true
       }
     })
     
+
     if (!purchase) {
       throw new Error('购买记录不存在')
     }
@@ -1273,23 +1263,23 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
     const refund_amount = validatedData.refund_amount || (Number(purchase.unit_price) * validatedData.quantity)
     
     // 5. 增加SKU库存（退货回库存）
-    const sku = purchase.sku
+    const sku = purchase.product_skus
     const quantity_before = sku.available_quantity
     const quantity_after = quantity_before + validatedData.quantity
     const totalQuantityAfter = sku.total_quantity + validatedData.quantity
     
-    const updated_sku = await tx.product_sku.update({
+    const updated_sku = await tx.productSku.update({
       where: { id: purchase.sku_id },
       data: {
         available_quantity: quantity_after,
         total_quantity: totalQuantityAfter,
-        total_value: quantity_after * Number(sku.unit_price)
+        total_value: quantity_after * Number(sku.selling_price)
       }
     })
     
     // 6. 创建SKU库存变更日志
     const translated_reason = translate_refund_reason(validatedData.reason)
-    await tx.sku_inventory_log.create({
+    await tx.skuInventoryLog.create({
       data: { sku_id: purchase.sku_id,
         action: 'ADJUST',
         quantity_change: validatedData.quantity,
@@ -1303,7 +1293,7 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
     })
     
     // 7. 更新客户统计数据（减少购买金额和订单数）
-    await tx.customer.update({
+    await tx.customers.update({
       where: { id: customer_id },
       data: {
         total_purchases: {
@@ -1317,24 +1307,26 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
     })
     
     // 8. 创建财务退款记录（负数金额，抵扣收入）
-    await tx.financial_record.create({
+    await tx.financialRecords.create({
       data: {
+        id: `refund_${purchase_id}_${Date.now()}`,
         record_type: 'REFUND',
         amount: -refund_amount, // 负数表示抵扣收入
-        description: `客户退货退款 - ${purchase.sku.sku_name}`,
+        description: `客户退货退款 - ${purchase.product_skus.sku_name}`,
         reference_type: 'REFUND',
         reference_id: purchase_id,
         category: '客户退货',
         transaction_date: new Date(),
         notes: `客户：${customer.name}，退货原因：${translated_reason}，退货数量：${validatedData.quantity}件${validatedData.notes ? `，备注：${validatedData.notes}` : ''}`,
-        user_id: req.user!.id
+        user_id: req.user!.id,
+        updated_at: new Date()
       }
     })
     
     // 9. 更新购买记录状态为已退货（保留记录，不删除）
     if (validatedData.quantity === purchase.quantity) {
       // 全部退货，标记为已退货状态
-      await tx.customer_purchase.update({
+      await tx.customerPurchases.update({
         where: { id: purchase_id },
         data: {
           status: 'REFUNDED',
@@ -1346,7 +1338,7 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
       })
     } else {
       // 部分退货，更新购买记录数量但保持ACTIVE状态
-      await tx.customer_purchase.update({
+      await tx.customerPurchases.update({
         where: { id: purchase_id },
         data: {
           quantity: purchase.quantity - validatedData.quantity,
@@ -1356,8 +1348,9 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
       })
       
       // 为退货部分创建新的已退货记录
-      await tx.customer_purchase.create({
+      await tx.customerPurchases.create({
         data: {
+          id: `refund_${purchase_id}_${Date.now()}`,
           customer_id: customer_id,
           sku_id: purchase.sku_id,
           sku_name: purchase.sku_name,
@@ -1371,7 +1364,8 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
           refund_notes: validatedData.notes,
           sale_channel: purchase.sale_channel,
           notes: purchase.notes,
-          purchase_date: purchase.purchase_date
+          purchase_date: purchase.purchase_date,
+          updated_at: new Date()
         }
       })
     }
@@ -1402,7 +1396,6 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticate_token, a
       notes: validatedData.notes
     }
   })
-  return
 }))
 
 export default router

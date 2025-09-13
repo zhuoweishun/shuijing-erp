@@ -1,0 +1,3 @@
+DESCRIBE users;
+DESCRIBE suppliers;
+SHOW COLUMNS

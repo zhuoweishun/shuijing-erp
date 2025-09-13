@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { validateFieldNaming } from '../utils/fieldConverter'
+// 移除fieldConverter导入，直接使用snake_case
 
 /**
  * API响应字段格式验证中间件
@@ -23,7 +23,7 @@ export const validateApiResponse = (req: Request, res: Response, next: NextFunct
       console.error('API响应字段格式验证失败:', {
         path: req.path,
         method: req.method,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         body: JSON.stringify(body, null, 2)
       })
       
@@ -32,7 +32,7 @@ export const validateApiResponse = (req: Request, res: Response, next: NextFunct
         return originalJson.call(this, {
           success: false,
           message: '服务器内部错误：响应字段格式不符合规范',
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         })
       } else {
         console.warn('生产环境下检测到字段格式问题，但继续发送响应')
@@ -63,7 +63,7 @@ function validateResponseFields(data: any, path: string): void {
       try {
         validateResponseFields(item, `${path}[${index}]`)
       } catch (error) {
-        throw new Error(`数组索引 ${index} 处的字段格式错误: ${error.message}`)
+        throw new Error(`数组索引 ${index} 处的字段格式错误: ${error instanceof Error ? error.message : String(error)}`)
       }
     })
   } else {
@@ -75,7 +75,7 @@ function validateResponseFields(data: any, path: string): void {
       }
       
       // 验证字段名是否符合snake_case格式
-      if (!validateFieldNaming(key, 'snake_case')) {
+      if (!isSnakeCase(key)) {
         throw new Error(`字段 "${key}" 不符合snake_case命名规范`)
       }
       
@@ -84,7 +84,7 @@ function validateResponseFields(data: any, path: string): void {
         try {
           validateResponseFields(data[key], `${path}.${key}`)
         } catch (error) {
-          throw new Error(`字段 "${key}" 中的嵌套数据格式错误: ${error.message}`)
+          throw new Error(`字段 "${key}" 中的嵌套数据格式错误: ${error instanceof Error ? error.message : String(error)}`)
         }
       }
     })
@@ -101,7 +101,7 @@ export function validateEndpointResponse(endpoint: string, responseData: any): b
     validateResponseFields(responseData, endpoint)
     return true
   } catch (error) {
-    console.error(`API端点 ${endpoint} 响应格式验证失败:`, error.message)
+    console.error(`API端点 ${endpoint} 响应格式验证失败:`, error instanceof Error ? error.message : String(error))
     return false
   }
 }
@@ -111,6 +111,17 @@ export function validateEndpointResponse(endpoint: string, responseData: any): b
  * 在开发环境下对所有API响应进行严格的字段格式检查
  */
 export const strictValidationMode = process.env.NODE_ENV === 'development'
+
+/**
+ * 验证字段名是否符合snake_case格式
+ * @param fieldName 字段名
+ * @returns 是否符合snake_case格式
+ */
+function isSnakeCase(fieldName: string): boolean {
+  // snake_case格式：小写字母开头，可包含数字和下划线
+  const snakeCasePattern = /^[a-z][a-z0-9_]*$/
+  return snakeCasePattern.test(fieldName)
+}
 
 /**
  * 字段格式验证配置

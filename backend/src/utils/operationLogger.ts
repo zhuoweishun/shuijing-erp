@@ -1,6 +1,6 @@
 // 操作日志记录工具
 import { PrismaClient } from '@prisma/client'
-import { logger } from './logger.js'
+import { logger } from './logger'
 
 const prisma = new PrismaClient()
 
@@ -46,12 +46,12 @@ export enum OperationType {
 
 // 操作日志接口
 export interface OperationLogData {
-  userId: string
+  user_id: string
   operation: OperationType
-  resourceType?: string // 资源类型（如 'purchase', 'supplier'）
-  resourceId?: string   // 资源ID
+  resource_type?: string // 资源类型（如 'purchase', 'supplier'）
+  resource_id?: string   // 资源ID
   details?: any         // 操作详情
-  changedFields?: Record<string, { from: any; to: any }> // 变更字段
+  changed_fields?: Record<string, { from: any; to: any }> // 变更字段
   ipAddress?: string    // IP地址
   userAgent?: string    // 用户代理
   metadata?: any        // 额外元数据
@@ -65,26 +65,26 @@ export class OperationLogger {
   static async log(data: OperationLogData): Promise<void> {
     try {
       // 记录到数据库（如果是采购相关操作且有resourceId）
-      if (data.resourceType === 'purchase' && data.resourceId) {
+      if (data.resource_type === 'purchase' && data.resource_id) {
         await prisma.editLog.create({
           data: {
-            purchaseId: data.resourceId,
-            userId: data.userId,
+            purchase_id: data.resource_id,
+            user_id: data.user_id,
             action: data.operation,
             details: data.details ? JSON.stringify(data.details) : null,
-            changedFields: data.changedFields ? JSON.stringify(data.changedFields) : undefined
+            changed_fields: data.changed_fields ? JSON.stringify(data.changed_fields) : undefined
           }
         })
       }
       
       // 记录到文件日志
       logger.info('操作日志', {
-        userId: data.userId,
+        user_id: data.user_id,
         operation: data.operation,
-        resourceType: data.resourceType,
-        resourceId: data.resourceId,
+        resource_type: data.resource_type,
+        resource_id: data.resource_id,
         details: data.details,
-        changedFields: data.changedFields,
+        changed_fields: data.changed_fields,
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
         metadata: data.metadata,
@@ -102,9 +102,9 @@ export class OperationLogger {
   /**
    * 记录用户登录
    */
-  static async logUserLogin(userId: string, ipAddress?: string, userAgent?: string): Promise<void> {
+  static async logUserLogin(user_id: string, ipAddress?: string, userAgent?: string): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.USER_LOGIN,
       ipAddress,
       userAgent,
@@ -117,9 +117,9 @@ export class OperationLogger {
   /**
    * 记录用户登出
    */
-  static async logUserLogout(userId: string, ipAddress?: string): Promise<void> {
+  static async logUserLogout(user_id: string, ipAddress?: string): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.USER_LOGOUT,
       ipAddress,
       details: {
@@ -132,22 +132,22 @@ export class OperationLogger {
    * 记录采购创建
    */
   static async logPurchaseCreate(
-    userId: string, 
-    purchaseId: string, 
+    user_id: string, 
+    purchase_id: string, 
     purchaseData: any,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.PURCHASE_CREATE,
-      resourceType: 'purchase',
-      resourceId: purchaseId,
+      resource_type: 'purchase',
+      resource_id: purchase_id,
       ipAddress,
       details: {
-        productName: purchaseData.productName,
-        productType: purchaseData.productType,
-        totalPrice: purchaseData.totalPrice,
-        supplierName: purchaseData.supplier?.name
+        product_name: purchaseData.product_name,
+        product_type: purchaseData.product_type,
+        total_price: purchaseData.total_price,
+        supplier_name: purchaseData.supplier?.name
       }
     })
   }
@@ -156,21 +156,21 @@ export class OperationLogger {
    * 记录采购更新
    */
   static async logPurchaseUpdate(
-    userId: string,
-    purchaseId: string,
-    changedFields: Record<string, { from: any; to: any }>,
+    user_id: string,
+    purchase_id: string,
+    changed_fields: Record<string, { from: any; to: any }>,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.PURCHASE_UPDATE,
-      resourceType: 'purchase',
-      resourceId: purchaseId,
-      changedFields,
+      resource_type: 'purchase',
+      resource_id: purchase_id,
+      changed_fields,
       ipAddress,
       details: {
-        fieldsChanged: Object.keys(changedFields),
-        changeCount: Object.keys(changedFields).length
+        fields_changed: Object.keys(changed_fields),
+        change_count: Object.keys(changed_fields).length
       }
     })
   }
@@ -179,19 +179,19 @@ export class OperationLogger {
    * 记录供应商创建
    */
   static async logSupplierCreate(
-    userId: string,
-    supplierId: string,
+    user_id: string,
+    supplier_id: string,
     supplierData: any,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.SUPPLIER_CREATE,
-      resourceType: 'supplier',
-      resourceId: supplierId,
+      resource_type: 'supplier',
+      resource_id: supplier_id,
       ipAddress,
       details: {
-        supplierName: supplierData.name,
+        supplier_name: supplierData.name,
         contact: supplierData.contact,
         phone: supplierData.phone
       }
@@ -202,15 +202,15 @@ export class OperationLogger {
    * 记录库存查看
    */
   static async logInventoryView(
-    userId: string,
+    user_id: string,
     viewType: string,
     filters?: any,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.INVENTORY_VIEW,
-      resourceType: 'inventory',
+      resource_type: 'inventory',
       ipAddress,
       details: {
         viewType,
@@ -224,15 +224,15 @@ export class OperationLogger {
    * 记录库存导出
    */
   static async logInventoryExport(
-    userId: string,
+    user_id: string,
     exportType: string,
     recordCount: number,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: OperationType.INVENTORY_EXPORT,
-      resourceType: 'inventory',
+      resource_type: 'inventory',
       ipAddress,
       details: {
         exportType,
@@ -246,15 +246,15 @@ export class OperationLogger {
    * 记录AI操作
    */
   static async logAIOperation(
-    userId: string,
+    user_id: string,
     aiOperation: OperationType,
     details: any,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation: aiOperation,
-      resourceType: 'ai',
+      resource_type: 'ai',
       ipAddress,
       details
     })
@@ -264,19 +264,19 @@ export class OperationLogger {
    * 记录文件操作
    */
   static async logFileOperation(
-    userId: string,
+    user_id: string,
     operation: OperationType.FILE_UPLOAD | OperationType.FILE_DELETE,
-    fileName: string,
+    file_name: string,
     fileSize?: number,
     ipAddress?: string
   ): Promise<void> {
     await this.log({
-      userId,
+      user_id,
       operation,
-      resourceType: 'file',
+      resource_type: 'file',
       ipAddress,
       details: {
-        fileName,
+        file_name,
         fileSize,
         timestamp: new Date().toISOString()
       }
@@ -287,7 +287,7 @@ export class OperationLogger {
    * 获取用户操作日志
    */
   static async getUserOperationLogs(
-    _userId: string,
+    _user_id: string,
     _limit: number = 50,
     _offset: number = 0
   ): Promise<any[]> {
@@ -305,24 +305,24 @@ export class OperationLogger {
    * 获取资源操作日志
    */
   static async getResourceOperationLogs(
-    resourceType: string,
-    resourceId: string,
+    resource_type: string,
+    resource_id: string,
     limit: number = 50
   ): Promise<any[]> {
     try {
-      if (resourceType === 'purchase') {
+      if (resource_type === 'purchase') {
         const logs = await prisma.editLog.findMany({
-          where: { purchaseId: resourceId },
+          where: { purchase_id: resource_id },
           include: {
             user: {
               select: {
                 id: true,
                 name: true,
-                username: true
+                user_name: true
               }
             }
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { created_at: 'desc' },
           take: limit
         })
         
@@ -331,8 +331,8 @@ export class OperationLogger {
           operation: log.action,
           user: log.user,
           details: log.details ? JSON.parse(log.details as string) : null,
-          changedFields: log.changedFields ? JSON.parse(log.changedFields as string) : null,
-          createdAt: log.createdAt
+          changed_fields: log.changed_fields ? JSON.parse(log.changed_fields as string) : null,
+          created_at: log.created_at
         }))
       }
       

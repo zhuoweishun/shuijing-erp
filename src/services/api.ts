@@ -97,7 +97,7 @@ export const fixImageUrl = (url: string): string => {
     // 在开发环境中，绝对不使用公域URL
     if (import.meta.env.MODE === 'development' || import.meta.env.DEV) {
       // 优先使用缓存的局域网IP
-      const cachedIP = localStorage.get_item('cached_local_ip')
+      const cachedIP = localStorage.getItem('cached_local_ip')
       
       if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
         const newUrl = url.replace(/https?:\/\/api\.dorblecapital\.com/g, `http://${cachedIP}:3001`)
@@ -136,7 +136,7 @@ export const fixImageUrl = (url: string): string => {
       }
       // 如果当前是localhost，优先使用缓存的局域网IP
       else if (currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-        const cachedIP = localStorage.get_item('cached_local_ip')
+        const cachedIP = localStorage.getItem('cached_local_ip')
         if (cachedIP && cachedIP !== urlIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1') {
           const newUrl = url.replace(new RegExp(`https?://${urlIP.replace(/\./g, '\\.')}:3001`, 'g'), `http://${cachedIP}:3001`)
           console.log(`🔄 图片URL已更新为缓存的局域网IP: ${url} -> ${newUrl}`)
@@ -254,7 +254,7 @@ const get_api_url = (): string => {
   // 2. 根据当前环境动态构建API地址
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
-    const cachedIP = localStorage.get_item('cached_local_ip')
+    const cachedIP = localStorage.getItem('cached_local_ip')
     
     if (import.meta.env.MODE === 'development') {
       console.log('🔧 [API_URL] 当前主机名:', hostname)
@@ -403,7 +403,7 @@ class ApiClient {
         method: config.method || 'GET',
         timestamp: new Date().toLocaleString(),
         hostname: window.location.hostname,
-        cachedIP: localStorage.get_item('cached_local_ip')
+        cachedIP: localStorage.getItem('cached_local_ip')
       })
     }
     
@@ -418,7 +418,7 @@ class ApiClient {
     }
 
     // 添加认证token
-    const token = localStorage.get_item('auth_token')
+    const token = localStorage.getItem('auth_token')
     if (import.meta.env.MODE === 'development') {
       console.log('🔍 [DEBUG] 从localStorage获取的token:', token ? `${token.substring(0, 20)}...` : 'null')
     }
@@ -685,7 +685,7 @@ class ApiClient {
     const headers: Record<string, string> = {}
     
     // 添加认证token
-    const token = localStorage.get_item('auth_token')
+    const token = localStorage.getItem('auth_token')
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
@@ -712,7 +712,10 @@ export const apiClient = new ApiClient()
 export const auth_api = {
   // 用户登录
   login: (credentials: { user_name: string; password: string }) =>
-    apiClient.post('/auth/login', credentials),
+    apiClient.post('/auth/login', {
+      user_name: credentials.user_name,
+      password: credentials.password
+    }),
   
   // 用户注册
   register: (userData: {
@@ -1052,7 +1055,7 @@ export const upload_api = {
       console.log('uploadPurchaseImages调用:', {
         formData,
         hasFiles: formData.has('images'),
-        token: localStorage.get_item('auth_token') ? '有token' : '无token'
+        token: localStorage.getItem('auth_token') ? '有token' : '无token'
       })
     }
     
@@ -1065,7 +1068,7 @@ export const upload_api = {
       body: JSON.stringify({ urls }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.get_item('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
       },
     }),
   
@@ -1081,7 +1084,7 @@ export const upload_api = {
     
     return apiClient.post('/upload/multiple', formData, {
       headers: {
-        'Authorization': `Bearer ${localStorage.get_item('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
       },
     })
   },
