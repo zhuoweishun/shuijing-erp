@@ -6,22 +6,35 @@ import { ApiResponse } from '../types'
 
 import { handleApiError, handleNetworkError, handleTimeoutError, ErrorType } from './errorHandler'
 
-// 动态获取本机局域网IP地址
+
+
+// 动态获取本机局域网IP地址（增强版）
 const get_local_network_ip = (): Promise<string | null> => {
   return new Promise((resolve) => {
     // 尝试通过WebRTC获取本机IP
-    const pc = new RTCPeerConnection({ iceServers: [] })
+    const pc = new RTCPeerConnection({ 
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // 添加STUN服务器提高成功率
+    })
     pc.createDataChannel('')
     
+    let resolved = false
+    
     pc.onicecandidate = (event) => {
-      if (event.candidate) {
+      if (event.candidate && !resolved) {
         const candidate = event.candidate.candidate
+        console.log('🔍 [IP检测] ICE候选:', candidate)
+        
         const ipMatch = candidate.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/)
         if (ipMatch && ipMatch[1]) {
           const ip = ipMatch[1]
-          // 只返回局域网IP
-          if (ip.startsWith('192.168.') || ip.startsWith('10.') || 
-              (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31)) {
+          console.log('🔍 [IP检测] 发现IP:', ip)
+          
+          // 只返回局域网IP，排除回环地址
+          if ((ip.startsWith('192.168.') || ip.startsWith('10.') || 
+              (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31)) &&
+              !ip.startsWith('127.')) {
+            console.log('✅ [IP检测] 检测到有效局域网IP:', ip)
+            resolved = true
             pc.close()
             resolve(ip)
             return
@@ -30,36 +43,47 @@ const get_local_network_ip = (): Promise<string | null> => {
       }
     }
     
-    pc.createOffer().then(offer => pc.setLocalDescription(offer))
-    
-    // 超时处理
-    setTimeout(() => {
+    pc.createOffer().then(offer => {
+      pc.setLocalDescription(offer)
+      console.log('🔍 [IP检测] WebRTC连接已建立，等待ICE候选...')
+    }).catch(error => {
+      console.warn('⚠️ [IP检测] WebRTC连接失败:', error)
       pc.close()
       resolve(null)
-    }, 2000)
+    })
+    
+    // 增加超时时间，给WebRTC更多时间
+    setTimeout(() => {
+      if (!resolved) {
+        console.warn('⚠️ [IP检测] WebRTC超时，未检测到局域网IP')
+        pc.close()
+        resolve(null)
+      }
+    }, 5000) // 增加到5秒
   })
 }
 
 // 缓存本机IP地址
 let cachedLocalIP: string | null = null
-let ipDetectionPromise: Promise<string | null> | null = null
 
 // 异步获取并缓存本机IP
-const ensureLocalIP = async (): Promise<string | null> => {
-  if (cachedLocalIP) return cachedLocalIP
-  
-  if (!ipDetectionPromise) {
-    ipDetectionPromise = get_local_network_ip().then(ip => {
-      if (ip) {
-        cachedLocalIP = ip
-        localStorage.setItem('cached_local_ip', ip)
-        console.log(`🌐 检测到本机局域网IP: ${ip}`)
-      }
-      return ip
-    })
+const detectAndCacheLocalIP = async (): Promise<string | null> => {
+  if (cachedLocalIP) {
+    return cachedLocalIP
   }
   
-  return ipDetectionPromise
+  try {
+    const ip = await get_local_network_ip()
+    if (ip) {
+      cachedLocalIP = ip
+      localStorage.setItem('cached_local_ip', ip)
+      console.log(`🌐 检测到本机局域网IP: ${ip}`)
+    }
+    return ip
+  } catch (error) {
+    console.error('❌ [IP检测] 获取IP失败:', error)
+    return null
+  }
 }
 
 // 修复图片URL协议问题和IP地址更新（增强版）
@@ -158,30 +182,19 @@ export const fixImageUrl = (url: string): string => {
   return url
 }
 
-// 初始化IP检测（在页面加载时自动执行）
+// 添加全局调试函数
 if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
-  // 延迟执行，避免阻塞页面加载
-  if (typeof window.setTimeout === 'function') {
-    window.setTimeout(() => {
-      ensureLocalIP().catch(console.error)
-    }, 1000)
-  } else {
-    // 如果setTimeout不可用，使用Promise.resolve().then()作为备选
-    Promise.resolve().then(() => {
-      ensureLocalIP().catch(console.error)
-    })
-  }
-  
-  // 添加全局调试函数
   (window as any).debugAPI = {
     // 重新检测IP
     async refreshIP() {
       console.log('🔄 重新检测IP地址...')
       cachedLocalIP = null
-      ipDetectionPromise = null
       localStorage.removeItem('cached_local_ip')
-      const newIP = await ensureLocalIP()
+      const newIP = await detectAndCacheLocalIP()
       console.log('✅ IP检测完成:', newIP)
+      if (newIP) {
+        console.log('💡 建议刷新页面以使用新的IP地址')
+      }
       return newIP
     },
     
@@ -189,7 +202,6 @@ if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
     clearCache() {
       console.log('🧹 清除API缓存...')
       cachedLocalIP = null
-      ipDetectionPromise = null
       localStorage.removeItem('cached_local_ip')
       console.log('✅ 缓存已清除')
     },
@@ -280,7 +292,7 @@ const get_api_url = (): string => {
       return apiUrl
     }
     
-    // localhost情况 - 优先使用缓存的局域网IP
+    // localhost情况 - 强制使用局域网IP
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       // 如果有缓存的局域网IP且不是localhost，优先使用
       if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1' && 
@@ -293,10 +305,25 @@ const get_api_url = (): string => {
         return apiUrl
       }
       
-      // 否则使用localhost
+      // 如果没有缓存IP，尝试立即检测
+      console.warn('⚠️ [API_URL] localhost环境下没有缓存的局域网IP，将使用localhost（可能导致手机无法访问）')
+      
+      // 异步检测IP但不等待结果
+      ;(async () => {
+        try {
+          const detectedIP = await detectAndCacheLocalIP()
+          if (detectedIP && detectedIP !== cachedIP) {
+            console.log('🔄 [API_URL] 检测到新的局域网IP，建议刷新页面:', detectedIP)
+          }
+        } catch (error: any) {
+          console.error('❌ [API_URL] IP检测失败:', error)
+        }
+      })()
+      
+      // 暂时使用localhost
       const apiUrl = `http://localhost:3001/api/v1`
       if (import.meta.env.MODE === 'development') {
-        console.log('🔧 [API_URL] 使用localhost:', apiUrl)
+        console.log('🔧 [API_URL] 使用localhost（临时）:', apiUrl)
       }
       return apiUrl
     }

@@ -18,10 +18,12 @@ import dashboardRoutes from './routes/dashboard.js'
 import purchaseRoutes from './routes/purchases.js'
 import inventoryRoutes from './routes/inventory.js'
 import supplierRoutes from './routes/suppliers.js'
+import customerRoutes from './routes/customers.js'
 import userRoutes from './routes/users.js'
 import aiRoutes from './routes/ai.js'
 import assistantRoutes from './routes/assistant.js'
 import uploadRoutes from './routes/upload.js'
+import financialRoutes from './routes/financial.js'
 
 // 导入products路由
 import productRoutes from './routes/products.js'
@@ -201,7 +203,9 @@ app.use('/api/v1/finished-products', productRoutes)
 app.use('/api/v1/skus', skuRoutes)
 app.use('/api/v1/inventory', inventoryRoutes)
 app.use('/api/v1/suppliers', supplierRoutes)
+app.use('/api/v1/customers', customerRoutes)
 app.use('/api/v1/users', userRoutes)
+app.use('/api/v1/financial', financialRoutes)
 app.use('/api/v1/ai', aiRoutes)
 app.use('/api/v1/assistant', assistantRoutes)
 
@@ -220,9 +224,9 @@ app.get('/', (_req, res) => {
     environment: NODE_ENV,
     timestamp: new Date().toISOString(),
     network: {
-      localIP,
-      publicIP,
-      apiDomain
+      local_ip: localIP,
+      public_ip: publicIP,
+      api_domain: apiDomain
     }
   })
 })

@@ -23,9 +23,9 @@ router.get('/', asyncHandler(async (req, res) => {
       external: Math.round(process.memoryUsage().external / 1024 / 1024 * 100) / 100
     },
     network: {
-      localIP: process.env.LOCAL_IP || 'localhost',
-      publicIP: process.env.PUBLIC_IP || '139.224.189.1',
-      apiDomain: process.env.API_DOMAIN || 'api.dorblecapital.com'
+      local_ip: process.env.LOCAL_IP || 'localhost',
+      public_ip: process.env.PUBLIC_IP || '139.224.189.1',
+      api_domain: process.env.API_DOMAIN || 'api.dorblecapital.com'
     }
   }
 

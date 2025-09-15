@@ -22,11 +22,19 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     status = 'ACTIVE' 
   } = req.query
   
+  // 解析status参数，支持多状态查询
+  let statusArray
+  if (typeof status === 'string' && status.includes(',')) {
+    statusArray = status.split(',').map(s => s.trim())
+  } else {
+    statusArray = String(status)
+  }
+  
   const result = await getSkuList({
     page: Number(page),
     limit: Number(limit),
     search: String(search),
-    status: String(status)
+    status: statusArray
   })
   
   return res.json({

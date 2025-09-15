@@ -83,7 +83,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
   })
 
   // 获取财务记录（销售收入和退货记录）
-  // const financial_records = await prisma.financialRecords.findMany({
+  // const financial_records = await prisma.FinancialRecords.findMany({
   //   where: {
   //     record_type: {
   //       in: ['INCOME', 'REFUND']
@@ -292,7 +292,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
   })
 
   // 获取财务记录（销售收入和退货记录）
-  const financial_records = await prisma.financialRecords.findMany({
+  const financial_records = await prisma.FinancialRecords.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { transaction_date: timeWhere } : {})
     }
@@ -715,7 +715,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   const yearlyTotalExpense = yearlyPurchaseAmount + yearlyProductionExpense
 
   // 获取本月销售收入（从财务记录中）
-  const monthlyIncomeRecords = await prisma.financialRecords.aggregate({
+  const monthlyIncomeRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -728,7 +728,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取年度销售收入（从财务记录中）
-  const yearlyIncomeRecords = await prisma.financialRecords.aggregate({
+  const yearlyIncomeRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -741,7 +741,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取本月退款金额（从财务记录中）
-  const monthlyRefundRecords = await prisma.financialRecords.aggregate({
+  const monthlyRefundRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -754,7 +754,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取年度退款金额（从财务记录中）
-  const yearlyRefundRecords = await prisma.financialRecords.aggregate({
+  const yearlyRefundRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -777,7 +777,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   // 获取今日数据
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  const todayIncomeRecords = await prisma.financialRecords.aggregate({
+  const todayIncomeRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -789,7 +789,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
     }
   })
 
-  const todayRefundRecords = await prisma.financialRecords.aggregate({
+  const todayRefundRecords = await prisma.FinancialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -928,8 +928,8 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
         date: key,
         income: 0, // 目前没有销售
         expense: 0,
-        productionExpense: 0,
-        destroyRefund: 0,
+        production_expense: 0,
+        destroy_refund: 0,
         refund: 0,
         loss: 0
       })
@@ -955,8 +955,8 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
         date: key,
         income: 0,
         expense: 0,
-        productionExpense: 0,
-        destroyRefund: 0,
+        production_expense: 0,
+        destroy_refund: 0,
         refund: 0,
         loss: 0
       })
@@ -966,7 +966,7 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
     const labor_cost = Number(sku.labor_cost || 0)
     const craft_cost = Number(sku.craft_cost || 0)
     const quantity = Number(sku.total_quantity || 0)
-    group.productionExpense += (labor_cost + craft_cost) * quantity
+    group.production_expense += (labor_cost + craft_cost) * quantity
   })
 
   // 统计销毁退回
@@ -985,8 +985,8 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
         date: key,
         income: 0,
         expense: 0,
-        productionExpense: 0,
-        destroyRefund: 0,
+        production_expense: 0,
+        destroy_refund: 0,
         refund: 0,
         loss: 0
       })
@@ -995,16 +995,16 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
     const group = groupedData.get(key)
     const craft_cost = Number(log.sku.craft_cost || 0)
     const destroyed_quantity = Math.abs(log.quantity_change)
-    group.destroyRefund += craft_cost * destroyed_quantity
+    group.destroy_refund += craft_cost * destroyed_quantity
   })
 
   // 转换为数组并计算利润
   const statistics = Array.from(groupedData.values()).map(item => {
-    const netProductionExpense = item.productionExpense - item.destroyRefund
-    const total_expense = item.expense + netProductionExpense
+    const net_production_expense = item.production_expense - item.destroy_refund
+    const total_expense = item.expense + net_production_expense
     return {
       ...item,
-      netProductionExpense: netProductionExpense,
+      net_production_expense: net_production_expense,
       total_expense: total_expense,
       profit: item.income - total_expense - item.refund - item.loss
     }
@@ -1013,8 +1013,8 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
   // 总计
   const total_income = 0 // 目前没有销售
   const totalPurchaseExpense = statistics.reduce((sum, item) => sum + Number(item.expense), 0)
-  const totalProductionExpense = statistics.reduce((sum, item) => sum + Number(item.productionExpense), 0)
-  const totalDestroyRefund = statistics.reduce((sum, item) => sum + Number(item.destroyRefund), 0)
+  const totalProductionExpense = statistics.reduce((sum, item) => sum + Number(item.production_expense), 0)
+  const totalDestroyRefund = statistics.reduce((sum, item) => sum + Number(item.destroy_refund), 0)
   const totalNetProductionExpense = totalProductionExpense - totalDestroyRefund
   const total_expense = totalPurchaseExpense + totalNetProductionExpense
   const total_refund = 0
@@ -1026,10 +1026,10 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
       statistics,
       total_income: total_income,
       total_expense: total_expense,
-      purchaseExpense: totalPurchaseExpense,
-      productionExpense: totalProductionExpense,
-      destroyRefund: totalDestroyRefund,
-      netProductionExpense: totalNetProductionExpense,
+      purchase_expense: totalPurchaseExpense,
+      production_expense: totalProductionExpense,
+      destroy_refund: totalDestroyRefund,
+      net_production_expense: totalNetProductionExpense,
       total_refund: total_refund,
       total_loss: total_loss,
       net_profit: total_income - total_expense - total_refund - total_loss,
@@ -1144,8 +1144,8 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
         date: key,
         income: 0,
         expense: 0,
-        productionExpense: 0,
-        destroyRefund: 0,
+        production_expense: 0,
+        destroy_refund: 0,
         refund: 0,
         loss: 0
       })
@@ -1155,7 +1155,7 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
     const labor_cost = Number(sku.labor_cost || 0)
     const craft_cost = Number(sku.craft_cost || 0)
     const quantity = Number(sku.total_quantity || 0)
-    group.productionExpense += (labor_cost + craft_cost) * quantity
+    group.production_expense += (labor_cost + craft_cost) * quantity
   })
 
   // 统计销毁退回
@@ -1174,8 +1174,8 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
         date: key,
         income: 0,
         expense: 0,
-        productionExpense: 0,
-        destroyRefund: 0,
+        production_expense: 0,
+        destroy_refund: 0,
         refund: 0,
         loss: 0
       })
@@ -1184,16 +1184,16 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
     const group = groupedData.get(key)
     const craft_cost = Number(log.sku.craft_cost || 0)
     const destroyed_quantity = Math.abs(log.quantity_change)
-    group.destroyRefund += craft_cost * destroyed_quantity
+    group.destroy_refund += craft_cost * destroyed_quantity
   })
 
   // 转换为数组并计算利润
   const trendData = Array.from(groupedData.values()).map(item => {
-    const netProductionExpense = item.productionExpense - item.destroyRefund
-    const total_expense = item.expense + netProductionExpense
+    const net_production_expense = item.production_expense - item.destroy_refund
+    const total_expense = item.expense + net_production_expense
     return {
       ...item,
-      netProductionExpense: netProductionExpense,
+      net_production_expense: net_production_expense,
       total_expense: total_expense,
       profit: Number(item.income) - Number(total_expense) - Number(item.refund) - Number(item.loss)
     }
@@ -1216,8 +1216,8 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
   // 总计
   const total_income = 0 // 目前没有销售
   const totalPurchaseExpense = trendData.reduce((sum, item) => sum + Number(item.expense), 0)
-  const totalProductionExpense = trendData.reduce((sum, item) => sum + Number(item.productionExpense), 0)
-  const totalDestroyRefund = trendData.reduce((sum, item) => sum + Number(item.destroyRefund), 0)
+  const totalProductionExpense = trendData.reduce((sum, item) => sum + Number(item.production_expense), 0)
+  const totalDestroyRefund = trendData.reduce((sum, item) => sum + Number(item.destroy_refund), 0)
   const totalNetProductionExpense = totalProductionExpense - totalDestroyRefund
   const total_expense = totalPurchaseExpense + totalNetProductionExpense
   const total_refund = 0
@@ -1226,18 +1226,18 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
   res.json({
     success: true,
     data: {
-      trendData: trendData,
+      trend_data: trendData,
       total_income: total_income,
       total_expense: total_expense,
-      purchaseExpense: totalPurchaseExpense,
-      productionExpense: totalProductionExpense,
-      destroyRefund: totalDestroyRefund,
-      netProductionExpense: totalNetProductionExpense,
+      purchase_expense: totalPurchaseExpense,
+      production_expense: totalProductionExpense,
+      destroy_refund: totalDestroyRefund,
+      net_production_expense: totalNetProductionExpense,
       total_refund: total_refund,
       total_loss: total_loss,
       net_profit: total_income - total_expense - total_refund - total_loss,
-      incomeByCategory: [], // 目前没有收入分类
-      expenseByCategory: expenseByCategory.map(item => ({
+      income_by_category: [], // 目前没有收入分类
+      expense_by_category: expenseByCategory.map(item => ({
         category: item.product_type || '未分类',
         amount: item._sum?.total_price || 0
       }))

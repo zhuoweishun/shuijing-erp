@@ -81,7 +81,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
         p.total_beads,
         p.piece_count,
         p.quantity,
-        p.beadsPerString,
+        p.beads_per_string,
         COALESCE(SUM(mu.quantity_used), 0) as used_beads,
         COALESCE(SUM(mu.quantity_used), 0) as used_pieces,
         -- 根据产品类型计算可用数量
@@ -118,7 +118,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
       LEFT JOIN suppliers s ON p.supplier_id = s.id
       ${whereClause}
       GROUP BY p.id, p.purchase_code, p.product_name, p.product_type, p.bead_diameter, p.specification, p.quality, 
-               p.total_beads, p.piece_count, p.quantity, p.beadsPerString, p.price_per_bead, p.price_per_gram, 
+               p.total_beads, p.piece_count, p.quantity, p.beads_per_string, p.price_per_bead, p.price_per_gram, 
                p.total_price, p.unit_price, p.weight, p.photos, s.name, p.created_at, p.updated_at
       ${available_only === 'true' ? 'HAVING available_quantity >= ?' : ''}
       ORDER BY p.created_at DESC
@@ -152,7 +152,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
         
         // 添加手串相关的重要字段映射
         quantity: material.quantity, // 串数
-        beads_per_string: material.beadsPerString, // 每串颗数
+        beads_per_string: material.beads_per_string, // 每串颗数
         total_beads: material.total_beads, // 总颗数
         piece_count: material.piece_count, // 片数/件数
         used_beads: Number(material.used_beads), // 已用颗数

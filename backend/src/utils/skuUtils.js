@@ -329,7 +329,7 @@ export async function getSkuDetails(skuId) {
         }
       },
       inventoryLogs: {
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         take: 10
       }
     }
@@ -355,8 +355,16 @@ export async function getSkuList({
 } = {}) {
   const skip = (page - 1) * limit;
   
+  // 处理status参数，支持单个值或数组
+  let statusCondition
+  if (Array.isArray(status)) {
+    statusCondition = { in: status }
+  } else {
+    statusCondition = status
+  }
+  
   const where = {
-    status: status,
+    status: statusCondition,
     ...(search && {
       OR: [
         { skuCode: { contains: search } },
@@ -370,7 +378,7 @@ export async function getSkuList({
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { created_at: 'desc' },
       include: {
         _count: {
           select: { products: true }
@@ -386,7 +394,7 @@ export async function getSkuList({
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit)
+      total_pages: Math.ceil(total / limit)
     }
   };
 }

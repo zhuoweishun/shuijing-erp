@@ -13,6 +13,7 @@ import {
 import { financial_api } from '../services/api'
 import { financial_overview } from '../types/financial'
 import { format_amount } from '../utils/format'
+import { useAuth } from '../hooks/useAuth'
 import FinancialCharts from '../components/FinancialCharts'
 import TransactionLog from '../components/TransactionLog'
 import InventoryStatus from '../components/InventoryStatus'
@@ -24,6 +25,7 @@ interface FinancialState {
 }
 
 const Financial: React.FC = () => {
+  const { is_authenticated, is_loading: auth_loading } = useAuth()
   const [state, setState] = useState<FinancialState>({
     overview: null,
     is_loading: false,
@@ -34,27 +36,52 @@ const Financial: React.FC = () => {
 
   // 获取财务概览
   const fetchOverview = async () => {
+    // 在发起请求前再次检查认证状态
+    const token = localStorage.getItem('auth_token')
+    if (!is_authenticated || !token) {
+      console.warn('⚠️ [财务页面] 认证状态异常，取消API请求:', { is_authenticated, hasToken: !!token })
+      setState(prev => ({ 
+        ...prev, 
+        error: '用户未登录，请重新登录' 
+      }))
+      return
+    }
+    
     try {
-      setState(prev => ({ ...prev, is_loading: true }))
+      console.log('🚀 [财务页面] 开始获取财务概览数据')
+      setState(prev => ({ ...prev, is_loading: true, error: null }))
+      
       const response = await financial_api.get_overview()
+      
       if (response.success) {
+        console.log('✅ [财务页面] 财务概览数据获取成功')
         setState(prev => ({ 
           ...prev, 
           overview: response.data as financial_overview,
           error: null 
         }))
       } else {
+        console.error('❌ [财务页面] 财务概览API返回错误:', response.message)
         setState(prev => ({ 
           ...prev, 
           error: response.message || '获取财务概览失败' 
         }))
       }
-    } catch (error) {
-      console.error('获取财务概览失败:', error)
-      setState(prev => ({ 
-        ...prev, 
-        error: '获取财务概览失败' 
-      }))
+    } catch (error: any) {
+      console.error('❌ [财务页面] 获取财务概览失败:', error)
+      
+      // 检查是否是认证错误
+      if (error.message && (error.message.includes('401') || error.message.includes('unauthorized') || error.message.includes('token'))) {
+        setState(prev => ({ 
+          ...prev, 
+          error: '登录已过期，请重新登录' 
+        }))
+      } else {
+        setState(prev => ({ 
+          ...prev, 
+          error: '获取财务概览失败，请检查网络连接' 
+        }))
+      }
     } finally {
       setState(prev => ({ ...prev, is_loading: false }))
     }
@@ -63,23 +90,14 @@ const Financial: React.FC = () => {
 
 
   useEffect(() => {
-    fetchOverview()
-    
-    // 添加页面可见性监听，当用户返回页面时自动刷新数据
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // 页面变为可见时刷新数据
-        fetchOverview()
-      }
+    // 只有在认证完成且已登录时才获取数据
+    if (!auth_loading && is_authenticated) {
+      console.log('🔄 [财务页面] 认证状态正常，开始获取财务概览数据')
+      fetchOverview()
+    } else {
+      console.log('⏳ [财务页面] 等待认证状态:', { auth_loading, is_authenticated })
     }
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    
-    // 清理事件监听器
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
+  }, [auth_loading, is_authenticated])
 
   const { overview, error } = state
 
@@ -93,8 +111,11 @@ const Financial: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <button 
-            onClick={fetchOverview}
-            disabled={state.is_loading}
+            onClick={() => {
+              console.log('🔄 [财务页面] 手动刷新按钮点击')
+              fetchOverview()
+            }}
+            disabled={state.is_loading || !is_authenticated}
             className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${state.is_loading ? 'animate-spin' : ''}`} />

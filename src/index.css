@@ -1,5 +1,5 @@
 /* 导入移动端优化样式 */
-/* 已移除无效的导入: @import './styles/mobile.css'; */
+@import './styles/mobile.css';
 
 @tailwind base;
 @tailwind components;
