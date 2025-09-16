@@ -65,7 +65,7 @@ Authorization: Bearer <token>
 
 ## 三、采购管理接口
 
-### 3.1 采购列表查询（更新版）
+### 3.1 采购列表查询（完整更新版）
 
 **接口地址：** `GET /purchases`
 
@@ -74,13 +74,32 @@ Authorization: Bearer <token>
 |--------|------|------|------|
 | page | number | 否 | 页码，默认1 |
 | limit | number | 否 | 每页数量，默认10 |
-| search | string | 否 | 产品名称搜索 |
-| purchase_code_search | string | 否 | **新增：采购编号搜索（支持模糊匹配）** |
-| quality | string | 否 | 品质筛选（AA/A/AB/B/C） |
-| product_type | string | 否 | 产品类型筛选 |
-| supplier_id | string | 否 | 供应商ID筛选 |
-| sort | string | 否 | 排序方式（asc/desc） |
-| sort_by | string | 否 | 排序字段 |
+| search | string | 否 | 产品名称搜索（模糊匹配） |
+| purchase_code_search | string | 否 | **采购编号搜索（支持模糊匹配）** |
+| quality | array/string | 否 | 品质筛选（支持多选：AA/A/AB/B/C/UNKNOWN） |
+| purchase_types | array/string | 否 | 产品类型筛选（支持多选：LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL） |
+| supplier | array/string | 否 | 供应商筛选（支持多选和模糊匹配） |
+| start_date | string | 否 | 开始日期（YYYY-MM-DD格式） |
+| end_date | string | 否 | 结束日期（YYYY-MM-DD格式） |
+| diameter_min | number | 否 | 珠径最小值（mm） |
+| diameter_max | number | 否 | 珠径最大值（mm） |
+| specification_min | number | 否 | 规格最小值 |
+| specification_max | number | 否 | 规格最大值 |
+| price_per_gram_min | number | 否 | 克价最小值（元/克） |
+| price_per_gram_max | number | 否 | 克价最大值（元/克） |
+| total_price_min | number | 否 | 总价最小值（元） |
+| total_price_max | number | 否 | 总价最大值（元） |
+| sort_by | string | 否 | 排序字段（purchase_date/purchase_code/purchase_name/supplier/quantity/price_per_gram/total_price/bead_diameter/specification） |
+| sort_order | string | 否 | 排序方式（asc/desc） |
+
+**核心功能特性：**
+- **多维度搜索**：支持产品名称和采购编号的独立搜索
+- **多选筛选**：品质、产品类型、供应商支持多选筛选
+- **范围筛选**：珠径、规格、价格支持最小值-最大值范围筛选
+- **日期筛选**：支持采购日期范围筛选
+- **智能排序**：支持多字段排序，包括规格动态字段选择
+- **权限控制**：EMPLOYEE角色自动过滤敏感价格字段
+- **分页优化**：支持自定义每页数量（10/20/50/100条）
 
 **响应示例：**
 ```json
@@ -91,21 +110,26 @@ Authorization: Bearer <token>
     "purchases": [
       {
         "id": "purchase_001",
-        "purchase_code": "PUR20240131001",
-        "product_name": "紫水晶散珠",
-        "product_type": "LOOSE_BEADS",
+        "purchase_code": "CG20250116001",
+        "purchase_name": "紫水晶散珠",
+        "purchase_type": "LOOSE_BEADS",
         "quality": "AA",
         "bead_diameter": 8.0,
-        "specification": "8.0",
+        "specification": 8.0,
+        "quantity": 100,
+        "piece_count": 1600,
+        "price_per_gram": 25.0,
+        "weight": 80.0,
         "total_price": 2000.00,
         "supplier": {
           "id": "supplier_001",
           "name": "水晶供应商A"
         },
-        "photos": ["https://example.com/photo1.jpg"],
-        "purchase_date": "2024-01-31T00:00:00.000Z",
-        "remaining_quantity": 1500,
-        "created_at": "2024-01-31T10:30:00.000Z"
+        "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"],
+        "purchase_date": "2025-01-16T00:00:00.000Z",
+        "notes": "品质优良，颜色均匀",
+        "created_at": "2025-01-16T10:30:00.000Z",
+        "edit_logs": []
       }
     ],
     "pagination": {
@@ -118,20 +142,63 @@ Authorization: Bearer <token>
 }
 ```
 
-### 3.2 采购记录创建
+### 3.2 采购记录创建（已修复）
 
 **接口地址：** `POST /purchases`
 
 **请求参数：**
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| product_name | string | 是 | 产品名称 |
-| product_type | string | 是 | 产品类型 |
+| purchase_name | string | 是 | 采购名称（修复：统一字段名） |
+| purchase_type | string | 是 | 采购类型（LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL） |
 | supplier_id | string | 是 | 供应商ID |
 | total_price | number | 是 | 总价格 |
-| quality | string | 是 | 品质等级 |
-| photos | array | 否 | 图片URL数组 |
+| quality | string | 是 | 品质等级（AA/A/AB/B/C） |
+| photos | array | 否 | 图片URL数组（JSON格式） |
 | notes | string | 否 | 备注 |
+| price_per_gram | number | 否 | 克价（散珠/手串必填） |
+| weight | number | 否 | 重量（散珠/手串必填） |
+| bead_diameter | number | 否 | 珠子直径（散珠/手串必填） |
+| beads_per_string | number | 否 | 每串颗数（手串必填） |
+| piece_count | number | 否 | 片数/件数（配件/成品必填） |
+| min_stock_alert | number | 否 | 最低预警颗数 |
+| natural_language_input | string | 否 | 自然语言录入信息 |
+| ai_recognition_result | object | 否 | AI识别结果 |
+
+**请求示例：**
+```json
+{
+  "purchase_name": "紫水晶散珠",
+  "purchase_type": "LOOSE_BEADS",
+  "supplier_id": "supplier_001",
+  "total_price": 2000.00,
+  "quality": "AA",
+  "price_per_gram": 25.0,
+  "weight": 80.0,
+  "bead_diameter": 8.0,
+  "min_stock_alert": 50,
+  "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"],
+  "notes": "品质优良，颜色均匀",
+  "natural_language_input": "紫水晶散珠，8mm，AA级，25元/克，80克"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "采购记录创建成功",
+  "data": {
+    "id": "purchase_001",
+    "purchase_code": "CG20241231001",
+    "purchase_name": "紫水晶散珠",
+    "purchase_type": "LOOSE_BEADS",
+    "total_price": 2000.00,
+    "remaining_quantity": 1600,
+    "created_at": "2024-12-31T10:30:00.000Z"
+  }
+}
+```
 
 ### 3.3 采购记录更新
 
@@ -310,9 +377,127 @@ Authorization: Bearer <token>
 }
 ```
 
-## 五、库存管理接口
+## 五、原材料库存管理接口（重要更新）
 
-### 5.1 库存统计
+### 5.1 层级式库存查询（核心接口）
+
+**接口地址：** `GET /inventory/hierarchical`
+
+**功能说明：** 获取按产品类型→规格→品相分层的库存数据，支持半成品、配件、成品原材料的统一查询
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认20 |
+| search | string | 否 | 产品名称搜索（模糊匹配） |
+| material_types | array/string | 否 | **原材料类型筛选（支持多选：LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL）** |
+| quality | string | 否 | 品质筛选（AA/A/AB/B/C） |
+| low_stock_only | boolean | 否 | 仅显示低库存 |
+| diameter_min | number | 否 | 珠径最小值（mm） |
+| diameter_max | number | 否 | 珠径最大值（mm） |
+| specification_min | number | 否 | 规格最小值 |
+| specification_max | number | 否 | 规格最大值 |
+| sort | string | 否 | 排序方式（asc/desc） |
+| sort_by | string | 否 | 排序字段（total_quantity/material_type/crystal_type） |
+
+**核心功能特性：**
+- **purchase到material映射**：后端自动将purchase字段映射为material字段
+- **层级数据结构**：产品类型→规格→品相→批次的四级层级
+- **库存计算逻辑**：remaining_quantity = original_quantity - used_quantity
+- **权限控制**：EMPLOYEE角色自动过滤价格敏感信息
+- **数据类型安全**：所有数值字段强制Number()转换
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "层级式库存查询成功",
+  "data": {
+    "hierarchy": [
+      {
+        "material_type": "FINISHED_MATERIAL",
+        "total_quantity": 45,
+        "total_variants": 3,
+        "has_low_stock": false,
+        "specifications": [
+          {
+            "specification_value": 18.0,
+            "specification_unit": "mm",
+            "total_quantity": 45,
+            "total_variants": 3,
+            "has_low_stock": false,
+            "qualities": [
+              {
+                "quality": "AA",
+                "remaining_quantity": 15,
+                "is_low_stock": false,
+                "price_per_unit": 280.00,
+                "batch_count": 1,
+                "batches": [
+                  {
+                    "purchase_id": "purchase_001",
+                    "material_code": "CG20250116001",
+                    "material_name": "紫水晶成品手串",
+                    "material_type": "FINISHED_MATERIAL",
+                    "material_date": "2025-01-16T00:00:00.000Z",
+                    "supplier_name": "水晶供应商A",
+                    "original_quantity": 20,
+                    "used_quantity": 5,
+                    "remaining_quantity": 15,
+                    "price_per_unit": 280.00,
+                    "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 1,
+      "pages": 1,
+      "has_next": false,
+      "has_prev": false
+    }
+  }
+}
+```
+
+### 5.2 purchase到material字段映射规范（核心机制）
+
+**映射函数：** `mapPurchaseToMaterial(data)`
+
+**字段映射规则：**
+| 原字段名（purchase） | 映射字段名（material） | 说明 |
+|---------------------|----------------------|------|
+| purchase_name | material_name | 产品名称 |
+| purchase_type | material_type | 产品类型 |
+| purchase_code | material_code | 产品编号 |
+| purchase_id | material_id | 产品ID |
+| purchase_date | material_date | 采购日期 |
+
+**映射逻辑特点：**
+- **递归处理**：支持嵌套对象和数组的深度映射
+- **Date对象保护**：特殊处理Date对象，避免被当作普通对象处理
+- **库存增强**：自动添加inventory_unit、usage_rate、stock_status等库存特有字段
+- **数据一致性**：确保前后端字段名完全一致
+
+**增强字段计算：**
+```typescript
+// 自动添加的库存特有字段
+interface MaterialEnhancement {
+  inventory_unit: string        // 库存单位（颗/片/件）
+  usage_rate: number           // 使用率（%）
+  remaining_rate: number       // 剩余率（%）
+  stock_status: 'sufficient' | 'low' | 'out'  // 库存状态
+}
+```
+
+### 5.3 库存统计
 
 **接口地址：** `GET /inventory/stats`
 
@@ -329,13 +514,13 @@ Authorization: Bearer <token>
       "LOOSE_BEADS": 80,
       "BRACELET": 30,
       "ACCESSORIES": 25,
-      "FINISHED": 15
+      "FINISHED_MATERIAL": 15
     }
   }
 }
 ```
 
-### 5.2 库存消耗分析（更新版）
+### 5.4 库存消耗分析（数据类型安全版）
 
 **接口地址：** `GET /inventory/consumption-analysis`
 
@@ -343,7 +528,23 @@ Authorization: Bearer <token>
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | time_range | string | 否 | 时间范围（7d/30d/90d/1y） |
-| product_type | string | 否 | 产品类型筛选 |
+| material_type | string | 否 | **原材料类型筛选（使用material_type替代product_type）** |
+
+**数据类型安全处理：**
+- **后端计算**：使用Number()强制类型转换，避免字符串拼接
+- **前端防护**：显示前进行Number()转换，确保数值正确
+- **SQL查询**：使用CAST()确保返回正确数据类型
+
+**核心修复：**
+```javascript
+// 后端：强制数字类型转换（避免"16"+"1"="161"的问题）
+const totalConsumption = convertedData.reduce((sum, item) => {
+  return sum + Number(item.total_consumed); // 关键修复点
+}, 0);
+
+// 前端：防护性类型转换
+const displayValue = Number(data.total_consumption).toLocaleString();
+```
 
 **响应示例：**
 ```json
@@ -355,7 +556,7 @@ Authorization: Bearer <token>
     "consumption_details": [
       {
         "purchase_id": "purchase_001",
-        "product_name": "紫水晶散珠",
+        "material_name": "紫水晶散珠",
         "total_consumed": 17,
         "consumption_value": 120.00
       }
@@ -364,9 +565,74 @@ Authorization: Bearer <token>
 }
 ```
 
-**重要说明：** 后端确保返回的`total_consumption`为数字类型，前端进行Number()转换防护。
+**重要说明：** 已修复数据类型混合导致的显示错误（"161"→17），后端和前端双重类型安全保护。
 
-## 六、供应商管理接口
+## 六、图片上传接口（新增）
+
+### 6.1 采购图片上传
+
+**接口地址：** `POST /uploads/purchase-images`
+
+**请求方式：** multipart/form-data
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| images | file[] | 是 | 图片文件数组，支持多文件上传 |
+| purchase_id | string | 否 | 采购记录ID（编辑时传入） |
+
+**文件限制：**
+- 支持格式：JPEG、PNG、WebP
+- 单文件大小：最大10MB
+- 总文件数量：最大5个
+- 图片尺寸：建议不超过2048x2048
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "图片上传成功",
+  "data": {
+    "uploaded_files": [
+      {
+        "filename": "image1_20241231_103000.jpg",
+        "url": "http://localhost:3001/uploads/purchases/image1_20241231_103000.jpg",
+        "size": 1024000,
+        "mimetype": "image/jpeg"
+      }
+    ],
+    "failed_files": []
+  }
+}
+```
+
+**错误处理：**
+- 文件格式不支持：返回INVALID_FILE_FORMAT
+- 文件过大：返回FILE_TOO_LARGE
+- 上传失败：返回UPLOAD_FAILED
+
+### 6.2 图片URL处理规范
+
+**URL格式：**
+- 开发环境：`http://localhost:3001/uploads/purchases/{filename}`
+- 生产环境：`http://api.dorblecapital.com/uploads/purchases/{filename}`
+
+**前端处理：**
+```typescript
+// 使用fixImageUrl函数处理跨域问题
+import { fixImageUrl } from '@/services/api'
+
+const processImageUrl = (url: string): string => {
+  return fixImageUrl(url)
+}
+```
+
+**存储规范：**
+- 数据库存储：JSON数组格式 `["url1", "url2"]`
+- 文件命名：`原文件名_时间戳.扩展名`
+- 目录结构：`/uploads/purchases/YYYY/MM/`
+
+## 七、供应商管理接口
 
 ### 6.1 供应商列表
 

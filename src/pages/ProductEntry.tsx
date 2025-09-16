@@ -80,7 +80,7 @@ export default function ProductEntry() {
   const [production_mode, set_production_mode] = useState<ProductionMode>('DIRECT_TRANSFORM')
   const [formData, set_form_data] = useState<ProductionFormData>({
     mode: 'DIRECT_TRANSFORM',
-    material_name: '',
+    purchase_name: '',
     description: '',
     specification: '',
     selected_materials: [],
@@ -97,7 +97,7 @@ export default function ProductEntry() {
     selected_materials: (AvailableMaterial & { 
       selected_quantity: number
       productInfo: {
-        material_name: string
+        purchase_name: string
         description: string
         specification: string | number
         labor_cost: number
@@ -349,14 +349,14 @@ export default function ProductEntry() {
     
     // 组合制作模式：按分类筛选
     if (formData.mode === 'COMBINATION_CRAFT') {
-      filteredMaterials = filteredMaterials.filter(material => material.material_type === active_tab)
+      filteredMaterials = filteredMaterials.filter(material => material.purchase_type === active_tab)
     }
     
     // 搜索筛选
     if (material_search.trim()) {
       const search_term = material_search.toLowerCase().trim()
       filteredMaterials = filteredMaterials.filter(material => 
-        material.material_name.toLowerCase().includes(search_term) ||
+        material.purchase_name.toLowerCase().includes(search_term) ||
         (material.quality && material.quality.toLowerCase().includes(search_term)) ||
         (material.supplier_name && material.supplier_name.toLowerCase().includes(search_term))
       )
@@ -388,7 +388,7 @@ export default function ProductEntry() {
       let material_types: string[] = []
       if (formData.mode === 'DIRECT_TRANSFORM') {
         // 直接转化模式：只显示成品类型的原材料
-        material_types = ['FINISHED']
+        material_types = ['FINISHED_MATERIAL']
       } else if (formData.mode === 'COMBINATION_CRAFT') {
         // 组合制作模式：显示散珠、手串、配件
         material_types = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES']
@@ -400,14 +400,14 @@ export default function ProductEntry() {
         search: material_search,
         available_only: true,
         min_quantity: 1,
-        material_types: material_types
+        purchase_types: material_types
       })
       
       if (response.success && response.data && typeof response.data === 'object' && response.data !== null && 'materials' in response.data) {
         let materials = (response.data as any).materials
         
         // 对原材料进行拼音排序
-        materials = sort_by_pinyin(materials, (material: any) => material.material_name)
+        materials = sort_by_pinyin(materials, (material: any) => material.purchase_name || '')
         
         set_available_materials(materials)
       } else {
@@ -477,7 +477,7 @@ export default function ProductEntry() {
           ...material, 
           selected_quantity: 1,
           productInfo: {
-            material_name: material.material_name + '（销售成品）',
+            purchase_name: material.purchase_name + '（销售成品）',
             description: '',
             specification: material.specification || '',
             labor_cost: 20, // 默认人工成本
@@ -509,8 +509,8 @@ export default function ProductEntry() {
         ...prev,
         selected_materials: [...prev.selected_materials, {
           material,
-          quantity_used_beads: material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? 1 : 0,
-          quantity_used_pieces: material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED' ? 1 : 0
+          quantity_used_beads: material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET' ? 1 : 0,
+        quantity_used_pieces: material.purchase_type === 'ACCESSORIES' || material.purchase_type === 'FINISHED_MATERIAL' ? 1 : 0
         }]
       }))
     }
@@ -613,12 +613,12 @@ export default function ProductEntry() {
       const material = item.material
       let availableForThisMaterial = 0
       
-      if (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') {
+      if (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET') {
         // 散珠和手串按颗数计算
         if (item.quantity_used_beads > 0) {
           availableForThisMaterial = Math.floor(material.available_quantity / item.quantity_used_beads)
         }
-      } else if (material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED') {
+      } else if (material.purchase_type === 'ACCESSORIES' || material.purchase_type === 'FINISHED_MATERIAL') {
         // 配件和成品按片/件数计算
         if (item.quantity_used_pieces > 0) {
           availableForThisMaterial = Math.floor(material.available_quantity / item.quantity_used_pieces)
@@ -694,7 +694,7 @@ export default function ProductEntry() {
       for (let i = 0; i < batch_form_data.selected_materials.length; i++) {
         const material = batch_form_data.selected_materials[i]
         const product = material.productInfo
-        if (!product.material_name.trim()) {
+        if (!product.purchase_name.trim()) {
           toast.error(`第${i + 1}个成品请输入名称`)
           return
         }
@@ -712,7 +712,7 @@ export default function ProductEntry() {
         for (let i = 0; i < material.selected_quantity; i++) {
           products.push({
             material_id: material.purchase_id,
-            material_name: material.productInfo.material_name + (material.selected_quantity > 1 ? ` #${i + 1}` : ''),
+            purchase_name: material.productInfo.purchase_name + (material.selected_quantity > 1 ? ` #${i + 1}` : ''),
             description: material.productInfo.description,
             specification: material.specification || '',
             labor_cost: material.productInfo.labor_cost,
@@ -755,7 +755,7 @@ export default function ProductEntry() {
       set_loading(true)
       
       // 验证表单数据
-      if (!formData.material_name.trim()) {
+      if (!formData.purchase_name.trim()) {
         toast.error('请输入成品名称')
         return
       }
@@ -798,7 +798,7 @@ export default function ProductEntry() {
         }))
 
         const response = await finished_product_api.create({
-          material_name: formData.material_name,
+          purchase_name: formData.purchase_name,
           description: formData.description,
           specification: formData.specification,
           materials,
@@ -827,7 +827,7 @@ export default function ProductEntry() {
 
           // 为每个成品创建请求
           const response = await finished_product_api.create({
-            material_name: formData.material_name + (formData.production_quantity > 1 ? ` #${i + 1}` : ''),
+            purchase_name: formData.purchase_name + (formData.production_quantity > 1 ? ` #${i + 1}` : ''),
             description: formData.description,
             specification: formData.specification,
             materials,
@@ -850,7 +850,7 @@ export default function ProductEntry() {
       // 重置表单
       set_form_data({
         mode: 'DIRECT_TRANSFORM',
-        material_name: '',
+        purchase_name: '',
         description: '',
         specification: '',
         selected_materials: [],
@@ -966,9 +966,9 @@ export default function ProductEntry() {
               batch_form_data.selected_materials.map((material) => (
                 <div key={material.purchase_id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{material.material_name}</div>
+                    <div className="font-medium text-gray-900">{material.purchase_name}</div>
                     <div className="text-sm text-gray-600">
-                      {material.material_type} · {material.quality}级 · 可用: {material.available_quantity}
+                      {material.purchase_type} · {material.quality}级 · 可用: {material.available_quantity}
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -1000,14 +1000,14 @@ export default function ProductEntry() {
               formData.selected_materials.map((item) => (
                 <div key={item.material.purchase_id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.material.material_name}</div>
+                    <div className="font-medium text-gray-900">{item.material.purchase_name}</div>
                     <div className="text-sm text-gray-600">
-                      {item.material.material_type} · {item.material.quality}级 · 可用: {item.material.available_quantity}
+                      {item.material.purchase_type} · {item.material.quality}级 · 可用: {item.material.available_quantity}
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     {/* 珠子数量输入 */}
-                    {(item.material.material_type === 'LOOSE_BEADS' || item.material.material_type === 'BRACELET') && (
+                    {(item.material.purchase_type === 'LOOSE_BEADS' || item.material.purchase_type === 'BRACELET') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-sm text-gray-600">颗数:</label>
                         <input
@@ -1039,7 +1039,7 @@ export default function ProductEntry() {
                     )}
                     
                     {/* 片/件数量输入 */}
-                    {(item.material.material_type === 'ACCESSORIES' || item.material.material_type === 'FINISHED') && (
+                    {(item.material.purchase_type === 'ACCESSORIES' || item.material.purchase_type === 'FINISHED_MATERIAL') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-sm text-gray-600">数量:</label>
                         <input
@@ -1181,7 +1181,7 @@ export default function ProductEntry() {
                         return photoUrl ? (
                           <img
                             src={photoUrl}
-                            alt={material.material_name}
+                            alt={material.purchase_name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
                             onError={(e) => {
                               console.error('图片加载失败:', e.currentTarget.src)
@@ -1236,7 +1236,7 @@ export default function ProductEntry() {
                     <div className="p-4">
                       {/* 产品名称 */}
                       <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm leading-tight">
-                        {material.material_name}
+                        {material.purchase_name}
                       </h3>
                       
                       {/* 规格信息 */}
@@ -1251,7 +1251,7 @@ export default function ProductEntry() {
                       {/* 库存数量 */}
                       <div className="flex items-center text-xs text-gray-600 mb-2">
                         <Package className="h-3 w-3 mr-1" />
-                        <span>库存: {material.available_quantity}{material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                        <span>库存: {material.available_quantity}{material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET' ? '颗' : material.purchase_type === 'ACCESSORIES' ? '片' : '件'}</span>
                       </div>
                       
                       {/* 底部按钮 - 添加到清单 */}
@@ -1344,7 +1344,7 @@ export default function ProductEntry() {
                       return photoUrl ? (
                         <img
                           src={photoUrl}
-                          alt={material.material_name}
+                          alt={material.purchase_name}
                           className="w-16 h-16 object-cover rounded-lg border border-gray-200"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none'
@@ -1362,7 +1362,7 @@ export default function ProductEntry() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {material.material_name}
+                        {material.purchase_name}
                       </h4>
                       {material.quality && (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${get_quality_color(material.quality)}`}>
@@ -1378,7 +1378,7 @@ export default function ProductEntry() {
                       </span>
                       <span>
                         库存: {material.available_quantity}
-                        {material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}
+                        {material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET' ? '颗' : material.purchase_type === 'ACCESSORIES' ? '片' : '件'}
                       </span>
                     </div>
                     
@@ -1394,7 +1394,7 @@ export default function ProductEntry() {
                             <span className="text-blue-800 font-medium">
                               小计: ¥{(
                                 (material.unitCost || 0) * 
-                                ((material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') 
+                                ((material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET') 
                                   ? item.quantity_used_beads 
                                   : item.quantity_used_pieces)
                               ).toFixed(2)}
@@ -1408,7 +1408,7 @@ export default function ProductEntry() {
                   {/* 使用数量控制 */}
                   <div className="flex items-center space-x-3">
                     {/* 颗数输入 */}
-                    {(material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') && (
+                    {(material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-xs text-gray-600 whitespace-nowrap">使用颗数:</label>
                         <input
@@ -1441,7 +1441,7 @@ export default function ProductEntry() {
                     )}
                     
                     {/* 片/件数输入 */}
-                    {(material.material_type === 'ACCESSORIES' || material.material_type === 'FINISHED') && (
+                    {(material.purchase_type === 'ACCESSORIES' || material.purchase_type === 'FINISHED_MATERIAL') && (
                       <div className="flex items-center space-x-2">
                         <label className="text-xs text-gray-600 whitespace-nowrap">使用数量:</label>
                         <input
@@ -1469,7 +1469,7 @@ export default function ProductEntry() {
                           }}
                           className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-crystal-500"
                         />
-                        <span className="text-xs text-gray-500">{material.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                        <span className="text-xs text-gray-500">{material.purchase_type === 'ACCESSORIES' ? '片' : '件'}</span>
                       </div>
                     )}
                     
@@ -1494,7 +1494,7 @@ export default function ProductEntry() {
               <div className="space-y-2">
                 {formData.selected_materials.map((item: any) => {
                   const material = item.material
-                  const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                  const used_quantity = (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET')
                     ? item.quantity_used_beads || 0
                     : item.quantity_used_pieces || 0
                   const itemCost = (material.unitCost || 0) * used_quantity
@@ -1502,8 +1502,8 @@ export default function ProductEntry() {
                   return (
                     <div key={material.purchase_id} className="flex justify-between text-xs">
                       <span className="text-gray-700 truncate max-w-xs">
-                        {material.material_name} × {used_quantity}
-                        {material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET' ? '颗' : material.material_type === 'ACCESSORIES' ? '片' : '件'}
+                        {material.purchase_name} × {used_quantity}
+                        {material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET' ? '颗' : material.purchase_type === 'ACCESSORIES' ? '片' : '件'}
                       </span>
                       <span className="text-blue-700 font-medium">¥{itemCost.toFixed(2)}</span>
                     </div>
@@ -1519,7 +1519,7 @@ export default function ProductEntry() {
                           (cost_calculation.materialCost / formData.production_quantity) :
                           formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                            const used_quantity = (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET')
                                ? item.quantity_used_beads || 0
                                : item.quantity_used_pieces || 0
                              return total + ((material.unitCost || 0) * used_quantity)
@@ -1537,7 +1537,7 @@ export default function ProductEntry() {
                           const totalMaterialCost = cost_calculation?.cost_breakdown?.materialCost ||
                             (formData.selected_materials.reduce((total: number, item: any) => {
                               const material = item.material
-                              const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                              const used_quantity = (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET')
                                  ? item.quantity_used_beads || 0
                                  : item.quantity_used_pieces || 0
                                return total + ((material.unitCost || 0) * used_quantity)
@@ -1569,7 +1569,7 @@ export default function ProductEntry() {
                         const materialCost = cost_calculation?.materialCost || 
                           formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET')
+                            const used_quantity = (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET')
                                ? item.quantity_used_beads || 0
                                : item.quantity_used_pieces || 0
                              return total + ((material.unitCost || 0) * used_quantity)
@@ -1594,7 +1594,7 @@ export default function ProductEntry() {
                         const materialCost = cost_calculation?.materialCost || 
                           formData.selected_materials.reduce((total: number, item: any) => {
                             const material = item.material
-                            const used_quantity = (material.material_type === 'LOOSE_BEADS' || material.material_type === 'BRACELET') 
+                            const used_quantity = (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'BRACELET') 
                               ? item.quantity_used_beads 
                               : item.quantity_used_pieces
                             return total + ((material.unitCost || 0) * used_quantity)
@@ -1821,8 +1821,8 @@ export default function ProductEntry() {
                  <label className="block text-sm font-medium text-gray-700 mb-2">成品名称 *</label>
                  <input
                    type="text"
-                   value={formData.material_name}
-                   onChange={(e) => set_form_data(prev => ({ ...prev, material_name: e.target.value }))}
+                   value={formData.purchase_name}
+                   onChange={(e) => set_form_data(prev => ({ ...prev, purchase_name: e.target.value }))}
                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                    placeholder="请输入成品名称"
                  />
@@ -1961,8 +1961,8 @@ export default function ProductEntry() {
                <label className="block text-sm font-medium text-gray-700 mb-2">成品名称 *</label>
                <input
                  type="text"
-                 value={formData.material_name}
-                 onChange={(e) => set_form_data(prev => ({ ...prev, material_name: e.target.value }))}
+                 value={formData.purchase_name}
+                 onChange={(e) => set_form_data(prev => ({ ...prev, purchase_name: e.target.value }))}
                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500 focus:border-transparent"
                  placeholder="请输入成品名称"
                />
@@ -2152,7 +2152,7 @@ export default function ProductEntry() {
       <div className="flex justify-between mt-6">
         <button
           onClick={handleSubmit}
-          disabled={!formData.material_name.trim() || formData.selling_price <= 0 || loading}
+          disabled={!formData.purchase_name.trim() || formData.selling_price <= 0 || loading}
           className="px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           {loading ? '提交中...' : '提交制作'}
@@ -2213,14 +2213,14 @@ export default function ProductEntry() {
                   <div className="flex items-center space-x-3">
                     <img 
                       src={get_first_photo_url(material.photos) || ''} 
-                      alt={material.material_name}
+                      alt={material.purchase_name}
                       className="w-12 h-12 object-cover rounded"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none'
                       }}
                     />
                     <div>
-                      <h4 className="font-medium text-gray-900">{material.material_name}</h4>
+                      <h4 className="font-medium text-gray-900">{material.purchase_name}</h4>
                       <p className="text-sm text-gray-500">
                         原材料成本: ¥{product.materialCost?.toFixed(2) || '0.00'} × {material.selected_quantity}个
                       </p>
@@ -2261,8 +2261,8 @@ export default function ProductEntry() {
                           </label>
                           <input
                             type="text"
-                            value={product.material_name}
-                            onChange={(e) => updateBatchProduct(material.purchase_id, 'material_name', e.target.value)}
+                            value={product.purchase_name}
+                            onChange={(e) => updateBatchProduct(material.purchase_id, 'purchase_name', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
                             placeholder="请输入成品名称"
                           />
@@ -2531,7 +2531,7 @@ export default function ProductEntry() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {selected_material_detail.material_name}
+                {selected_material_detail.purchase_name}
               </h3>
               <button
                 onClick={() => set_selected_material_detail(null)}
@@ -2545,7 +2545,7 @@ export default function ProductEntry() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-gray-500">库存数量</div>
-                  <div className="text-xl font-bold text-gray-900">{selected_material_detail.available_quantity} {selected_material_detail.material_type === 'LOOSE_BEADS' || selected_material_detail.material_type === 'BRACELET' ? '颗' : selected_material_detail.material_type === 'ACCESSORIES' ? '片' : '件'}</div>
+                  <div className="text-xl font-bold text-gray-900">{selected_material_detail.available_quantity} {selected_material_detail.purchase_type === 'LOOSE_BEADS' || selected_material_detail.purchase_type === 'BRACELET' ? '颗' : selected_material_detail.purchase_type === 'ACCESSORIES' ? '片' : '件'}</div>
                 </div>
                 {user?.role === 'BOSS' && selected_material_detail.unitCost && (
                   <div>
@@ -2582,9 +2582,9 @@ export default function ProductEntry() {
                     <div>
                       <span className="font-medium text-gray-700">产品类型:</span>
                       <span className="ml-1">
-                        {selected_material_detail.material_type === 'LOOSE_BEADS' ? '散珠' :
-                       selected_material_detail.material_type === 'BRACELET' ? '手串' :
-                       selected_material_detail.material_type === 'ACCESSORIES' ? '配件' : '成品'}
+                        {selected_material_detail.purchase_type === 'LOOSE_BEADS' ? '散珠' :
+                       selected_material_detail.purchase_type === 'BRACELET' ? '手串' :
+                       selected_material_detail.purchase_type === 'ACCESSORIES' ? '配件' : '成品'}
                       </span>
                     </div>
                     <div>
@@ -2613,7 +2613,7 @@ export default function ProductEntry() {
                       <img
                         key={index}
                         src={fixImageUrl(photo)}
-                        alt={`${selected_material_detail.material_name} ${index + 1}`}
+                        alt={`${selected_material_detail.purchase_name} ${index + 1}`}
                         className="w-full max-w-full h-auto object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                         onError={handleImageError}
                         onClick={() => window.open(fixImageUrl(photo), '_blank')}

@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger'
+import fetch from 'node-fetch'
 
 // 豆包AI配置 - 从环境变量读取
 const DOUBAO_CONFIG = {
@@ -51,8 +52,8 @@ export const checkAIHealth = async (): Promise<{
 export const getAIConfig = () => {
   return {
     model: DOUBAO_CONFIG.model,
-    baseUrl: DOUBAO_CONFIG.baseUrl,
-    hasApiKey: !!DOUBAO_CONFIG.apiKey,
+    base_url: DOUBAO_CONFIG.baseUrl,
+    has_api_key: !!DOUBAO_CONFIG.apiKey,
     timestamp: new Date().toISOString()
   }
 }
@@ -61,18 +62,18 @@ export const getAIConfig = () => {
 export const parseCrystalPurchaseDescription = async (description: string): Promise<{
   success: boolean
   data?: {
-    productName?: string
-    productType?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
-    unitType?: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
-    beadDiameter?: number
+    product_name?: string
+    product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+    unit_type?: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
+    bead_diameter?: number
     quantity?: number
-    pieceCount?: number
-    pricePerGram?: number
-    unitPrice?: number
-    totalPrice?: number
+    piece_count?: number
+    price_per_gram?: number
+    unit_price?: number
+    total_price?: number
     weight?: number
     quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-    supplierName?: string
+    supplier_name?: string
     notes?: string
   }
   error?: string
@@ -88,18 +89,18 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 
 请以JSON格式返回，包含以下字段（如果描述中没有提到某个字段，请不要包含该字段）：
 {
-  "productName": "水晶名称（如：白水晶、紫水晶、粉水晶等）",
-  "productType": "产品类型（LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED）",
-  "unitType": "单位类型（PIECES/STRINGS/SLICES/ITEMS）",
-  "beadDiameter": 珠子直径（毫米，数字）,
+  "purchase_name": "水晶名称（如：白水晶、紫水晶、粉水晶等）",
+  "purchase_type": "产品类型（LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL）",
+  "unit_type": "单位类型（PIECES/STRINGS/SLICES/ITEMS）",
+  "bead_diameter": 珠子直径（毫米，数字）,
   "quantity": 数量（串数，仅用于BRACELET类型）,
-  "pieceCount": 数量（颗数/片数/件数，用于LOOSE_BEADS/ACCESSORIES/FINISHED类型）,
-  "pricePerGram": 克价（数字，仅用于LOOSE_BEADS和BRACELET类型）,
-  "unitPrice": 单价（数字，仅用于ACCESSORIES和FINISHED类型）,
-  "totalPrice": 总价（数字）,
+  "piece_count": 数量（颗数/片数/件数，用于LOOSE_BEADS/ACCESSORIES/FINISHED类型）,
+  "price_per_gram": 克价（数字，仅用于LOOSE_BEADS和BRACELET类型）,
+  "unit_price": 单价（数字，仅用于ACCESSORIES和FINISHED类型）,
+  "total_price": 总价（数字）,
   "weight": 重量（克，数字，仅在明确提到重量时才包含）,
   "quality": "品相等级（AA/A/AB/B/C）",
-  "supplierName": "供应商名称",
+  "supplier_name": "供应商名称",
   "notes": "其他备注信息"
 }
 
@@ -120,31 +121,32 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 产品类型识别规则（重要）：
 - LOOSE_BEADS（散珠）：包含'散珠'、'颗'、'粒'、'散装'、'单颗'等关键词
 - BRACELET（手串）：包含'手串'、'串'、'条'、'手链'等关键词，但不包含'多宝手串'、'成品手串'等成品关键词
-- ACCESSORIES（饰品）：包含'吊坠'、'挂件'、'饰品'、'片'、'配件'、'耳环'、'项链'等关键词
-- FINISHED（成品）：包含'成品'、'件'、'个'、'雕件'、'摆件'、'工艺品'、'多宝手串'、'设计款'、'同款'、'明星同款'、'成品手串'、'定制款'、'限量款'、'特别款'、'收藏款'、'精品'、'艺术品'、'纪念品'、'礼品'等关键词
+- ACCESSORIES（饰品）：包含'吊坠'、'挂件'、'饰品'、'片'、'配件'、'耳环'、'项链'、'隔片'、'隔珠'、'垫片'、'镀金'、'银饰'、'铜饰'、'合金'、'随行'等关键词
+- FINISHED_MATERIAL（成品）：包含'成品'、'件'、'个'、'雕件'、'摆件'、'工艺品'、'多宝手串'、'设计款'、'同款'、'明星同款'、'成品手串'、'定制款'、'限量款'、'特别款'、'收藏款'、'精品'、'艺术品'、'纪念品'、'礼品'等关键词
 
 单位类型对应：
 - LOOSE_BEADS → PIECES（颗）
 - BRACELET → STRINGS（串）
 - ACCESSORIES → SLICES（片）
-- FINISHED → ITEMS（件）
+- FINISHED_MATERIAL → ITEMS（件）
 
 字段使用规则（重要）：
-- LOOSE_BEADS（散珠）：使用pieceCount（颗数）、pricePerGram（克价）
-- BRACELET（手串）：使用quantity（串数）、pricePerGram（克价）
-- ACCESSORIES（饰品）：使用pieceCount（片数）、unitPrice（单价）
-- FINISHED（成品）：使用pieceCount（件数）、unitPrice（单价）
+- LOOSE_BEADS（散珠）：使用piece_count（颗数）、price_per_gram（克价）
+- BRACELET（手串）：使用quantity（串数）、price_per_gram（克价）
+- ACCESSORIES（饰品）：使用piece_count（片数）、unit_price（单价）
+- FINISHED_MATERIAL（成品）：使用piece_count（件数）、unit_price（单价）
 
 数量识别规则：
 - "2串"、"3串" → quantity: 2或3（仅用于BRACELET）
-- "2件"、"3件" → piece_count: 2或3（用于FINISHED）
+- "2件"、"3件" → piece_count: 2或3（用于FINISHED_MATERIAL）
 - "2颗"、"3颗" → piece_count: 2或3（用于LOOSE_BEADS）
 - "2片"、"3片" → piece_count: 2或3（用于ACCESSORIES）
 
 价格识别规则（重要）：
-- 成品和饰品："2000块一串"、"500元一件" → unit_price: 2000或500
-- 散珠和手串："50元一克"、"客价100"、"克价50" → price_per_gram: 50或100
-- 克价表述："客价"、"克价"、"每克"、"一克"都表示pricePerGram
+- 成品和饰品单价："2000块一串"、"500元一件"、"3.5一颗"、"10块一片"、"5元一个" → unit_price: 2000、500、3.5、10、5
+- 散珠和手串克价："50元一克"、"客价100"、"克价50" → price_per_gram: 50、100、50
+- 克价表述："客价"、"克价"、"每克"、"一克"都表示price_per_gram
+- 单价表述："一颗"、"一片"、"一个"、"一件"、"每颗"、"每片"、"每个"、"每件"都表示unit_price
 - 总价识别："200块钱"、"500元"、"1000块"、"总共200"、"一共500元"、"花了300块"、"总价1000"、"合计500元" → total_price: 200、500、1000、200、500、300、1000、500
 - 单独价格表述：当描述中只出现一个价格且没有明确单位指示时，如"200块钱"、"300元"、"500块" → total_price: 200、300、500
 - 价格单位："块"、"元"、"块钱"都表示人民币
@@ -156,10 +158,11 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 - 带"的"表述："16米的"、"8毫米的"、"12的" → 提取数字部分
 - 特殊表述：六毫米、八毫米、十毫米、十二毫米、十四毫米等
 - 注意："X米的"格式中，X就是直径数值（毫米），如"16米的" → bead_diameter: 16
+- 特别注意："18米"、"18米的"、"18的"都应识别为18毫米直径
 
 供应商名称识别规则（重要）：
-- 直接提及："供应商张三"、"张三水晶"、"李四珠宝" → supplierName: "张三"、"张三水晶"、"李四珠宝"
-- 购买地点："在阿来水晶买的"、"从张三那里买的"、"在李四店里买的" → supplierName: "阿来水晶"、"张三"、"李四"
+- 直接提及："供应商张三"、"张三水晶"、"李四珠宝" → supplier_name: "张三"、"张三水晶"、"李四珠宝"
+- 购买地点："在阿来水晶买的"、"从张三那里买的"、"在李四店里买的" → supplier_name: "阿来水晶"、"张三"、"李四"
 - 商店名称："XX水晶"、"XX珠宝"、"XX商行"、"XX店" → 完整提取商店名称
 - 特殊商店名："咯咯珠宝"、"阿来水晶"、"晶晶水晶"等 → 完整提取包含特殊字符的商店名
 - 人名模式："老张"、"小李"、"阿明" → 提取人名
@@ -168,12 +171,12 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 - 购买表述："在XX买的"、"从XX购买"、"XX那里买的" → 提取XX作为供应商名称
 
 供应商识别示例（必须严格遵循）：
-- "在咯咯珠宝买的" → supplierName: "咯咯珠宝"
-- "在阿来水晶买的" → supplierName: "阿来水晶"
-- "从张三那里买的" → supplierName: "张三"
-- "李四珠宝店" → supplierName: "李四珠宝店"
-- "老王水晶" → supplierName: "老王水晶"
-- "晶晶商行" → supplierName: "晶晶商行"
+- "在咯咯珠宝买的" → supplier_name: "咯咯珠宝"
+- "在阿来水晶买的" → supplier_name: "阿来水晶"
+- "从张三那里买的" → supplier_name: "张三"
+- "李四珠宝店" → supplier_name: "李四珠宝店"
+- "老王水晶" → supplier_name: "老王水晶"
+- "晶晶商行" → supplier_name: "晶晶商行"
 
 注意：
 1. 只返回JSON，不要其他文字
@@ -183,17 +186,17 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
 5. 品相等级必须严格按照上述规则识别，从AA、A、AB、B、C中选择
 6. 特别注意识别"还不错"、"不错"、"良好"、"品质不错"等表述应对应AB级
 7. 重量字段只有在明确提到重量时才包含，不要根据数量或价格推测
-8. 成品和饰品类型不使用pricePerGram字段，散珠和手串类型不使用unitPrice字段
-9. 供应商识别重点："在XX买的"格式中，XX就是供应商名称，如"在阿来水晶买的" → supplierName: "阿来水晶"
+8. 成品和饰品类型不使用price_per_gram字段，散珠和手串类型不使用unit_price字段
+9. 供应商识别重点："在XX买的"格式中，XX就是供应商名称，如"在阿来水晶买的" → supplier_name: "阿来水晶"
 10. 供应商名称要完整提取，包括"水晶"、"珠宝"等后缀，不要只提取人名部分
-11. 克价识别重点："客价100"、"克价50"都表示pricePerGram，提取数字部分
-12. 直径识别重点："16米的"表示16毫米直径，提取数字部分作为beadDiameter
+11. 克价识别重点："客价100"、"克价50"都表示price_per_gram，提取数字部分
+12. 直径识别重点："16米的"表示16毫米直径，提取数字部分作为bead_diameter
 13. 特殊商店名识别："咯咯珠宝"等包含重复字符或特殊字符的商店名要完整识别
-14. 【重要】供应商字段是必须识别的关键信息，如果描述中包含"在XX买的"、"从XX购买"等表述，必须提取XX作为supplierName
-15. 【重要】总价识别：当描述中出现"200块钱"、"500元"等单独价格表述时，应识别为totalPrice，特别是散珠类型应优先使用totalPrice而非pricePerGram
-16. 【重要】价格字段优先级：如果同时出现总价和克价，散珠类型优先使用totalPrice；如果只有总价，所有类型都使用totalPrice
-17. 【重要】测试案例："在咯咯珠宝买的黑曜石五串" → 必须识别出 supplierName: "咯咯珠宝"
-18. 【重要】测试案例："拉拉水晶买的单珠，黄耀石一颗，200块钱，品质还不错的。18米。" → 必须识别出 supplierName: "拉拉水晶", total_price: 200`
+14. 【重要】供应商字段是必须识别的关键信息，如果描述中包含"在XX买的"、"从XX购买"等表述，必须提取XX作为supplier_name
+15. 【重要】总价识别：当描述中出现"200块钱"、"500元"等单独价格表述时，应识别为total_price，特别是散珠类型应优先使用total_price而非price_per_gram
+16. 【重要】价格字段优先级：如果同时出现总价和克价，散珠类型优先使用total_price；如果只有总价，所有类型都使用total_price
+17. 【重要】测试案例："在咯咯珠宝买的黑曜石五串" → 必须识别出 supplier_name: "咯咯珠宝"
+18. 【重要】测试案例："拉拉水晶买的单珠，黄耀石一颗，200块钱，品质还不错的。18米。" → 必须识别出 supplier_name: "拉拉水晶", total_price: 200`
 
     const response = await fetch(`${DOUBAO_CONFIG.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -270,7 +273,7 @@ export const parsePurchaseDescription = async (description: string): Promise<{
       name: string
       quantity: number
       unit: string
-      estimatedPrice?: number
+      estimated_price?: number
     }>
     supplier?: string
     notes?: string
@@ -293,7 +296,7 @@ export const parsePurchaseDescription = async (description: string): Promise<{
       "name": "物品名称",
       "quantity": 数量,
       "unit": "单位",
-      "estimatedPrice": 预估单价(可选)
+      "estimated_price": 预估单价(可选)
     }
   ],
   "supplier": "供应商名称(如果提到)",
@@ -559,9 +562,9 @@ ${includeFinancial ? '包含财务数据分析' : '不包含财务敏感数据'}
           '建立预警机制'
         ],
         metrics: {
-          analysisDate: new Date().toISOString(),
-          timeRange,
-          includeFinancial
+          analysis_date: new Date().toISOString(),
+          time_range: timeRange,
+          include_financial: includeFinancial
         }
       }
     }

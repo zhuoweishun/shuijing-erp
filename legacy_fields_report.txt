@@ -1,0 +1,1669 @@
+水晶ERP项目废弃字段检查报告
+生成时间: 2025-09-16 15:41:25.290328
+发现 555 个废弃字段
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:195:5 product_name → purchase_name
+  3. `product_name` (8次)
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:144:7 product_type → purchase_type
+  - `product_type` → `productType`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:172:40 product_type → purchase_type
+  - **对象属性定义**: `productType: string` → `product_type: string`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:173:34 product_type → purchase_type
+  - **对象属性访问**: `.productType` → `.product_type`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:174:38 product_type → purchase_type
+  - **数组索引访问**: `['productType']` → `['product_type']`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:175:35 product_type → purchase_type
+  - **字符串字面量**: `'productType'` → `'product_type'`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:176:47 product_type → purchase_type
+  - **SQL查询字段**: `SELECT productType` → `SELECT product_type`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:193:5 product_type → purchase_type
+  1. `product_type` (14次)
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:144:24 productType → purchase_type
+  - `product_type` → `productType`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:172:16 productType → purchase_type
+  - **对象属性定义**: `productType: string` → `product_type: string`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:173:17 productType → purchase_type
+  - **对象属性访问**: `.productType` → `.product_type`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:174:18 productType → purchase_type
+  - **数组索引访问**: `['productType']` → `['product_type']`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:175:17 productType → purchase_type
+  - **字符串字面量**: `'productType'` → `'product_type'`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:176:24 productType → purchase_type
+  - **SQL查询字段**: `SELECT productType` → `SELECT product_type`
+
+D:\shuijing ERP\scripts\README-API-Mapping-Tools.md:227:3 productType → purchase_type
+  productType: 'crystal',
+
+D:\shuijing ERP\scripts\README.md:64:20 product_name → purchase_name
+  | `productName` | `product_name` | 8次 | 产品名称 |
+
+D:\shuijing ERP\scripts\README.md:76:20 product_name → purchase_name
+  - `productName` → `product_name`
+
+D:\shuijing ERP\scripts\README.md:64:4 productName → purchase_name
+  | `productName` | `product_name` | 8次 | 产品名称 |
+
+D:\shuijing ERP\scripts\README.md:76:4 productName → purchase_name
+  - `productName` → `product_name`
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:12:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:120:19 product_name → purchase_name
+  product_name: batch.product_name || get_product_type_display(type_group.material_type),
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:120:39 product_name → purchase_name
+  product_name: batch.product_name || get_product_type_display(type_group.material_type),
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:139:17 product_name → purchase_name
+  product_name: get_product_type_display(type_group.material_type),
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:157:76 product_name → purchase_name
+  return sort_by_pinyin(products, (product: AccessoryProduct) => product.product_name)
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:235:48 product_name → purchase_name
+  product_types: new Set(products.map(p => p.product_name)).size,
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:299:32 product_name → purchase_name
+  alt={product.product_name}
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:342:26 product_name → purchase_name
+  {product.product_name}
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:410:36 product_name → purchase_name
+  {selectedProduct.product_name}
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:515:51 product_name → purchase_name
+  alt={`${selectedProduct.product_name} ${index + 1}`}
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:57:9 product_types → purchase_types
+  product_types: ['ACCESSORIES'], // 只查询配件类型
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:235:5 product_types → purchase_types
+  product_types: new Set(products.map(p => p.product_name)).size,
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:266:73 product_types → purchase_types
+  <div className="text-2xl font-bold text-crystal-600">{stats.product_types}</div>
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:95:37 material_type → purchase_type
+  const get_product_type_display = (material_type: string) => {
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:102:21 material_type → purchase_type
+  return type_map[material_type] || material_type
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:102:39 material_type → purchase_type
+  return type_map[material_type] || material_type
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:110:22 material_type → purchase_type
+  if (type_group.material_type === 'ACCESSORIES') {
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:120:91 material_type → purchase_type
+  product_name: batch.product_name || get_product_type_display(type_group.material_type),
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:135:41 material_type → purchase_type
+  const key = `${type_group.material_type}-${spec_group.specification_value || `spec-${spec_index}`}-${quality_group.quality}-${quality_index}`
+
+D:\shuijing ERP\src\components\AccessoriesProductGrid.tsx:139:67 material_type → purchase_type
+  product_name: get_product_type_display(type_group.material_type),
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:12:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:162:48 product_name → purchase_name
+  product_types: new Set(products.map(p => p.product_name)).size,
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:242:32 product_name → purchase_name
+  alt={product.product_name}
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:285:26 product_name → purchase_name
+  {product.product_name}
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:344:36 product_name → purchase_name
+  {selectedProduct.product_name}
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:430:51 product_name → purchase_name
+  alt={`${selectedProduct.product_name} ${index + 1}`}
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:162:5 product_types → purchase_types
+  product_types: new Set(products.map(p => p.product_name)).size,
+
+D:\shuijing ERP\src\components\FinishedProductGrid.tsx:193:73 product_types → purchase_types
+  <div className="text-2xl font-bold text-crystal-600">{stats.product_types}</div>
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:21:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:76:18 product_name → purchase_name
+  name: item.product_name.length > 8 ? `${item.product_name.slice(0, 8)}...` : item.product_name,
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:76:52 product_name → purchase_name
+  name: item.product_name.length > 8 ? `${item.product_name.slice(0, 8)}...` : item.product_name,
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:76:89 product_name → purchase_name
+  name: item.product_name.length > 8 ? `${item.product_name.slice(0, 8)}...` : item.product_name,
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:77:22 product_name → purchase_name
+  fullName: item.product_name,
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:245:93 product_name → purchase_name
+  <div className="font-medium text-gray-900 text-mobile-body">{item.product_name}</div>
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:329:64 product_name → purchase_name
+  <div className="font-medium">{item.product_name}</div>
+
+D:\shuijing ERP\src\components\InventoryConsumptionChart.tsx:22:3 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\InventoryDashboard.tsx:45:5 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\InventoryDashboard.tsx:28:5 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\InventoryDashboard.tsx:36:5 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\InventoryDashboard.tsx:46:5 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:17:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:89:13 product_name → purchase_name
+  product_name: item.material_type === 'LOOSE_BEADS' ? '散珠' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:18:3 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:44:43 material_type → purchase_type
+  const fetchProductDistribution = async (material_type: ProductType) => {
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:48:9 material_type → purchase_type
+  material_type: material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:48:24 material_type → purchase_type
+  material_type: material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:65:62 material_type → purchase_type
+  const typeConfig = PRODUCT_TYPES.find(t => t.key === material_type)
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:76:24 material_type → purchase_type
+  name: item.material_type === 'LOOSE_BEADS' ? '散珠' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:77:24 material_type → purchase_type
+  item.material_type === 'BRACELET' ? '手串' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:78:24 material_type → purchase_type
+  item.material_type === 'ACCESSORIES' ? '饰品配件' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:79:24 material_type → purchase_type
+  item.material_type === 'FINISHED_MATERIAL' ? '成品' : item.material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:79:76 material_type → purchase_type
+  item.material_type === 'FINISHED_MATERIAL' ? '成品' : item.material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:89:32 material_type → purchase_type
+  product_name: item.material_type === 'LOOSE_BEADS' ? '散珠' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:90:31 material_type → purchase_type
+  item.material_type === 'BRACELET' ? '手串' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:91:31 material_type → purchase_type
+  item.material_type === 'ACCESSORIES' ? '饰品配件' :
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:92:31 material_type → purchase_type
+  item.material_type === 'FINISHED_MATERIAL' ? '成品' : item.material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:92:83 material_type → purchase_type
+  item.material_type === 'FINISHED_MATERIAL' ? '成品' : item.material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:93:13 material_type → purchase_type
+  material_type: item.material_type,
+
+D:\shuijing ERP\src\components\InventoryPieChart.tsx:93:33 material_type → purchase_type
+  material_type: item.material_type,
+
+D:\shuijing ERP\src\components\ProductDistributionPieChart.tsx:18:8 material_type → purchase_type
+  //     material_type: string
+
+D:\shuijing ERP\src\components\ProductDistributionPieChart.tsx:41:46 material_type → purchase_type
+  const fetch_material_distribution = async (material_type: MaterialType) => {
+
+D:\shuijing ERP\src\components\ProductDistributionPieChart.tsx:45:9 material_type → purchase_type
+  material_type: material_type,
+
+D:\shuijing ERP\src\components\ProductDistributionPieChart.tsx:45:24 material_type → purchase_type
+  material_type: material_type,
+
+D:\shuijing ERP\src\components\ProductDistributionPieChart.tsx:52:22 material_type → purchase_type
+  name: item.material_type || '未知类型',
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:55:5 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:149:60 product_name → purchase_name
+  <p className="font-medium text-gray-900">{data.product_name || data.name}</p>
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:225:22 product_name → purchase_name
+  name: item.product_name,
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:39:3 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:56:5 material_type → purchase_type
+  material_type: string
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:81:10 material_type → purchase_type
+  const [material_type, setMaterial_type] = useState<string>('LOOSE_BEADS')
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:88:9 material_type → purchase_type
+  material_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL',
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:88:24 material_type → purchase_type
+  material_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL',
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:111:7 material_type → purchase_type
+  }, [material_type, priceType])
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:136:73 material_type → purchase_type
+  <p className="text-sm text-gray-600">产品类型：{PRODUCT_TYPE_MAP[material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:150:76 material_type → purchase_type
+  <p className="text-sm text-gray-600">类型：{PRODUCT_TYPE_MAP[data.material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
+
+D:\shuijing ERP\src\components\ProductPriceDistributionChart.tsx:250:17 material_type → purchase_type
+  material_type === key
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:597:90 product_name → purchase_name
+  const productNames = (response.data as any).used_by_products.map((p: any) => p.product_name).join('、')
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:642:90 product_name → purchase_name
+  const productNames = (response.data as any).used_by_products.map((p: any) => p.product_name).join('、')
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:317:11 product_type → purchase_type
+  const product_type = originalData?.product_type || 'BRACELET'
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:317:40 product_type → purchase_type
+  const product_type = originalData?.product_type || 'BRACELET'
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:323:9 product_type → purchase_type
+  if (product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:361:9 product_type → purchase_type
+  if (product_type === 'BRACELET' && quantityChanged && beads_per_string > 0) {
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:373:16 product_type → purchase_type
+  } else if (product_type !== 'BRACELET' && quantityChanged && total_price > 0) {
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:382:9 product_type → purchase_type
+  if (product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\PurchaseDetailModal.tsx:403:9 product_type → purchase_type
+  if (product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:39:31 product_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:57:31 product_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:170:24 product_name → purchase_name
+  const matrix: { [product_name: string]: { [size: string]: MatrixCell } } = {}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:193:55 product_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:284:24 product_name → purchase_name
+  const matrix: { [product_name: string]: { [quality: string]: MatrixCell } } = {}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:309:55 product_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:343:28 product_name → purchase_name
+  productNames.forEach(product_name => {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:344:21 product_name → purchase_name
+  if (!matrix[product_name]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:345:18 product_name → purchase_name
+  matrix[product_name] = {}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:349:23 product_name → purchase_name
+  if (!matrix[product_name][quality]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:351:20 product_name → purchase_name
+  matrix[product_name][quality] = {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:353:30 product_name → purchase_name
+  material_name: product_name, // 修改：product_name → material_name（这里productName实际上是materialName）
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:353:50 product_name → purchase_name
+  material_name: product_name, // 修改：product_name → material_name（这里productName实际上是materialName）
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:466:32 product_name → purchase_name
+  const handleProductToggle = (product_name: string) => {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:468:25 product_name → purchase_name
+  if (prev.includes(product_name)) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:469:45 product_name → purchase_name
+  return prev.filter(name => name !== product_name)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:471:26 product_name → purchase_name
+  return [...prev, product_name]
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:594:27 product_name → purchase_name
+  .filter(([product_name]) => filteredProductNames.includes(product_name))
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:594:75 product_name → purchase_name
+  .filter(([product_name]) => filteredProductNames.includes(product_name))
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:604:27 product_name → purchase_name
+  .filter(([product_name]) => filteredProductNames.includes(product_name))
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:604:75 product_name → purchase_name
+  .filter(([product_name]) => filteredProductNames.includes(product_name))
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:705:41 product_name → purchase_name
+  .map((product_name, filterIndex) => (
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:706:57 product_name → purchase_name
+  <label key={`filter-${product_name}-${filterIndex}`} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:709:78 product_name → purchase_name
+  checked={tempSelectedProducts.includes(product_name)}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:710:75 product_name → purchase_name
+  onChange={() => handleProductToggle(product_name)}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:713:93 product_name → purchase_name
+  <span className="text-sm text-gray-700 truncate" title={product_name}>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:714:40 product_name → purchase_name
+  {product_name}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:756:42 product_name → purchase_name
+  {filteredProductNames.map((product_name, rowIndex) => (
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:757:29 product_name → purchase_name
+  <tr key={`${product_name}-${rowIndex}`} className="hover:bg-gray-50">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:759:63 product_name → purchase_name
+  <div className="max-w-32 truncate" title={product_name}>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:760:24 product_name → purchase_name
+  {product_name}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:765:54 product_name → purchase_name
+  const cell = matrixData.matrix[product_name]?.[size]
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:769:39 product_name → purchase_name
+  <td key={`${product_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:776:37 product_name → purchase_name
+  <td key={`${product_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:834:54 product_name → purchase_name
+  const cell = matrixData.matrix[product_name]?.[quality]
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:838:39 product_name → purchase_name
+  <td key={`${product_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:845:37 product_name → purchase_name
+  <td key={`${product_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:10:3 product_type → purchase_type
+  product_type: string
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:40:3 product_type → purchase_type
+  product_type: string // 保留：这里的productType实际上是material_type，但API返回仍使用product_type
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:56:3 product_type → purchase_type
+  product_type: string // 保留：这里的productType实际上是material_type，但API返回仍使用product_type
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:165:12 product_type → purchase_type
+  item.product_type === 'LOOSE_BEADS' || item.product_type === 'BRACELET'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:165:51 product_type → purchase_type
+  item.product_type === 'LOOSE_BEADS' || item.product_type === 'BRACELET'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:192:19 product_type → purchase_type
+  product_type: productTypeData.product_type,
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:192:49 product_type → purchase_type
+  product_type: productTypeData.product_type,
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:197:46 product_type → purchase_type
+  priceUnit: productTypeData.product_type === 'LOOSE_BEADS' ? '元/颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:198:45 product_type → purchase_type
+  productTypeData.product_type === 'BRACELET' ? '元/颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:199:45 product_type → purchase_type
+  productTypeData.product_type === 'ACCESSORIES' ? '元/片' : '元/件',
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:234:23 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:234:63 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:248:50 product_type → purchase_type
+  semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:248:73 product_type → purchase_type
+  semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:308:19 product_type → purchase_type
+  product_type: productTypeData.product_type,
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:308:49 product_type → purchase_type
+  product_type: productTypeData.product_type,
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:314:46 product_type → purchase_type
+  priceUnit: productTypeData.product_type === 'LOOSE_BEADS' ? '元/颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:315:45 product_type → purchase_type
+  productTypeData.product_type === 'BRACELET' ? '元/颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:316:45 product_type → purchase_type
+  productTypeData.product_type === 'ACCESSORIES' ? '元/片' : '元/件',
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:352:15 product_type → purchase_type
+  product_type: 'LOOSE_BEADS', // 默认类型，实际会被数据覆盖
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:378:23 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:378:63 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:395:66 product_type → purchase_type
+  const batchSpec = semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:395:89 product_type → purchase_type
+  const batchSpec = semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:815:92 product_type → purchase_type
+  <span className="text-xs">{quality}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:815:136 product_type → purchase_type
+  <span className="text-xs">{quality}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:815:177 product_type → purchase_type
+  <span className="text-xs">{quality}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:884:92 product_type → purchase_type
+  <span className="text-xs">{sizeKey}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:884:136 product_type → purchase_type
+  <span className="text-xs">{sizeKey}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:884:177 product_type → purchase_type
+  <span className="text-xs">{sizeKey}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:937:36 product_type → purchase_type
+  selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:938:36 product_type → purchase_type
+  selectedCell.product_type === 'BRACELET' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:939:36 product_type → purchase_type
+  selectedCell.product_type === 'ACCESSORIES' ? '片' : '件'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:976:43 product_type → purchase_type
+  (selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:977:43 product_type → purchase_type
+  selectedCell.product_type === 'BRACELET' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:978:43 product_type → purchase_type
+  selectedCell.product_type === 'ACCESSORIES' ? '片' : '件') :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:979:43 product_type → purchase_type
+  (selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:980:43 product_type → purchase_type
+  selectedCell.product_type === 'BRACELET' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:981:43 product_type → purchase_type
+  selectedCell.product_type === 'ACCESSORIES' ? '片' : '件')
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1014:44 product_type → purchase_type
+  selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1015:44 product_type → purchase_type
+  selectedCell.product_type === 'BRACELET' ? '颗' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1016:44 product_type → purchase_type
+  selectedCell.product_type === 'ACCESSORIES' ? '片' : '件'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1032:39 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1032:79 product_type → purchase_type
+  if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1044:48 product_type → purchase_type
+  selectedCell.product_type === 'LOOSE_BEADS' ? '颗单价:' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1045:48 product_type → purchase_type
+  selectedCell.product_type === 'BRACELET' ? '颗单价:' :
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:1046:48 product_type → purchase_type
+  selectedCell.product_type === 'ACCESSORIES' ? '片单价:' : '件单价:'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:39:3 material_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:39:46 material_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:57:3 material_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:57:46 material_name → purchase_name
+  material_name: string // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:181:21 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:181:43 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:184:32 material_name → purchase_name
+  productNames.add(material_name) // 修改：使用materialName
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:186:27 material_name → purchase_name
+  if (!matrix[material_name]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:187:24 material_name → purchase_name
+  matrix[material_name] = {}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:190:27 material_name → purchase_name
+  if (!matrix[material_name][size]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:191:24 material_name → purchase_name
+  matrix[material_name][size] = {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:193:19 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:193:34 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:193:70 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:207:35 material_name → purchase_name
+  const cell = matrix[material_name][size]
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:298:21 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:298:43 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:300:32 material_name → purchase_name
+  productNames.add(material_name) // 修改：使用materialName
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:302:27 material_name → purchase_name
+  if (!matrix[material_name]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:303:24 material_name → purchase_name
+  matrix[material_name] = {}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:306:27 material_name → purchase_name
+  if (!matrix[material_name][quality]) {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:307:24 material_name → purchase_name
+  matrix[material_name][quality] = {
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:309:19 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:309:34 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:309:70 material_name → purchase_name
+  material_name: material_name, // 修改：product_name → material_name
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:324:35 material_name → purchase_name
+  const cell = matrix[material_name][quality]
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:353:15 material_name → purchase_name
+  material_name: product_name, // 修改：product_name → material_name（这里productName实际上是materialName）
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:353:65 material_name → purchase_name
+  material_name: product_name, // 修改：product_name → material_name（这里productName实际上是materialName）
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:437:19 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:437:41 material_name → purchase_name
+  const material_name = batch.material_name || '未知产品'
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:438:23 material_name → purchase_name
+  names.add(material_name)
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:922:33 material_name → purchase_name
+  {selectedCell.material_name} - {viewMode === 'size' ? `${selectedCell.size}mm` : `${selectedCell.quality}级`}
+
+D:\shuijing ERP\src\components\SemiFinishedMatrixView.tsx:997:63 material_name → purchase_name
+  <div key={`${batch.purchase_id}-${batch.material_name}-${index}`} className="text-xs text-gray-600 p-3 bg-gray-50 rounded">
+
+D:\shuijing ERP\src\components\SkuDestroyForm.tsx:251:7 material_name → purchase_name
+  material_name: material.material_name,
+
+D:\shuijing ERP\src\components\SkuDestroyForm.tsx:251:31 material_name → purchase_name
+  material_name: material.material_name,
+
+D:\shuijing ERP\src\components\SkuDestroyForm.tsx:514:37 material_name → purchase_name
+  {material.material_name}
+
+D:\shuijing ERP\src\components\SkuRestockForm.tsx:234:75 material_name → purchase_name
+  <td className="px-4 py-2 font-medium">{material.material_name}</td>
+
+D:\shuijing ERP\src\components\SkuTraceView.tsx:117:37 material_name → purchase_name
+  {recipe.material_name}
+
+D:\shuijing ERP\src\components\SkuTraceView.tsx:162:67 material_name → purchase_name
+  <span className="text-gray-900">{recipe.material_name}</span>
+
+D:\shuijing ERP\src\pages\Home.tsx:292:73 product_name → purchase_name
+  <div className="font-medium text-gray-900">{product.product_name}</div>
+
+D:\shuijing ERP\src\pages\InventoryList.tsx:37:10 product_types → purchase_types
+  product_types: selectedProductTypes.length > 0 ? selectedProductTypes: undefined,
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:715:13 material_name → purchase_name
+  material_name: material.productInfo.purchase_name + (material.selected_quantity > 1 ? ` #${i + 1}` : ''),
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:801:11 material_name → purchase_name
+  material_name: formData.purchase_name,
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:830:13 material_name → purchase_name
+  material_name: formData.purchase_name + (formData.production_quantity > 1 ? ` #${i + 1}` : ''),
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:388:11 material_types → purchase_types
+  let material_types: string[] = []
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:391:9 material_types → purchase_types
+  material_types = ['FINISHED_MATERIAL']
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:394:9 material_types → purchase_types
+  material_types = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES']
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:397:62 material_types → purchase_types
+  console.log('🔍 [原材料筛选] 制作模式:', formData.mode, '筛选类型:', material_types)
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:403:9 material_types → purchase_types
+  material_types: material_types
+
+D:\shuijing ERP\src\pages\ProductEntry.tsx:403:25 material_types → purchase_types
+  material_types: material_types
+
+D:\shuijing ERP\src\pages\PurchaseList.tsx:722:12 product_name → purchase_name
+  'product_name': 'product_name',
+
+D:\shuijing ERP\src\pages\PurchaseList.tsx:722:28 product_name → purchase_name
+  'product_name': 'product_name',
+
+D:\shuijing ERP\src\pages\PurchaseList.tsx:139:32 product_type → purchase_type
+  const format_product_type = (product_type?: string) => {
+
+D:\shuijing ERP\src\pages\PurchaseList.tsx:146:21 product_type → purchase_type
+  return type_map[product_type as keyof typeof type_map] || '手串'
+
+D:\shuijing ERP\src\services\api.ts:888:16 material_name → purchase_name
+  sort_by?: 'material_name' | 'total_remaining_quantity' | 'material_type' // 按原材料名称和类型排序
+
+D:\shuijing ERP\src\services\api.ts:901:69 material_name → purchase_name
+  sort_by?: 'purchase_date' | 'created_at' | 'remaining_beads' | 'material_name' // 按原材料名称排序
+
+D:\shuijing ERP\src\services\api.ts:927:34 material_name → purchase_name
+  sort_by?: 'purchase_date' | 'material_name' | 'specification' | 'remaining_quantity' // 按原材料名称排序
+
+D:\shuijing ERP\src\services\api.ts:1150:5 material_name → purchase_name
+  material_name: string // 成品原材料名称
+
+D:\shuijing ERP\src\services\api.ts:1183:5 material_name → purchase_name
+  material_name?: string // 成品原材料名称
+
+D:\shuijing ERP\src\services\api.ts:1205:7 material_name → purchase_name
+  material_name: string // 成品原材料名称
+
+D:\shuijing ERP\src\services\api.ts:876:16 material_type → purchase_type
+  sort_by?: 'material_type' | 'total_quantity' // 按原材料类型排序
+
+D:\shuijing ERP\src\services\api.ts:888:63 material_type → purchase_type
+  sort_by?: 'material_name' | 'total_remaining_quantity' | 'material_type' // 按原材料名称和类型排序
+
+D:\shuijing ERP\src\services\api.ts:935:5 material_type → purchase_type
+  material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型
+
+D:\shuijing ERP\src\services\api.ts:947:5 material_type → purchase_type
+  material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL' // 原材料类型
+
+D:\shuijing ERP\src\services\api.ts:777:5 material_types → purchase_types
+  material_types?: string[]
+
+D:\shuijing ERP\src\services\api.ts:868:5 material_types → purchase_types
+  material_types?: string[] // 原材料类型筛选（多选）
+
+D:\shuijing ERP\src\services\api.ts:884:5 material_types → purchase_types
+  material_types?: string[] // 原材料类型筛选（多选）
+
+D:\shuijing ERP\src\services\api.ts:1131:5 material_types → purchase_types
+  material_types?: string[] // 原材料类型筛选
+
+D:\shuijing ERP\src\types\index.ts:1021:3 product_name → purchase_name
+  product_name: string // 产品名称
+
+D:\shuijing ERP\src\types\index.ts:1029:3 product_name → purchase_name
+  product_name: string // 成品名称
+
+D:\shuijing ERP\src\types\index.ts:158:3 material_name → purchase_name
+  material_name: string
+
+D:\shuijing ERP\src\types\index.ts:175:3 material_name → purchase_name
+  material_name: string
+
+D:\shuijing ERP\src\types\index.ts:589:5 material_name → purchase_name
+  material_name: string // 成品原材料名称
+
+D:\shuijing ERP\src\types\index.ts:653:3 material_name → purchase_name
+  material_name: string
+
+D:\shuijing ERP\src\types\index.ts:752:3 material_name → purchase_name
+  material_name: string // 原材料名称
+
+D:\shuijing ERP\src\types\index.ts:788:3 material_name → purchase_name
+  material_name: string // 原材料名称
+
+D:\shuijing ERP\src\types\index.ts:819:7 material_name → purchase_name
+  material_name: string // 改为materialName保持一致性
+
+D:\shuijing ERP\src\types\index.ts:866:7 material_name → purchase_name
+  material_name: string // 改为materialName保持一致性
+
+D:\shuijing ERP\src\types\index.ts:1037:3 material_name → purchase_name
+  material_name: string // 成品名称（别名）
+
+D:\shuijing ERP\src\types\index.ts:789:3 material_type → purchase_type
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型（半成品material和成品material）
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:186:3 product_name → purchase_name
+  product_name: 'material_name', // 修改：统一映射到materialName（概念统一）
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:191:3 product_types → purchase_types
+  product_types: 'material_types', // 兼容：product_types -> material_types
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:191:42 product_types → purchase_types
+  product_types: 'material_types', // 兼容：product_types -> material_types
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:169:3 material_name → purchase_name
+  material_name: 'material_name', // 原材料名称
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:169:19 material_name → purchase_name
+  material_name: 'material_name', // 原材料名称
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:186:18 material_name → purchase_name
+  product_name: 'material_name', // 修改：统一映射到materialName（概念统一）
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:170:3 material_type → purchase_type
+  material_type: 'material_type', // 原材料类型（散珠material、手串material、饰品配件material、成品material）
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:170:19 material_type → purchase_type
+  material_type: 'material_type', // 原材料类型（散珠material、手串material、饰品配件material、成品material）
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:191:19 material_types → purchase_types
+  product_types: 'material_types', // 兼容：product_types -> material_types
+
+D:\shuijing ERP\src\utils\fieldConverter.ts:191:59 material_types → purchase_types
+  product_types: 'material_types', // 兼容：product_types -> material_types
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:117:50 product_name → purchase_name
+  const material_name_a = a.material_name || a.product_name || a.purchase_name || '' // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:118:50 product_name → purchase_name
+  const material_name_b = b.material_name || b.product_name || b.purchase_name || '' // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:117:31 material_name → purchase_name
+  const material_name_a = a.material_name || a.product_name || a.purchase_name || '' // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:118:31 material_name → purchase_name
+  const material_name_b = b.material_name || b.product_name || b.purchase_name || '' // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:109:40 material_type → purchase_type
+  const typeA = type_order.indexOf(a.material_type || a.material_type) // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:109:59 material_type → purchase_type
+  const typeA = type_order.indexOf(a.material_type || a.material_type) // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:110:40 material_type → purchase_type
+  const typeB = type_order.indexOf(b.material_type || b.material_type) // 兼容处理
+
+D:\shuijing ERP\src\utils\pinyinSort.ts:110:59 material_type → purchase_type
+  const typeB = type_order.indexOf(b.material_type || b.material_type) // 兼容处理
+
+D:\shuijing ERP\src\utils\validation.ts:102:3 product_type → purchase_type
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+
+D:\shuijing ERP\src\utils\validation.ts:112:12 product_type → purchase_type
+  if (data.product_type === 'LOOSE_BEADS' || data.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\utils\validation.ts:112:51 product_type → purchase_type
+  if (data.product_type === 'LOOSE_BEADS' || data.product_type === 'BRACELET') {
+
+D:\shuijing ERP\src\utils\validation.ts:120:12 product_type → purchase_type
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\src\utils\validation.ts:120:51 product_type → purchase_type
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\src\pages\__tests__\InventoryList.test.tsx:50:9 product_name → purchase_name
+  product_name: '紫水晶手串',
+
+D:\shuijing ERP\src\pages\__tests__\InventoryList.test.tsx:68:9 product_name → purchase_name
+  product_name: '玫瑰石英项链',
+
+D:\shuijing ERP\src\pages\__tests__\InventoryList.test.tsx:46:5 material_type → purchase_type
+  material_type: '手串',
+
+D:\shuijing ERP\src\pages\__tests__\InventoryList.test.tsx:64:5 material_type → purchase_type
+  material_type: '项链',
+
+D:\shuijing ERP\src\pages\__tests__\InventoryList.test.tsx:215:13 material_type → purchase_type
+  material_type: '手串'
+
+D:\shuijing ERP\src\pages\__tests__\PurchaseEntry.test.tsx:389:13 material_name → purchase_name
+  material_name: '测试材料',
+
+D:\shuijing ERP\backend\routes\financial.ts:590:17 product_name → purchase_name
+  { product_name: { contains: search as string } },
+
+D:\shuijing ERP\backend\routes\financial.ts:608:41 product_name → purchase_name
+  description: `采购 - ${purchase.product_name}`,
+
+D:\shuijing ERP\backend\routes\financial.ts:699:19 product_name → purchase_name
+  { product_name: { contains: search as string } },
+
+D:\shuijing ERP\backend\routes\financial.ts:712:39 product_name → purchase_name
+  description: `销售 - ${sale.product_name}`,
+
+D:\shuijing ERP\backend\src\routes\dashboard.ts:58:9 product_name → purchase_name
+  product_name: purchase.purchase_name,
+
+D:\shuijing ERP\backend\src\routes\dashboard.ts:64:9 product_name → purchase_name
+  product_name: product.name,
+
+D:\shuijing ERP\backend\src\routes\financial.ts:319:24 product_type → purchase_type
+  switch (purchase.product_type) {
+
+D:\shuijing ERP\backend\src\routes\financial.ts:354:24 product_type → purchase_type
+  switch (purchase.product_type) {
+
+D:\shuijing ERP\backend\src\routes\financial.ts:1204:11 product_type → purchase_type
+  by: ['product_type'],
+
+D:\shuijing ERP\backend\src\routes\financial.ts:1241:24 product_type → purchase_type
+  category: item.product_type || '未分类',
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:86:40 product_name → purchase_name
+  // const parseProductClassification = (product_name: string) => {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:115:37 product_name → purchase_name
+  //     if (keywords.some(keyword => product_name.includes(keyword))) {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:123:37 product_name → purchase_name
+  //     if (keywords.some(keyword => product_name.includes(keyword))) {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:130:10 product_name → purchase_name
+  //   if (product_name.includes('随形')) {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:547:16 product_name → purchase_name
+  sort_by = 'product_name'
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:618:31 product_name → purchase_name
+  ORDER BY ${sort_by === 'product_name' ? 'p.purchase_name' : 'total_remaining_beads'} ${sort === 'asc' ? 'ASC' : 'DESC'}
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:694:77 product_name → purchase_name
+  const purchases = await prisma.$queryRawUnsafe(purchaseQuery, group.product_name) as any[]
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:695:44 product_name → purchase_name
+  console.log(`🔍 [采购记录查询] 产品"${group.product_name}"的采购记录:`, purchases)
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:779:42 product_name → purchase_name
+  console.log(`✅ [变体合并] 产品"${group.product_name}"合并后的变体:`, {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:791:11 product_name → purchase_name
+  product_name: group.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:791:31 product_name → purchase_name
+  product_name: group.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:894:79 product_name → purchase_name
+  const validSortFields = ['purchase_date', 'created_at', 'remaining_beads', 'product_name']
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:998:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1063:38 product_name → purchase_name
+  sort_by: z.enum(['purchase_date', 'product_name', 'specification', 'remaining_quantity']).optional()
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1131:22 product_name → purchase_name
+  if (sort_by === 'product_name') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1144:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1265:7 product_name → purchase_name
+  product_name: item.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1265:26 product_name → purchase_name
+  product_name: item.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1271:7 product_name → purchase_name
+  product_name: item.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1271:26 product_name → purchase_name
+  product_name: item.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1410:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1464:18 product_name → purchase_name
+  name: item.product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1635:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1956:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:2027:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:28:39 product_type → purchase_type
+  sort_by: z.enum(['total_quantity', 'product_type', 'crystal_type']).optional()
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:493:36 product_type → purchase_type
+  const sortField = sort_by === 'product_type' ? 'purchase_type' : 'total_quantity'
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1313:28 product_type → purchase_type
+  p.purchase_type as product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1399:13 product_type → purchase_type
+  const { product_type, limit = 20 } = req.query
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1403:9 product_type → purchase_type
+  if (product_type && product_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1403:25 product_type → purchase_type
+  if (product_type && product_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1404:49 product_type → purchase_type
+  whereClause = `WHERE p.purchase_type = '${product_type}'`
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1411:28 product_type → purchase_type
+  p.purchase_type as product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1636:28 product_type → purchase_type
+  p.purchase_type as product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1735:5 product_type → purchase_type
+  product_type = 'LOOSE_BEADS',
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1741:5 product_type → purchase_type
+  product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1750:9 product_type → purchase_type
+  if (product_type && product_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1750:25 product_type → purchase_type
+  if (product_type && product_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1751:56 product_type → purchase_type
+  productTypeCondition = `AND p.purchase_type = '${product_type}'`
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1806:9 product_type → purchase_type
+  product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1905:7 product_type → purchase_type
+  product_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:17:3 product_types → purchase_types
+  product_types: z.union([
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:205:5 product_types → purchase_types
+  product_types,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:224:5 product_types → purchase_types
+  product_types,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:326:11 product_types → purchase_types
+  if (product_types) {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:327:49 product_types → purchase_types
+  const productTypesArray = Array.isArray(product_types) ? product_types : [product_types]
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:327:66 product_types → purchase_types
+  const productTypesArray = Array.isArray(product_types) ? product_types : [product_types]
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:327:83 product_types → purchase_types
+  const productTypesArray = Array.isArray(product_types) ? product_types : [product_types]
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1516:13 material_type → purchase_type
+  const { material_type, limit = 10 } = req.query
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1520:9 material_type → purchase_type
+  if (material_type && material_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1520:26 material_type → purchase_type
+  if (material_type && material_type !== 'ALL') {
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1521:49 material_type → purchase_type
+  whereClause += ` AND p.purchase_type = '${material_type}'`
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1527:28 material_type → purchase_type
+  p.purchase_name as material_type,
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1567:7 material_type → purchase_type
+  material_type: material_type || 'ALL',
+
+D:\shuijing ERP\backend\src\routes\inventory.ts:1567:22 material_type → purchase_type
+  material_type: material_type || 'ALL',
+
+D:\shuijing ERP\backend\src\routes\materials.ts:241:9 product_name → purchase_name
+  product_name: data.material_name,
+
+D:\shuijing ERP\backend\src\routes\materials.ts:12:3 product_type → purchase_type
+  product_type: z.enum(['BRACELET', 'FINISHED']),
+
+D:\shuijing ERP\backend\src\routes\materials.ts:42:3 product_type → purchase_type
+  product_type: z.enum(['BRACELET', 'FINISHED']).optional(),
+
+D:\shuijing ERP\backend\src\routes\materials.ts:59:34 product_type → purchase_type
+  const { page, limit, search, product_type, status, purchase_id } = query;
+
+D:\shuijing ERP\backend\src\routes\materials.ts:74:9 product_type → purchase_type
+  if (product_type) {
+
+D:\shuijing ERP\backend\src\routes\materials.ts:75:13 product_type → purchase_type
+  where.product_type = product_type;
+
+D:\shuijing ERP\backend\src\routes\materials.ts:75:28 product_type → purchase_type
+  where.product_type = product_type;
+
+D:\shuijing ERP\backend\src\routes\materials.ts:242:9 product_type → purchase_type
+  product_type: data.product_type,
+
+D:\shuijing ERP\backend\src\routes\materials.ts:242:28 product_type → purchase_type
+  product_type: data.product_type,
+
+D:\shuijing ERP\backend\src\routes\materials.ts:418:40 product_type → purchase_type
+  prisma.purchase.count({ where: { product_type: 'BRACELET' } }),
+
+D:\shuijing ERP\backend\src\routes\materials.ts:419:40 product_type → purchase_type
+  prisma.purchase.count({ where: { product_type: 'FINISHED' } })
+
+D:\shuijing ERP\backend\src\routes\materials.ts:11:3 material_name → purchase_name
+  material_name: z.string().min(1, '原材料名称不能为空'),
+
+D:\shuijing ERP\backend\src\routes\materials.ts:26:3 material_name → purchase_name
+  material_name: z.string().min(1, '原材料名称不能为空').optional(),
+
+D:\shuijing ERP\backend\src\routes\materials.ts:67:11 material_name → purchase_name
+  { material_name: { contains: search } },
+
+D:\shuijing ERP\backend\src\routes\materials.ts:241:28 material_name → purchase_name
+  product_name: data.material_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:76:28 product_name → purchase_name
+  p.purchase_name as product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:249:6 product_name → purchase_name
+  'product_name': 'name',
+
+D:\shuijing ERP\backend\src\routes\products.ts:348:15 product_name → purchase_name
+  product_name: true,
+
+D:\shuijing ERP\backend\src\routes\products.ts:421:17 product_name → purchase_name
+  product_name: true,
+
+D:\shuijing ERP\backend\src\routes\products.ts:439:7 product_name → purchase_name
+  product_name: usage.purchase?.purchase_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:526:7 product_name → purchase_name
+  product_name: purchase.purchase_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:570:5 product_name → purchase_name
+  product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:580:8 product_name → purchase_name
+  if (!product_name || !materials || !Array.isArray(materials) || materials.length === 0) {
+
+D:\shuijing ERP\backend\src\routes\products.ts:688:20 product_name → purchase_name
+  productName: product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:698:15 product_name → purchase_name
+  name: product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:734:36 product_name → purchase_name
+  changeReason: `组合制作模式创建成品: ${product_name}`
+
+D:\shuijing ERP\backend\src\routes\products.ts:739:7 product_name → purchase_name
+  product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:778:42 product_name → purchase_name
+  if (!product.material_id || !product.product_name || !product.selling_price || product.selling_price <= 0) {
+
+D:\shuijing ERP\backend\src\routes\products.ts:874:36 product_name → purchase_name
+  productName: productData.product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:884:31 product_name → purchase_name
+  name: productData.product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:913:52 product_name → purchase_name
+  changeReason: `直接转化模式创建成品: ${productData.product_name}`
+
+D:\shuijing ERP\backend\src\routes\products.ts:921:11 product_name → purchase_name
+  product_name: productData.product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:921:37 product_name → purchase_name
+  product_name: productData.product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:77:28 product_type → purchase_type
+  p.purchase_type as product_type,
+
+D:\shuijing ERP\backend\src\routes\products.ts:39:5 product_types → purchase_types
+  product_types,
+
+D:\shuijing ERP\backend\src\routes\products.ts:56:9 product_types → purchase_types
+  if (product_types) {
+
+D:\shuijing ERP\backend\src\routes\products.ts:57:18 product_types → purchase_types
+  if (typeof product_types === 'string') {
+
+D:\shuijing ERP\backend\src\routes\products.ts:59:30 product_types → purchase_types
+  productTypesArray = (product_types as string).split(',').map(type => type.trim()).filter(Boolean)
+
+D:\shuijing ERP\backend\src\routes\products.ts:60:32 product_types → purchase_types
+  } else if (Array.isArray(product_types)) {
+
+D:\shuijing ERP\backend\src\routes\products.ts:61:29 product_types → purchase_types
+  productTypesArray = product_types as string[]
+
+D:\shuijing ERP\backend\src\routes\products.ts:688:7 productName → purchase_name
+  productName: product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:874:11 productName → purchase_name
+  productName: productData.product_name,
+
+D:\shuijing ERP\backend\src\routes\products.ts:825:15 productType → purchase_type
+  const productType = purchase.purchase_type as string;
+
+D:\shuijing ERP\backend\src\routes\products.ts:826:13 productType → purchase_type
+  if (productType === 'LOOSE_BEADS' || productType === 'BRACELET') {
+
+D:\shuijing ERP\backend\src\routes\products.ts:826:46 productType → purchase_type
+  if (productType === 'LOOSE_BEADS' || productType === 'BRACELET') {
+
+D:\shuijing ERP\backend\src\routes\products.ts:829:20 productType → purchase_type
+  } else if (productType === 'ACCESSORIES' || productType === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\backend\src\routes\products.ts:829:53 productType → purchase_type
+  } else if (productType === 'ACCESSORIES' || productType === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1512:11 product_name → purchase_name
+  product_name: usage.product?.name || "未知产品",
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1806:11 product_name → purchase_name
+  product_name: usage.product?.name || "未知产品",
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1862:11 product_name → purchase_name
+  product_name: existingPurchase.purchase_name,
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1915:7 product_name → purchase_name
+  product_name: purchase.purchase_name,
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:102:5 product_type → purchase_type
+  product_type: data.purchase_type,
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1081:62 product_type → purchase_type
+  console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.product_type));
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1097:62 product_type → purchase_type
+  console.log('产品类型序列:', purchases.slice(0, 15).map(p => p.product_type));
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1593:9 product_type → purchase_type
+  const product_type = existingPurchase.purchase_type
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1596:9 product_type → purchase_type
+  if (product_type === 'LOOSE_BEADS') {
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1601:16 product_type → purchase_type
+  } else if (product_type === 'BRACELET') {
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1607:16 product_type → purchase_type
+  } else if (product_type === 'ACCESSORIES' || product_type === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1607:50 product_type → purchase_type
+  } else if (product_type === 'ACCESSORIES' || product_type === 'FINISHED_MATERIAL') {
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1614:29 product_type → purchase_type
+  console.log('🔍 [派生字段计算] product_type:', product_type, 'price_per_bead:', updateData.price_per_bead, 'price_per_piece:', updateData.price_per_piece, 'unit_price:', updateData.unit_price)
+
+D:\shuijing ERP\backend\src\routes\purchases.ts:1614:45 product_type → purchase_type
+  console.log('🔍 [派生字段计算] product_type:', product_type, 'price_per_bead:', updateData.price_per_bead, 'price_per_piece:', updateData.price_per_piece, 'unit_price:', updateData.unit_price)
+
+D:\shuijing ERP\backend\src\routes\skus.ts:326:25 product_type → purchase_type
+  switch (purchase?.product_type) {
+
+D:\shuijing ERP\backend\src\routes\skus.ts:360:25 product_type → purchase_type
+  switch (purchase?.product_type) {
+
+D:\shuijing ERP\backend\src\routes\skus.ts:411:11 material_name → purchase_name
+  material_name: purchase?.purchase_name || '未知产品',
+
+D:\shuijing ERP\backend\src\services\ai.ts:65:5 product_name → purchase_name
+  product_name?: string
+
+D:\shuijing ERP\backend\src\services\ai.ts:66:5 product_type → purchase_type
+  product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+
+D:\shuijing ERP\backend\src\utils\operationLogger.ts:147:9 product_name → purchase_name
+  product_name: purchaseData.product_name,
+
+D:\shuijing ERP\backend\src\utils\operationLogger.ts:147:36 product_name → purchase_name
+  product_name: purchaseData.product_name,
+
+D:\shuijing ERP\backend\src\utils\operationLogger.ts:148:9 product_type → purchase_type
+  product_type: purchaseData.product_type,
+
+D:\shuijing ERP\backend\src\utils\operationLogger.ts:148:36 product_type → purchase_type
+  product_type: purchaseData.product_type,
+
+D:\shuijing ERP\backend\src\utils\skuUtils.d.ts:17:3 product_name → purchase_name
+  product_name: string;
+
+D:\shuijing ERP\backend\src\utils\skuUtils.d.ts:37:3 productName → purchase_name
+  productName: string;
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:17:7 productName → purchase_name
+  productName: usage.purchase.productName,
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:17:35 productName → purchase_name
+  productName: usage.purchase.productName,
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:25:23 productName → purchase_name
+  .sort((a, b) => a.productName.localeCompare(b.productName));
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:25:51 productName → purchase_name
+  .sort((a, b) => a.productName.localeCompare(b.productName));
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:51:20 productName → purchase_name
+  * @param {string} productName - 原成品名称
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:54:33 productName → purchase_name
+  export function generateSkuName(productName) {
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:55:10 productName → purchase_name
+  return productName.replace(/\s*#\d+\s*$/, '').trim();
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:62:27 productName → purchase_name
+  * @param {string} params.productName - 成品名称
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:71:3 productName → purchase_name
+  productName,
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:129:35 productName → purchase_name
+  const skuName = generateSkuName(productName);
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:18:7 productType → purchase_type
+  productType: usage.purchase.productType,
+
+D:\shuijing ERP\backend\src\utils\skuUtils.js:18:35 productType → purchase_type
+  productType: usage.purchase.productType,
+
+D:\shuijing ERP\backend\src\utils\validation.ts:107:3 product_type → purchase_type
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+
+D:\shuijing ERP\backend\src\utils\validation.ts:114:12 product_type → purchase_type
+  if (data.product_type === 'LOOSE_BEADS' || data.product_type === 'BRACELET') {
+
+D:\shuijing ERP\backend\src\utils\validation.ts:114:51 product_type → purchase_type
+  if (data.product_type === 'LOOSE_BEADS' || data.product_type === 'BRACELET') {
+
+D:\shuijing ERP\backend\src\utils\validation.ts:127:12 product_type → purchase_type
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED') {
+
+D:\shuijing ERP\backend\src\utils\validation.ts:127:51 product_type → purchase_type
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED') {
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:56:5 product_name → purchase_name
+  product_name: '紫水晶手串',
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:70:5 product_name → purchase_name
+  product_name: '玫瑰石英项链',
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:86:3 product_name → purchase_name
+  product_name: '紫水晶手串',
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:207:33 product_name → purchase_name
+  expect(response.body.data.product_name).toBe('紫水晶手串');
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:459:9 product_name → purchase_name
+  product_name: '<script>alert("xss")</script>'
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:471:11 product_name → purchase_name
+  product_name: 'alert("xss")' // HTML标签被清理
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:483:9 product_name → purchase_name
+  product_name: `产品${i + 1}`
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:57:5 product_type → purchase_type
+  product_type: '手串',
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:71:5 product_type → purchase_type
+  product_type: '项链',
+
+D:\shuijing ERP\backend\src\routes\__tests__\purchases.test.ts:87:3 product_type → purchase_type
+  product_type: '手串',
+
+D:\shuijing ERP\.trae\documents\01-系统架构与技术栈规范.md:289:3 productName → purchase_name
+  | productName  | product\_name                | string | 产品名称                                             |
+
+D:\shuijing ERP\.trae\documents\01-系统架构与技术栈规范.md:290:3 productType → purchase_type
+  | productType  | product\_type                | enum   | 产品类型（LOOSE\_BEADS/BRACELET/ACCESSORIES/FINISHED） |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:95:10 product_name → purchase_name
+  "product_name": "紫水晶散珠",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:128:3 product_name → purchase_name
+  | product_name | string | 是 | 产品名称 |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:170:3 product_name → purchase_name
+  | product_name | string | 是 | 成品名称 |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:209:4 product_name → purchase_name
+  "product_name": "紫水晶手串（销售成品）",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:259:10 product_name → purchase_name
+  "product_name": "紫水晶散珠",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:304:10 product_name → purchase_name
+  "product_name": "紫水晶散珠",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:358:10 product_name → purchase_name
+  "product_name": "紫水晶散珠",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:424:34 product_name → purchase_name
+  - 使用snake_case命名（如：purchase_code、product_name）
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:80:3 product_type → purchase_type
+  | product_type | string | 否 | 产品类型筛选 |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:96:10 product_type → purchase_type
+  "product_type": "LOOSE_BEADS",
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:129:3 product_type → purchase_type
+  | product_type | string | 是 | 产品类型 |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:346:3 product_type → purchase_type
+  | product_type | string | 否 | 产品类型筛选 |
+
+D:\shuijing ERP\.trae\documents\02-API接口统一规范文档.md:328:6 product_types → purchase_types
+  "product_types": {
+
+D:\shuijing ERP\.trae\documents\03-数据库设计与数据规则文档.md:23:63 product_name → purchase_name
+  - **严格使用snake_case命名**：所有字段都使用下划线分隔（如：user_name、purchase_code、product_name）
+
+D:\shuijing ERP\.trae\documents\03-数据库设计与数据规则文档.md:540:21 product_name → purchase_name
+  - 采购表：purchase_code、product_name、product_type、user_id
+
+D:\shuijing ERP\.trae\documents\03-数据库设计与数据规则文档.md:30:16 product_type → purchase_type
+  - **状态字段使用枚举**：product_type、quality、status等
+
+D:\shuijing ERP\.trae\documents\03-数据库设计与数据规则文档.md:540:34 product_type → purchase_type
+  - 采购表：purchase_code、product_name、product_type、user_id
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:77:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:95:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:110:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:123:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:155:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:169:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:182:42 product_name → purchase_name
+  type SortByPinyinFunction = <T extends { product_name: string }>(
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:224:42 product_name → purchase_name
+  export const sortByPinyin = <T extends { product_name: string }>(
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:228:49 product_name → purchase_name
+  const firstLetterA = getPinyinFirstLetter(a.product_name[0])
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:229:49 product_name → purchase_name
+  const firstLetterB = getPinyinFirstLetter(b.product_name[0])
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:235:14 product_name → purchase_name
+  return a.product_name.localeCompare(b.product_name)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:235:43 product_name → purchase_name
+  return a.product_name.localeCompare(b.product_name)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:241:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:253:49 product_name → purchase_name
+  const firstLetterA = getPinyinFirstLetter(a.product_name[0])
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:254:49 product_name → purchase_name
+  const firstLetterB = getPinyinFirstLetter(b.product_name[0])
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:260:14 product_name → purchase_name
+  return a.product_name.localeCompare(b.product_name)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:260:43 product_name → purchase_name
+  return a.product_name.localeCompare(b.product_name)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:287:7 product_name → purchase_name
+  product_name: material.product_name,
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:287:30 product_name → purchase_name
+  product_name: material.product_name,
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:493:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:572:31 product_name → purchase_name
+  alt={material.product_name}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:576:69 product_name → purchase_name
+  <h4 className="font-medium text-gray-900">{material.product_name}</h4>
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:664:36 product_name → purchase_name
+  alt={material?.product_name}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:668:74 product_name → purchase_name
+  <h4 className="font-medium text-gray-900">{material?.product_name}</h4>
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:709:42 product_name → purchase_name
+  value={product.product_name}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:710:68 product_name → purchase_name
+  onChange={(e) => onProductChange(index, 'product_name', e.target.value)}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1070:29 product_name → purchase_name
+  产品：{purchase?.product_name}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1132:88 product_name → purchase_name
+  const productNames = (response.data as any).used_by_products.map((p: any) => p.product_name).join('、')
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1316:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1672:3 product_name → purchase_name
+  product_name: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:78:3 product_type → purchase_type
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:96:3 product_type → purchase_type
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:111:3 product_type → purchase_type
+  product_type: 'ACCESSORIES'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:170:3 product_type → purchase_type
+  product_type: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:242:3 product_type → purchase_type
+  product_type: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:248:11 product_type → purchase_type
+  if (a.product_type !== b.product_type) {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:248:30 product_type → purchase_type
+  if (a.product_type !== b.product_type) {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:249:16 product_type → purchase_type
+  return a.product_type.localeCompare(b.product_type)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:249:45 product_type → purchase_type
+  return a.product_type.localeCompare(b.product_type)
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:283:34 product_type → purchase_type
+  .filter(material => material.product_type === 'ACCESSORIES')
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:288:7 product_type → purchase_type
+  product_type: 'ACCESSORIES' as const,
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:382:7 product_type → purchase_type
+  product_type: filters.productType,
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:577:64 product_type → purchase_type
+  <p className="text-sm text-gray-500">{material.product_type}</p>
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:583:27 product_type → purchase_type
+  {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:583:70 product_type → purchase_type
+  {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:597:29 product_type → purchase_type
+  max={material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:597:72 product_type → purchase_type
+  max={material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:605:26 product_type → purchase_type
+  material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? 'beads' : 'pieces'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:605:69 product_type → purchase_type
+  material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? 'beads' : 'pieces'
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:609:25 product_type → purchase_type
+  {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : '片'}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:609:68 product_type → purchase_type
+  {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : '片'}
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1700:16 product_type → purchase_type
+  if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1700:59 product_type → purchase_type
+  if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1703:23 product_type → purchase_type
+  } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:1703:66 product_type → purchase_type
+  } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:332:5 productName → purchase_name
+  productName: {
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:320:5 productType → purchase_type
+  productType: string
+
+D:\shuijing ERP\.trae\documents\04-React前端开发规范文档.md:382:29 productType → purchase_type
+  product_type: filters.productType,
+
+D:\shuijing ERP\.trae\documents\05-业务流程详细规范文档.md:36:12 product_type → purchase_type
+  | 产品类型筛选 | product_type | 精确匹配 | "LOOSE_BEADS" | 按产品类型筛选 |
+
+D:\shuijing ERP\.trae\documents\05-业务流程详细规范文档.md:56:5 product_type → purchase_type
+  product_type: searchParams.typeFilter,
+
+D:\shuijing ERP\.trae\documents\06-UI设计规范文档.md:102:25 product_name → purchase_name
+  Text(material.product_name)
+
+D:\shuijing ERP\.trae\documents\07-错误处理与测试规范文档.md:130:28 product_name → purchase_name
+  "submittedFields": ["product_name", "total_price"],
+
+D:\shuijing ERP\.trae\documents\07-错误处理与测试规范文档.md:131:28 product_name → purchase_name
+  "unchangedFields": ["product_name", "total_price"]
+
+D:\shuijing ERP\.trae\documents\07-错误处理与测试规范文档.md:162:12 productName → purchase_name
+  "productName": "南红老型珠（销售成品）#1",
+
+D:\shuijing ERP\.trae\documents\07-错误处理与测试规范文档.md:167:12 productName → purchase_name
+  "productName": "南红老型珠（销售成品）#2",
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:227:3 product_name → purchase_name
+  product_name: material.product_name + '（销售成品）',
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:227:26 product_name → purchase_name
+  product_name: material.product_name + '（销售成品）',
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:325:4 product_name → purchase_name
+  "product_name": "紫水晶组合手串",
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:346:8 product_name → purchase_name
+  "product_name": "8mm紫水晶手串（销售成品）",
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:275:18 product_type → purchase_type
+  if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:275:61 product_type → purchase_type
+  if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:280:25 product_type → purchase_type
+  } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:280:68 product_type → purchase_type
+  } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:866:3 productName → purchase_name
+  productName: string      // 产品名称
+
+D:\shuijing ERP\.trae\documents\10-文档总览与查询索引.md:867:3 productType → purchase_type
+  productType: string      // 产品类型
+

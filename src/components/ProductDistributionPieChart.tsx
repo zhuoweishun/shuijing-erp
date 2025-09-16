@@ -8,7 +8,7 @@ const MATERIAL_TYPES = [
   { key: 'LOOSE_BEADS', label: '散珠', color: '#3B82F6' },
   { key: 'BRACELET', label: '手串', color: '#10B981' },
   { key: 'ACCESSORIES', label: '饰品配件', color: '#F59E0B' },
-  { key: 'FINISHED', label: '成品', color: '#EF4444' }
+  { key: 'FINISHED_MATERIAL', label: '成品', color: '#EF4444' }
 ] as const
 
 type MaterialType = typeof MATERIAL_TYPES[number]['key']
@@ -29,6 +29,7 @@ interface ChartDataItem {
   value: number
   percentage: number
   color: string
+  [key: string]: any // 添加索引签名以兼容recharts
 }
 
 const Material_distribution_pie_chart: React.FC = () => {
@@ -161,7 +162,7 @@ const Material_distribution_pie_chart: React.FC = () => {
                   innerRadius={is_mobile ? 20 : 0}
                   fill="#8884d8"
                   dataKey="value"
-                  label={is_mobile ? false : ({ payload }) => `${payload.percentage}%`}
+                  label={is_mobile ? false : ({ payload }: any) => `${(payload as ChartDataItem).percentage.toFixed(1)}%`}
                   stroke="#fff"
                   strokeWidth={2}
                 >

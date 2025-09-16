@@ -212,3 +212,70 @@ export function format_purchase_code(code: string | number): string {
   const numericCode = typeof code === 'string' ? parseInt(code) : code
   return `P${String(numericCode).padStart(6, '0')}`
 }
+
+// 格式化价格
+export const formatPrice = (price: number | null | undefined): string => {
+  if (price === null || price === undefined || isNaN(price)) {
+    return '暂无价格'
+  }
+  return `¥${price.toFixed(2)}`
+}
+
+// 格式化采购日期显示（统一处理字段映射）
+export const formatPurchaseDate = (item: any): string => {
+  console.log('🔍 [采购日期格式化] 传入的item:', item, '类型:', typeof item)
+  
+  // 检查item是否为有效对象
+  if (!item || typeof item !== 'object') {
+    console.log('🔍 [采购日期格式化] item不是有效对象')
+    return '暂无日期'
+  }
+  
+  const dateValue = item.material_date || item.purchase_date
+  console.log('🔍 [采购日期格式化] 原始值:', dateValue, '类型:', typeof dateValue)
+  
+  if (!dateValue || dateValue === 'null' || dateValue === 'undefined' || dateValue === null || dateValue === undefined) {
+    console.log('🔍 [采购日期格式化] 日期为空或无效')
+    return '暂无日期'
+  }
+  
+  try {
+    let date: Date
+    
+    // 处理不同的日期格式
+    if (typeof dateValue === 'string') {
+      // 如果是字符串，尝试多种格式
+      if (dateValue.includes('T')) {
+        // ISO格式：2024-01-01T00:00:00.000Z
+        date = new Date(dateValue)
+      } else if (dateValue.includes('-')) {
+        // YYYY-MM-DD格式
+        date = new Date(dateValue + 'T00:00:00.000Z')
+      } else if (dateValue.includes('/')) {
+        // MM/DD/YYYY或DD/MM/YYYY格式
+        date = new Date(dateValue)
+      } else {
+        // 其他格式，直接尝试解析
+        date = new Date(dateValue)
+      }
+    } else if (typeof dateValue === 'number') {
+      // 时间戳
+      date = new Date(dateValue)
+    } else {
+      // 其他类型，直接尝试转换
+      date = new Date(dateValue)
+    }
+    
+    console.log('🔍 [采购日期格式化] Date对象:', date, '是否有效:', !isNaN(date.getTime()))
+    
+    if (isNaN(date.getTime())) {
+      console.warn('🔍 [采购日期格式化] 无法解析的日期格式:', dateValue)
+      return '日期格式错误'
+    }
+    
+    return date.toLocaleDateString('zh-CN')
+  } catch (error) {
+    console.error('🔍 [采购日期格式化] 日期解析错误:', error)
+    return '日期解析失败'
+  }
+}

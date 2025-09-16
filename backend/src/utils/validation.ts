@@ -59,7 +59,7 @@ export const weightSchema = z.number()
   }, '重量最多保留2位小数')
 
 // 产品类型枚举
-export const productTypeSchema = z.enum(['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'])
+export const productTypeSchema = z.enum(['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL'])
 
 // 单位类型枚举
 export const unitTypeSchema = z.enum(['PIECES', 'STRINGS', 'SLICES', 'ITEMS'])
@@ -124,7 +124,7 @@ export const validateProductTypeFields = (data: {
   }
   
   // 饰品配件和成品需要规格
-  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED') {
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED_MATERIAL') {
     if (data.specification === undefined) {
       errors.push('饰品配件和成品需要填写规格')
     } else {

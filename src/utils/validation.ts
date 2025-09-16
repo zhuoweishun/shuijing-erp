@@ -99,7 +99,7 @@ export const validate_range = (
 
 // 产品类型相关验证
 export const validate_product_type_fields = (data: {
-  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
   bead_diameter?: number
   specification?: number
 }): {
@@ -117,7 +117,7 @@ export const validate_product_type_fields = (data: {
   }
   
   // 饰品配件和成品需要规格
-  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED') {
+  if (data.product_type === 'ACCESSORIES' || data.product_type === 'FINISHED_MATERIAL') {
     const spec_validation = validate_specification(data.specification)
     if (!spec_validation.is_valid) {
       errors.push(spec_validation.error!)

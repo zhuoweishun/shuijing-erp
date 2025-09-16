@@ -248,7 +248,7 @@ export default function SkuDestroyForm({ sku, on_submit, onCancel, loading = fal
     const destroyQuantity = Math.max(1, formData.quantity || 1)
     
     console.log('🔍 [最大退回数量] 计算过程:', {
-      material_name: material.material_name,
+      purchase_name: material.purchase_name,
       quantity_used_beads: material.quantity_used_beads,
       quantity_used_pieces: material.quantity_used_pieces,
       singleSkuQuantity,
@@ -511,7 +511,7 @@ export default function SkuDestroyForm({ sku, on_submit, onCancel, loading = fal
                       />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900">
-                          {material.material_name}
+                          {material.purchase_name}
                         </div>
                         <div className="text-xs text-gray-500">
                           供应商: {material.supplier_name || '未知'}

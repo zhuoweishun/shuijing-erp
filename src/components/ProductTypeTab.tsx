@@ -2,7 +2,7 @@ import React from 'react'
 import { Package, Gem, Sparkles, Star } from 'lucide-react'
 
 // 产品类型枚举
-export type ProductType = 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+export type ProductType = 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
 export type UnitType = 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
 
 // Tab选项配置
@@ -37,7 +37,7 @@ const tabOptions: TabOption[] = [
     description: '按片计量的隔片等配件'
   },
   {
-    id: 'FINISHED',
+    id: 'FINISHED_MATERIAL',
     label: '成品',
     icon: Star,
     unit_type: 'ITEMS',

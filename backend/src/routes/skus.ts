@@ -339,7 +339,7 @@ router.get('/:id/traces', authenticateToken, asyncHandler(async (req, res) => {
           }
           break
         case 'ACCESSORIES':
-        case 'FINISHED':
+        case 'FINISHED_MATERIAL':
           correctPrice = parseFloat(purchase.price_per_piece?.toString() || '0')
           // 如果pricePerPiece为空，尝试其他价格字段
           if (correctPrice === 0) {
@@ -368,7 +368,7 @@ router.get('/:id/traces', authenticateToken, asyncHandler(async (req, res) => {
           }
           break
         case 'ACCESSORIES':
-        case 'FINISHED':
+        case 'FINISHED_MATERIAL':
           // 饰品配件和成品优先使用specification，备选beadDiameter
           if (purchase?.specification) {
             correctSpecification = `${purchase.specification}mm`
@@ -392,8 +392,8 @@ router.get('/:id/traces', authenticateToken, asyncHandler(async (req, res) => {
       const traceRecord = {
         id: `trace-${materialUsage.id}`,
         type: 'material',
-        name: `${purchase?.product_name || '未知产品'}采购`,
-        description: `采购${purchase?.product_name || '未知产品'}原材料用于制作`,
+        name: `${purchase?.purchase_name || '未知产品'}采购`,
+        description: `采购${purchase?.purchase_name || '未知产品'}原材料用于制作`,
         timestamp: purchase?.purchase_date || new Date(),
         operator: operatorName,
         location: '采购部',
@@ -408,7 +408,7 @@ router.get('/:id/traces', authenticateToken, asyncHandler(async (req, res) => {
         },
         materials: [{
           material_id: materialUsage.id,
-          material_name: purchase?.product_name || '未知产品',
+          material_name: purchase?.purchase_name || '未知产品',
           quantity_used: quantityUsed,
           unit: unit,
           cost_per_unit: materialUsage.unit_cost ? parseFloat(materialUsage.unit_cost.toString()) : correctPrice,

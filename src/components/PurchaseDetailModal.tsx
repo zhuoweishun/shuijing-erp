@@ -26,14 +26,17 @@ interface PurchaseDetailModalProps {
   onSave?: () => void
 }
 
-export default function PurchaseDetailModal({ 
-  is_open, 
-  onClose, 
-  purchase_id, 
+export default function PurchaseDetailModal({
+  is_open,
+  onClose,
+  purchase_id,
   edit_mode = false,
+  // onEdit,
   onDelete,
   onSave
 }: PurchaseDetailModalProps) {
+  // 基本调试信息
+  console.log('🔍 [PurchaseDetailModal] is_open:', is_open, 'purchase_id:', purchase_id)
   const { user } = useAuth()
   // 使用user变量避免未使用警告
   const canEdit = user?.role === 'BOSS'
@@ -84,11 +87,19 @@ export default function PurchaseDetailModal({
   }
 
   // 获取采购详情
-  const fetchPurchaseDetail = async () => {if (!purchase_id) return
+  const fetchPurchaseDetail = async (isRefresh = false) => {
+    console.log('📥 PurchaseDetailModal获取采购详情 - purchase_id:', purchase_id, 'type:', typeof purchase_id)
+    if (!purchase_id) {
+      console.log('❌ purchase_id为空，无法获取采购详情')
+      return
+    }
 
     try {
       set_loading(true)
-      setError(null)
+      // 只在首次加载时清空错误，刷新时保持现有状态
+      if (!isRefresh) {
+        setError(null)
+      }
       
       const response = await purchase_api.get(purchase_id)
       console.log('采购详情API响应:', response)
@@ -121,13 +132,25 @@ export default function PurchaseDetailModal({
         
         setPurchase(purchaseData)
         setSelectedImageIndex(0)
+        // 成功获取数据后清空错误
+        setError(null)
       } else {
-        setError(response.message || '获取采购详情失败')
+        // 只在首次加载时设置错误，刷新时不影响现有显示
+        if (!isRefresh) {
+          setError(response.message || '获取采购详情失败')
+        } else {
+          console.warn('刷新采购详情失败:', response.message)
+        }
       }
     } catch (error) {
       console.error('获取采购详情失败:', error)
-      setError(error instanceof Error ? error.message : '获取采购详情失败')
-      toast.error('获取采购详情失败')
+      // 只在首次加载时设置错误和显示toast
+      if (!isRefresh) {
+        setError(error instanceof Error ? error.message : '获取采购详情失败')
+        toast.error('获取采购详情失败')
+      } else {
+        console.warn('刷新采购详情失败:', error)
+      }
     } finally {set_loading(false)
     }
   }
@@ -151,7 +174,7 @@ export default function PurchaseDetailModal({
   useEffect(() => {
     if (purchase && isEditMode) {
       const baseData = {
-        material_name: purchase.material_name || '',
+        purchase_name: purchase.purchase_name || '',
         quality: (purchase.quality as 'AA' | 'A' | 'AB' | 'B' | 'C') || undefined,
         price_per_gram: purchase.price_per_gram || 0,
         total_price: purchase.total_price || 0,
@@ -161,7 +184,7 @@ export default function PurchaseDetailModal({
       }
       
       // 根据产品类型添加相应字段
-      if (purchase.material_type === 'BRACELET') {
+      if (purchase.purchase_type === 'BRACELET') {
         // 手串类型：使用quantity, bead_diameter, beads_per_string, total_beads
         setEditData({
           ...baseData,
@@ -177,9 +200,9 @@ export default function PurchaseDetailModal({
           piece_count: purchase.piece_count || undefined
         }
         
-        if (purchase.material_type === 'LOOSE_BEADS') {
+        if (purchase.purchase_type === 'LOOSE_BEADS') {
           editDataObj.bead_diameter = purchase.bead_diameter || undefined
-        } else if (purchase.material_type === 'ACCESSORIES' || purchase.material_type === 'FINISHED') {
+        } else if (purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') {
           editDataObj.specification = purchase.specification || undefined
         }
         
@@ -202,7 +225,7 @@ export default function PurchaseDetailModal({
       setIsEditMode(true)
       if (purchase) {
         const baseData = {
-          material_name: purchase.material_name || '',
+          purchase_name: purchase.purchase_name || '',
           quality: (purchase.quality as 'AA' | 'A' | 'AB' | 'B' | 'C') || undefined,
           price_per_gram: purchase.price_per_gram || 0,
           total_price: purchase.total_price || 0,
@@ -212,7 +235,7 @@ export default function PurchaseDetailModal({
         }
         
         // 根据产品类型添加相应字段
-        if (purchase.material_type === 'BRACELET') {
+        if (purchase.purchase_type === 'BRACELET') {
           // 手串类型：使用quantity, bead_diameter, beads_per_string, total_beads
           setEditData({
             ...baseData,
@@ -228,9 +251,9 @@ export default function PurchaseDetailModal({
             piece_count: purchase.piece_count || undefined
           }
           
-          if (purchase.material_type === 'LOOSE_BEADS') {
+          if (purchase.purchase_type === 'LOOSE_BEADS') {
             editDataObj.bead_diameter = purchase.bead_diameter || undefined
-          } else if (purchase.material_type === 'ACCESSORIES' || purchase.material_type === 'FINISHED') {
+          } else if (purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') {
             editDataObj.specification = purchase.specification || undefined
           }
           
@@ -462,8 +485,8 @@ export default function PurchaseDetailModal({
       const updateData: any = {}
       
       // 检查每个字段是否有变化（使用snake_case格式发送给后端）
-      if (editData.material_name !== undefined && editData.material_name !== purchase.material_name) {
-        updateData.material_name = editData.material_name
+      if (editData.purchase_name !== undefined && editData.purchase_name !== purchase.purchase_name) {
+        updateData.purchase_name = editData.purchase_name
       }
       if (editData.quantity !== undefined && editData.quantity !== purchase.quantity) {
         updateData.quantity = editData.quantity
@@ -526,7 +549,7 @@ export default function PurchaseDetailModal({
       
       console.log('🔍 [前端调试] editData内容:', editData)
       console.log('🔍 [前端调试] purchase原始数据:', {
-        material_name: purchase.material_name,
+        purchase_name: purchase.purchase_name,
         quantity: purchase.quantity,
         piece_count: purchase.piece_count,
         bead_diameter: purchase.bead_diameter,
@@ -556,8 +579,13 @@ export default function PurchaseDetailModal({
         setEditData({})
         setSuggestions({})
         
-        // 重新获取数据
-        await fetchPurchaseDetail()
+        // 重新获取数据，但不让错误影响用户体验
+        try {
+          await fetchPurchaseDetail(true) // 传入isRefresh=true
+        } catch (fetchError) {
+          console.warn('保存成功但重新获取数据失败:', fetchError)
+          // 不显示错误，因为保存已经成功了
+        }
         
         // 通知父组件刷新列表
         if (onSave) {
@@ -795,7 +823,16 @@ export default function PurchaseDetailModal({
     )
   }
 
-  if (!purchase) return null
+  // 渲染条件检查
+  if (!is_open) {
+    return null
+  }
+
+  if (!purchase) {
+    return null
+  }
+  
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -899,7 +936,7 @@ export default function PurchaseDetailModal({
                         {purchase.photos && purchase.photos.length > 0 ? (
                           <img
                             src={purchase.photos[selectedImageIndex]}
-                            alt={`${purchase.material_name} - 图片 ${selectedImageIndex + 1}`}
+                            alt={`${purchase.purchase_name} - 图片 ${selectedImageIndex + 1}`}
                             className="w-auto h-auto max-w-full max-h-full object-contain rounded-lg border border-gray-200 shadow-sm bg-gray-50"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement
@@ -926,7 +963,7 @@ export default function PurchaseDetailModal({
                           <div className="flex items-center justify-between">
                             <span className="text-gray-500 text-xs">产品</span>
                             <span className="font-medium text-gray-900 truncate text-xs max-w-20">
-                              {renderEditField('material_name', purchase.material_name)}
+                              {renderEditField('purchase_name', purchase.purchase_name)}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
@@ -1100,7 +1137,7 @@ export default function PurchaseDetailModal({
                           <div className="relative">
                             <img
                               src={purchase.photos[selectedImageIndex]}
-                              alt={`${purchase.material_name} - 图片 ${selectedImageIndex + 1}`}
+                              alt={`${purchase.purchase_name} - 图片 ${selectedImageIndex + 1}`}
                               className="w-full h-auto object-contain rounded-xl border border-gray-200 shadow-sm bg-gray-50"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement
@@ -1159,16 +1196,16 @@ export default function PurchaseDetailModal({
                           <div className="flex justify-between items-center">
                             <span className="text-gray-500">产品名称</span>
                             <div className="font-medium text-gray-900">
-                              {renderEditField('material_name', purchase.material_name)}
+                              {renderEditField('purchase_name', purchase.purchase_name)}
                             </div>
                           </div>
                           
                           {/* 根据产品类型显示数量字段 */}
-                          {(purchase.material_type === 'LOOSE_BEADS' || purchase.material_type === 'ACCESSORIES' || purchase.material_type === 'FINISHED') && (
+                          {(purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') && (
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">
-                                {purchase.material_type === 'LOOSE_BEADS' ? '颗数' :
-                                 purchase.material_type === 'ACCESSORIES' ? '片数' : '件数'}
+                                {purchase.purchase_type === 'LOOSE_BEADS' ? '颗数' :
+                                 purchase.purchase_type === 'ACCESSORIES' ? '片数' : '件数'}
                               </span>
                               <div className="font-medium text-gray-900">
                                 {renderEditField('piece_count', purchase.piece_count, 'number')}
@@ -1176,7 +1213,7 @@ export default function PurchaseDetailModal({
                             </div>
                           )}
                           
-                          {purchase.material_type === 'BRACELET' && (
+                          {purchase.purchase_type === 'BRACELET' && (
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">串数</span>
                               <div className="font-medium text-gray-900">
@@ -1186,7 +1223,7 @@ export default function PurchaseDetailModal({
                           )}
                           
                           {/* 根据产品类型显示规格/直径字段 */}
-                          {(purchase.material_type === 'LOOSE_BEADS' || purchase.material_type === 'BRACELET') && (
+                          {(purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET') && (
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">直径</span>
                               <div className="font-medium text-gray-900">
@@ -1195,7 +1232,7 @@ export default function PurchaseDetailModal({
                             </div>
                           )}
                           
-                          {(purchase.material_type === 'ACCESSORIES' || purchase.material_type === 'FINISHED') && (
+                          {(purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') && (
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">规格</span>
                               <div className="font-medium text-gray-900">
@@ -1281,7 +1318,7 @@ export default function PurchaseDetailModal({
                         {/* 预估数值区域 - 根据产品类型显示 */}
                         <div className="pt-2 border-t border-gray-200">
                           {/* 手串类型显示传统的每串颗数、总计颗数、每颗价格 */}
-                          {purchase.material_type === 'BRACELET' && (
+                          {purchase.purchase_type === 'BRACELET' && (
                             <div className="grid grid-cols-3 gap-1.5">
                               <div className="text-center p-1.5 bg-green-50 rounded-md border border-green-100">
                                 <p className="text-green-600 text-xs font-medium">每串</p>
@@ -1365,11 +1402,11 @@ export default function PurchaseDetailModal({
 
                           
                           {/* 饰品和成品类型显示单价 */}
-                          {(purchase.material_type === 'ACCESSORIES' || purchase.material_type === 'FINISHED') && (
+                          {(purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') && (
                             <div className="grid grid-cols-1 gap-1.5">
                               <div className="text-center p-1.5 bg-blue-50 rounded-md border border-blue-100">
                                 <p className="text-blue-600 text-xs font-medium">
-                                  {purchase.material_type === 'ACCESSORIES' ? '每片价格' : '每件价格'}
+                                  {purchase.purchase_type === 'ACCESSORIES' ? '每片价格' : '每件价格'}
                                 </p>
                                 <p className="font-semibold text-blue-900 text-xs">
                                   {user?.role === 'EMPLOYEE' ? '-' : (
@@ -1563,7 +1600,7 @@ export default function PurchaseDetailModal({
                 </p>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                   <p className="text-sm text-red-800 font-medium">
-                    产品：{purchase?.material_name}
+                    产品：{purchase?.purchase_name}
                   </p>
                   <p className="text-sm text-red-600">
                     采购编号：{purchase ? (purchase.purchase_code || format_purchase_code(purchase.id)) : ''}

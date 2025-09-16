@@ -10,7 +10,7 @@ interface TotalPriceInputProps {
   error?: string
   placeholder?: string
   // 动态显示相关的props
-  selected_material_type: string
+  selected_purchase_type: string
   unit_price: number
   total_beads: number
   price_per_bead: number
@@ -24,7 +24,7 @@ export function TotalPriceInput({
   onChange,
   error,
   placeholder,
-  selected_material_type,
+  selected_purchase_type,
   unit_price,
   total_beads,
   price_per_bead,
@@ -68,21 +68,21 @@ export function TotalPriceInput({
       {total_price && unit_price > 0 && (
         <div className={`mt-2 space-y-1 ${isMobile ? 'text-mobile-small' : 'text-sm'} text-gray-500`}>
           <p>
-            {selected_material_type === 'LOOSE_BEADS' && `每颗约 ${price_per_bead.toFixed(4)} 元`}
-            {selected_material_type === 'BRACELET' && `每条约 ${unit_price.toFixed(2)} 元`}
-            {selected_material_type === 'ACCESSORIES' && `每片约 ${unit_price.toFixed(4)} 元`}
-            {selected_material_type === 'FINISHED' && `每件约 ${unit_price.toFixed(2)} 元`}
+            {selected_purchase_type === 'LOOSE_BEADS' && `每颗约 ${price_per_bead.toFixed(4)} 元`}
+            {selected_purchase_type === 'BRACELET' && `每条约 ${unit_price.toFixed(2)} 元`}
+            {selected_purchase_type === 'ACCESSORIES' && `每片约 ${unit_price.toFixed(4)} 元`}
+            {selected_purchase_type === 'FINISHED_MATERIAL' && `每件约 ${unit_price.toFixed(2)} 元`}
           </p>
           
           {/* 手串额外显示每颗价格和总颗数 */}
-          {selected_material_type === 'BRACELET' && total_beads > 0 && (
+          {selected_purchase_type === 'BRACELET' && total_beads > 0 && (
             <p>
               总计约 {total_beads} 颗，每颗约 {price_per_bead.toFixed(4)} 元
             </p>
           )}
           
           {/* 散珠显示每颗价格 */}
-          {selected_material_type === 'LOOSE_BEADS' && price_per_bead > 0 && (
+          {selected_purchase_type === 'LOOSE_BEADS' && price_per_bead > 0 && (
             <p>
               每颗价格：{price_per_bead.toFixed(4)} 元
             </p>

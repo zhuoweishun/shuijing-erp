@@ -38,7 +38,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     
     // 从数据库获取用户信息
     const user = await prisma.user.findUnique({
-      where: { id: decoded.user_id },
+      where: { id: decoded.userId || decoded.user_id },
       select: {
         id: true,
         user_name: true,

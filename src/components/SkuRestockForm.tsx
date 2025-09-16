@@ -231,7 +231,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
                     <tbody>
                       {restockInfo.required_materials.map((material, index) => (
                         <tr key={index} className="border-t">
-                          <td className="px-4 py-2 font-medium">{material.material_name}</td>
+                          <td className="px-4 py-2 font-medium">{material.purchase_name}</td>
                           <td className="px-4 py-2">{material.supplier_name}</td>
                           <td className="px-4 py-2">{material.purchase_code}</td>
                           <td className="px-4 py-2 text-right">

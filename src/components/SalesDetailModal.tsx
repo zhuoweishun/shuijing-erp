@@ -34,7 +34,7 @@ export default function SalesDetailModal({
   
   // 编辑表单状态
   const [editForm, setEditForm] = useState({
-    material_name: '',
+    purchase_name: '',
     description: '',
     specification: '',
     selling_price: '',
@@ -67,7 +67,7 @@ export default function SalesDetailModal({
         
         // 初始化编辑表单
         setEditForm({
-          material_name: productData.material_name || '',
+          purchase_name: productData.purchase_name || '',
           description: productData.description || '',
           specification: productData.specification || '',
           selling_price: productData.selling_price?.toString() || '',
@@ -90,7 +90,7 @@ export default function SalesDetailModal({
       setSaving(true)
       
       const updateData: any = {
-        material_name: editForm.material_name,
+        purchase_name: editForm.purchase_name,
         description: editForm.description,
         specification: editForm.specification,
         status: editForm.status
@@ -337,12 +337,12 @@ export default function SalesDetailModal({
                           {is_editing ? (
                             <input
                               type="text"
-                              value={editForm.material_name}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, material_name: e.target.value }))}
+                              value={editForm.purchase_name}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, purchase_name: e.target.value }))}
                               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
                             />
                           ) : (
-                            <p className="text-sm text-gray-900 mt-1">{product.material_name}</p>
+                            <p className="text-sm text-gray-900 mt-1">{product.purchase_name}</p>
                           )}
                         </div>
                       </div>
@@ -505,9 +505,9 @@ export default function SalesDetailModal({
                             <div key={index} className="relative">
                               <img
                                 src={image_url}
-                                alt={`${product.material_name} - 图片 ${index + 1}`}
+                                alt={`${product.purchase_name} - 图片 ${index + 1}`}
                                 className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => open_image_preview(image_url, `${product.material_name} - 图片 ${index + 1}`)}
+                                onClick={() => open_image_preview(image_url, `${product.purchase_name} - 图片 ${index + 1}`)}
                               />
                             </div>
                           )

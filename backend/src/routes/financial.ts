@@ -113,7 +113,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
       id: `purchase_${purchase.id}`,
       record_type: 'EXPENSE',
       amount: purchase.total_price,
-      description: `采购支出 - ${purchase.product_name}`,
+      description: `采购支出 - ${purchase.purchase_name}`,
       reference_type: 'PURCHASE',
       reference_id: purchase.id,
       category: '采购支出',
@@ -330,7 +330,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
             specificationDisplay = `规格: ${purchase.specification}mm`;
           }
           break;
-        case 'FINISHED':
+        case 'FINISHED_MATERIAL':
           // 成品使用specification字段
           if (purchase.specification) {
             specificationDisplay = `尺寸: ${purchase.specification}mm`;
@@ -373,7 +373,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
             quantityDisplay = `数量: ${qty}片`;
           }
           break;
-        case 'FINISHED':
+        case 'FINISHED_MATERIAL':
           // 成品使用piece_count字段
           qty = purchase?.piece_count;
           if (qty) {
@@ -405,7 +405,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
         type: 'expense' as const,
         category: 'purchase' as const,
         amount: Number(purchase.total_price || 0),
-        description: `采购支出 - ${purchase.product_name}`,
+        description: `采购支出 - ${purchase.purchase_name}`,
         details: detailsParts.join(', '),
         reference_id: purchase.id,
         reference_type: 'PURCHASE' as const,
@@ -1263,8 +1263,8 @@ router.get('/inventory/status', authenticateToken, asyncHandler(async (req, res)
     },
     select: {
       id: true,
-      product_name: true,
-      // total_price: true, // 字段不存在，已注释
+      purchase_name: true, // 修复：使用正确的字段名
+      total_price: true, // 修复：恢复total_price字段
       quantity: true,
       piece_count: true,
       created_at: true,
@@ -1278,8 +1278,8 @@ router.get('/inventory/status', authenticateToken, asyncHandler(async (req, res)
   let staleMaterialCount = 0
   
   material_inventory.forEach((material: any) => {
-    // total_price字段已移除，使用0作为默认值
-    const cost = 0 // Number(material.total_price || 0)
+    // 修复：使用正确的total_price字段
+    const cost = Number(material.total_price || 0)
     totalMaterialCost += cost
     
     // 判断是否为滞销（基于最后更新时间）
@@ -1303,7 +1303,7 @@ router.get('/inventory/status', authenticateToken, asyncHandler(async (req, res)
       sku_code: true,
       sku_name: true,
       available_quantity: true,
-      // total_price: true, // 字段不存在，已注释
+      total_value: true, // 修复：使用正确的字段名total_value
       material_cost: true,
       labor_cost: true,
       craft_cost: true,

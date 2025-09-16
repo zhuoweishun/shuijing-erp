@@ -11,14 +11,14 @@ import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
 // 默认价格类型
-const price_type = "sell_price";
+// const price_type = "sell_price"; // 暂时注释掉未使用的变量
 
 // 产品类型映射
 const PRODUCT_TYPE_MAP = {
   'LOOSE_BEADS': '散珠',
   'BRACELET': '手串', 
   'ACCESSORIES': '饰品配件',
-  'FINISHED': '成品',
+  'FINISHED_MATERIAL': '成品',
   'ALL': '全部类型'
 }
 
@@ -85,8 +85,8 @@ export default function ProductPriceDistributionChart() {
   const fetchPriceDistribution = async () => {set_loading(true)
     try {
       const response = await inventory_api.get_price_distribution({
-        material_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' | 'ALL',
-        price_type: price_type as 'unit_price' | 'total_price',
+        material_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL',
+        price_type: priceType as 'unit_price' | 'total_price',
       })
       
       console.log('🔍 [价格分布] API响应:', response)
@@ -292,10 +292,10 @@ export default function ProductPriceDistributionChart() {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={is_mobile ? false : ({ name, value, percent }) => 
+              label={is_mobile ? false : ({ name, value, percent }: any) => 
                 priceType === 'unit_price' 
-                  ? `${name}: ${value}个 (${((percent || 0) * 100).toFixed(1)}%)`
-                  : `${name}: ${format_price(value)} (${((percent || 0) * 100).toFixed(1)}%)`
+                  ? `${name}: ${value}个 (${(((percent as number) || 0) * 100).toFixed(1)}%)`
+                  : `${name}: ${format_price(value as number)} (${(((percent as number) || 0) * 100).toFixed(1)}%)`
               }
               outerRadius={is_mobile ? 70 : 80}
               innerRadius={is_mobile ? 20 : 0}

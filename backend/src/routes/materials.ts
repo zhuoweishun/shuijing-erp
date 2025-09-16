@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 
 // 验证schemas
 const createMaterialSchema = z.object({
-  material_name: z.string().min(1, '原材料名称不能为空'),
-  product_type: z.enum(['BRACELET', 'FINISHED']),
+  purchase_name: z.string().min(1, '原材料名称不能为空'),
+  purchase_type: z.enum(['BRACELET', 'FINISHED_MATERIAL']),
   specification: z.string().optional(),
   unit: z.string().min(1, '计量单位不能为空'),
   total_quantity: z.number().int().min(0, '总数量不能为负数'),
@@ -23,7 +23,7 @@ const createMaterialSchema = z.object({
 });
 
 const updateMaterialSchema = z.object({
-  material_name: z.string().min(1, '原材料名称不能为空').optional(),
+  purchase_name: z.string().min(1, '原材料名称不能为空').optional(),
   specification: z.string().optional(),
   unit: z.string().min(1, '计量单位不能为空').optional(),
   available_quantity: z.number().int().min(0, '可用数量不能为负数').optional(),
@@ -39,7 +39,7 @@ const querySchema = z.object({
   page: z.string().optional().transform(val => val ? parseInt(val) : 1),
   limit: z.string().optional().transform(val => val ? parseInt(val) : 20),
   search: z.string().optional(),
-  product_type: z.enum(['BRACELET', 'FINISHED']).optional(),
+  purchase_type: z.enum(['BRACELET', 'FINISHED_MATERIAL']).optional(),
   status: z.enum(['ACTIVE', 'USED']).optional(),
   purchase_id: z.string().optional()
 });
@@ -64,7 +64,7 @@ router.get('/', authenticateToken, async (req, res) => {
     
     if (search) {
       where.OR = [
-        { material_name: { contains: search } },
+        { purchase_name: { contains: search } },
         { id: { contains: search } },
         { specification: { contains: search } },
         { notes: { contains: search } }
@@ -72,7 +72,7 @@ router.get('/', authenticateToken, async (req, res) => {
     }
     
     if (product_type) {
-      where.product_type = product_type;
+      where.purchase_type = product_type;
     }
     
     if (status) {
@@ -238,8 +238,8 @@ router.post('/', authenticateToken, async (req, res) => {
       data: {
         id: material_code!,
         purchase_code: material_code!,
-        product_name: data.material_name,
-        product_type: data.product_type,
+        purchase_name: data.purchase_name,
+        purchase_type: data.purchase_type,
         specification: data.specification,
         quantity: data.total_quantity,
         unit_price: data.unit_cost,
@@ -415,8 +415,8 @@ router.get('/stats/overview', authenticateToken, async (_req, res) => {
       prisma.purchase.count(),
       prisma.purchase.count({ where: { status: 'ACTIVE' } }),
       prisma.purchase.count({ where: { status: 'USED' } }),
-      prisma.purchase.count({ where: { product_type: 'BRACELET' } }),
-      prisma.purchase.count({ where: { product_type: 'FINISHED' } })
+      prisma.purchase.count({ where: { purchase_type: 'BRACELET' } }),
+      prisma.purchase.count({ where: { purchase_type: 'FINISHED_MATERIAL' } })
     ]);
 
     const total_value = await prisma.purchase.aggregate({

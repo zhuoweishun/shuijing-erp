@@ -70,21 +70,32 @@ interface FinishedProductGridProps {
 
 **采购相关类型（已更新）：**
 ```typescript
-// 采购记录类型
+// 采购记录类型（已修复）
 interface Purchase {
   id: string
-  purchase_code: string // **新增：采购编号字段**
-  product_name: string
-  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+  purchase_code: string // 采购编号字段
+  purchase_name: string // 修复：统一使用purchase_name
+  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 修复：统一类型名称
   supplier: {
     id: string
     name: string
   }
   quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
   total_price: number
+  price_per_gram?: number // 克价（散珠/手串专用）
+  weight?: number // 重量（散珠/手串专用）
+  bead_diameter?: number // 珠子直径（散珠/手串专用）
+  beads_per_string?: number // 每串颗数（手串专用）
+  piece_count?: number // 片数/件数（配件/成品专用）
+  total_beads?: number // 总颗数（自动计算）
+  price_per_bead?: number // 每颗价格（自动计算）
+  price_per_piece?: number // 每片/件价格（自动计算）
+  min_stock_alert?: number // 最低预警颗数
   photos: string[]
   purchase_date: string
   remaining_quantity: number
+  natural_language_input?: string // 自然语言录入
+  ai_recognition_result?: any // AI识别结果
   created_at: string
 }
 
@@ -297,44 +308,361 @@ const extractAccessoryProducts = (materials: AvailableMaterial[]): AccessoryProd
 }
 ```
 
-## 三、采购列表搜索功能规范（新增）
+## 三、采购录入表单组件规范（重要更新）
 
-### 3.1 采购编号搜索组件
+### 3.1 PurchaseEntry组件结构
 
-**PurchaseList组件状态管理：**
+**组件状态管理：**
+```typescript
+interface PurchaseEntryState {
+  // 基础信息
+  purchase_name: string
+  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+  supplier_id: string
+  quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  total_price: number
+  notes: string
+  
+  // 散珠/手串专用字段
+  price_per_gram: number
+  weight: number
+  bead_diameter: number
+  beads_per_string: number // 手串专用
+  
+  // 配件/成品专用字段
+  piece_count: number
+  
+  // 可选字段
+  min_stock_alert: number
+  natural_language_input: string
+  
+  // 图片相关
+  photos: string[]
+  file_data_list: File[]
+  
+  // UI状态
+  uploading: boolean
+  ai_parsing: boolean
+  submitting: boolean
+  
+  // 供应商相关
+  suppliers: Supplier[]
+  supplier_input: string
+  show_supplier_dropdown: boolean
+}
+```
+
+**表单验证规则：**
+```typescript
+const validatePurchaseForm = (data: PurchaseEntryState): ValidationResult => {
+  const errors: string[] = []
+  
+  // 基础验证
+  if (!data.purchase_name.trim()) {
+    errors.push('采购名称不能为空')
+  }
+  
+  if (!data.supplier_id) {
+    errors.push('请选择供应商')
+  }
+  
+  if (data.total_price <= 0) {
+    errors.push('总价格必须大于0')
+  }
+  
+  if (data.photos.length === 0) {
+    errors.push('请至少上传一张图片')
+  }
+  
+  // 按类型验证
+  if (data.purchase_type === 'LOOSE_BEADS' || data.purchase_type === 'BRACELET') {
+    if (data.price_per_gram <= 0) {
+      errors.push('克价必须大于0')
+    }
+    if (data.weight <= 0) {
+      errors.push('重量必须大于0')
+    }
+    if (data.bead_diameter <= 0) {
+      errors.push('珠子直径必须大于0')
+    }
+    
+    // 手串额外验证
+    if (data.purchase_type === 'BRACELET' && data.beads_per_string <= 0) {
+      errors.push('每串颗数必须大于0')
+    }
+  }
+  
+  if (data.purchase_type === 'ACCESSORIES' || data.purchase_type === 'FINISHED_MATERIAL') {
+    if (data.piece_count <= 0) {
+      errors.push('片数/件数必须大于0')
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+```
+
+### 3.2 图片上传组件规范
+
+**ImageUpload组件：**
+```typescript
+interface ImageUploadProps {
+  photos: string[]
+  file_data_list: File[]
+  uploading: boolean
+  onPhotosChange: (photos: string[]) => void
+  onFileDataChange: (files: File[]) => void
+  onUploadStart: () => void
+  onUploadEnd: () => void
+  maxFiles?: number // 默认5
+  maxFileSize?: number // 默认10MB
+}
+
+// 使用react-dropzone实现拖拽上传
+const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  accept: {
+    'image/*': ['.jpeg', '.jpg', '.png', '.webp']
+  },
+  maxFiles: maxFiles || 5,
+  maxSize: maxFileSize || 10 * 1024 * 1024,
+  onDrop: handleFilesDrop,
+  onDropRejected: handleDropRejected
+})
+```
+
+**图片处理逻辑：**
+```typescript
+const handleFilesDrop = async (acceptedFiles: File[]) => {
+  onUploadStart()
+  
+  try {
+    const formData = new FormData()
+    acceptedFiles.forEach(file => {
+      formData.append('images', file)
+    })
+    
+    const response = await uploadApi.uploadPurchaseImages(formData)
+    
+    if (response.success) {
+      const newPhotos = response.data.uploaded_files.map(file => file.url)
+      onPhotosChange([...photos, ...newPhotos])
+      onFileDataChange([...file_data_list, ...acceptedFiles])
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    // 显示错误提示
+  } finally {
+    onUploadEnd()
+  }
+}
+```
+
+### 3.3 供应商选择组件规范
+
+**SupplierSelect组件：**
+```typescript
+interface SupplierSelectProps {
+  suppliers: Supplier[]
+  selectedSupplierId: string
+  inputValue: string
+  showDropdown: boolean
+  onSupplierSelect: (supplierId: string) => void
+  onInputChange: (value: string) => void
+  onDropdownToggle: (show: boolean) => void
+  allowCreate?: boolean // 是否允许创建新供应商
+}
+
+// 供应商筛选逻辑
+const filteredSuppliers = suppliers.filter(supplier =>
+  supplier.name.toLowerCase().includes(inputValue.toLowerCase())
+)
+
+// 拼音排序
+const sortedSuppliers = sortByPinyin(filteredSuppliers)
+```
+
+## 四、采购列表组件规范（完整更新版）
+
+### 4.1 PurchaseList组件状态管理
+
+**完整状态接口：**
 ```typescript
 interface PurchaseListState {
   purchases: Purchase[]
   loading: boolean
   error: string | null
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
+  
+  // 分页状态
+  current_page: number
+  items_per_page: number
+  total_items: number
+  total_pages: number
+  
+  // 搜索和筛选状态
+  search_term: string
+  purchase_code_search: string
+  selected_qualities: string[]
+  selected_types: string[]
+  selected_suppliers: string[]
+  
+  // 范围筛选状态
+  date_range: { start: string; end: string }
+  diameter_range: { min: number | null; max: number | null }
+  specification_range: { min: number | null; max: number | null }
+  price_per_gram_range: { min: number | null; max: number | null }
+  total_price_range: { min: number | null; max: number | null }
+  
+  // 排序状态
+  sort_by: string
+  sort_order: 'asc' | 'desc'
+  
+  // UI状态
+  show_filters: { [key: string]: boolean }
+  show_mobile_filters: boolean
+  show_detail_modal: boolean
+  selected_purchase: Purchase | null
+  
+  // 供应商数据
+  suppliers: Supplier[]
+}
+```
+
+### 4.2 表头筛选器组件规范
+
+**筛选器渲染函数：**
+```typescript
+const render_column_filter = (column: string) => {
+  const filter_types = {
+    purchase_name: 'search',
+    purchase_code: 'search',
+    quality: 'multi_select',
+    purchase_type: 'multi_select',
+    supplier: 'multi_select_with_search',
+    bead_diameter: 'range',
+    specification: 'range',
+    price_per_gram: 'range',
+    total_price: 'range',
+    purchase_date: 'date_range'
   }
-  filters: {
-    search: string // 产品名称搜索
-    purchaseCodeSearch: string // **新增：采购编号搜索**
-    quality: string
-    productType: string
-    supplierId: string
-  }
-  sorting: {
-    field: string
-    direction: 'asc' | 'desc'
-  }
-  columnFilters: {
-    purchaseCode: {
-      type: 'search' // **更新：从sort改为search**
-      value: string
-    }
-    productName: {
-      type: 'search'
-      value: string
-    }
-    // ... 其他筛选器
-  }
+  
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => toggle_filter(column)}
+        className="p-1 hover:bg-gray-100 rounded"
+      >
+        <FunnelIcon className="h-4 w-4" />
+      </button>
+      
+      {show_filters[column] && (
+        <div className="absolute top-8 left-0 z-50 bg-white border rounded-lg shadow-lg p-4 min-w-64">
+          {render_filter_content(column, filter_types[column])}
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+**多选筛选器实现：**
+```typescript
+const render_multi_select_filter = (column: string, options: any[], selected: string[]) => {
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <span className="font-medium">选择{getColumnLabel(column)}</span>
+        <button 
+          onClick={() => clear_filter(column)}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          清除
+        </button>
+      </div>
+      
+      <div className="max-h-48 overflow-y-auto space-y-1">
+        {options.map(option => (
+          <label key={option.value} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={selected.includes(option.value)}
+              onChange={(e) => handle_multi_select_change(column, option.value, e.target.checked)}
+              className="rounded"
+            />
+            <span className="text-sm">{option.label}</span>
+          </label>
+        ))}
+      </div>
+      
+      <button
+        onClick={() => apply_filters()}
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+      >
+        应用筛选
+      </button>
+    </div>
+  )
+}
+```
+
+### 4.3 范围筛选器实现
+
+**数值范围筛选：**
+```typescript
+const render_range_filter = (column: string, range: { min: number | null; max: number | null }) => {
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-center">
+        <span className="font-medium">{getColumnLabel(column)}范围</span>
+        <button 
+          onClick={() => clear_range_filter(column)}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          清除
+        </button>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">最小值</label>
+          <input
+            type="number"
+            value={range.min || ''}
+            onChange={(e) => handle_range_change(column, 'min', e.target.value)}
+            placeholder="最小值"
+            className="w-full px-2 py-1 text-sm border rounded"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">最大值</label>
+          <input
+            type="number"
+            value={range.max || ''}
+            onChange={(e) => handle_range_change(column, 'max', e.target.value)}
+            placeholder="最大值"
+            className="w-full px-2 py-1 text-sm border rounded"
+          />
+        </div>
+      </div>
+      
+      <div className="flex space-x-2">
+        <button
+          onClick={() => apply_range_filter(column)}
+          className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 text-sm"
+        >
+          应用
+        </button>
+        <button
+          onClick={() => clear_range_filter(column)}
+          className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 text-sm"
+        >
+          清除
+        </button>
+      </div>
+    </div>
+  )
 }
 ```
 
@@ -408,28 +736,186 @@ const fetchPurchases = async () => {
 }
 ```
 
-## 四、组件错误处理规范
+## 四、原材料库存组件开发规范（重要更新）
 
-### 4.1 TypeScript错误修复模式
+### 4.1 purchase到material字段映射前端处理
+
+**核心原则：**
+- 前端统一使用material_*字段名
+- 后端mapPurchaseToMaterial函数自动映射
+- 组件中处理字段映射的兼容性
+
+**字段映射处理示例：**
+```typescript
+// 处理后端映射后的字段（优先使用mapped字段）
+const extract_finished_products = (hierarchy_data: any[]): FinishedProduct[] => {
+  // 后端mapPurchaseToMaterial函数将purchase_code映射为material_code
+  const purchase_code = batch.material_code || batch.purchase_code || batch.material_id || batch.purchase_id || ''
+  
+  // 后端mapPurchaseToMaterial函数将purchase_date映射为material_date
+  const finalDate = batch.material_date || batch.purchase_date || new Date().toISOString()
+  
+  // 确保数值字段正确转换（考虑字段映射）
+  const remaining_qty = Number(batch.remaining_quantity) || Number(batch.material_remaining_quantity) || 0
+  const price_unit = Number(batch.price_per_unit) || Number(batch.material_price_per_unit) || 0
+  
+  return {
+    purchase_id: batch.purchase_id,
+    purchase_code: purchase_code,
+    purchase_name: batch.material_name || batch.purchase_name,
+    remaining_quantity: remaining_qty,
+    price_per_unit: price_unit,
+    purchase_date: finalDate
+  }
+}
+```
+
+### 4.2 数据类型安全处理规范
+
+**数值字段处理：**
+```typescript
+// 1. 后端返回数据的防护性转换
+const safe_number_conversion = (value: any): number => {
+  if (value === null || value === undefined) return 0
+  const num = Number(value)
+  return isNaN(num) ? 0 : num
+}
+
+// 2. 显示前的类型转换
+const format_quantity = (quantity: any): string => {
+  return Number(quantity).toLocaleString()
+}
+
+// 3. 价格字段的安全处理
+const format_price = (price: any): string => {
+  const safe_price = Number(price) || 0
+  return `¥${safe_price.toFixed(2)}`
+}
+```
+
+### 4.3 库存组件类型定义规范
+
+**半成品库存类型：**
+```typescript
+interface SemiFinishedMatrixData {
+  material_type: string // 统一使用material_type
+  total_quantity: number
+  total_variants: number
+  has_low_stock: boolean
+  specifications: SpecificationData[]
+}
+
+interface BatchData {
+  purchase_id: number
+  material_code?: string // 映射后的字段
+  material_name: string // 统一使用material_name
+  material_type: string // 统一使用material_type
+  purchase_date: string
+  supplier_name: string
+  original_quantity: number
+  used_quantity: number
+  remaining_quantity: number
+  price_per_unit: number | null
+  photos?: string[]
+}
+```
+
+**配件库存类型：**
+```typescript
+interface AccessoryProduct {
+  purchase_id: string
+  purchase_code?: string // 兼容映射前后的字段
+  purchase_name: string
+  specification?: number
+  piece_count?: number
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  photos?: string[]
+  price_per_unit?: number
+  price_per_piece?: number
+  remaining_quantity: number
+  is_low_stock: boolean
+}
+```
+
+**成品原材料类型：**
+```typescript
+interface FinishedProduct {
+  purchase_id: string
+  purchase_code?: string // 兼容映射前后的字段
+  purchase_name: string
+  specification: number
+  piece_count: number
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  photos?: string[]
+  price_per_unit?: number
+  total_price?: number
+  supplier_name?: string
+  purchase_date: string
+  remaining_quantity: number
+  is_low_stock: boolean
+}
+```
+
+### 4.4 库存状态处理规范
+
+**库存状态计算：**
+```typescript
+// 获取库存状态颜色
+const get_stock_status_color = (quantity: number, is_low_stock: boolean) => {
+  if (is_low_stock || quantity <= 50) {
+    return 'bg-red-100 border-red-200 text-red-800'
+  } else if (quantity <= 200) {
+    return 'bg-yellow-100 border-yellow-200 text-yellow-800'
+  } else {
+    return 'bg-green-100 border-green-200 text-green-800'
+  }
+}
+
+// 库存状态显示
+const render_stock_status = (product: any) => {
+  const quantity = Number(product.remaining_quantity) || 0
+  const is_low_stock = Boolean(product.is_low_stock)
+  
+  if (quantity <= 0) {
+    return <span className="text-gray-400 text-xs">-</span>
+  }
+  
+  return (
+    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+      get_stock_status_color(quantity, is_low_stock)
+    }`}>
+      {quantity} {get_unit_display(product.material_type || product.purchase_type)}
+    </span>
+  )
+}
+```
+
+## 五、组件错误处理规范
+
+### 5.1 TypeScript错误修复模式
 
 **常见错误类型：**
 1. **属性不存在错误**：`Property 'purchase_code' does not exist`
 2. **类型不匹配错误**：类型定义与实际使用不符
 3. **导入错误**：未使用的导入和函数
+4. **字段映射错误**：purchase字段和material字段混用
 
 **修复策略：**
 ```typescript
-// 1. 为接口添加可选字段
+// 1. 为接口添加可选字段（兼容映射前后）
 interface SomeInterface {
   existing_field: string
-  purchase_code?: string // 添加可选字段
+  purchase_code?: string // 原字段
+  material_code?: string // 映射后字段
 }
 
-// 2. 使用类型断言（谨慎使用）
-const item = data as SomeInterface
+// 2. 字段映射兼容处理
+const get_code = (item: any): string => {
+  return item.material_code || item.purchase_code || item.material_id || item.purchase_id || ''
+}
 
 // 3. 条件访问
-const purchaseCode = item.purchase_code || 'N/A'
+const purchaseCode = get_code(item)
 
 // 4. 清理未使用的导入
 // 删除未使用的import语句和函数定义

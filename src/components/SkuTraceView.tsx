@@ -114,7 +114,7 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 text-sm">
                           <span className="font-medium text-gray-900 truncate">
-                            {recipe.material_name}
+                            {recipe.purchase_name}
                           </span>
                           <span className="text-gray-500">•</span>
                           <span className="text-blue-600 font-medium">
@@ -159,7 +159,7 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
                       <div className="space-y-2">
                         <div className="text-sm">
                           <span className="text-gray-500">原材料名称：</span>
-                          <span className="text-gray-900">{recipe.material_name}</span>
+                          <span className="text-gray-900">{recipe.purchase_name}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">规格：</span>

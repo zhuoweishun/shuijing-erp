@@ -1,7 +1,0 @@
-{
-  "timestamp": "2025-09-12T21:16:33.149540",
-  "action": "rollback_to_stable",
-  "from_backup": "backups/before_rollback_20250912_211633",
-  "to_backup": "backups/stage1_syntax_fixes",
-  "reason": "回滚到1692个错误的稳定状态"
-}

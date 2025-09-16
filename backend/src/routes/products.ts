@@ -36,7 +36,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
   
   const { 
     search, 
-    product_types,
+    purchase_types,
     available_only = 'true', 
     min_quantity = 1 
   } = req.query
@@ -47,25 +47,25 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
     const params: any[] = []
     
     if (search) {
-      whereClause += ' AND p.product_name LIKE ?'
+      whereClause += ' AND p.purchase_name LIKE ?'
       params.push(`%${search}%`)
     }
     
     // 产品类型筛选 - 处理字符串或数组格式
-    let productTypesArray: string[] = []
-    if (product_types) {
-      if (typeof product_types === 'string') {
+    let purchaseTypesArray: string[] = []
+    if (purchase_types) {
+      if (typeof purchase_types === 'string') {
         // 如果是逗号分隔的字符串，分割成数组
-        productTypesArray = (product_types as string).split(',').map(type => type.trim()).filter(Boolean)
-      } else if (Array.isArray(product_types)) {
-        productTypesArray = product_types as string[]
+        purchaseTypesArray = (purchase_types as string).split(',').map(type => type.trim()).filter(Boolean)
+      } else if (Array.isArray(purchase_types)) {
+        purchaseTypesArray = purchase_types as string[]
       }
     }
     
-    if (productTypesArray.length > 0) {
-      const placeholders = productTypesArray.map(() => '?').join(',')
-      whereClause += ` AND p.product_type IN (${placeholders})`
-      params.push(...productTypesArray)
+    if (purchaseTypesArray.length > 0) {
+      const placeholders = purchaseTypesArray.map(() => '?').join(',')
+      whereClause += ` AND p.purchase_type IN (${placeholders})`
+      params.push(...purchaseTypesArray)
     }
     
     // 使用通用的库存计算逻辑，支持所有产品类型
@@ -73,8 +73,8 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
       SELECT 
         p.id,
         p.purchase_code as purchase_code,
-        p.product_name as product_name,
-        p.product_type as product_type,
+        p.purchase_name as purchase_name,
+        p.purchase_type as purchase_type,
         p.bead_diameter as bead_diameter,
         p.specification as specification,
         p.quality,
@@ -86,21 +86,21 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
         COALESCE(SUM(mu.quantity_used), 0) as used_pieces,
         -- 根据产品类型计算可用数量
         CASE 
-          WHEN p.product_type = 'LOOSE_BEADS' THEN 
+          WHEN p.purchase_type = 'LOOSE_BEADS' THEN 
             GREATEST(0, COALESCE(p.piece_count, 0) - COALESCE(SUM(mu.quantity_used), 0))
-          WHEN p.product_type = 'BRACELET' THEN 
+          WHEN p.purchase_type = 'BRACELET' THEN 
             GREATEST(0, COALESCE(p.total_beads, 0) - COALESCE(SUM(mu.quantity_used), 0))
-          WHEN p.product_type IN ('ACCESSORIES', 'FINISHED') THEN 
+          WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN 
             GREATEST(0, COALESCE(p.piece_count, 0) - COALESCE(SUM(mu.quantity_used), 0))
           ELSE 0
         END as available_quantity,
         -- 计算单位成本
         CASE 
-          WHEN p.product_type = 'LOOSE_BEADS' AND p.piece_count > 0 THEN 
+          WHEN p.purchase_type = 'LOOSE_BEADS' AND p.piece_count > 0 THEN 
             p.total_price / p.piece_count
-          WHEN p.product_type = 'BRACELET' AND p.total_beads > 0 THEN 
+          WHEN p.purchase_type = 'BRACELET' AND p.total_beads > 0 THEN 
             p.price_per_bead
-          WHEN p.product_type IN ('ACCESSORIES', 'FINISHED') AND p.piece_count > 0 THEN 
+          WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') AND p.piece_count > 0 THEN 
             p.total_price / p.piece_count
           ELSE p.unit_price
         END as unit_cost,
@@ -117,7 +117,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
       LEFT JOIN material_usage mu ON p.id = mu.purchase_id
       LEFT JOIN suppliers s ON p.supplier_id = s.id
       ${whereClause}
-      GROUP BY p.id, p.purchase_code, p.product_name, p.product_type, p.bead_diameter, p.specification, p.quality, 
+      GROUP BY p.id, p.purchase_code, p.purchase_name, p.purchase_type, p.bead_diameter, p.specification, p.quality, 
                p.total_beads, p.piece_count, p.quantity, p.beads_per_string, p.price_per_bead, p.price_per_gram, 
                p.total_price, p.unit_price, p.weight, p.photos, s.name, p.created_at, p.updated_at
       ${available_only === 'true' ? 'HAVING available_quantity >= ?' : ''}
@@ -160,7 +160,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
       }
       
       // 计算剩余数量（用于验证）
-      if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'LOOSE_BEADS') {
+      if (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'LOOSE_BEADS') {
         converted.remaining_beads = (material.total_beads || 0) - Number(material.used_beads)
       } else {
         converted.remaining_pieces = (material.piece_count || 0) - Number(material.used_pieces)
@@ -246,7 +246,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
   const fieldMapping: Record<string, string> = {
     'created_at': 'created_at',
     'updated_at': 'updated_at',
-    'product_name': 'name',
+    'purchase_name': 'name',
     'product_code': 'product_code',
     'unit_price': 'unit_price',
     'total_value': 'totalValue'
@@ -270,7 +270,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
             purchase: {
               select: {
                 id: true,
-                product_name: true,
+                purchase_name: true,
                 bead_diameter: true,
                 specification: true,
                 quality: true
@@ -345,7 +345,7 @@ router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
           purchase: {
             select: {
               id: true,
-              product_name: true,
+              purchase_name: true,
               bead_diameter: true,
               specification: true,
               quality: true,
@@ -418,7 +418,7 @@ router.delete('/:id/destroy', authenticateToken, asyncHandler(async (req, res) =
             purchase: {
               select: {
                 id: true,
-                product_name: true,
+                purchase_name: true,
                 bead_diameter: true,
                 quality: true
               }
@@ -436,7 +436,7 @@ router.delete('/:id/destroy', authenticateToken, asyncHandler(async (req, res) =
     // 记录要回滚的原材料信息
     const restoredMaterials = product.material_usages.map((usage: any) => ({
       purchase_id: usage.purchase_id,
-      product_name: usage.purchase?.product_name,
+      purchase_name: usage.purchase?.purchase_name,
       bead_diameter: usage.purchase?.bead_diameter,
       quality: usage.purchase?.quality,
       restored_quantity: usage.quantity_used
@@ -523,7 +523,7 @@ router.post('/cost', authenticateToken, asyncHandler(async (req, res) => {
     totalMaterialCost += materialCost
     materialDetails.push({
       purchase_id: material.purchase_id,
-      product_name: purchase.product_name,
+      purchase_name: purchase.purchase_name,
       used_beads: usedBeads,
       used_pieces: usedPieces,
       unit_cost: purchase.price_per_bead || purchase.price_per_piece || 0,
@@ -567,7 +567,7 @@ router.post('/cost', authenticateToken, asyncHandler(async (req, res) => {
   //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   const {
-    product_name,
+    purchase_name,
     description,
     materials,
     labor_cost = 0,
@@ -612,14 +612,14 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
       let available_quantity = 0
       let requiredQuantity = 0
       
-      if (purchase.product_type === 'BRACELET') {
+      if (purchase.purchase_type === 'BRACELET') {
         // 散珠和手串按颗计算
         used_quantity = purchase.material_usages.reduce(
           (sum, usage) => sum + usage.quantity_used, 0
         )
         available_quantity = (purchase.total_beads || 0) - used_quantity
         requiredQuantity = material.quantity_used || 0
-      } else if ((purchase.product_type as string) === 'BRACELET' || (purchase.product_type as string) === 'FINISHED') {
+      } else if ((purchase.purchase_type as string) === 'ACCESSORIES' || (purchase.purchase_type as string) === 'FINISHED_MATERIAL') {
         // 饰品配件和成品按片/件计算
         used_quantity = purchase.material_usages.reduce(
           (sum, usage) => sum + usage.quantity_used, 0
@@ -629,21 +629,21 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
       }
       
       if (available_quantity < requiredQuantity) {
-        const unit = purchase.product_type === 'BRACELET' ? '颗' : 
-                    (purchase.product_type as string) === 'BRACELET' ? '片' : '件'
+        const unit = purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET' ? '颗' :
+                    purchase.purchase_type === 'ACCESSORIES' ? '片' : '件'
         const available_quantity = (purchase?.piece_count || 0) - (purchase.material_usages?.reduce((sum, usage) => sum + usage.quantity_used, 0) || 0) || 0;
-        throw new Error(`原材料 ${purchase.product_name} 库存不足，可用：${ available_quantity }${unit}，需要：${requiredQuantity}${unit}`)
+        throw new Error(`原材料 ${purchase.purchase_name} 库存不足，可用：${ available_quantity }${unit}，需要：${requiredQuantity}${unit}`)
       }
       
       // 计算原材料成本（根据产品类型和使用数量）
       let materialUnitCost = 0;
       let materialUsedQuantity = 0;
       
-      if (purchase.product_type === 'BRACELET') {
+      if (purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET') {
         // 散珠和手串使用每颗价格和颗数
         materialUnitCost = Number(purchase.price_per_bead) || 0;
         materialUsedQuantity = material.quantity_used || 0;
-      } else if ((purchase.product_type as string) === 'BRACELET' || (purchase.product_type as string) === 'FINISHED') {
+      } else if (purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') {
         // 饰品配件和成品使用每片/每件价格和片数/件数
         materialUnitCost = Number(purchase.price_per_piece) || 0;
         materialUsedQuantity = material.quantity_used || 0;
@@ -685,7 +685,7 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     const { sku, isNewSku } = await findOrCreateSku({
 
       tx: tx,
-      productName: product_name,
+      productName: purchase_name,
       specification: '',
       unitPrice: Number(selling_price),
       images: photos.length > 0 ? photos : []
@@ -695,7 +695,7 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     const product = await tx.product.create({
       data: {
         product_code: null, // 不再使用单独的成品编号
-        name: product_name,
+        name: purchase_name,
         description: description || null,
         unit_price: Number(selling_price),
         total_value: totalCost,
@@ -731,12 +731,12 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
       skuId: sku.id!,
       action: 'CREATE',
       newQuantity: 1,
-      changeReason: `组合制作模式创建成品: ${product_name}`
+      changeReason: `组合制作模式创建成品: ${purchase_name}`
     })
     
     return {
       id: product.id,
-      product_name,
+      purchase_name,
       sku_code: sku.sku_code,
       sku_id: sku.id,
       is_new_sku: isNewSku,
@@ -775,7 +775,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
   // 验证每个成品的必填字段
   for (let i = 0; i < products.length; i++) {
     const product = products[i]
-    if (!product.material_id || !product.product_name || !product.selling_price || product.selling_price <= 0) {
+    if (!product.material_id || !product.purchase_name || !product.selling_price || product.selling_price <= 0) {
       return res.status(400).json({
         success: false,
         message: `第${i + 1}个成品信息不完整：需要原材料ID、成品名称和有效的销售价格`
@@ -805,7 +805,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         }
         
         // 检查是否为成品类型的原材料
-        if (purchase.product_type !== 'FINISHED') {
+        if (purchase.purchase_type !== 'FINISHED_MATERIAL') {
           throw new Error(`只能使用成品类型的原材料进行直接转化`)
         }
         
@@ -822,11 +822,11 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         
         // 计算材料成本（根据产品类型选择正确的价格字段）
         let materialCost = 0;
-        const productType = purchase.product_type as string;
+        const productType = purchase.purchase_type as string;
         if (productType === 'LOOSE_BEADS' || productType === 'BRACELET') {
           // 散珠和手串使用每颗价格
           materialCost = Number(purchase.price_per_bead) || 0;
-        } else if (productType === 'ACCESSORIES' || productType === 'FINISHED') {
+        } else if (productType === 'ACCESSORIES' || productType === 'FINISHED_MATERIAL') {
           // 饰品配件和成品使用每片/每件价格
           materialCost = Number(purchase.price_per_piece) || 0;
         }
@@ -871,7 +871,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         // 查找或创建SKU
         const { sku, isNewSku } = await findOrCreateSku({
           tx: tx,
-          productName: productData.product_name,
+          productName: productData.purchase_name,
           specification: productData.specification || '',
           unitPrice: Number(productData.selling_price),
           images: productImages ? JSON.parse(productImages) : []
@@ -881,7 +881,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         const product = await tx.product.create({
           data: {
             product_code: null, // 不再使用单独的成品编号
-            name: productData.product_name,
+            name: productData.purchase_name,
             description: productData.description || null,
             unit_price: Number(productData.selling_price),
             total_value: totalCost,
@@ -910,7 +910,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
           skuId: sku.id!,
           action: 'CREATE',
           newQuantity: 1,
-          changeReason: `直接转化模式创建成品: ${productData.product_name}`
+          changeReason: `直接转化模式创建成品: ${productData.purchase_name}`
         })
         
         return {
@@ -918,7 +918,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
           sku_code: sku.sku_code,
           sku_id: sku.id,
           is_new_sku: isNewSku,
-          product_name: productData.product_name,
+          purchase_name: productData.purchase_name,
           material_cost: Number(materialCost),
           total_price: totalCost,
           selling_price: Number(productData.selling_price),

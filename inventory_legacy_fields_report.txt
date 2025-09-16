@@ -1,0 +1,547 @@
+================================================================================
+原材料库存相关代码废弃字段检查报告
+================================================================================
+
+🚨 发现问题文件: 13 个
+🚨 发现废弃字段类型: 32 种
+🚨 发现问题代码行: 413 行
+
+📁 文件: backend/src/routes/inventory.ts
+------------------------------------------------------------
+  ❌ 废弃字段: product_types (1 处)
+    第224行: product_types,
+
+
+📁 文件: backend/src/routes/inventory.ts.backup_20250913_130937
+------------------------------------------------------------
+  ❌ 废弃字段: product_types (6 处)
+    第17行: product_types: z.union([
+    第43行: product_types: z.union([
+    第233行: product_types,
+    第252行: product_types,
+    第354行: if (product_types) {
+    第355行: const productTypesArray = Array.isArray(product_types) ? product_types : [product_types]
+
+  ❌ 废弃字段: product_type (34 处)
+    第28行: sort_by: z.enum(['total_quantity', 'product_type', 'crystal_type']).optional()
+    第63行: product_type: true,
+    第264行: p.productType as product_type,
+    第345行: const productType = item.product_type
+    第380行: product_type: productType,
+    第442行: product_type: item.product_type,
+    第512行: product_type: level1.product_type,
+    第521行: const sortField = sort_by === 'product_type' ? 'product_type' : 'total_quantity'
+    第523行: if (sortField === 'product_type') {
+    第524行: return sort === 'asc' ? a.product_type.localeCompare(b.product_type) : b.product_type.localeCompare(a.product_type)
+    第1340行: p.productType as product_type,
+    第1426行: const { product_type, limit = 20 } = req.query
+    第1430行: if (product_type && product_type !== 'ALL') {
+    第1431行: whereClause = `WHERE p.productType = '${product_type}'`
+    第1438行: p.productType as product_type,
+    第1579行: p.productType as product_type,
+    第1678行: product_type = 'LOOSE_BEADS',
+    第1684行: product_type,
+    第1693行: if (product_type && product_type !== 'ALL') {
+    第1694行: productTypeCondition = `AND p.productType = '${product_type}'`
+    第1704行: WHEN product_type = 'FINISHED' AND calculated_price >= 0 AND calculated_price <= 50 THEN '0-50元（含）'
+    第1705行: WHEN product_type = 'FINISHED' AND calculated_price > 50 AND calculated_price <= 100 THEN '50-100元（含）'
+    第1706行: WHEN product_type = 'FINISHED' AND calculated_price > 100 AND calculated_price <= 200 THEN '100-200元（含）'
+    第1707行: WHEN product_type = 'FINISHED' AND calculated_price > 200 AND calculated_price <= 500 THEN '200-500元（含）'
+    第1708行: WHEN product_type = 'FINISHED' AND calculated_price > 500 THEN '500元以上'
+    第1710行: WHEN product_type != 'FINISHED' AND calculated_price >= 0 AND calculated_price <= 3 THEN '0-3元（含）'
+    第1711行: WHEN product_type != 'FINISHED' AND calculated_price > 3 AND calculated_price <= 10 THEN '3-10元（含）'
+    第1712行: WHEN product_type != 'FINISHED' AND calculated_price > 10 AND calculated_price <= 20 THEN '10-20元（含）'
+    第1713行: WHEN product_type != 'FINISHED' AND calculated_price > 20 AND calculated_price <= 50 THEN '20-50元（含）'
+    第1714行: WHEN product_type != 'FINISHED' AND calculated_price > 50 THEN '50元以上'
+    第1718行: FROM (          SELECT             p.productType as product_type,            CASE               WHEN p.productType = 'LOOSE_BEADS' AND p.totalBeads > 0 THEN p.totalPrice / p.totalBeads              WHEN p.productType = 'BRACELET' AND p.quantity > 0 THEN p.totalPrice / p.quantity              WHEN p.productType = 'ACCESSORIES' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.totalPrice IS NOT NULL             AND p.totalPrice > 0            AND (              (p.productType = 'LOOSE_BEADS' AND p.totalBeads IS NOT NULL AND p.totalBeads > 0) OR              (p.productType = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)            )            ${productTypeCondition}        ) as price_data
+    第1749行: product_type,
+    第1776行: p.productType as product_type,
+    第1848行: product_type,
+
+  ❌ 废弃字段: product_name (25 处)
+    第62行: product_name: true,
+    第263行: p.productName as product_name,
+    第351行: if (search && !item.product_name.toLowerCase().includes(search.toLowerCase())) return
+    第441行: product_name: item.product_name,
+    第575行: sort_by = 'product_name'
+    第614行: p.productName as product_name,
+    第646行: ORDER BY ${sort_by === 'product_name' ? 'p.productName' : 'total_remaining_beads'} ${sort === 'asc' ? 'ASC' : 'DESC'}
+    第722行: const purchases = await prisma.$queryRawUnsafe(purchaseQuery, group.product_name) as any[]
+    第723行: console.log(`🔍 [采购记录查询] 产品"${group.product_name}"的采购记录:`, purchases)
+    第807行: console.log(`✅ [变体合并] 产品"${group.product_name}"合并后的变体:`, {
+    第819行: product_name: group.product_name,
+    第922行: const validSortFields = ['purchase_date', 'created_at', 'remaining_beads', 'product_name']
+    第931行: p.productName as product_name,
+    第1025行: p.productName as product_name,
+    第1090行: sort_by: z.enum(['purchase_date', 'product_name', 'specification', 'remaining_quantity']).optional()
+    第1158行: if (sort_by === 'product_name') {
+    第1171行: p.productName as product_name,
+    第1292行: product_name: item.product_name,
+    第1298行: product_name: item.product_name,
+    第1437行: p.productName as product_name,
+    第1491行: name: item.product_name,
+    第1578行: p.productName as product_name,
+    第1775行: p.productName as product_name,
+    第1899行: p.productName as product_name,
+    第1969行: p.productName as product_name,
+
+  ❌ 废弃字段: productName (37 处)
+    第96行: const parseProductClassification = (productName: string) => {
+    第143行: if (keywords.some(keyword => productName.includes(keyword))) {
+    第151行: if (keywords.some(keyword => productName.includes(keyword))) {
+    第158行: if (productName.includes('随形')) {
+    第263行: p.productName as product_name,
+    第330行: ORDER BY p.productType, p.productName,
+    第587行: whereClause += ' AND p.productName LIKE ?'
+    第614行: p.productName as product_name,
+    第645行: GROUP BY p.productName
+    第646行: ORDER BY ${sort_by === 'product_name' ? 'p.productName' : 'total_remaining_beads'} ${sort === 'asc' ? 'ASC' : 'DESC'}
+    第652行: SELECT COUNT(DISTINCT p.productName) as total
+    第718行: WHERE p.beadDiameter IS NOT NULL AND p.productName = ?
+    第898行: whereClause += ' AND p.productName LIKE ?'
+    第931行: p.productName as product_name,
+    第932行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第957行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1025行: p.productName as product_name,
+    第1026行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1043行: AND (p.productName LIKE ? OR s.name LIKE ?)
+    第1044行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1135行: whereConditions.push('(p.productName LIKE ? OR s.name LIKE ?)')
+    第1159行: orderBy = `p.productName ${sort === 'asc' ? 'ASC' : 'DESC'}`
+    第1171行: p.productName as product_name,
+    第1437行: p.productName as product_name,
+    第1453行: GROUP BY p.productName, p.productType
+    第1578行: p.productName as product_name,
+    第1614行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification, p.quality, s.name
+    第1775行: p.productName as product_name,
+    第1807行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification,
+    第1899行: p.productName as product_name,
+    第1900行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1929行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1969行: p.productName as product_name,
+    第1970行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1980行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第2025行: p.productName as '产品名称',
+    第2057行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+
+  ❌ 废弃字段: productType (78 处)
+    第264行: p.productType as product_type,
+    第271行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第272行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第273行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第274行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第279行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第280行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第281行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第282行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第287行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第288行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第289行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第290行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第295行: WHEN p.productType = 'LOOSE_BEADS' THEN p.pricePerBead
+    第296行: WHEN p.productType = 'BRACELET' THEN
+    第303行: WHEN p.productType = 'ACCESSORIES' THEN
+    第310行: WHEN p.productType = 'FINISHED' THEN
+    第330行: ORDER BY p.productType, p.productName,
+    第345行: const productType = item.product_type
+    第356行: if (!productTypesArray.includes(productType)) return
+    第373行: const level1Key = productType
+    第374行: const level2Key = `${productType}|${specValue}${specUnit}`
+    第375行: const level3Key = `${productType}|${specValue}${specUnit}|${quality}`
+    第380行: product_type: productType,
+    第597行: whereClause += ' AND (CASE WHEN p.productType = "LOOSE_BEADS" THEN COALESCE(p.pieceCount, 0) WHEN p.productType = "BRACELET" THEN COALESCE(p.quantity, 0) WHEN p.productType = "ACCESSORIES" THEN COALESCE(p.pieceCount, 0) WHEN p.productType = "FINISHED" THEN COALESCE(p.pieceCount, 0) ELSE COALESCE(p.quantity, 0) END - COALESCE(mu.used_beads, 0)) <= p.minStockAlert'
+    第622行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第623行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第624行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第625行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第631行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第632行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第633行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第634行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第684行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第685行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第686行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第687行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第692行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第693行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第694行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第695行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第700行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第701行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第702行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第703行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第1130行: let whereConditions = ['p.productType = "FINISHED"']
+    第1179行: WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 AND p.totalPrice IS NOT NULL
+    第1340行: p.productType as product_type,
+    第1343行: WHEN p.productType = 'LOOSE_BEADS' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1344行: WHEN p.productType = 'BRACELET' THEN (p.totalBeads - COALESCE(mu.used_quantity, 0))
+    第1345行: WHEN p.productType = 'ACCESSORIES' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1346行: WHEN p.productType = 'FINISHED' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1355行: GROUP BY p.productType
+    第1356行: ORDER BY p.productType
+    第1431行: whereClause = `WHERE p.productType = '${product_type}'`
+    第1438行: p.productType as product_type,
+    第1440行: WHEN p.productType = 'LOOSE_BEADS' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1441行: WHEN p.productType = 'BRACELET' THEN (p.totalBeads - COALESCE(mu.used_quantity, 0))
+    第1442行: WHEN p.productType = 'ACCESSORIES' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1443行: WHEN p.productType = 'FINISHED' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1453行: GROUP BY p.productName, p.productType
+    第1579行: p.productType as product_type,
+    第1586行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+    第1587行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+    第1594行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+    第1595行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+    第1602行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN '颗'
+    第1603行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN '件'
+    第1611行: (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND mu.quantityUsedBeads > 0) OR
+    第1612行: (p.productType IN ('ACCESSORIES', 'FINISHED') AND mu.quantityUsedPieces > 0)
+    第1614行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification, p.quality, s.name
+    第1694行: productTypeCondition = `AND p.productType = '${product_type}'`
+    第1718行: FROM (          SELECT             p.productType as product_type,            CASE               WHEN p.productType = 'LOOSE_BEADS' AND p.totalBeads > 0 THEN p.totalPrice / p.totalBeads              WHEN p.productType = 'BRACELET' AND p.quantity > 0 THEN p.totalPrice / p.quantity              WHEN p.productType = 'ACCESSORIES' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.totalPrice IS NOT NULL             AND p.totalPrice > 0            AND (              (p.productType = 'LOOSE_BEADS' AND p.totalBeads IS NOT NULL AND p.totalBeads > 0) OR              (p.productType = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)            )            ${productTypeCondition}        ) as price_data
+    第1776行: p.productType as product_type,
+    第1802行: (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND (p.totalBeads IS NOT NULL AND p.totalBeads > 0 OR p.pieceCount IS NOT NULL AND p.pieceCount > 0)) OR
+    第1803行: (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR
+    第1804行: (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)
+    第1807行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification,
+
+
+📁 文件: backend/src/routes/inventory.ts.backup_20250913_130344
+------------------------------------------------------------
+  ❌ 废弃字段: product_types (6 处)
+    第17行: product_types: z.union([
+    第43行: product_types: z.union([
+    第233行: product_types,
+    第252行: product_types,
+    第354行: if (product_types) {
+    第355行: const productTypesArray = Array.isArray(product_types) ? product_types : [product_types]
+
+  ❌ 废弃字段: product_type (34 处)
+    第28行: sort_by: z.enum(['total_quantity', 'product_type', 'crystal_type']).optional()
+    第63行: product_type: true,
+    第264行: p.productType as product_type,
+    第345行: const productType = item.product_type
+    第380行: product_type: productType,
+    第442行: product_type: item.product_type,
+    第512行: product_type: level1.product_type,
+    第521行: const sortField = sort_by === 'product_type' ? 'product_type' : 'total_quantity'
+    第523行: if (sortField === 'product_type') {
+    第524行: return sort === 'asc' ? a.product_type.localeCompare(b.product_type) : b.product_type.localeCompare(a.product_type)
+    第1340行: p.productType as product_type,
+    第1426行: const { product_type, limit = 20 } = req.query
+    第1430行: if (product_type && product_type !== 'ALL') {
+    第1431行: whereClause = `WHERE p.productType = '${product_type}'`
+    第1438行: p.productType as product_type,
+    第1579行: p.productType as product_type,
+    第1678行: product_type = 'LOOSE_BEADS',
+    第1684行: product_type,
+    第1693行: if (product_type && product_type !== 'ALL') {
+    第1694行: productTypeCondition = `AND p.productType = '${product_type}'`
+    第1704行: WHEN product_type = 'FINISHED' AND calculated_price >= 0 AND calculated_price <= 50 THEN '0-50元（含）'
+    第1705行: WHEN product_type = 'FINISHED' AND calculated_price > 50 AND calculated_price <= 100 THEN '50-100元（含）'
+    第1706行: WHEN product_type = 'FINISHED' AND calculated_price > 100 AND calculated_price <= 200 THEN '100-200元（含）'
+    第1707行: WHEN product_type = 'FINISHED' AND calculated_price > 200 AND calculated_price <= 500 THEN '200-500元（含）'
+    第1708行: WHEN product_type = 'FINISHED' AND calculated_price > 500 THEN '500元以上'
+    第1710行: WHEN product_type != 'FINISHED' AND calculated_price >= 0 AND calculated_price <= 3 THEN '0-3元（含）'
+    第1711行: WHEN product_type != 'FINISHED' AND calculated_price > 3 AND calculated_price <= 10 THEN '3-10元（含）'
+    第1712行: WHEN product_type != 'FINISHED' AND calculated_price > 10 AND calculated_price <= 20 THEN '10-20元（含）'
+    第1713行: WHEN product_type != 'FINISHED' AND calculated_price > 20 AND calculated_price <= 50 THEN '20-50元（含）'
+    第1714行: WHEN product_type != 'FINISHED' AND calculated_price > 50 THEN '50元以上'
+    第1718行: FROM (          SELECT             p.productType as product_type,            CASE               WHEN p.productType = 'LOOSE_BEADS' AND p.totalBeads > 0 THEN p.totalPrice / p.totalBeads              WHEN p.productType = 'BRACELET' AND p.quantity > 0 THEN p.totalPrice / p.quantity              WHEN p.productType = 'ACCESSORIES' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.totalPrice IS NOT NULL             AND p.totalPrice > 0            AND (              (p.productType = 'LOOSE_BEADS' AND p.totalBeads IS NOT NULL AND p.totalBeads > 0) OR              (p.productType = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)            )            ${productTypeCondition}        ) as price_data
+    第1749行: product_type,
+    第1776行: p.productType as product_type,
+    第1848行: product_type,
+
+  ❌ 废弃字段: product_name (25 处)
+    第62行: product_name: true,
+    第263行: p.productName as product_name,
+    第351行: if (search && !item.product_name.toLowerCase().includes(search.toLowerCase())) return
+    第441行: product_name: item.product_name,
+    第575行: sort_by = 'product_name'
+    第614行: p.productName as product_name,
+    第646行: ORDER BY ${sort_by === 'product_name' ? 'p.productName' : 'total_remaining_beads'} ${sort === 'asc' ? 'ASC' : 'DESC'}
+    第722行: const purchases = await prisma.$queryRawUnsafe(purchaseQuery, group.product_name) as any[]
+    第723行: console.log(`🔍 [采购记录查询] 产品"${group.product_name}"的采购记录:`, purchases)
+    第807行: console.log(`✅ [变体合并] 产品"${group.product_name}"合并后的变体:`, {
+    第819行: product_name: group.product_name,
+    第922行: const validSortFields = ['purchase_date', 'created_at', 'remaining_beads', 'product_name']
+    第931行: p.productName as product_name,
+    第1025行: p.productName as product_name,
+    第1090行: sort_by: z.enum(['purchase_date', 'product_name', 'specification', 'remaining_quantity']).optional()
+    第1158行: if (sort_by === 'product_name') {
+    第1171行: p.productName as product_name,
+    第1292行: product_name: item.product_name,
+    第1298行: product_name: item.product_name,
+    第1437行: p.productName as product_name,
+    第1491行: name: item.product_name,
+    第1578行: p.productName as product_name,
+    第1775行: p.productName as product_name,
+    第1899行: p.productName as product_name,
+    第1969行: p.productName as product_name,
+
+  ❌ 废弃字段: productName (37 处)
+    第96行: const parseProductClassification = (productName: string) => {
+    第143行: if (keywords.some(keyword => productName.includes(keyword))) {
+    第151行: if (keywords.some(keyword => productName.includes(keyword))) {
+    第158行: if (productName.includes('随形')) {
+    第263行: p.productName as product_name,
+    第330行: ORDER BY p.productType, p.productName,
+    第587行: whereClause += ' AND p.productName LIKE ?'
+    第614行: p.productName as product_name,
+    第645行: GROUP BY p.productName
+    第646行: ORDER BY ${sort_by === 'product_name' ? 'p.productName' : 'total_remaining_beads'} ${sort === 'asc' ? 'ASC' : 'DESC'}
+    第652行: SELECT COUNT(DISTINCT p.productName) as total
+    第718行: WHERE p.beadDiameter IS NOT NULL AND p.productName = ?
+    第898行: whereClause += ' AND p.productName LIKE ?'
+    第931行: p.productName as product_name,
+    第932行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第957行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1025行: p.productName as product_name,
+    第1026行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1043行: AND (p.productName LIKE ? OR s.name LIKE ?)
+    第1044行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1135行: whereConditions.push('(p.productName LIKE ? OR s.name LIKE ?)')
+    第1159行: orderBy = `p.productName ${sort === 'asc' ? 'ASC' : 'DESC'}`
+    第1171行: p.productName as product_name,
+    第1437行: p.productName as product_name,
+    第1453行: GROUP BY p.productName, p.productType
+    第1578行: p.productName as product_name,
+    第1614行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification, p.quality, s.name
+    第1775行: p.productName as product_name,
+    第1807行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification,
+    第1899行: p.productName as product_name,
+    第1900行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1929行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第1969行: p.productName as product_name,
+    第1970行: CONCAT(p.productName, ' ', p.beadDiameter, 'mm ', COALESCE(p.quality, ''), '级') as bead_type,
+    第1980行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+    第2025行: p.productName as '产品名称',
+    第2057行: GROUP BY p.id, p.productName, p.beadDiameter, p.quality, p.minStockAlert,
+
+  ❌ 废弃字段: productType (78 处)
+    第264行: p.productType as product_type,
+    第271行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第272行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第273行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第274行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第279行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第280行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第281行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第282行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第287行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第288行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.totalBeads, p.pieceCount, 0)
+    第289行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第290行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第295行: WHEN p.productType = 'LOOSE_BEADS' THEN p.pricePerBead
+    第296行: WHEN p.productType = 'BRACELET' THEN
+    第303行: WHEN p.productType = 'ACCESSORIES' THEN
+    第310行: WHEN p.productType = 'FINISHED' THEN
+    第330行: ORDER BY p.productType, p.productName,
+    第345行: const productType = item.product_type
+    第356行: if (!productTypesArray.includes(productType)) return
+    第373行: const level1Key = productType
+    第374行: const level2Key = `${productType}|${specValue}${specUnit}`
+    第375行: const level3Key = `${productType}|${specValue}${specUnit}|${quality}`
+    第380行: product_type: productType,
+    第597行: whereClause += ' AND (CASE WHEN p.productType = "LOOSE_BEADS" THEN COALESCE(p.pieceCount, 0) WHEN p.productType = "BRACELET" THEN COALESCE(p.quantity, 0) WHEN p.productType = "ACCESSORIES" THEN COALESCE(p.pieceCount, 0) WHEN p.productType = "FINISHED" THEN COALESCE(p.pieceCount, 0) ELSE COALESCE(p.quantity, 0) END - COALESCE(mu.used_beads, 0)) <= p.minStockAlert'
+    第622行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第623行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第624行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第625行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第631行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第632行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第633行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第634行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第684行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第685行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第686行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第687行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第692行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第693行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第694行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第695行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第700行: WHEN p.productType = 'LOOSE_BEADS' THEN COALESCE(p.pieceCount, 0)
+    第701行: WHEN p.productType = 'BRACELET' THEN COALESCE(p.quantity, 0)
+    第702行: WHEN p.productType = 'ACCESSORIES' THEN COALESCE(p.pieceCount, 0)
+    第703行: WHEN p.productType = 'FINISHED' THEN COALESCE(p.pieceCount, 0)
+    第1130行: let whereConditions = ['p.productType = "FINISHED"']
+    第1179行: WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 AND p.totalPrice IS NOT NULL
+    第1340行: p.productType as product_type,
+    第1343行: WHEN p.productType = 'LOOSE_BEADS' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1344行: WHEN p.productType = 'BRACELET' THEN (p.totalBeads - COALESCE(mu.used_quantity, 0))
+    第1345行: WHEN p.productType = 'ACCESSORIES' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1346行: WHEN p.productType = 'FINISHED' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1355行: GROUP BY p.productType
+    第1356行: ORDER BY p.productType
+    第1431行: whereClause = `WHERE p.productType = '${product_type}'`
+    第1438行: p.productType as product_type,
+    第1440行: WHEN p.productType = 'LOOSE_BEADS' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1441行: WHEN p.productType = 'BRACELET' THEN (p.totalBeads - COALESCE(mu.used_quantity, 0))
+    第1442行: WHEN p.productType = 'ACCESSORIES' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1443行: WHEN p.productType = 'FINISHED' THEN (p.pieceCount - COALESCE(mu.used_quantity, 0))
+    第1453行: GROUP BY p.productName, p.productType
+    第1579行: p.productType as product_type,
+    第1586行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+    第1587行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+    第1594行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantityUsedBeads
+    第1595行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN mu.quantityUsedPieces
+    第1602行: WHEN p.productType IN ('LOOSE_BEADS', 'BRACELET') THEN '颗'
+    第1603行: WHEN p.productType IN ('ACCESSORIES', 'FINISHED') THEN '件'
+    第1611行: (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND mu.quantityUsedBeads > 0) OR
+    第1612行: (p.productType IN ('ACCESSORIES', 'FINISHED') AND mu.quantityUsedPieces > 0)
+    第1614行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification, p.quality, s.name
+    第1694行: productTypeCondition = `AND p.productType = '${product_type}'`
+    第1718行: FROM (          SELECT             p.productType as product_type,            CASE               WHEN p.productType = 'LOOSE_BEADS' AND p.totalBeads > 0 THEN p.totalPrice / p.totalBeads              WHEN p.productType = 'BRACELET' AND p.quantity > 0 THEN p.totalPrice / p.quantity              WHEN p.productType = 'ACCESSORIES' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              WHEN p.productType = 'FINISHED' AND p.pieceCount > 0 THEN p.totalPrice / p.pieceCount              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.totalPrice IS NOT NULL             AND p.totalPrice > 0            AND (              (p.productType = 'LOOSE_BEADS' AND p.totalBeads IS NOT NULL AND p.totalBeads > 0) OR              (p.productType = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR              (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)            )            ${productTypeCondition}        ) as price_data
+    第1776行: p.productType as product_type,
+    第1802行: (p.productType IN ('LOOSE_BEADS', 'BRACELET') AND (p.totalBeads IS NOT NULL AND p.totalBeads > 0 OR p.pieceCount IS NOT NULL AND p.pieceCount > 0)) OR
+    第1803行: (p.productType = 'ACCESSORIES' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0) OR
+    第1804行: (p.productType = 'FINISHED' AND p.pieceCount IS NOT NULL AND p.pieceCount > 0)
+    第1807行: GROUP BY p.id, p.productName, p.productType, p.beadDiameter, p.specification,
+
+
+📁 文件: src/pages/InventoryList.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: product_types (1 处)
+    第37行: product_types: selectedProductTypes.length > 0 ? selectedProductTypes: undefined,
+
+
+📁 文件: src/pages/ProductEntry.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: material_types (5 处)
+    第388行: let material_types: string[] = []
+    第391行: material_types = ['FINISHED_MATERIAL']
+    第394行: material_types = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES']
+    第397行: console.log('🔍 [原材料筛选] 制作模式:', formData.mode, '筛选类型:', material_types)
+    第403行: purchase_types: material_types
+
+
+📁 文件: src/components/InventoryDashboard.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: material_type (3 处)
+    第28行: material_type: string
+    第36行: material_type: string
+    第46行: material_type: string
+
+  ❌ 废弃字段: product_name (1 处)
+    第45行: product_name: string
+
+
+📁 文件: src/components/InventoryConsumptionChart.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: product_name (5 处)
+    第21行: product_name: string
+    第76行: name: item.product_name.length > 8 ? `${item.product_name.slice(0, 8)}...` : item.product_name,
+    第77行: fullName: item.product_name,
+    第245行: <div className="font-medium text-gray-900 text-mobile-body">{item.product_name}</div>
+    第329行: <div className="font-medium">{item.product_name}</div>
+
+  ❌ 废弃字段: material_type (1 处)
+    第22行: material_type: string
+
+
+📁 文件: src/components/ProductPriceDistributionChart.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: material_type (8 处)
+    第39行: material_type: string
+    第56行: material_type: string
+    第81行: const [material_type, setMaterial_type] = useState<string>('LOOSE_BEADS')
+    第88行: purchase_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL',
+    第111行: }, [material_type, priceType])
+    第136行: <p className="text-sm text-gray-600">产品类型：{PRODUCT_TYPE_MAP[material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
+    第150行: <p className="text-sm text-gray-600">类型：{PRODUCT_TYPE_MAP[data.material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
+    第250行: material_type === key
+
+  ❌ 废弃字段: product_name (3 处)
+    第55行: product_name: string
+    第149行: <p className="font-medium text-gray-900">{data.product_name || data.name}</p>
+    第225行: name: item.product_name,
+
+
+📁 文件: src/components/ProductDistributionPieChart.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: material_type (3 处)
+    第41行: const fetch_material_distribution = async (material_type: MaterialType) => {
+    第45行: purchase_type: material_type,
+    第52行: name: item.material_type || '未知类型',
+
+
+📁 文件: src/types/index.ts
+------------------------------------------------------------
+  ❌ 废弃字段: material_name (3 处)
+    第175行: material_name: string
+    第653行: material_name: string
+    第1037行: material_name: string // 成品名称（别名）
+
+  ❌ 废弃字段: product_name (2 处)
+    第1021行: product_name: string // 产品名称
+    第1029行: product_name: string // 成品名称
+
+
+📁 文件: src/utils/fieldConverter.ts
+------------------------------------------------------------
+  ❌ 废弃字段: material_name (2 处)
+    第169行: material_name: 'material_name', // 原材料名称
+    第186行: product_name: 'material_name', // 修改：统一映射到materialName（概念统一）
+
+  ❌ 废弃字段: material_type (1 处)
+    第170行: material_type: 'material_type', // 原材料类型（散珠material、手串material、饰品配件material、成品material）
+
+  ❌ 废弃字段: product_name (1 处)
+    第186行: product_name: 'material_name', // 修改：统一映射到materialName（概念统一）
+
+  ❌ 废弃字段: product_types (1 处)
+    第191行: product_types: 'material_types', // 兼容：product_types -> material_types
+
+  ❌ 废弃字段: material_types (1 处)
+    第191行: product_types: 'material_types', // 兼容：product_types -> material_types
+
+
+📁 文件: src/utils/pinyinSort.ts
+------------------------------------------------------------
+  ❌ 废弃字段: material_type (2 处)
+    第109行: const typeA = type_order.indexOf(a.material_type || a.material_type) // 兼容处理
+    第110行: const typeB = type_order.indexOf(b.material_type || b.material_type) // 兼容处理
+
+  ❌ 废弃字段: product_name (2 处)
+    第117行: const material_name_a = a.material_name || a.product_name || a.purchase_name || '' // 兼容处理
+    第118行: const material_name_b = b.material_name || b.product_name || b.purchase_name || '' // 兼容处理
+
+  ❌ 废弃字段: material_name (2 处)
+    第117行: const material_name_a = a.material_name || a.product_name || a.purchase_name || '' // 兼容处理
+    第118行: const material_name_b = b.material_name || b.product_name || b.purchase_name || '' // 兼容处理
+
+
+📁 文件: src/pages/__tests__/InventoryList.test.tsx
+------------------------------------------------------------
+  ❌ 废弃字段: material_type (3 处)
+    第46行: material_type: '手串',
+    第64行: material_type: '项链',
+    第215行: material_type: '手串'
+
+  ❌ 废弃字段: product_name (2 处)
+    第50行: product_name: '紫水晶手串',
+    第68行: product_name: '玫瑰石英项链',
+
+
+🔧 修复建议:
+----------------------------------------
+1. product_types → purchase_types
+2. product_type → purchase_type
+3. product_name → purchase_name
+4. material_types → purchase_types
+5. material_type → purchase_type
+6. material_name → purchase_name
+7. productType → purchase_type
+8. productName → purchase_name
+9. materialType → purchase_type
+10. materialName → purchase_name
+
+⚠️  注意: material_usage 相关字段应保持不变
+
+🎯 重点关注 'product_types is not defined' 错误:
+--------------------------------------------------
+以下文件中发现 product_types 字段，可能是错误根源:
+  - backend/src/routes/inventory.ts
+  - backend/src/routes/inventory.ts.backup_20250913_130937
+  - backend/src/routes/inventory.ts.backup_20250913_130344
+  - src/pages/InventoryList.tsx
+  - src/utils/fieldConverter.ts

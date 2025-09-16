@@ -34,7 +34,7 @@ export default function InventoryList() {
          page: current_page,
          limit: 20,
          search: search_term || undefined,
-         product_types: selectedProductTypes.length > 0 ? selectedProductTypes: undefined,
+         material_types: selectedProductTypes.length > 0 ? selectedProductTypes: undefined,
          quality: (selected_quality as 'AA' | 'A' | 'AB' | 'B' | 'C') || undefined,
          low_stock_only: low_stock_only || undefined,
          specification_min: specification_min || undefined,
@@ -129,30 +129,30 @@ export default function InventoryList() {
     set_view_mode(mode)
     setCurrentPage(1)
     
-    // 根据视图模式自动筛选对应的产品类型
+    // 根据视图模式自动筛选对应的原材料类型
     if (mode === 'finished') {
-      set_selected_product_types(['FINISHED'])
+      set_selected_product_types(['FINISHED_MATERIAL'])
     } else if (mode === 'semi-finished') {
       set_selected_product_types(['LOOSE_BEADS', 'BRACELET'])
     } else if (mode === 'accessories') {
       set_selected_product_types(['ACCESSORIES'])
     } else {
-      // 切换回全部视图时，清除产品类型筛选
+      // 切换回全部视图时，清除原材料类型筛选
       set_selected_product_types([])
     }
   }
   
-  // 成品详情查看处理
+  // 原材料详情查看处理
   const handle_material_click = (material: any) => {
     // 安全检查：确保material对象存在且有material_name属性
     if (!material || !material.material_name) {
-      console.warn('材料信息不完整:', material)
-      toast.error('材料信息不完整，无法查看详情')
+      console.warn('原材料信息不完整:', material)
+      toast.error('原材料信息不完整，无法查看详情')
       return
     }
     
-    // 这里可以添加查看成品详情的逻辑
-    console.log('查看成品详情:', material)
+    // 这里可以添加查看原材料详情的逻辑
+    console.log('查看原材料详情:', material)
     toast.success(`查看 ${material.material_name} 详情`)
   }
   

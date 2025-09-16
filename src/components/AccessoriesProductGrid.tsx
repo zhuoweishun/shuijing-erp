@@ -7,9 +7,10 @@ import { format_purchase_code } from '../utils/format'
 import { sort_by_pinyin } from '../utils/pinyinSort'
 
 // 配件数据类型定义
-interface AccessoryProduct {purchase_id: string
+interface AccessoryProduct {
+  purchase_id: string
   purchase_code?: string
-  product_name: string
+  purchase_name: string
   specification?: number
   piece_count?: number
   quantity?: number
@@ -47,22 +48,35 @@ export default function AccessoriesProductGrid({search_term,
   const [selectedProduct, setSelectedProduct] = useState<AccessoryProduct | null>(null)
 
   // 获取配件数据
-  const fetch_accessory_products = async (page_num: number = 1, append: boolean = false) => {try {
-      set_loading(true)
+  const fetch_accessory_products = async (page_num: number = 1, append: boolean = false) => {
+    set_loading(true)
+    try {
+      console.log('🔍 [配件数据获取] 请求参数:', {
+        page: page_num,
+        limit: 50,
+        search: search_term,
+        material_types: ['ACCESSORIES'],
+        quality: selected_quality,
+        low_stock_only,
+        specification_min,
+        specification_max
+      })
       
       const params = {
         page: page_num,
         limit: 20,
         search: search_term || undefined,
-        product_types: ['ACCESSORIES'], // 只查询配件类型
+        material_types: ['ACCESSORIES'], // 修复：使用material_types参数名
         quality: (selected_quality as 'AA' | 'A' | 'AB' | 'B' | 'C') || undefined,
         low_stock_only: low_stock_only || undefined,
         specification_min: specification_min || undefined,
         specification_max: specification_max || undefined
       }
 
+      console.log('🔍 [API请求] 请求参数:', params)
       // 使用层级式库存API，但只查询配件类型
       const response = await inventory_api.list_hierarchical(params)
+      console.log('🔍 [API响应] 原始数据:', response)
       
       if (response.success && response.data) {
         console.log('🔍 [配件数据] API响应成功:', response.data)
@@ -92,59 +106,113 @@ export default function AccessoriesProductGrid({search_term,
   }
 
   // 产品类型中文映射
-  const get_product_type_display = (material_type: string) => {
+  const get_product_type_display = (purchase_type: string) => {
     const type_map: { [key: string]: string } = {
       'LOOSE_BEADS': '散珠',
       'BRACELET': '手串',
       'ACCESSORIES': '饰品配件',
-      'FINISHED': '成品'
+      'FINISHED_MATERIAL': '成品'
     }
-    return type_map[material_type] || material_type
+    return type_map[purchase_type] || purchase_type
   }
 
   // 从层级式数据中提取配件产品
   const extract_accessory_products = (hierarchy_data: any[]): AccessoryProduct[] => {
     const products: AccessoryProduct[] = []
     
+    console.log('🔍 [配件数据提取] 原始层级数据:', hierarchy_data)
+    
     hierarchy_data.forEach((type_group) => {
-      if (type_group.material_type === 'ACCESSORIES') {
+      console.log('🔍 [配件数据提取] type_group:', type_group)
+      if (type_group.material_type === 'ACCESSORIES' || type_group.purchase_type === 'ACCESSORIES') {
         type_group.specifications?.forEach((spec_group: any, spec_index: number) => {
           spec_group.qualities?.forEach((quality_group: any, quality_index: number) => {
             // 从batches中获取实际的产品数据
             if (quality_group.batches && quality_group.batches.length > 0) {
+              console.log('🔍 [配件数据提取] quality_group.batches:', quality_group.batches)
               quality_group.batches.forEach((batch: any, batch_index: number) => {
+                console.log('🔍 [配件数据提取] batch数据:', batch)
+                
+                // 后端mapPurchaseToMaterial函数将purchase_date映射为material_date
+                const finalDate = batch.material_date || batch.purchase_date || new Date().toISOString()
+                console.log('🔍 [配件数据提取] 最终采购日期:', finalDate, '类型:', typeof finalDate)
+                
                 const key = `${batch.purchase_id}-${batch_index}`
+                
+                // 确保数值字段正确转换（考虑字段映射）
+                const remaining_qty = Number(batch.remaining_quantity) || Number(batch.material_remaining_quantity) || 0
+                const price_unit = Number(batch.price_per_unit) || Number(batch.material_price_per_unit) || 0
+                const price_gram = Number(batch.price_per_gram) || Number(batch.material_price_per_gram) || 0
+                // 后端mapPurchaseToMaterial函数将purchase_code映射为material_code
+                const purchase_code = batch.material_code || batch.purchase_code || batch.material_id || batch.purchase_id || ''
+                
+                console.log('🔍 [配件字段转换] remaining_qty:', remaining_qty, 'price_unit:', price_unit, 'purchase_code:', purchase_code)
                 
                 products.push({
                   purchase_id: batch.purchase_id,
-                  product_name: batch.product_name || get_product_type_display(type_group.material_type),
+                  purchase_code: purchase_code, // 修复：添加purchase_code字段
+                  purchase_name: batch.material_name || batch.purchase_name || get_product_type_display(type_group.purchase_type),
                   specification: spec_group.specification_value,
                   quality: quality_group.quality,
-                  remaining_quantity: batch.remaining_quantity || 0,
+                  remaining_quantity: remaining_qty, // 修复：使用转换后的数量
                   is_low_stock: batch.is_low_stock || quality_group.is_low_stock || false,
-                  price_per_unit: batch.price_per_unit,
-                  price_per_gram: batch.price_per_gram,
+                  price_per_unit: price_unit, // 修复：使用转换后的价格
+                  price_per_gram: price_gram, // 修复：使用转换后的价格
                   photos: batch.photos || [],
                   supplier_name: batch.supplier_name,
-                  purchase_date: batch.purchase_date,
+                  purchase_date: finalDate,
                   key
                 })
               })
             } else {
               // 如果没有batches，使用品相组的汇总数据
-              const key = `${type_group.material_type}-${spec_group.specification_value || `spec-${spec_index}`}-${quality_group.quality}-${quality_index}`
+              const key = `${type_group.purchase_type}-${spec_group.specification_value || `spec-${spec_index}`}-${quality_group.quality}-${quality_index}`
+              
+              // 尝试从不同层级获取采购日期
+              const purchase_date = quality_group.purchase_date || 
+                                  spec_group.purchase_date || 
+                                  type_group.purchase_date || 
+                                  new Date().toISOString()
+              
+              // 汇总数据的字段调试信息
+              console.log('🔍 [配件汇总数据调试] quality_group.remaining_quantity:', quality_group.remaining_quantity, '类型:', typeof quality_group.remaining_quantity)
+              console.log('🔍 [配件汇总数据调试] quality_group.price_per_unit:', quality_group.price_per_unit, '类型:', typeof quality_group.price_per_unit)
+              
+              // 确保汇总数据的数值字段正确转换（考虑字段映射）
+              const summary_remaining_qty = Number(quality_group.remaining_quantity) || Number(quality_group.material_remaining_quantity) || 0
+              const summary_price_unit = Number(quality_group.price_per_unit) || Number(quality_group.material_price_per_unit) || 0
+              const summary_price_gram = Number(quality_group.price_per_gram) || Number(quality_group.material_price_per_gram) || 0
+              
+              console.log('🔍 [配件汇总数据转换] summary_remaining_qty:', summary_remaining_qty, 'summary_price_unit:', summary_price_unit)
+              
+              // 汇总数据中尝试获取purchase_code（考虑字段映射）
+              const summary_purchase_code = quality_group.material_code || 
+                                          quality_group.purchase_code || 
+                                          spec_group.material_code || 
+                                          spec_group.purchase_code || 
+                                          type_group.material_code || 
+                                          type_group.purchase_code || 
+                                          quality_group.material_id || 
+                                          quality_group.purchase_id || 
+                                          spec_group.material_id || 
+                                          spec_group.purchase_id || 
+                                          type_group.material_id || 
+                                          type_group.purchase_id || ''
+              
+              console.log('🔍 [配件汇总数据] summary_purchase_code:', summary_purchase_code)
               
               products.push({
                 purchase_id: key,
-                product_name: get_product_type_display(type_group.material_type),
+                purchase_code: summary_purchase_code, // 修复：使用正确的采购编号
+                purchase_name: get_product_type_display(type_group.purchase_type),
                 specification: spec_group.specification_value,
                 quality: quality_group.quality,
-                remaining_quantity: quality_group.remaining_quantity || 0,
+                remaining_quantity: summary_remaining_qty, // 修复：使用转换后的数量
                 is_low_stock: quality_group.is_low_stock || false,
-                price_per_unit: quality_group.price_per_unit,
-                price_per_gram: quality_group.price_per_gram,
+                price_per_unit: summary_price_unit, // 修复：使用转换后的价格
+                price_per_gram: summary_price_gram, // 修复：使用转换后的价格
                 photos: [],
-                purchase_date: new Date().toISOString(),
+                purchase_date: purchase_date,
                 key
               })
             }
@@ -154,7 +222,7 @@ export default function AccessoriesProductGrid({search_term,
     })
     
     // 对配饰产品按产品名称进行A-Z排序
-    return sort_by_pinyin(products, (product: AccessoryProduct) => product.product_name)
+    return sort_by_pinyin(products, (product: AccessoryProduct) => product.purchase_name)
   }
 
   // 加载更多数据
@@ -178,20 +246,40 @@ export default function AccessoriesProductGrid({search_term,
     return `¥${price.toFixed(2)}`
   }
 
+
+
   // 格式化品相显示
-  const format_quality = (quality?: string) => {
-    if (!quality) return '未分级'
-    return quality
+  const format_quality = (quality: string | undefined | null) => {
+    // 品质值处理
+    
+    // 处理各种空值情况
+    if (quality === null || quality === undefined || quality === '' || quality === 'null' || quality === 'undefined') {
+      // 品质为空值
+      return '未知'
+    }
+    
+    // 确保quality是有效的枚举值
+    const validQualities = ['AA', 'A', 'AB', 'B', 'C']
+    const normalizedQuality = String(quality).trim().toUpperCase()
+    
+    if (!validQualities.includes(normalizedQuality)) {
+      // 品质值无效
+      return '未知'
+    }
+    
+    // 返回格式化的品质值
+    return `${normalizedQuality}级`
   }
 
   // 获取品相颜色
   const get_quality_color = (quality?: string) => {
     switch (quality) {
-      case 'AA': return 'bg-red-100 text-red-800'
-      case 'A': return 'bg-orange-100 text-orange-800'
-      case 'AB': return 'bg-yellow-100 text-yellow-800'
-      case 'B': return 'bg-blue-100 text-blue-800'
-      case 'C': return 'bg-gray-100 text-gray-800'
+      case 'AA级': return 'bg-red-100 text-red-800'
+      case 'A级': return 'bg-orange-100 text-orange-800'
+      case 'AB级': return 'bg-yellow-100 text-yellow-800'
+      case 'B级': return 'bg-blue-100 text-blue-800'
+      case 'C级': return 'bg-gray-100 text-gray-800'
+      case '未知': return 'bg-gray-100 text-gray-600'
       default: return 'bg-gray-100 text-gray-600'
     }
   }
@@ -232,7 +320,7 @@ export default function AccessoriesProductGrid({search_term,
 
   // 计算统计数据
   const stats = {
-    product_types: new Set(products.map(p => p.product_name)).size,
+    product_types: new Set(products.map(p => p.purchase_name)).size,
     total_quantity: products.reduce((sum, p) => sum + (p.remaining_quantity || 0), 0),
     low_stock_items: products.filter(p => p.is_low_stock).length,
     avg_price: products.length > 0 ? products.reduce((sum, p) => sum + (p.price_per_unit || p.price_per_piece || p.price_per_gram || 0), 0) / products.length : 0
@@ -296,7 +384,7 @@ export default function AccessoriesProductGrid({search_term,
               {product.photos && product.photos.length > 0 ? (
                 <img
                   src={fixImageUrl(product.photos[0])}
-                  alt={product.product_name}
+                  alt={product.purchase_name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
                   onError={handle_image_error}
                 />
@@ -339,7 +427,7 @@ export default function AccessoriesProductGrid({search_term,
             <div className="p-4">
               {/* 产品名称 */}
               <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm leading-tight">
-                {product.product_name}
+                {product.purchase_name}
               </h3>
               
               {/* 规格信息 */}
@@ -356,23 +444,29 @@ export default function AccessoriesProductGrid({search_term,
                 <span>库存: {product.remaining_quantity}件</span>
               </div>
               
-              {/* 价格信息 - 更突出显示 */}
+              {/* 价格信息 - 更突出显示，添加权限控制 */}
               <div className="mt-2 pt-2 border-t border-gray-100">
-                {product.price_per_unit || product.price_per_piece || product.price_per_gram ? (
+                {user?.role === 'BOSS' && (product.price_per_unit || product.price_per_piece || product.price_per_gram) ? (
                   <div className="flex items-center justify-center bg-green-50 rounded-md py-1 px-2">
                     <DollarSign className="h-3 w-3 mr-1 text-green-600" />
                     <span className="text-sm font-bold text-green-700">
-                      {product.price_per_unit 
+                      {product.price_per_unit && product.price_per_unit > 0
                         ? `${format_price(product.price_per_unit)}/件`
-                        : product.price_per_piece 
+                        : product.price_per_piece && product.price_per_piece > 0
                         ? `${format_price(product.price_per_piece)}/片`
-                        : `${format_price(product.price_per_gram)}/克`
+                        : product.price_per_gram && product.price_per_gram > 0
+                        ? `${format_price(product.price_per_gram)}/克`
+                        : '暂无价格'
                       }
                     </span>
                   </div>
-                ) : (
+                ) : user?.role === 'BOSS' ? (
                   <div className="flex items-center justify-center bg-gray-50 rounded-md py-1 px-2">
                     <span className="text-xs text-gray-500">暂无价格</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center bg-gray-50 rounded-md py-1 px-2">
+                    <span className="text-xs text-gray-500">-</span>
                   </div>
                 )}
               </div>
@@ -407,7 +501,7 @@ export default function AccessoriesProductGrid({search_term,
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedProduct.product_name}
+                  {selectedProduct.purchase_name}
                 </h3>
                 <button
                   onClick={() => setSelectedProduct(null)}
@@ -483,7 +577,33 @@ export default function AccessoriesProductGrid({search_term,
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">采购日期:</span>
-                        <span className="ml-1">{new Date(selectedProduct.purchase_date).toLocaleDateString()}</span>
+                        <span className="ml-1">{(() => {
+                          console.log('🔍 [采购日期调试] selectedProduct.purchase_date:', selectedProduct.purchase_date, '类型:', typeof selectedProduct.purchase_date)
+                          
+                          if (!selectedProduct.purchase_date) {
+                            console.log('🔍 [采购日期调试] purchase_date为空')
+                            return '未知日期'
+                          }
+                          
+                          try {
+                            const date = new Date(selectedProduct.purchase_date)
+                            console.log('🔍 [采购日期调试] Date对象:', date)
+                            console.log('🔍 [采购日期调试] date.getTime():', date.getTime())
+                            console.log('🔍 [采购日期调试] isNaN(date.getTime()):', isNaN(date.getTime()))
+                            
+                            if (isNaN(date.getTime())) {
+                              console.log('🔍 [采购日期调试] 日期无效，显示原始值:', selectedProduct.purchase_date)
+                              return `日期格式错误: ${selectedProduct.purchase_date}`
+                            }
+                            
+                            const formatted = date.toLocaleDateString('zh-CN')
+                            console.log('🔍 [采购日期调试] 格式化结果:', formatted)
+                            return formatted
+                          } catch (error) {
+                            console.error('🔍 [采购日期调试] 日期处理异常:', error)
+                            return `日期处理异常: ${selectedProduct.purchase_date}`
+                          }
+                        })()}</span>
                       </div>
                       {selectedProduct.piece_count && (
                         <div>
@@ -512,7 +632,7 @@ export default function AccessoriesProductGrid({search_term,
                         <img
                           key={index}
                           src={fixImageUrl(photo)}
-                          alt={`${selectedProduct.product_name} ${index + 1}`}
+                          alt={`${selectedProduct.purchase_name} ${index + 1}`}
                           className="w-full max-w-full h-auto object-contain rounded border cursor-pointer hover:opacity-80 transition-opacity"
                           onError={handle_image_error}
                           onClick={() => window.open(fixImageUrl(photo), '_blank')}

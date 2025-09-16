@@ -78,7 +78,7 @@ const Inventory_consumption_chart: React.FC = () => {
       consumed: item.totalConsumed,
       count: item.consumptionCount,
       avgConsumption: Math.round(item.avgConsumption * 100) / 100,
-      quality: item.quality || '未分级',
+      quality: item.quality || '未知',
       supplier: item.supplier_name || '未知供应商',
       unit_type: item.unit_type || '个'
     }))
@@ -275,7 +275,7 @@ const Inventory_consumption_chart: React.FC = () => {
                             item.quality === 'C' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
-                            {item.quality || '未分级'}
+                            {item.quality || '未知'}
                           </span>
                         </div>
                       </div>
@@ -351,7 +351,7 @@ const Inventory_consumption_chart: React.FC = () => {
                             item.quality === 'C' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
-                            {item.quality || '未分级'}
+                            {item.quality || '未知'}
                           </span>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">

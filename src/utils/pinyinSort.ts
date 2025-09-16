@@ -80,8 +80,8 @@ export function get_pinyin_first_letter(str: string): string {
  */
 export function sort_by_pinyin<T>(items: T[], get_name_fn: (item: T) => string): T[] {
   return items.sort((a, b) => {
-    const name_a = get_name_fn(a)
-    const name_b = get_name_fn(b)
+    const name_a = get_name_fn(a) || ''
+    const name_b = get_name_fn(b) || ''
     
     // 获取拼音首字母
     const letter_a = get_pinyin_first_letter(name_a)
@@ -105,7 +105,7 @@ export function sort_by_pinyin<T>(items: T[], get_name_fn: (item: T) => string):
 export function sort_materials_by_type_and_pinyin(materials: any[]): any[] {
   return materials.sort((a, b) => {
     // 先按原材料类型排序
-    const type_order = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED']
+    const type_order = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL']
     const typeA = type_order.indexOf(a.material_type || a.material_type) // 兼容处理
     const typeB = type_order.indexOf(b.material_type || b.material_type) // 兼容处理
     
@@ -114,8 +114,8 @@ export function sort_materials_by_type_and_pinyin(materials: any[]): any[] {
     }
     
     // 同类型内按拼音排序
-    const material_name_a = a.material_name || a.product_name || '' // 兼容处理
-    const material_name_b = b.material_name || b.product_name || '' // 兼容处理
+    const material_name_a = a.material_name || a.product_name || a.purchase_name || '' // 兼容处理
+    const material_name_b = b.material_name || b.product_name || b.purchase_name || '' // 兼容处理
     const letter_a = get_pinyin_first_letter(material_name_a)
     const letter_b = get_pinyin_first_letter(material_name_b)
     

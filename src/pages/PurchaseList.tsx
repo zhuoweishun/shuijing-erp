@@ -100,7 +100,7 @@ interface PurchaseListState {
     price_per_gram_max: string
     total_price_min: string
     total_price_max: string
-    material_types_filter: string[]
+    purchase_types_filter: string[]
   }
   sorting: {
     [key: string]: 'asc' | 'desc' | null
@@ -141,14 +141,14 @@ export default function PurchaseList() {
       'LOOSE_BEADS': '散珠',
       'BRACELET': '手串',
       'ACCESSORIES': '饰品配件',
-      'FINISHED': '成品'
+      'FINISHED_MATERIAL': '成品'
     }
     return type_map[product_type as keyof typeof type_map] || '手串'
   }
   
   // 格式化规格
   const format_specification = (purchase: Purchase) => {
-    if (purchase.material_type === 'LOOSE_BEADS' || purchase.material_type === 'BRACELET') {
+    if (purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET') {
       // 确保bead_diameter是数字类型
       const diameter = typeof purchase.bead_diameter === 'object' 
         ? (purchase.bead_diameter as any)?.value || (purchase.bead_diameter as any)?.diameter || 0
@@ -165,14 +165,14 @@ export default function PurchaseList() {
   
   // 格式化数量
   const format_quantity = (purchase: Purchase) => {
-    switch (purchase.material_type) {
+    switch (purchase.purchase_type) {
       case 'LOOSE_BEADS':
         return purchase.piece_count ? `${purchase.piece_count}颗` : '-'
       case 'BRACELET':
         return purchase.quantity ? `${purchase.quantity}条` : '-'
       case 'ACCESSORIES':
         return purchase.piece_count ? `${purchase.piece_count}片` : '-'
-      case 'FINISHED':
+      case 'FINISHED_MATERIAL':
         return purchase.piece_count ? `${purchase.piece_count}件` : '-'
       default:
         return purchase.quantity ? `${purchase.quantity}条` : '-'
@@ -194,7 +194,7 @@ export default function PurchaseList() {
       purchase_code_search: '', // 采购编号搜索
       quality_filter: ['AA', 'A', 'AB', 'B', 'C', 'UNKNOWN'], // 默认全选状态
       supplier_filter: [] as string[], // 将在获取供应商数据后设置为全选
-      material_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'], // 全选状态
+      purchase_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL'], // 全选状态
       
       // 日期范围
       start_date: '',
@@ -215,8 +215,8 @@ export default function PurchaseList() {
     sorting: { purchase_date: 'desc' }, // 默认按采购日期降序排列
     column_filters: {
       purchase_code: { is_visible: false, filter_type: 'search' }, // 采购编号：搜索功能
-      product_name: { is_visible: false, filter_type: 'search' }, // 产品名称：搜索功能
-      material_type: { is_visible: false, filter_type: 'multiSelect' }, // 产品类型：多选功能
+      purchase_name: { is_visible: false, filter_type: 'search' }, // 采购名称：搜索功能
+      purchase_type: { is_visible: false, filter_type: 'multiSelect' }, // 采购类型：多选功能
       specification: { is_visible: false, filter_type: 'sortAndRange' }, // 规格：排序和范围筛选
       quality: { is_visible: false, filter_type: 'multiSelect' }, // 品相：多选功能
       supplier: { is_visible: false, filter_type: 'multiSelect' }, // 供应商：多选功能
@@ -289,7 +289,14 @@ export default function PurchaseList() {
       
       // 构建筛选参数
       if (filters.search_term) params.search = filters.search_term
-      if (filters.purchase_code_search) params.purchase_code_search = filters.purchase_code_search
+      if (filters.purchase_code_search) {
+        params.purchase_code_search = filters.purchase_code_search
+        console.log('🔍 [采购编号搜索] 前端发送参数:', {
+          purchase_code_search: filters.purchase_code_search,
+          原始值: filters.purchase_code_search,
+          类型: typeof filters.purchase_code_search
+        })
+      }
       // 品相筛选：支持多选，将'UNKNOWN'映射为null
       // 只有当品相数组不为空时才发送quality参数
       if (filters.quality_filter !== undefined && filters.quality_filter.length > 0) {
@@ -328,8 +335,8 @@ export default function PurchaseList() {
       if (filters.total_price_min) params.total_price_min = filters.total_price_min
       if (filters.total_price_max) params.total_price_max = filters.total_price_max
       // 产品类型筛选：如果数组为空，发送空数组表示不显示任何结果
-      if (filters.material_types_filter !== undefined) {
-        params.material_types = filters.material_types_filter
+      if (filters.purchase_types_filter !== undefined) {
+        params.purchase_types = filters.purchase_types_filter
       }
       
       // 构建排序参数
@@ -339,7 +346,7 @@ export default function PurchaseList() {
         const fieldMapping: { [key: string]: string } = {
           'purchase_date': 'purchase_date',
           'purchase_code': 'purchase_code',
-          'product_name': 'product_name',
+          'purchase_name': 'purchase_name',
           'specification': 'specification',
           'supplier': 'supplier',
           'quantity': 'quantity',
@@ -355,24 +362,35 @@ export default function PurchaseList() {
       
       if (response.success && response.data) {
         const data = response.data as any
-        setState(prev => ({
-          ...prev,
-          purchases: data.purchases || [],
-          pagination: {
-            ...prev.pagination,
-            current_page: data.pagination?.page || 1,
-            page_size: data.pagination?.limit || 10,
-            total_count: data.pagination?.total || 0,
-            total_pages: data.pagination?.pages || 0
-          },
-          is_loading: false
-        }))
+        setState(prev => {
+          console.log('🔍 [fetch_purchases] setState 回调执行，prev.detail_modal:', prev.detail_modal)
+          const newState = {
+            ...prev,
+            purchases: data.purchases || [],
+            pagination: {
+              ...prev.pagination,
+              current_page: data.pagination?.page || 1,
+              page_size: data.pagination?.limit || 10,
+              total_count: data.pagination?.total || 0,
+              total_pages: data.pagination?.pages || 0
+            },
+            is_loading: false
+          }
+          console.log('🔍 [fetch_purchases] setState 新状态 detail_modal:', newState.detail_modal)
+          console.log('🔍 [fetch_purchases] detail_modal 是否被保留:', newState.detail_modal === prev.detail_modal)
+          return newState
+        })
       } else {
-        setState(prev => ({
-          ...prev,
-          error: response.message || '获取数据失败',
-          is_loading: false
-        }))
+        setState(prev => {
+          console.log('🔍 [fetch_purchases错误] setState 回调执行，prev.detail_modal:', prev.detail_modal)
+          const newState = {
+            ...prev,
+            error: response.message || '获取数据失败',
+            is_loading: false
+          }
+          console.log('🔍 [fetch_purchases错误] setState 新状态 detail_modal:', newState.detail_modal)
+          return newState
+        })
       }
     } catch (error) {
       setState(prev => ({
@@ -465,7 +483,7 @@ export default function PurchaseList() {
         purchase_code_search: '',
         quality_filter: [] as string[],
         supplier_filter: [],
-        material_types_filter: [],
+        purchase_types_filter: [],
         start_date: '',
         end_date: '',
         diameter_min: '',
@@ -549,25 +567,87 @@ export default function PurchaseList() {
 
   // 弹窗控制
   const open_detail_modal = (purchase_id: string) => {
-    setState(prev => ({
-      ...prev,
-      detail_modal: {
-        is_open: true,
-        purchase_id: purchase_id,
-        isEditMode: false
+    console.log('🔍 打开详情弹窗 - purchase_id:', purchase_id, 'type:', typeof purchase_id)
+    
+    // 记录调用前的状态
+    console.log('🔍 [状态追踪] 调用前 detail_modal 状态:', state.detail_modal)
+    
+    // 查找对应的purchase记录进行详细调试
+    const purchase_record = state.purchases.find(p => p.id === purchase_id)
+    if (purchase_record) {
+      console.log('🔍 [详情弹窗] 找到purchase记录:', purchase_record)
+      console.log('🔍 [详情弹窗] purchase记录字段数量:', Object.keys(purchase_record).length)
+      console.log('🔍 [详情弹窗] purchase记录所有字段:', Object.keys(purchase_record))
+      console.log('🔍 [详情弹窗] 是否有edit_logs:', !!purchase_record.edit_logs)
+      console.log('🔍 [详情弹窗] edit_logs长度:', purchase_record.edit_logs?.length || 0)
+      console.log('🔍 [详情弹窗] 是否编辑过:', (purchase_record.edit_logs?.length || 0) > 0)
+      
+      // 🚨 针对特定采购编号的深度调试
+      const target_codes = ['CG20250916254490', 'CG20250916714781']
+      if (target_codes.includes(purchase_record.purchase_code)) {
+        console.log('🚨🚨🚨 [特定调试] 发现目标采购编号:', purchase_record.purchase_code)
+        console.log('🚨 [特定调试] 完整purchase_record数据:', JSON.stringify(purchase_record, null, 2))
+        console.log('🚨 [特定调试] purchase_record.id:', purchase_record.id)
+        console.log('🚨 [特定调试] purchase_record.purchase_code:', purchase_record.purchase_code)
+        console.log('🚨 [特定调试] purchase_record.edit_logs:', purchase_record.edit_logs)
+        console.log('🚨 [特定调试] edit_logs类型:', typeof purchase_record.edit_logs)
+        console.log('🚨 [特定调试] edit_logs是否为数组:', Array.isArray(purchase_record.edit_logs))
+        if (purchase_record.edit_logs && Array.isArray(purchase_record.edit_logs)) {
+          console.log('🚨 [特定调试] edit_logs内容:', JSON.stringify(purchase_record.edit_logs, null, 2))
+          purchase_record.edit_logs.forEach((log, index) => {
+            console.log(`🚨 [特定调试] edit_logs[${index}]:`, log)
+          })
+        }
+        console.log('🚨 [特定调试] 所有字段及其值:')
+        Object.keys(purchase_record).forEach(key => {
+          console.log(`🚨   ${key}:`, (purchase_record as any)[key], `(${typeof (purchase_record as any)[key]})`)
+        })
       }
-    }))
+    } else {
+      console.log('🔍 [详情弹窗] 未找到purchase记录，purchase_id:', purchase_id)
+    }
+    
+    console.log('🔍 [状态追踪] 即将设置 detail_modal 状态为:', {
+      is_open: true,
+      purchase_id: purchase_id,
+      isEditMode: false
+    })
+    
+    setState(prev => {
+      console.log('🔍 [状态追踪] setState 回调执行，prev.detail_modal:', prev.detail_modal)
+      const newState = {
+        ...prev,
+        detail_modal: {
+          is_open: true,
+          purchase_id: purchase_id,
+          isEditMode: false
+        }
+      }
+      console.log('🔍 [状态追踪] setState 新状态 detail_modal:', newState.detail_modal)
+      return newState
+    })
+    
+    // 使用 setTimeout 检查状态是否真的被设置了
+    setTimeout(() => {
+      console.log('🔍 [状态追踪] 100ms后检查 detail_modal 状态:', state.detail_modal)
+    }, 100)
   }
 
   const close_detail_modal = () => {
-    setState(prev => ({
-      ...prev,
-      detail_modal: {
-        is_open: false,
-        purchase_id: null,
-        isEditMode: false
+    console.log('🔍 [状态追踪] 关闭详情弹窗，当前状态:', state.detail_modal)
+    setState(prev => {
+      console.log('🔍 [状态追踪] 关闭弹窗 setState 回调执行，prev.detail_modal:', prev.detail_modal)
+      const newState = {
+        ...prev,
+        detail_modal: {
+          is_open: false,
+          purchase_id: null,
+          isEditMode: false
+        }
       }
-    }))
+      console.log('🔍 [状态追踪] 关闭弹窗新状态 detail_modal:', newState.detail_modal)
+      return newState
+    })
   }
 
   // 图片预览控制
@@ -623,8 +703,8 @@ export default function PurchaseList() {
       }
       
       // 材料类型筛选
-      if (state.filters.material_types_filter && state.filters.material_types_filter.length > 0) {
-        state.filters.material_types_filter.forEach(t => params.append('material_types', t))
+      if (state.filters.purchase_types_filter && state.filters.purchase_types_filter.length > 0) {
+        state.filters.purchase_types_filter.forEach(t => params.append('purchase_types', t))
       }
       
       // 数值范围筛选
@@ -723,6 +803,43 @@ export default function PurchaseList() {
 
   // 编辑处理
   const handle_edit = (purchase_id: string) => {
+    console.log('✏️ 编辑采购记录 - purchase_id:', purchase_id, 'type:', typeof purchase_id)
+    
+    // 查找对应的purchase记录进行详细调试
+    const purchase_record = state.purchases.find(p => p.id === purchase_id)
+    if (purchase_record) {
+      console.log('✏️ [编辑弹窗] 找到purchase记录:', purchase_record)
+      console.log('✏️ [编辑弹窗] purchase记录字段数量:', Object.keys(purchase_record).length)
+      console.log('✏️ [编辑弹窗] purchase记录所有字段:', Object.keys(purchase_record))
+      console.log('✏️ [编辑弹窗] 是否有edit_logs:', !!purchase_record.edit_logs)
+      console.log('✏️ [编辑弹窗] edit_logs长度:', purchase_record.edit_logs?.length || 0)
+      console.log('✏️ [编辑弹窗] 是否编辑过:', (purchase_record.edit_logs?.length || 0) > 0)
+      
+      // 🚨 针对特定采购编号的深度调试
+      const target_codes = ['CG20250916254490', 'CG20250916714781']
+      if (target_codes.includes(purchase_record.purchase_code)) {
+        console.log('🚨🚨🚨 [编辑特定调试] 发现目标采购编号:', purchase_record.purchase_code)
+        console.log('🚨 [编辑特定调试] 完整purchase_record数据:', JSON.stringify(purchase_record, null, 2))
+        console.log('🚨 [编辑特定调试] purchase_record.id:', purchase_record.id)
+        console.log('🚨 [编辑特定调试] purchase_record.purchase_code:', purchase_record.purchase_code)
+        console.log('🚨 [编辑特定调试] purchase_record.edit_logs:', purchase_record.edit_logs)
+        console.log('🚨 [编辑特定调试] edit_logs类型:', typeof purchase_record.edit_logs)
+        console.log('🚨 [编辑特定调试] edit_logs是否为数组:', Array.isArray(purchase_record.edit_logs))
+        if (purchase_record.edit_logs && Array.isArray(purchase_record.edit_logs)) {
+          console.log('🚨 [编辑特定调试] edit_logs内容:', JSON.stringify(purchase_record.edit_logs, null, 2))
+          purchase_record.edit_logs.forEach((log, index) => {
+            console.log(`🚨 [编辑特定调试] edit_logs[${index}]:`, log)
+          })
+        }
+        console.log('🚨 [编辑特定调试] 所有字段及其值:')
+        Object.keys(purchase_record).forEach(key => {
+          console.log(`🚨   ${key}:`, (purchase_record as any)[key], `(${typeof (purchase_record as any)[key]})`)
+        })
+      }
+    } else {
+      console.log('✏️ [编辑弹窗] 未找到purchase记录，purchase_id:', purchase_id)
+    }
+    
     // 打开详情弹窗并进入编辑模式
     setState(prev => ({
       ...prev,
@@ -971,12 +1088,12 @@ export default function PurchaseList() {
                     type="text"
                     placeholder={`搜索${title}...`}
                     value={column === 'purchase_code' ? state.filters.purchase_code_search : 
-                           column === 'product_name' ? state.filters.search_term : ''}
+                           column === 'purchase_name' ? state.filters.search_term : ''}
                     onChange={(e) => {
                       let newFilters;
                       if (column === 'purchase_code') {
                         newFilters = { ...state.filters, purchase_code_search: e.target.value }
-                      } else if (column === 'product_name') {
+                      } else if (column === 'purchase_name') {
                         newFilters = { ...state.filters, search_term: e.target.value }
                       } else {
                         return;
@@ -1002,14 +1119,14 @@ export default function PurchaseList() {
                   >
                     应用
                   </button>
-                  {((column === '' && state.filters.purchase_code_search) || 
-                    (column === '' && state.filters.search_term)) && (
+                  {((column === 'purchase_code' && state.filters.purchase_code_search) || 
+                    (column === 'purchase_name' && state.filters.search_term)) && (
                     <button
                       onClick={() => {
                         let newFilters;
-                        if (column === '') {
+                        if (column === 'purchase_code') {
                           newFilters = { ...state.filters, purchase_code_search: '' }
-                        } else if (column === '') {
+                        } else if (column === 'purchase_name') {
                           newFilters = { ...state.filters, search_term: '' }
                         } else {
                           return;
@@ -1177,21 +1294,21 @@ export default function PurchaseList() {
             )}
             
             {/* 产品类型多选功能 */}
-            {filter.filter_type === 'multiSelect' && column === 'material_type' && (
+            {filter.filter_type === 'multiSelect' && column === 'purchase_type' && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-gray-500">产品类型</div>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {
-                        const allTypes = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'];
+                        const allTypes = ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL'];
                         let newFilters;
-                        if (state.filters.material_types_filter.length === allTypes.length) {
+                        if (state.filters.purchase_types_filter.length === allTypes.length) {
                           // 当前全选状态，点击变为全不选
-                          newFilters = { ...state.filters, material_types_filter: [] };
+                          newFilters = { ...state.filters, purchase_types_filter: [] };
                         } else {
                           // 当前非全选状态，点击变为全选
-                          newFilters = { ...state.filters, material_types_filter: allTypes };
+                          newFilters = { ...state.filters, purchase_types_filter: allTypes };
                         }
                         setState(prev => ({
                           ...prev,
@@ -1203,12 +1320,12 @@ export default function PurchaseList() {
                       }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >
-                      {state.filters.material_types_filter.length === 4 ? '取消全选' : '全选'}
+                      {state.filters.purchase_types_filter.length === 4 ? '取消全选' : '全选'}
                     </button>
-                    {state.filters.material_types_filter.length > 0 && state.filters.material_types_filter.length < 4 && (
+                    {state.filters.purchase_types_filter.length > 0 && state.filters.purchase_types_filter.length < 4 && (
                       <button
                         onClick={() => {
-                          const newFilters = { ...state.filters, material_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED'] };
+                          const newFilters = { ...state.filters, purchase_types_filter: ['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL'] };
                           setState(prev => ({
                             ...prev,
                             filters: newFilters
@@ -1227,25 +1344,25 @@ export default function PurchaseList() {
                     { value: 'LOOSE_BEADS', label: '散珠' },
                     { value: 'BRACELET', label: '手串' },
                     { value: 'ACCESSORIES', label: '饰品配件' },
-                    { value: 'FINISHED', label: '成品' }
+                    { value: 'FINISHED_MATERIAL', label: '成品' }
                   ].map(type => (
                     <label key={type.value} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={state.filters.material_types_filter.includes(type.value)}
+                        checked={state.filters.purchase_types_filter.includes(type.value)}
                         onChange={(e) => {
                           let newFilters;
                           if (e.target.checked) {
                             // 选中：添加到包含列表
                             newFilters = {
                               ...state.filters,
-                              material_types_filter: [...state.filters.material_types_filter, type.value]
+                              purchase_types_filter: [...state.filters.purchase_types_filter, type.value]
                             };
                           } else {
                             // 取消选中：从包含列表中移除
                             newFilters = {
                               ...state.filters,
-                              material_types_filter: state.filters.material_types_filter.filter((t: string) => t !== type.value)
+                              purchase_types_filter: state.filters.purchase_types_filter.filter((t: string) => t !== type.value)
                             };
                           }
                           setState(prev => ({
@@ -1618,13 +1735,13 @@ export default function PurchaseList() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '180px' }}>
                 <div className="flex items-center">
                   产品名称
-                  {render_column_filter('material_name', '产品名称')}
+                  {render_column_filter('purchase_name', '产品名称')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '100px' }}>
                 <div className="flex items-center">
                   产品类型
-                  {render_column_filter('material_type', '产品类型')}
+                  {render_column_filter('purchase_type', '产品类型')}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '80px' }}>
@@ -1689,19 +1806,19 @@ export default function PurchaseList() {
                        {get_first_photo_url(purchase.photos) && (
                          <img 
                            src={get_first_photo_url(purchase.photos)!} 
-                           alt={purchase.material_name}
+                           alt={purchase.purchase_name}
                            className="w-8 h-12 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
                            onClick={() => {
                              const photoUrl = get_first_photo_url(purchase.photos)
-                             if (photoUrl) open_image_preview(photoUrl, purchase.material_name)
+                             if (photoUrl) open_image_preview(photoUrl, purchase.purchase_name)
                            }}
                          />
                        )}
-                       <div className="text-sm font-medium text-gray-900 truncate">{purchase.material_name}</div>
+                       <div className="text-sm font-medium text-gray-900 truncate">{purchase.purchase_name}</div>
                      </div>
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
-                     {format_product_type(purchase.material_type)}
+                     {format_product_type(purchase.purchase_type)}
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '80px' }}>
                      {format_specification(purchase)}
@@ -1713,7 +1830,7 @@ export default function PurchaseList() {
                      {format_quantity(purchase)}
                    </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
-                    {format_sensitive_price(purchase.price_per_gram, true)}
+                    {format_sensitive_price(purchase.price_per_gram)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: '100px' }}>
                     {format_sensitive_price(purchase.total_price)}
@@ -1730,17 +1847,57 @@ export default function PurchaseList() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ width: '100px' }}>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => open_detail_modal(purchase.id)}
+                        onClick={(e) => {
+                          console.log('🖱️ 桌面端详情按钮点击事件触发！')
+                          console.log('🖱️ 桌面端详情按钮点击 - purchase:', purchase)
+                          console.log('🖱️ 桌面端详情按钮点击 - purchase.id:', purchase.id, 'type:', typeof purchase.id)
+                          console.log('🖱️ 桌面端详情按钮点击 - 事件对象:', e)
+                          console.log('🖱️ 桌面端详情按钮点击 - 是否有edit_logs:', !!purchase.edit_logs)
+                          console.log('🖱️ 桌面端详情按钮点击 - edit_logs长度:', purchase.edit_logs?.length || 0)
+                          
+                          // 🚨 针对特定采购编号的深度调试
+                          const target_codes = ['CG20250916254490', 'CG20250916714781']
+                          if (target_codes.includes(purchase.purchase_code)) {
+                            console.log('🚨🚨🚨 [桌面端详情特定调试] 发现目标采购编号:', purchase.purchase_code)
+                            console.log('🚨 [桌面端详情特定调试] 完整purchase数据:', JSON.stringify(purchase, null, 2))
+                            console.log('🚨 [桌面端详情特定调试] 按钮点击事件详情:', e)
+                          }
+                          
+                          e.preventDefault()
+                          e.stopPropagation()
+                          open_detail_modal(purchase.id)
+                        }}
                         className="text-gray-600 hover:text-gray-900"
                         title="查看详情"
+                        style={{ pointerEvents: 'auto', zIndex: 1 }}
                       >
                         <Eye className="h-4 w-4" />
                       </button>
                       <Permission_wrapper allowed_roles={['BOSS']}>
                         <button
-                          onClick={() => handle_edit(purchase.id)}
+                          onClick={(e) => {
+                            console.log('✏️ 桌面端编辑按钮点击事件触发！')
+                            console.log('✏️ 桌面端编辑按钮点击 - purchase:', purchase)
+                            console.log('✏️ 桌面端编辑按钮点击 - purchase.id:', purchase.id, 'type:', typeof purchase.id)
+                            console.log('✏️ 桌面端编辑按钮点击 - 事件对象:', e)
+                            console.log('✏️ 桌面端编辑按钮点击 - 是否有edit_logs:', !!purchase.edit_logs)
+                            console.log('✏️ 桌面端编辑按钮点击 - edit_logs长度:', purchase.edit_logs?.length || 0)
+                            
+                            // 🚨 针对特定采购编号的深度调试
+                            const target_codes = ['CG20250916254490', 'CG20250916714781']
+                            if (target_codes.includes(purchase.purchase_code)) {
+                              console.log('🚨🚨🚨 [桌面端编辑特定调试] 发现目标采购编号:', purchase.purchase_code)
+                              console.log('🚨 [桌面端编辑特定调试] 完整purchase数据:', JSON.stringify(purchase, null, 2))
+                              console.log('🚨 [桌面端编辑特定调试] 按钮点击事件详情:', e)
+                            }
+                            
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handle_edit(purchase.id)
+                          }}
                           className="text-blue-600 hover:text-blue-900"
                           title="编辑"
+                          style={{ pointerEvents: 'auto', zIndex: 1 }}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -1767,32 +1924,72 @@ export default function PurchaseList() {
                 {get_first_photo_url(purchase.photos) && (
                    <img 
                      src={get_first_photo_url(purchase.photos)!} 
-                     alt={purchase.material_name}
+                     alt={purchase.purchase_name}
                      className="w-12 h-16 object-cover rounded border border-gray-200 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                      onClick={() => {
                        const photoUrl = get_first_photo_url(purchase.photos)
-                       if (photoUrl) open_image_preview(photoUrl, purchase.material_name)
+                       if (photoUrl) open_image_preview(photoUrl, purchase.purchase_name)
                      }}
                    />
                  )}
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 text-base">{purchase.material_name}</h3>
+                  <h3 className="font-medium text-gray-900 text-base">{purchase.purchase_name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{purchase.purchase_code}</p>
                 </div>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button
-                  onClick={() => open_detail_modal(purchase.id)}
+                  onClick={(e) => {
+                    console.log('📱 手机端详情按钮点击事件触发！')
+                    console.log('📱 手机端详情按钮点击 - purchase:', purchase)
+                    console.log('📱 手机端详情按钮点击 - purchase.id:', purchase.id, 'type:', typeof purchase.id)
+                    console.log('📱 手机端详情按钮点击 - 事件对象:', e)
+                    console.log('📱 手机端详情按钮点击 - 是否有edit_logs:', !!purchase.edit_logs)
+                    console.log('📱 手机端详情按钮点击 - edit_logs长度:', purchase.edit_logs?.length || 0)
+                    
+                    // 🚨 针对特定采购编号的深度调试
+                    const target_codes = ['CG20250916254490', 'CG20250916714781']
+                    if (target_codes.includes(purchase.purchase_code)) {
+                      console.log('🚨🚨🚨 [手机端详情特定调试] 发现目标采购编号:', purchase.purchase_code)
+                      console.log('🚨 [手机端详情特定调试] 完整purchase数据:', JSON.stringify(purchase, null, 2))
+                      console.log('🚨 [手机端详情特定调试] 按钮点击事件详情:', e)
+                    }
+                    
+                    e.preventDefault()
+                    e.stopPropagation()
+                    open_detail_modal(purchase.id)
+                  }}
                   className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
                   title="查看详情"
+                  style={{ pointerEvents: 'auto', zIndex: 1 }}
                 >
                   <Eye className="h-4 w-4" />
                 </button>
                 <Permission_wrapper allowed_roles={['BOSS']}>
                   <button
-                    onClick={() => handle_edit(purchase.id)}
+                    onClick={(e) => {
+                      console.log('📱 手机端编辑按钮点击事件触发！')
+                      console.log('📱 手机端编辑按钮点击 - purchase:', purchase)
+                      console.log('📱 手机端编辑按钮点击 - purchase.id:', purchase.id, 'type:', typeof purchase.id)
+                      console.log('📱 手机端编辑按钮点击 - 事件对象:', e)
+                      console.log('📱 手机端编辑按钮点击 - 是否有edit_logs:', !!purchase.edit_logs)
+                      console.log('📱 手机端编辑按钮点击 - edit_logs长度:', purchase.edit_logs?.length || 0)
+                      
+                      // 🚨 针对特定采购编号的深度调试
+                      const target_codes = ['CG20250916254490', 'CG20250916714781']
+                      if (target_codes.includes(purchase.purchase_code)) {
+                        console.log('🚨🚨🚨 [手机端编辑特定调试] 发现目标采购编号:', purchase.purchase_code)
+                        console.log('🚨 [手机端编辑特定调试] 完整purchase数据:', JSON.stringify(purchase, null, 2))
+                        console.log('🚨 [手机端编辑特定调试] 按钮点击事件详情:', e)
+                      }
+                      
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handle_edit(purchase.id)
+                    }}
                     className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg"
                     title="编辑"
+                    style={{ pointerEvents: 'auto', zIndex: 1 }}
                   >
                     <Edit className="h-4 w-4" />
                   </button>
@@ -1803,7 +2000,7 @@ export default function PurchaseList() {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                  <span className="text-gray-500">类型:</span>
-                 <span className="ml-1 text-gray-900">{format_product_type(purchase.material_type)}</span>
+                 <span className="ml-1 text-gray-900">{format_product_type(purchase.purchase_type)}</span>
                </div>
               <div>
                 <span className="text-gray-500">规格:</span>
@@ -1834,7 +2031,7 @@ export default function PurchaseList() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-500">克价:</span>
-                  <span className="ml-1 text-gray-900">{format_sensitive_price(purchase.price_per_gram, true)}</span>
+                  <span className="ml-1 text-gray-900">{format_sensitive_price(purchase.price_per_gram)}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">重量:</span>
@@ -2156,17 +2353,17 @@ export default function PurchaseList() {
                   { value: 'LOOSE_BEADS', label: '散珠' },
                   { value: 'BRACELET', label: '手串' },
                   { value: 'ACCESSORIES', label: '饰品配件' },
-                  { value: 'FINISHED', label: '成品' }
+                  { value: 'FINISHED_MATERIAL', label: '成品' }
                 ].map(type => (
                   <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={state.filters.material_types_filter.includes(type.value)}
+                      checked={state.filters.purchase_types_filter.includes(type.value)}
                       onChange={(e) => {
-                        const newMaterialTypes = e.target.checked
-                          ? [...state.filters.material_types_filter, type.value]
-                          : state.filters.material_types_filter.filter((t: string) => t !== type.value)
-                        const newFilters = { ...state.filters, material_types_filter: newMaterialTypes }
+                        const newPurchaseTypes = e.target.checked
+                          ? [...state.filters.purchase_types_filter, type.value]
+                          : state.filters.purchase_types_filter.filter((t: string) => t !== type.value)
+                        const newFilters = { ...state.filters, purchase_types_filter: newPurchaseTypes }
                         setState(prev => ({
                           ...prev,
                           filters: newFilters

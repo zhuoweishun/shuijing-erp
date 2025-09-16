@@ -774,7 +774,7 @@ export const purchase_api = {
     purchase_date_start?: string
     purchase_date_end?: string
     supplier?: string[]
-    material_types?: string[]
+    purchase_types?: string[]
     diameter_min?: string
     diameter_max?: string
     specification_min?: string
@@ -791,8 +791,8 @@ export const purchase_api = {
   
   // 创建采购记录
   create: (data: {
-    material_name: string
-    material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+    purchase_name: string
+    purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
     unit_type: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
     bead_diameter?: number // 散珠和手串使用
     specification?: number // 饰品配件和成品使用
@@ -898,7 +898,7 @@ export const inventory_api = {
     min_stock?: number
     max_stock?: number
     sort?: 'asc' | 'desc'
-    sort_by?: 'purchase_date' | 'created_at' | 'remaining_beads' | 'material_name' // 按原材料名称排序
+    sort_by?: 'material_date' | 'created_at' | 'remaining_quantity' | 'material_name' // 按原材料名称排序
   }) => apiClient.get(`/inventory${buildQueryString(params)}`),
   
   // 库存搜索
@@ -924,7 +924,7 @@ export const inventory_api = {
     specification_min?: string
     specification_max?: string
     sort?: 'asc' | 'desc'
-    sort_by?: 'purchase_date' | 'material_name' | 'specification' | 'remaining_quantity' // 按原材料名称排序
+    sort_by?: 'material_date' | 'material_name' | 'specification' | 'remaining_quantity' // 按原材料名称排序
   }) => apiClient.get(`/inventory/finished-products-cards${buildQueryString(params)}`),
 
   // 获取库存统计数据（仪表盘）
@@ -932,7 +932,7 @@ export const inventory_api = {
   
   // 获取原材料分布数据（饼图）
   get_material_distribution: (params?: {
-    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' // 原材料类型
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型
     limit?: number
   }) => apiClient.get(`/inventory/material-distribution${buildQueryString(params)}`),
   
@@ -944,7 +944,7 @@ export const inventory_api = {
   
   // 获取原材料价格分布数据
   get_price_distribution: (params?: {
-    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' | 'ALL' // 原材料类型
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL' // 原材料类型
     price_type?: 'unit_price' | 'total_price'
     limit?: number
   }) => apiClient.get(`/inventory/price-distribution${buildQueryString(params)}`),
@@ -1128,7 +1128,7 @@ export const finished_product_api = {
   // 获取可用原材料列表
   get_materials: (params?: {
     search?: string
-    material_types?: string[] // 原材料类型筛选
+    purchase_types?: string[] // 原材料类型筛选
     available_only?: boolean
     min_quantity?: number
   }) => apiClient.get(`/finished-products/materials${buildQueryString(params)}`),
@@ -1147,7 +1147,7 @@ export const finished_product_api = {
   
   // 创建成品原材料（注意：这里创建的仍然是原材料material，不是最终产品）
   create: (data: {
-    material_name: string // 成品原材料名称
+    purchase_name: string // 成品原材料名称
     description?: string
     specification?: string
     materials: {
@@ -1180,7 +1180,7 @@ export const finished_product_api = {
   
   // 更新成品原材料信息
   update: (id: string, data: {
-    material_name?: string // 成品原材料名称
+    purchase_name?: string // 成品原材料名称
     description?: string
     specification?: string
     selling_price?: number
@@ -1202,7 +1202,7 @@ export const finished_product_api = {
   batchCreate: (data: {
     products: {
       material_id: string
-      material_name: string // 成品原材料名称
+      purchase_name: string // 成品原材料名称
       description?: string
       specification?: string | number
       labor_cost: number

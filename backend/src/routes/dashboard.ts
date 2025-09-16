@@ -21,7 +21,7 @@ router.get('/', authenticateToken, asyncHandler(async (_req, res) => {
       },
       select: {
         id: true,
-        product_name: true,
+        purchase_name: true,
         created_at: true,
         total_price: true
       }
@@ -55,7 +55,7 @@ router.get('/', authenticateToken, asyncHandler(async (_req, res) => {
       low_stock_items: 0, // 暂时设为0，后续可以根据库存阈值计算
       recent_purchases: recent_purchases.map(purchase => ({
         id: purchase.id,
-        product_name: purchase.product_name,
+        product_name: purchase.purchase_name,
         purchase_date: purchase.created_at,
         total_price: purchase.total_price
       })),

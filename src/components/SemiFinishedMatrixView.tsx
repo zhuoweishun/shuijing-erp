@@ -2,12 +2,12 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { Package, AlertTriangle, TrendingUp, ToggleRight, Filter, Search, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
-import { format_purchase_code } from '../utils/format'
+import { format_purchase_code, formatPurchaseDate } from '../utils/format'
 import Portal from './Portal'
 
 // 半成品库存矩阵数据类型
 interface SemiFinishedMatrixData {
-  product_type: string
+  material_type: string
   total_quantity: number
   total_variants: number
   has_low_stock: boolean
@@ -35,9 +35,9 @@ interface QualityData {
 
 interface BatchData {
   purchase_id: number
-  purchase_code?: string
-  material_name: string // 修改：product_name → material_name
-  product_type: string // 保留：这里的productType实际上是material_type，但API返回仍使用product_type
+  material_code?: string
+  material_name: string // 统一使用material_name
+  material_type: string // 统一使用material_type
   purchase_date: string
   supplier_name: string
   original_quantity: number
@@ -53,8 +53,8 @@ interface BatchData {
 }
 
 interface MatrixCell {
-  product_type: string // 保留：这里的productType实际上是material_type，但API返回仍使用product_type
-  material_name: string // 修改：product_name → material_name
+  material_type: string // 统一使用material_type
+  material_name: string // 统一使用material_name
   size: number
   quality?: string
   total_quantity: number
@@ -79,8 +79,25 @@ interface Props {
 
 // 格式化品相显示
 const format_quality = (quality: string | undefined | null) => {
-  if (!quality) return '未知'
-  return quality
+  // 品质值处理
+  
+  // 处理各种空值情况
+  if (quality === null || quality === undefined || quality === '' || quality === 'null' || quality === 'undefined') {
+    // 品质为空值
+    return '未知'
+  }
+  
+  // 确保quality是有效的枚举值
+  const validQualities = ['AA', 'A', 'AB', 'B', 'C']
+  const normalizedQuality = String(quality).trim().toUpperCase()
+  
+  if (!validQualities.includes(normalizedQuality)) {
+    // 品质值无效
+    return '未知'
+  }
+  
+  // 品质值正常
+  return `${normalizedQuality}级`
 }
 
 // 获取库存状态颜色
@@ -96,11 +113,11 @@ const get_stock_status_color = (quantity: number, is_low_stock: boolean) => {if 
 // 获取品相颜色
 const get_quality_color = (quality: string) => {
   const colorMap: Record<string, string> = {
-    'AA': 'bg-red-500',
-    'A': 'bg-orange-500',
-    'AB': 'bg-yellow-500',
-    'B': 'bg-blue-500',
-    'C': 'bg-gray-500',
+    'AA级': 'bg-red-500',
+    'A级': 'bg-orange-500',
+    'AB级': 'bg-yellow-500',
+    'B级': 'bg-blue-500',
+    'C级': 'bg-gray-500',
     '未知': 'bg-gray-400'
   }
   return colorMap[quality] || 'bg-gray-400'
@@ -162,12 +179,12 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
   const matrixData = useMemo(() => {
     // 只处理散珠和手串类型
     const semiFinishedData = data.filter(item => 
-      item.product_type === 'LOOSE_BEADS' || item.product_type === 'BRACELET'
+      item.material_type === 'LOOSE_BEADS' || item.material_type === 'BRACELET'
     )
 
     if (viewMode === 'size') {
       // 按尺寸展示的矩阵
-      const matrix: { [product_name: string]: { [size: string]: MatrixCell } } = {}
+      const matrix: { [material_name: string]: { [size: string]: MatrixCell } } = {}
       const allSizes = new Set<number>()
       const productNames = new Set<string>()
 
@@ -177,11 +194,11 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           
           specData.qualities.forEach(qualityData => {
             qualityData.batches.forEach(batch => {
-              // 兼容性处理：优先使用materialName，如果不存在则使用productName
-              const material_name = batch.material_name || '未知产品'
+              // 统一使用material_name
+              const material_name = batch.material_name || '未知原材料'
               const size = specData.specification_value
               
-              productNames.add(material_name) // 修改：使用materialName
+              productNames.add(material_name)
               
               if (!matrix[material_name]) {
                 matrix[material_name] = {}
@@ -189,14 +206,14 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               
               if (!matrix[material_name][size]) {
                 matrix[material_name][size] = {
-                  product_type: productTypeData.product_type,
-                  material_name: material_name, // 修改：product_name → material_name
+                  material_type: productTypeData.material_type,
+                  material_name: material_name,
                   size: size,
                   total_quantity: 0,
                   avg_price: 0,
-                  priceUnit: productTypeData.product_type === 'LOOSE_BEADS' ? '元/颗' : 
-                            productTypeData.product_type === 'BRACELET' ? '元/颗' : 
-                            productTypeData.product_type === 'ACCESSORIES' ? '元/片' : '元/件',
+                  priceUnit: productTypeData.material_type === 'LOOSE_BEADS' ? '元/颗' : 
+                            productTypeData.material_type === 'BRACELET' ? '元/颗' : 
+                            productTypeData.material_type === 'ACCESSORIES' ? '元/片' : '元/件',
                   qualityDistribution: {},
                   qualityPrices: {},
                   is_low_stock: false,
@@ -231,7 +248,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           cell.batches.forEach(batch => {
             // 根据产品类型选择合适的价格字段
             let price = 0
-            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
               // 散珠和手串优先使用pricePerBead
               price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
             } else {
@@ -245,7 +262,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
             if (price > 0) {
               // 从批次数据中获取品相信息
               const batchQuality = format_quality(
-                semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+                semiFinishedData.find(ptd => ptd.material_type === batch.material_type)
                   ?.specifications.find(spec => spec.specification_value === cell.size)
                   ?.qualities.find(q => q.batches.some(b => b.purchase_id === batch.purchase_id))
                   ?.quality
@@ -281,23 +298,22 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
       }
     } else {
       // 按品相展示的矩阵
-      const matrix: { [product_name: string]: { [quality: string]: MatrixCell } } = {}
-      // 定义完整的品相选项，确保所有品相都显示
-      const completeQualities = ['AA', 'A', 'AB', 'B', 'C', '未知']
-      const allQualities = new Set<string>(completeQualities)
+      const matrix: { [material_name: string]: { [quality: string]: MatrixCell } } = {}
+      // 动态收集实际存在的品相
+      const actualQualities = new Set<string>()
       const productNames = new Set<string>()
 
       semiFinishedData.forEach(productTypeData => {
         productTypeData.specifications.forEach(specData => {
           specData.qualities.forEach(qualityData => {
             const quality = format_quality(qualityData.quality)
-            allQualities.add(quality)
+            actualQualities.add(quality)
             
             qualityData.batches.forEach(batch => {
-              // 兼容性处理：优先使用materialName，如果不存在则使用productName
-              const material_name = batch.material_name || '未知产品'
+              // 统一使用material_name
+              const material_name = batch.material_name || '未知原材料'
               
-              productNames.add(material_name) // 修改：使用materialName
+              productNames.add(material_name)
               
               if (!matrix[material_name]) {
                 matrix[material_name] = {}
@@ -305,15 +321,15 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               
               if (!matrix[material_name][quality]) {
                 matrix[material_name][quality] = {
-                  product_type: productTypeData.product_type,
-                  material_name: material_name, // 修改：product_name → material_name
+                  material_type: productTypeData.material_type,
+                  material_name: material_name,
                   size: 0, // 在品相视图中，size不是主要维度
                   quality: quality,
                   total_quantity: 0,
                   avg_price: 0,
-                  priceUnit: productTypeData.product_type === 'LOOSE_BEADS' ? '元/颗' : 
-                            productTypeData.product_type === 'BRACELET' ? '元/颗' : 
-                            productTypeData.product_type === 'ACCESSORIES' ? '元/片' : '元/件',
+                  priceUnit: productTypeData.material_type === 'LOOSE_BEADS' ? '元/颗' : 
+                            productTypeData.material_type === 'BRACELET' ? '元/颗' : 
+                            productTypeData.material_type === 'ACCESSORIES' ? '元/片' : '元/件',
                   qualityDistribution: {},
                   qualityPrices: {},
                   is_low_stock: false,
@@ -339,30 +355,16 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
         })
       })
 
-      // 确保每个产品都有完整的品相列（包括空数据）
-      productNames.forEach(product_name => {
-        if (!matrix[product_name]) {
-          matrix[product_name] = {}
-        }
-        
-        completeQualities.forEach(quality => {
-          if (!matrix[product_name][quality]) {
-            // 创建空的品相单元格
-            matrix[product_name][quality] = {
-              product_type: 'LOOSE_BEADS', // 默认类型，实际会被数据覆盖
-              material_name: product_name, // 修改：product_name → material_name（这里productName实际上是materialName）
-              size: 0,
-              quality: quality,
-              total_quantity: 0,
-              avg_price: 0,
-              priceUnit: '元/颗',
-              qualityDistribution: {},
-              qualityPrices: {},
-              is_low_stock: false,
-              batches: []
-            }
-          }
-        })
+      // 按品相优先级排序：AA级 > A级 > AB级 > B级 > C级 > 未知
+      const qualityOrder = ['AA级', 'A级', 'AB级', 'B级', 'C级', '未知']
+      const sortedQualities = Array.from(actualQualities).sort((a, b) => {
+        const indexA = qualityOrder.indexOf(a)
+        const indexB = qualityOrder.indexOf(b)
+        // 如果品相不在预定义列表中，放到最后
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+        if (indexA === -1) return 1
+        if (indexB === -1) return -1
+        return indexA - indexB
       })
       
       // 计算平均价格（按品相）
@@ -375,7 +377,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           cell.batches.forEach(batch => {
             // 根据产品类型选择合适的价格字段
             let price = 0
-            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
               // 散珠和手串优先使用pricePerBead
               price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
             } else {
@@ -392,7 +394,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               total_quantity += remainingQty
               
               // 根据批次找到对应的尺寸
-              const batchSpec = semiFinishedData.find(ptd => ptd.product_type === batch.product_type)
+              const batchSpec = semiFinishedData.find(ptd => ptd.material_type === batch.material_type)
                 ?.specifications.find(spec => 
                   spec.qualities.some(q => q.batches.some(b => b.purchase_id === batch.purchase_id))
                 )
@@ -420,7 +422,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
       return {
         matrix,
         allSizes: [],
-        allQualities: completeQualities, // 使用预定义的完整品相顺序
+        allQualities: sortedQualities, // 使用动态收集的品相列表
         productNames: Array.from(productNames).sort((a, b) => a.localeCompare(b, 'zh-CN'))
       }
     }
@@ -433,8 +435,8 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
       productTypeData.specifications.forEach(specData => {
         specData.qualities.forEach(qualityData => {
           qualityData.batches.forEach(batch => {
-            // 兼容性处理：优先使用materialName，如果不存在则使用productName
-            const material_name = batch.material_name || '未知产品'
+            // 统一使用material_name
+            const material_name = batch.material_name || '未知原材料'
             names.add(material_name)
           })
         })
@@ -463,12 +465,12 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
   }, [allProductNames, searchKeyword, selectedProducts])
 
   // 筛选功能处理函数
-  const handleProductToggle = (product_name: string) => {
+  const handleProductToggle = (material_name: string) => {
     setTempSelectedProducts(prev => {
-      if (prev.includes(product_name)) {
-        return prev.filter(name => name !== product_name)
+      if (prev.includes(material_name)) {
+        return prev.filter(name => name !== material_name)
       } else {
-        return [...prev, product_name]
+        return [...prev, material_name]
       }
     })
   }
@@ -591,7 +593,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
               {Object.entries(matrixData.matrix)
-                .filter(([product_name]) => filteredProductNames.includes(product_name))
+                .filter(([material_name]) => filteredProductNames.includes(material_name))
                 .reduce((total, [, productRow]) => 
                   total + Object.values(productRow).reduce((sum, cell) => sum + (Number(cell.total_quantity) || 0), 0), 0
                 )}
@@ -601,7 +603,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600">
               {Object.entries(matrixData.matrix)
-                .filter(([product_name]) => filteredProductNames.includes(product_name))
+                .filter(([material_name]) => filteredProductNames.includes(material_name))
                 .reduce((total, [, productRow]) => 
                   total + Object.values(productRow).filter(cell => cell.is_low_stock).length, 0
                 )}
@@ -702,16 +704,16 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                               <div className="max-h-60 overflow-y-auto mb-3">
                                 {allProductNames
                                   .filter(name => name.toLowerCase().includes(tempSearchKeyword.toLowerCase()))
-                                  .map((product_name, filterIndex) => (
-                                  <label key={`filter-${product_name}-${filterIndex}`} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                  .map((purchase_name, filterIndex) => (
+                                  <label key={`filter-${purchase_name}-${filterIndex}`} className="flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
                                     <input
                                       type="checkbox"
-                                      checked={tempSelectedProducts.includes(product_name)}
-                                      onChange={() => handleProductToggle(product_name)}
+                                      checked={tempSelectedProducts.includes(purchase_name)}
+                                      onChange={() => handleProductToggle(purchase_name)}
                                       className="rounded border-gray-300 text-crystal-600 focus:ring-crystal-500"
                                     />
-                                    <span className="text-sm text-gray-700 truncate" title={product_name}>
-                                      {product_name}
+                                    <span className="text-sm text-gray-700 truncate" title={purchase_name}>
+                                      {purchase_name}
                                     </span>
                                   </label>
                                 ))}
@@ -753,27 +755,27 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProductNames.map((product_name, rowIndex) => (
-                <tr key={`${product_name}-${rowIndex}`} className="hover:bg-gray-50">
+              {filteredProductNames.map((purchase_name, rowIndex) => (
+                <tr key={`${purchase_name}-${rowIndex}`} className="hover:bg-gray-50">
                   <td className="px-4 py-4 text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
-                    <div className="max-w-32 truncate" title={product_name}>
-                      {product_name}
+                    <div className="max-w-32 truncate" title={purchase_name}>
+                      {purchase_name}
                     </div>
                   </td>
                   {viewMode === 'size' ? (
                     matrixData.allSizes.map((size, cellIndex) => {
-                      const cell = matrixData.matrix[product_name]?.[size]
+                      const cell = matrixData.matrix[purchase_name]?.[size]
                       
                       if (!cell) {
                         return (
-                          <td key={`${product_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
+                          <td key={`${purchase_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
                             <div className="text-gray-400 text-xs">-</div>
                           </td>
                         )
                       }
                       
                       return (
-                        <td key={`${product_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
+                        <td key={`${purchase_name}-${size}-${cellIndex}`} className="px-3 py-4 text-center">
                           <div 
                             className={`cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md ${
               get_stock_status_color(cell.total_quantity, cell.is_low_stock)
@@ -805,14 +807,14 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                                 {Object.entries(cell.qualityDistribution)
                                   .filter(([, quantity]) => quantity > 0)
                                   .sort(([a], [b]) => {
-                                    // 按品相等级排序：AA > A > AB > B > C > 未知
-                                    const order = ['AA', 'A', 'AB', 'B', 'C', '未知'];
+                                    // 按品相等级排序：AA级 > A级 > AB级 > B级 > C级 > 未知
+                                    const order = ['AA级', 'A级', 'AB级', 'B级', 'C级', '未知'];
                                     return order.indexOf(a) - order.indexOf(b);
                                   })
                                   .map(([quality, quantity]) => (
                                     <div key={quality} className="flex justify-center items-center space-x-1">
                                       <div className={`w-1.5 h-1.5 rounded-full ${get_quality_color(quality)}`}></div>
-                                      <span className="text-xs">{quality}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                                      <span className="text-xs">{quality}: {quantity}{cell.material_type === 'LOOSE_BEADS' ? '颗' : cell.material_type === 'BRACELET' ? '颗' : cell.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
                                     </div>
                                   ))
                                 }
@@ -831,18 +833,18 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                     })
                   ) : (
                     matrixData.allQualities.map((quality, cellIndex) => {
-                      const cell = matrixData.matrix[product_name]?.[quality]
+                      const cell = matrixData.matrix[purchase_name]?.[quality]
                       
                       if (!cell) {
                         return (
-                          <td key={`${product_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
+                          <td key={`${purchase_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
                             <div className="text-gray-400 text-xs">-</div>
                           </td>
                         )
                       }
                       
                       return (
-                        <td key={`${product_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
+                        <td key={`${purchase_name}-${quality}-${cellIndex}`} className="px-3 py-4 text-center">
                           <div 
                             className={`cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md ${
                               get_stock_status_color(cell.total_quantity, cell.is_low_stock)
@@ -881,7 +883,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                                   })
                                   .map(([sizeKey, quantity]) => (
                                     <div key={sizeKey} className="flex justify-center items-center">
-                                      <span className="text-xs">{sizeKey}: {quantity}{cell.product_type === 'LOOSE_BEADS' ? '颗' : cell.product_type === 'BRACELET' ? '颗' : cell.product_type === 'ACCESSORIES' ? '片' : '件'}</span>
+                                      <span className="text-xs">{sizeKey}: {quantity}{cell.material_type === 'LOOSE_BEADS' ? '颗' : cell.material_type === 'BRACELET' ? '颗' : cell.material_type === 'ACCESSORIES' ? '片' : '件'}</span>
                                     </div>
                                   ))
                                 }
@@ -934,9 +936,9 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                   <div>
                     <div className="text-sm text-gray-500">总库存</div>
                     <div className="text-xl font-bold text-gray-900">{selectedCell.total_quantity} {
-                      selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
-                      selectedCell.product_type === 'BRACELET' ? '颗' :
-                      selectedCell.product_type === 'ACCESSORIES' ? '片' : '件'
+                      selectedCell.material_type === 'LOOSE_BEADS' ? '颗' :
+                       selectedCell.material_type === 'BRACELET' ? '颗' :
+                      selectedCell.material_type === 'ACCESSORIES' ? '片' : '件'
                     }</div>
                   </div>
                   {user?.role === 'BOSS' && (
@@ -973,12 +975,12 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-medium text-gray-900">{quantity} {viewMode === 'size' ? 
-                            (selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
-                             selectedCell.product_type === 'BRACELET' ? '颗' :
-                             selectedCell.product_type === 'ACCESSORIES' ? '片' : '件') :
-                            (selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
-                             selectedCell.product_type === 'BRACELET' ? '颗' :
-                             selectedCell.product_type === 'ACCESSORIES' ? '片' : '件')
+                            (selectedCell.material_type === 'LOOSE_BEADS' ? '颗' :
+                             selectedCell.material_type === 'BRACELET' ? '颗' :
+                             selectedCell.material_type === 'ACCESSORIES' ? '片' : '件') :
+                            (selectedCell.material_type === 'LOOSE_BEADS' ? '颗' :
+                             selectedCell.material_type === 'BRACELET' ? '颗' :
+                             selectedCell.material_type === 'ACCESSORIES' ? '片' : '件')
                           }</span>
                           {/* 在品相视图中显示尺寸对应的价格，在尺寸视图中显示品相对应的价格 */}
                           {user?.role === 'BOSS' && selectedCell.qualityPrices[key] && (
@@ -998,7 +1000,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <span className="font-medium text-gray-700">CG编号:</span>
-                            <span className="ml-1">{batch.purchase_code || format_purchase_code(batch.purchase_id)}</span>
+                            <span className="ml-1">{batch.material_code || format_purchase_code(batch.purchase_id)}</span>
                           </div>
                           <div>
                             <span className="font-medium text-gray-700">供应商:</span>
@@ -1011,15 +1013,15 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                           <div>
                             <span className="font-medium text-gray-700">库存:</span>
                             <span className="ml-1">{batch.original_quantity} {
-                              selectedCell.product_type === 'LOOSE_BEADS' ? '颗' :
-                              selectedCell.product_type === 'BRACELET' ? '颗' :
-                              selectedCell.product_type === 'ACCESSORIES' ? '片' : '件'
+                              selectedCell.material_type === 'LOOSE_BEADS' ? '颗' :
+                              selectedCell.material_type === 'BRACELET' ? '颗' :
+                              selectedCell.material_type === 'ACCESSORIES' ? '片' : '件'
                             }</span>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-700">采购日期:</span>
-                            <span className="ml-1">{new Date(batch.purchase_date).toLocaleDateString()}</span>
-                          </div>
+                              <span className="font-medium text-gray-700">采购日期:</span>
+                              <span className="ml-1">{formatPurchaseDate(batch)}</span>
+                            </div>
                           {batch.piece_count && (
                             <div>
                               <span className="font-medium text-gray-700">颗数:</span>
@@ -1029,7 +1031,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                           {user?.role === 'BOSS' && (() => {
                             // 根据产品类型选择合适的价格字段
                             let price = 0
-                            if (batch.product_type === 'LOOSE_BEADS' || batch.product_type === 'BRACELET') {
+                            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
                               price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
                             } else {
                               price = Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
@@ -1041,9 +1043,9 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                             return price > 0 ? (
                               <div>
                                 <span className="font-medium text-gray-700">{
-                                  selectedCell.product_type === 'LOOSE_BEADS' ? '颗单价:' :
-                                  selectedCell.product_type === 'BRACELET' ? '颗单价:' :
-                                  selectedCell.product_type === 'ACCESSORIES' ? '片单价:' : '件单价:'
+                                  selectedCell.material_type === 'LOOSE_BEADS' ? '颗单价:' :
+                                  selectedCell.material_type === 'BRACELET' ? '颗单价:' :
+                                  selectedCell.material_type === 'ACCESSORIES' ? '片单价:' : '件单价:'
                                 }</span>
                                 <span className="ml-1">¥{price.toFixed(2)}</span>
                               </div>

@@ -8,14 +8,14 @@ const PRODUCT_TYPES = [
   { key: 'LOOSE_BEADS', label: '散珠', color: '#8884d8' },
   { key: 'BRACELET', label: '手串', color: '#82ca9d' },
   { key: 'ACCESSORIES', label: '饰品配件', color: '#ffc658' },
-  { key: 'FINISHED', label: '成品', color: '#ff7300' }
+  { key: 'FINISHED_MATERIAL', label: '成品', color: '#ff7300' }
 ] as const
 
 type ProductType = typeof PRODUCT_TYPES[number]['key']
 
 interface ProductDistributionItem {
-  product_name: string
-  material_type: string
+  purchase_name: string
+  purchase_type: string
   total_quantity: number
   percentage: number
 }
@@ -33,6 +33,7 @@ interface ChartDataItem {
   value: number
   percentage: number
   color: string
+  [key: string]: any // 添加索引签名以兼容recharts
 }
 
 const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType] = useState<ProductType>('LOOSE_BEADS')
@@ -41,11 +42,11 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
   const [chartData, setChartData] = useState<ChartDataItem[]>([])
 
   // 获取产品分布数据
-  const fetchProductDistribution = async (material_type: ProductType) => {
+  const fetchProductDistribution = async (purchase_type: ProductType) => {
     set_loading(true)
     try {
       const response = await inventory_api.get_material_distribution({
-        material_type: material_type,
+        material_type: purchase_type,
         limit: 20
       })
       
@@ -62,7 +63,7 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
         }
         
         // 转换为图表数据格式
-        const typeConfig = PRODUCT_TYPES.find(t => t.key === material_type)
+        const typeConfig = PRODUCT_TYPES.find(t => t.key === purchase_type)
         const baseColor = typeConfig?.color || '#8884d8'
         
         // 计算总数量用于百分比计算
@@ -73,10 +74,10 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
         const chartItems: ChartDataItem[] = backendData.items.map((item: any, index: number) => {
           const percentage = total_quantity > 0 ? (item.total_remaining_quantity / total_quantity) * 100 : 0
           return {
-            name: item.material_type === 'LOOSE_BEADS' ? '散珠' : 
-                  item.material_type === 'BRACELET' ? '手串' :
-                  item.material_type === 'ACCESSORIES' ? '饰品配件' :
-                  item.material_type === 'FINISHED' ? '成品' : item.material_type,
+            name: item.purchase_type === 'LOOSE_BEADS' ? '散珠' : 
+                  item.purchase_type === 'BRACELET' ? '手串' :
+                  item.purchase_type === 'ACCESSORIES' ? '饰品配件' :
+                  item.purchase_type === 'FINISHED_MATERIAL' ? '成品' : item.purchase_type,
             value: item.total_remaining_quantity,
             percentage: percentage,
             color: generateColor(baseColor, index, (backendData as any).items.length)
@@ -86,11 +87,11 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
         // 转换数据格式以兼容现有的显示逻辑
         const compatibleData = {
           topProducts: backendData.items.map(item => ({
-            product_name: item.material_type === 'LOOSE_BEADS' ? '散珠' : 
-                         item.material_type === 'BRACELET' ? '手串' :
-                         item.material_type === 'ACCESSORIES' ? '饰品配件' :
-                         item.material_type === 'FINISHED' ? '成品' : item.material_type,
-            material_type: item.material_type,
+            purchase_name: item.purchase_type === 'LOOSE_BEADS' ? '散珠' : 
+                         item.purchase_type === 'BRACELET' ? '手串' :
+                         item.purchase_type === 'ACCESSORIES' ? '饰品配件' :
+                         item.purchase_type === 'FINISHED_MATERIAL' ? '成品' : item.purchase_type,
+            purchase_type: item.purchase_type,
             total_quantity: item.total_remaining_quantity,
             percentage: total_quantity > 0 ? (item.total_remaining_quantity / total_quantity) * 100 : 0
           }))
@@ -204,7 +205,7 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percentage }) => `${name} (${percentage.toFixed(1)}%)`}
+                label={({ name, percentage }: any) => `${name} (${(percentage as number).toFixed(1)}%)`}
                 outerRadius={120}
                 fill="#8884d8"
                 dataKey="value"

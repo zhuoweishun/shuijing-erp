@@ -30,9 +30,9 @@ router.get('/config', asyncHandler(async (_req, res) => {
       ...config,
       provider: 'doubao',
       features: {
-        crystalPurchaseParsing: true,
-        textParsing: true,
-        imageAnalysis: false,
+        crystal_purchase_parsing: true,
+        text_parsing: true,
+        image_analysis: false,
         assistant: true
       }
     }

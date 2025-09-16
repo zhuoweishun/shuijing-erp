@@ -76,8 +76,8 @@ class CameraErrorBoundary extends React.Component<
 
 // 表单数据类型
 interface PurchaseFormData {
-  material_name: string
-  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+  purchase_name: string
+  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
   unit_type: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
   bead_diameter?: number // 散珠和手串必填，其他可选
   specification?: number // 通用规格字段
@@ -85,6 +85,7 @@ interface PurchaseFormData {
   piece_count?: number // 散珠颗数/饰品片数/成品件数
   min_stock_alert?: number
   price_per_gram?: number
+  unit_price?: number // 单价字段
   total_price?: number
   weight?: number
   quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
@@ -105,15 +106,15 @@ export default function PurchaseEntry() {
   // 表单状态
   const { register, handleSubmit, setValue, watch, reset, formState, formState: { errors } } = useForm<PurchaseFormData>({
     defaultValues: {
-      material_name: '',
-      material_type: 'BRACELET',
+      purchase_name: '',
+      purchase_type: 'BRACELET',
       unit_type: 'STRINGS'
     },
     mode: 'onChange'
   })
   
   // 产品类型状态 - 必须在使用前声明
-  const [selected_material_type, set_selected_material_type] = useState<ProductType>('BRACELET')
+  const [selected_purchase_type, set_selected_purchase_type] = useState<ProductType>('BRACELET')
   const [selected_unit_type, set_selected_unit_type] = useState<UnitType>('STRINGS')
   
   // 监听价格相关字段变化
@@ -130,37 +131,37 @@ export default function PurchaseEntry() {
   const beads_per_string = bead_diameter ? Math.floor(160 / bead_diameter) : 0
   
   // 计算总颗数（仅用于手串）
-  const total_beads = selected_material_type === 'BRACELET' && quantity && beads_per_string ? quantity * beads_per_string: 0
+  const total_beads = selected_purchase_type === 'BRACELET' && quantity && beads_per_string ? quantity * beads_per_string: 0
   
   // 根据产品类型计算单价
   const unit_price = useMemo(() => {
     if (!total_price) return 0
     
-    switch (selected_material_type) {
+    switch (selected_purchase_type) {
       case 'LOOSE_BEADS':
         return piece_count ? total_price / piece_count : 0 // 每颗价格
       case 'BRACELET':
         return quantity ? total_price / quantity : 0 // 每条价格
       case 'ACCESSORIES':
         return piece_count ? total_price / piece_count : 0 // 每片价格
-      case 'FINISHED':
+      case 'FINISHED_MATERIAL':
         return piece_count ? total_price / piece_count : 0 // 每件价格
       default:
         return 0
     }
-  }, [total_price, selected_material_type, quantity, piece_count])
+  }, [total_price, selected_purchase_type, quantity, piece_count])
   
   // 计算每颗珠子价格（仅用于散珠和手串）
   const price_per_bead = useMemo(() => {
     if (!total_price) return 0
     
-    if (selected_material_type === 'LOOSE_BEADS' && piece_count) {
+    if (selected_purchase_type === 'LOOSE_BEADS' && piece_count) {
       return total_price / piece_count
-    } else if (selected_material_type === 'BRACELET' && total_beads) {
+    } else if (selected_purchase_type === 'BRACELET' && total_beads) {
       return total_price / total_beads
     }
     return 0
-  }, [total_price, selected_material_type, piece_count, total_beads])
+  }, [total_price, selected_purchase_type, piece_count, total_beads])
   
   // 持久化key
   const PHOTOS_STORAGE_KEY = 'purchase_entry_photos'
@@ -279,15 +280,15 @@ export default function PurchaseEntry() {
   const [filtered_suppliers, set_filtered_suppliers] = useState<Array<{id: string, name: string, contact?: string, phone?: string}>>([])
   const [creating_supplier, set_creating_supplier] = useState(false)
   
-  // 处理材料类型变更
-  const handle_material_type_change = (material_type: ProductType, unit_type: UnitType) => {
-    set_selected_material_type(material_type)
+  // 处理采购类型变更
+  const handle_purchase_type_change = (purchase_type: ProductType, unit_type: UnitType) => {
+    set_selected_purchase_type(purchase_type)
     set_selected_unit_type(unit_type)
-    setValue('material_type', material_type)
+    setValue('purchase_type', purchase_type)
     setValue('unit_type', unit_type)
     
     // 清空相关字段，避免数据混乱
-    if (material_type === 'LOOSE_BEADS' || material_type === 'BRACELET') {
+    if (purchase_type === 'LOOSE_BEADS' || purchase_type === 'BRACELET') {
       setValue('specification', undefined)
       setValue('piece_count', undefined)
     } else {
@@ -298,9 +299,9 @@ export default function PurchaseEntry() {
   
   // 初始化表单默认值
   useEffect(() => {
-    setValue('material_type', selected_material_type)
+    setValue('purchase_type', selected_purchase_type)
     setValue('unit_type', selected_unit_type)
-  }, [setValue, selected_material_type, selected_unit_type])
+  }, [setValue, selected_purchase_type, selected_unit_type])
   
   // 加载供应商列表
   useEffect(() => {
@@ -849,13 +850,20 @@ export default function PurchaseEntry() {
   useEffect(() => {
     // 防抖处理，避免频繁计算
     const timer = setTimeout(() => {
-      if (price_per_gram || total_price || weight) {
-        calculate_missing_value(price_per_gram || 0, total_price || 0, weight || 0)
+      if (price_per_gram || total_price || weight || unit_price || piece_count) {
+        calculate_missing_value(
+          price_per_gram || 0, 
+          total_price || 0, 
+          weight || 0,
+          unit_price || 0,
+          piece_count || 0,
+          selected_purchase_type
+        )
       }
     }, 500)
     
     return () => clearTimeout(timer)
-  }, [price_per_gram, total_price, weight])
+  }, [price_per_gram, total_price, weight, unit_price, piece_count, selected_purchase_type])
   
 
   
@@ -1093,12 +1101,39 @@ export default function PurchaseEntry() {
   }
   
   // 价格计算函数
-  const calculate_missing_value = (price_per_gram: number, total_price: number, weight: number) => {
+  const calculate_missing_value = (price_per_gram: number, total_price: number, weight: number, unit_price?: number, piece_count?: number, purchase_type?: string) => {
     // 检查输入值的有效性
     const validPricePerGram = price_per_gram && price_per_gram > 0
     const validTotalPrice = total_price && total_price > 0
     const validWeight = weight && weight > 0
+    const validUnitPrice = unit_price && unit_price > 0
+    const validPieceCount = piece_count && piece_count > 0
     
+    // 饰品配件和成品类型：使用单价和数量计算总价
+    if ((purchase_type === 'ACCESSORIES' || purchase_type === 'FINISHED_MATERIAL') && validUnitPrice && validPieceCount && !validTotalPrice) {
+      const calculatedTotalPrice = Number((unit_price * piece_count).toFixed(1))
+      console.log('计算总价(饰品/成品):', { unit_price, piece_count, calculatedTotalPrice })
+      setValue('total_price', calculatedTotalPrice)
+      return { type: 'total_price', value: calculatedTotalPrice }
+    }
+    
+    // 饰品配件和成品类型：根据总价和数量计算单价
+    if ((purchase_type === 'ACCESSORIES' || purchase_type === 'FINISHED_MATERIAL') && validTotalPrice && validPieceCount && !validUnitPrice) {
+      const calculatedUnitPrice = Number((total_price / piece_count).toFixed(2))
+      console.log('计算单价(饰品/成品):', { total_price, piece_count, calculatedUnitPrice })
+      setValue('unit_price', calculatedUnitPrice)
+      return { type: 'unit_price', value: calculatedUnitPrice }
+    }
+    
+    // 饰品配件和成品类型：根据总价和单价计算数量
+    if ((purchase_type === 'ACCESSORIES' || purchase_type === 'FINISHED_MATERIAL') && validTotalPrice && validUnitPrice && !validPieceCount) {
+      const calculatedPieceCount = Math.round(total_price / unit_price)
+      console.log('计算数量(饰品/成品):', { total_price, unit_price, calculatedPieceCount })
+      setValue('piece_count', calculatedPieceCount)
+      return { type: 'piece_count', value: calculatedPieceCount }
+    }
+    
+    // 散珠和手串类型：使用克价、总价、重量计算
     // 如果有克价和总价，计算重量
     if (validPricePerGram && validTotalPrice && !validWeight) {
       const calculatedWeight = Number((total_price / price_per_gram).toFixed(1))
@@ -1153,21 +1188,21 @@ export default function PurchaseEntry() {
         
         console.log('🔍 AI返回的原始字段:', Object.keys(aiData))
         
-        // 材料名称：product_name -> material_name
-        if (aiData.product_name) {
-          setValue('material_name', aiData.product_name)
-          console.log('✅ 映射材料名称:', aiData.product_name)
+        // 采购名称：purchase_name -> purchase_name
+        if (aiData.purchase_name) {
+          setValue('purchase_name', aiData.purchase_name)
+          console.log('✅ 映射采购名称:', aiData.purchase_name)
         }
         
-        // 自动设置材料类型和单位类型：material_type, unit_type -> material_type, unit_type
-        if (aiData.material_type && aiData.unit_type) {
-          handle_material_type_change(aiData.material_type, aiData.unit_type)
-          console.log('✅ 映射材料类型:', aiData.material_type, aiData.unit_type)
+        // 自动设置采购类型和单位类型：purchase_type, unit_type -> purchase_type, unit_type
+        if (aiData.purchase_type && aiData.unit_type) {
+          handle_purchase_type_change(aiData.purchase_type, aiData.unit_type)
+          console.log('✅ 映射采购类型:', aiData.purchase_type, aiData.unit_type)
         }
         
         // 设置珠子直径或规格：bead_diameter -> bead_diameter 或 specification
         if (aiData.bead_diameter) {
-          if (aiData.material_type === 'FINISHED' || aiData.material_type === 'ACCESSORIES') {
+          if (aiData.purchase_type === 'FINISHED_MATERIAL' || aiData.purchase_type === 'ACCESSORIES') {
             // 成品和饰品使用规格字段
             setValue('specification', aiData.bead_diameter)
             console.log('✅ 映射规格:', aiData.bead_diameter)
@@ -1198,9 +1233,10 @@ export default function PurchaseEntry() {
           console.log('✅ 映射总价:', aiData.total_price)
         }
         
-        // 单价字段：unit_price（暂时不直接设置到表单）
+        // 单价字段：unit_price -> unit_price
         if (aiData.unit_price) {
-          console.log('ℹ️ 识别到单价（将通过总价和数量计算）:', aiData.unit_price)
+          setValue('unit_price', aiData.unit_price)
+          console.log('✅ 映射单价:', aiData.unit_price)
         }
         
         // 重量字段：weight -> weight
@@ -1230,12 +1266,13 @@ export default function PurchaseEntry() {
         
         // 统计成功映射的字段
         const mappedFields = [
-          aiData.product_name && 'product_name',
-          aiData.material_type && 'material_type',
+          aiData.purchase_name && 'purchase_name',
+          aiData.purchase_type && 'purchase_type',
           aiData.bead_diameter && 'bead_diameter',
           aiData.quantity && 'quantity',
           aiData.piece_count && 'piece_count',
           aiData.price_per_gram && 'price_per_gram',
+          aiData.unit_price && 'unit_price',
           aiData.total_price && 'total_price',
           aiData.weight && 'weight',
           aiData.quality && 'quality',
@@ -1250,10 +1287,21 @@ export default function PurchaseEntry() {
           const result = calculate_missing_value(
             aiData.price_per_gram || 0,
             aiData.total_price || 0,
-            aiData.weight || 0
+            aiData.weight || 0,
+            aiData.unit_price || 0,
+            aiData.piece_count || 0,
+            aiData.purchase_type
           )
           if (result) {
-            toast.success(`AI识别成功，已自动填充${mappedFields.length}个字段，并计算${result.type === 'weight' ? '重量' : result.type === 'total_price' ? '总价' : '克价'}：${result.value}`)
+            const resultTypeMap = {
+              'weight': '重量',
+              'total_price': '总价',
+              'price_per_gram': '克价',
+              'unit_price': '单价',
+              'piece_count': '数量'
+            }
+            const resultTypeName = resultTypeMap[result.type as keyof typeof resultTypeMap] || result.type
+            toast.success(`AI识别成功，已自动填充${mappedFields.length}个字段，并计算${resultTypeName}：${result.value}`)
           } else {
             toast.success(`AI识别成功，已自动填充${mappedFields.length}个字段`)
           }
@@ -1278,20 +1326,20 @@ export default function PurchaseEntry() {
     // 表单提交开始
     console.log('🔍 [表单提交] 开始提交，表单数据:', data)
     
-    // 详细调试：检查 material_name 字段
-    console.log('🔍 [调试] data.material_name 详细信息:', {
-      value: data.material_name,
-      type: typeof data.material_name,
-      length: data.material_name?.length,
-      trimmed: data.material_name?.trim(),
-      isEmpty: !data.material_name || !data.material_name.trim()
+    // 详细调试：检查 purchase_name 字段
+    console.log('🔍 [调试] data.purchase_name 详细信息:', {
+      value: data.purchase_name,
+      type: typeof data.purchase_name,
+      length: data.purchase_name?.length,
+      trimmed: data.purchase_name?.trim(),
+      isEmpty: !data.purchase_name || !data.purchase_name.trim()
     })
     
     // 检查表单验证状态
     console.log('🔍 [调试] 表单验证状态:', {
       errors: errors,
-      hasMaterialNameError: !!errors.material_name,
-      materialNameError: errors.material_name?.message,
+      hasPurchaseNameError: !!errors.purchase_name,
+      purchaseNameError: errors.purchase_name?.message,
       formState: {
         is_valid: formState.isValid,
         isDirty: formState.isDirty,
@@ -1300,8 +1348,8 @@ export default function PurchaseEntry() {
     })
     
     // 验证必填字段
-    if (!data.material_name || !data.material_name.trim()) {
-      toast.error('材料名称不能为空')
+    if (!data.purchase_name || !data.purchase_name.trim()) {
+      toast.error('采购名称不能为空')
       return
     }
     
@@ -1321,9 +1369,9 @@ export default function PurchaseEntry() {
     try {
       // 根据产品类型验证必需字段
       
-      // 验证材料名称（所有类型必填）
-      if (!data.material_name?.trim()) {
-        toast.error('材料名称不能为空')
+      // 验证采购名称（所有类型必填）
+      if (!data.purchase_name?.trim()) {
+        toast.error('采购名称不能为空')
         set_submitting(false)
         return
       }
@@ -1335,8 +1383,8 @@ export default function PurchaseEntry() {
         return
       }
       
-      // 根据材料类型验证特定字段
-      if (data.material_type === 'LOOSE_BEADS') {
+      // 根据采购类型验证特定字段
+      if (data.purchase_type === 'LOOSE_BEADS') {
         // 散珠：产品名称、直径、数量、总价、供应商名称
         if (!data.bead_diameter) {
           toast.error('珠子直径不能为空')
@@ -1353,7 +1401,7 @@ export default function PurchaseEntry() {
           set_submitting(false)
           return
         }
-      } else if (data.material_type === 'BRACELET') {
+      } else if (data.purchase_type === 'BRACELET') {
         // 手串：产品名称、直径、数量、克价/总价/重量三选二、供应商名称
         if (!data.bead_diameter) {
           toast.error('珠子直径不能为空')
@@ -1372,7 +1420,7 @@ export default function PurchaseEntry() {
           set_submitting(false)
           return
         }
-      } else if (data.material_type === 'ACCESSORIES') {
+      } else if (data.purchase_type === 'ACCESSORIES') {
         // 饰品配件：产品名称、规格、数量、总价、供应商名称
         if (!data.specification) {
           toast.error('规格不能为空')
@@ -1389,7 +1437,7 @@ export default function PurchaseEntry() {
           set_submitting(false)
           return
         }
-      } else if (data.material_type === 'FINISHED') {
+      } else if (data.purchase_type === 'FINISHED_MATERIAL') {
         // 成品：产品名称、规格、数量、总价、供应商名称
         if (!data.specification) {
           toast.error('规格不能为空')
@@ -1421,18 +1469,18 @@ export default function PurchaseEntry() {
       }
       
       // 构建提交数据前的调试
-      console.log('🔍 [调试] 构建 submitData 前，data.material_name:', {
-        value: data.material_name,
-        type: typeof data.material_name,
-        length: data.material_name?.length,
-        isUndefined: data.material_name === undefined,
-        isNull: data.material_name === null,
-        isEmpty: data.material_name === ''
+      console.log('🔍 [调试] 构建 submitData 前，data.purchase_name:', {
+        value: data.purchase_name,
+        type: typeof data.purchase_name,
+        length: data.purchase_name?.length,
+        isUndefined: data.purchase_name === undefined,
+        isNull: data.purchase_name === null,
+        isEmpty: data.purchase_name === ''
       })
       
       const submitData = {
-        material_name: data.material_name,
-        material_type: data.material_type || 'BRACELET',
+        purchase_name: data.purchase_name,
+        purchase_type: data.purchase_type || 'BRACELET',
         unit_type: data.unit_type || 'STRINGS',
         bead_diameter: data.bead_diameter ? Number(data.bead_diameter) : undefined,
         specification: data.specification ? Number(data.specification) : undefined,
@@ -1450,19 +1498,19 @@ export default function PurchaseEntry() {
       }
       
       // 构建提交数据后的调试
-      console.log('🔍 [调试] 构建 submitData 后，submitData.material_name:', {
-        value: submitData.material_name,
-        type: typeof submitData.material_name,
-        length: submitData.material_name?.length,
-        isUndefined: submitData.material_name === undefined,
-        isNull: submitData.material_name === null,
-        isEmpty: submitData.material_name === ''
+      console.log('🔍 [调试] 构建 submitData 后，submitData.purchase_name:', {
+        value: submitData.purchase_name,
+        type: typeof submitData.purchase_name,
+        length: submitData.purchase_name?.length,
+        isUndefined: submitData.purchase_name === undefined,
+        isNull: submitData.purchase_name === null,
+        isEmpty: submitData.purchase_name === ''
       })
       
       console.log('📤 [表单提交] 准备提交的数据:', submitData)
       console.log('🔍 [表单提交] 关键字段检查:', {
-        material_name: submitData.material_name,
-        material_type: submitData.material_type,
+        purchase_name: submitData.purchase_name,
+        purchase_type: submitData.purchase_type,
         supplier_name: submitData.supplier_name,
         photosCount: submitData.photos.length
       })
@@ -1487,8 +1535,8 @@ export default function PurchaseEntry() {
           reset()
           set_photos([])
           set_file_data_list([])
-          // 重置材料类型和单位类型到默认值
-          set_selected_material_type('BRACELET')
+          // 重置采购类型和单位类型到默认值
+          set_selected_purchase_type('BRACELET')
           set_selected_unit_type('STRINGS')
           // 状态重置完成，准备下一次录入
           // 不再跳转到采购列表，留在当前页面方便连续录入
@@ -1566,7 +1614,7 @@ export default function PurchaseEntry() {
                 <div className="relative group max-w-sm">
                   <img
                     src={photos.length > 0 ? photos[0] : (file_data_list.length > 0 ? file_data_list[0].base64 : '')}
-                    alt="产品图片"
+                    alt="采购产品图片"
                     className="w-full max-h-64 object-contain rounded-lg border border-gray-200 shadow-sm bg-gray-50"
                     onLoad={() => console.log('图片加载成功')}
                     onError={(e) => {
@@ -2038,8 +2086,8 @@ export default function PurchaseEntry() {
         {/* 产品类型选择 */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <ProductTypeTab
-            selected_type={selected_material_type}
-            onTypeChange={handle_material_type_change}
+            selected_type={selected_purchase_type}
+            onTypeChange={handle_purchase_type_change}
           />
         </div>
         
@@ -2055,22 +2103,22 @@ export default function PurchaseEntry() {
                 type="text"
                 placeholder="如：白水晶、紫水晶、粉水晶等"
                 className="input-mobile"
-                {...register('material_name', {
-                  required: '材料名称不能为空',
-                  minLength: { value: 1, message: '材料名称不能为空' },
-                  maxLength: { value: 100, message: '材料名称不能超过100字符' }
+                {...register('purchase_name', {
+                  required: '采购名称不能为空',
+                  minLength: { value: 1, message: '采购名称不能为空' },
+                  maxLength: { value: 100, message: '采购名称不能超过100字符' }
                 })}
               />
-              {errors.material_name && (
+              {errors.purchase_name && (
                 <div className="form-error-mobile">
                   <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
-                  {errors.material_name.message}
+                  {errors.purchase_name.message}
                 </div>
               )}
             </div>
             
             {/* 动态字段：根据产品类型显示不同的规格字段 */}
-            {(selected_material_type === 'LOOSE_BEADS' || selected_material_type === 'BRACELET') && (
+            {(selected_purchase_type === 'LOOSE_BEADS' || selected_purchase_type === 'BRACELET') && (
               <MobileInput
                 label="珠子直径 (mm)"
                 required
@@ -2086,7 +2134,7 @@ export default function PurchaseEntry() {
               />
             )}
             
-            {selected_material_type === 'ACCESSORIES' && (
+            {selected_purchase_type === 'ACCESSORIES' && (
               <MobileInput
                 label="使用边规格 (mm)"
                 required
@@ -2101,7 +2149,7 @@ export default function PurchaseEntry() {
               />
             )}
             
-            {selected_material_type === 'FINISHED' && (
+            {selected_purchase_type === 'FINISHED_MATERIAL' && (
               <MobileInput
                 label="规格 (mm)"
                 required
@@ -2117,7 +2165,7 @@ export default function PurchaseEntry() {
             )}
             
             {/* 动态字段：根据产品类型显示不同的数量字段 */}
-            {selected_material_type === 'BRACELET' && (
+            {selected_purchase_type === 'BRACELET' && (
               <MobileInput
                 label="数量 (条)"
                 required
@@ -2131,13 +2179,13 @@ export default function PurchaseEntry() {
               />
             )}
             
-            {(selected_material_type === 'LOOSE_BEADS' || selected_material_type === 'ACCESSORIES' || selected_material_type === 'FINISHED') && (
+            {(selected_purchase_type === 'LOOSE_BEADS' || selected_purchase_type === 'ACCESSORIES' || selected_purchase_type === 'FINISHED_MATERIAL') && (
               <MobileInput
-                label={`数量 (${selected_material_type === 'LOOSE_BEADS' ? '颗' : selected_material_type === 'ACCESSORIES' ? '片' : '件'})`}
+                label={`数量 (${selected_purchase_type === 'LOOSE_BEADS' ? '颗' : selected_purchase_type === 'ACCESSORIES' ? '片' : '件'})`}
                 required
                 type="number"
                 min={1}
-                placeholder={`请输入${selected_material_type === 'LOOSE_BEADS' ? '颗数' : selected_material_type === 'ACCESSORIES' ? '片数' : '件数'}`}
+                placeholder={`请输入${selected_purchase_type === 'LOOSE_BEADS' ? '颗数' : selected_purchase_type === 'ACCESSORIES' ? '片数' : '件数'}`}
                 value={watch('piece_count') || ''}
                 on_change={(e) => setValue('piece_count', parseInt(e.target.value) || undefined)}
                 error={errors.piece_count?.message}
@@ -2167,7 +2215,7 @@ export default function PurchaseEntry() {
           <MobileFormRow columns={isMobile ? 1 : 2}>
             {/* 克价 */}
             <MobileInput
-              label={`克价 (元/克)${selected_material_type === 'BRACELET' ? ' (与总价、重量三选二)' : ''}`}
+              label={`克价 (元/克)${selected_purchase_type === 'BRACELET' ? ' (与总价、重量三选二)' : ''}`}
               type="number"
               step="0.1"
               min={0}
@@ -2181,13 +2229,13 @@ export default function PurchaseEntry() {
             
             {/* 总价 */}
             <TotalPriceInput
-              label={`总价 (元)${selected_material_type !== 'BRACELET' ? '' : ' (与克价、重量三选二)'}`}
-              required={selected_material_type !== 'BRACELET'}
+              label={`总价 (元)${selected_purchase_type !== 'BRACELET' ? '' : ' (与克价、重量三选二)'}`}
+              required={selected_purchase_type !== 'BRACELET'}
               value={watch('total_price') || ''}
               onChange={(value: any) => setValue('total_price', value)}
               error={errors.total_price?.message}
               placeholder="采购总价"
-              selected_material_type={selected_material_type}
+              selected_purchase_type={selected_purchase_type}
               unit_price={unit_price}
               total_beads={total_beads}
               price_per_bead={price_per_bead}
@@ -2196,7 +2244,7 @@ export default function PurchaseEntry() {
             
             {/* 重量 */}
             <MobileInput
-              label={`重量 (克)${selected_material_type === 'BRACELET' ? ' (与克价、总价三选二)' : ''}`}
+              label={`重量 (克)${selected_purchase_type === 'BRACELET' ? ' (与克价、总价三选二)' : ''}`}
               type="number"
               step="0.1"
               min={0}

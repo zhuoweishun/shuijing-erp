@@ -51,7 +51,7 @@ model Supplier {
 model Purchase {
   id                     String           @id @default(cuid())
   purchase_code          String           @unique
-  product_name           String
+  purchase_name          String
   quantity               Int?
   min_stock_alert        Int?
   price_per_gram         Decimal?         @db.Decimal(10, 1)
@@ -64,7 +64,7 @@ model Purchase {
   price_per_bead         Decimal?         @db.Decimal(10, 4)
   price_per_piece        Decimal?         @db.Decimal(10, 4)
   quality                Quality?
-  product_type           ProductType      @default(BRACELET)
+  purchase_type          ProductType      @default(BRACELET)
   unit_type              UnitType         @default(STRINGS)
   specification          Decimal?         @db.Decimal(10, 1)
   piece_count            Int?
@@ -354,7 +354,7 @@ enum ProductType {
   LOOSE_BEADS
   BRACELET
   ACCESSORIES
-  FINISHED
+  FINISHED_MATERIAL
 }
 
 enum UnitType {

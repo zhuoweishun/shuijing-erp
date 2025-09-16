@@ -169,7 +169,7 @@ describe('PurchaseEntry 组件测试', () => {
       await waitFor(() => {
         // 验证必填字段错误提示
         expect(screen.getByText(/供应商名称为必填项/)).toBeInTheDocument();
-        expect(screen.getByText(/产品名称为必填项/)).toBeInTheDocument();
+        expect(screen.getByText(/材料名称为必填项/)).toBeInTheDocument();
       });
     });
 
@@ -369,12 +369,12 @@ describe('PurchaseEntry 组件测试', () => {
 
       // 填写表单
       const supplier_input = screen.getByLabelText(/供应商名称/);
-      const productNameInput = screen.getByLabelText(/产品名称/);
+      const materialNameInput = screen.getByLabelText(/材料名称/);
       const quantityInput = screen.getByLabelText(/数量/);
       const priceInput = screen.getByLabelText(/单价/);
 
       await userEvent.type(supplier_input, '测试供应商1');
-      await userEvent.type(productNameInput, '测试产品');
+      await userEvent.type(materialNameInput, '测试材料');
       await userEvent.type(quantityInput, '100');
       await userEvent.type(priceInput, '10.5');
 
@@ -386,7 +386,7 @@ describe('PurchaseEntry 组件测试', () => {
         expect(mockApiClient.post).toHaveBeenCalledWith('/purchases',
           expect.objectContaining({
             supplier_name: '测试供应商1',
-            product_name: '测试产品',
+            material_name: '测试材料',
             quantity: 100,
             unit_price: 10.5
           })

@@ -21,6 +21,7 @@ interface PieData {
   name: string
   value: number
   color: string
+  [key: string]: any // 添加索引签名以兼容recharts
 }
 
 const FinancialCharts: React.FC = () => {
@@ -251,7 +252,7 @@ const FinancialCharts: React.FC = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }: any) => `${name} ${(((percent as number) || 0) * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"

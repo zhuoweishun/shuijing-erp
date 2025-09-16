@@ -132,8 +132,8 @@ export type { AIService }
 export function formatAIParseResult(result: AIParseResponse): string {
   const parts: string[] = []
   
-  if (result.material_name) {
-    parts.push(`原材料名称: ${result.material_name}`)
+  if (result.purchase_name) {
+    parts.push(`采购名称: ${result.purchase_name}`)
   }
   
   if (result.quantity) {
@@ -186,8 +186,8 @@ export function validateAIParseResult(result: AIParseResponse): {
   }
   
   // 检查必要字段
-  if (!result.material_name) {
-    errors.push('未识别到原材料名称')
+  if (!result.purchase_name) {
+    errors.push('未识别到采购名称')
   }
   
   // 检查数值合理性
