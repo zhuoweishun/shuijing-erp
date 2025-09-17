@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单API测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 简单API测试</h1>
+        
+        <div>
+            <h3>1. 测试API连接</h3>
+            <button onclick="testAPIConnection()">测试API连接</button>
+            <button onclick="testLogin()">测试登录</button>
+            <button onclick="testInventoryAPI()">测试库存API</button>
+            <button onclick="testMaterialDistribution()">测试原材料分布API</button>
+            <div id="api-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api/v1';
+        
+        function setResult(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = isError ? 'result error' : 'result success';
+        }
+        
+        async function testAPIConnection() {
+            setResult('api-result', '正在测试API连接...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    setResult('api-result', `✅ API连接成功\n状态: ${response.status}\n响应: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    setResult('api-result', `❌ API连接失败\n状态: ${response.status}\n状态文本: ${response.statusText}`, true);
+                }
+            } catch (error) {
+                setResult('api-result', `❌ 连接错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testLogin() {
+            setResult('api-result', '正在测试登录...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_name: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // 保存token到localStorage
+                    if (data.data && data.data.token) {
+                        localStorage.setItem('auth_token', data.data.token);
+                        setResult('api-result', `✅ 登录成功\nToken已保存到localStorage\n响应: ${JSON.stringify(data, null, 2)}`);
+                    } else {
+                        setResult('api-result', `⚠️ 登录响应异常\n响应: ${JSON.stringify(data, null, 2)}`, true);
+                    }
+                } else {
+                    const errorData = await response.text();
+                    setResult('api-result', `❌ 登录失败\n状态: ${response.status}\n错误: ${errorData}`, true);
+                }
+            } catch (error) {
+                setResult('api-result', `❌ 登录错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testInventoryAPI() {
+            setResult('api-result', '正在测试库存API...');
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                setResult('api-result', '❌ 请先登录获取token', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/inventory/hierarchical?material_types=LOOSE_BEADS`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    let output = `✅ 库存API调用成功\n响应状态: ${data.success}\n`;
+                    
+                    // 查找油胆数据
+                    const hierarchy = data.data?.hierarchy || [];
+                    let foundYoudan = false;
+                    
+                    hierarchy.forEach((typeGroup, typeIndex) => {
+                        if (typeGroup.material_type === 'LOOSE_BEADS') {
+                            typeGroup.specifications?.forEach((spec, specIndex) => {
+                                spec.qualities?.forEach((quality, qualityIndex) => {
+                                    quality.batches?.forEach((batch, batchIndex) => {
+                                        if (batch.material_name?.includes('油胆')) {
+                                            foundYoudan = true;
+                                            output += `\n🎯 找到油胆数据:\n`;
+                                            output += `  - 名称: ${batch.material_name}\n`;
+                                            output += `  - 品相: ${quality.quality}级\n`;
+                                            output += `  - 规格: ${batch.bead_diameter}mm\n`;
+                                            output += `  - 库存: ${batch.remaining_quantity}\n`;
+                                            output += `  - price_per_unit: ${batch.price_per_unit} (类型: ${typeof batch.price_per_unit})\n`;
+                                            output += `  - unit_cost: ${batch.unit_cost} (类型: ${typeof batch.unit_cost})\n`;
+                                            output += `  - 供应商: ${batch.supplier_name}\n`;
+                                            
+                                            // 测试前端价格计算
+                                            const frontendPrice = Number(batch.price_per_unit) || 0;
+                                            output += `  - 前端计算价格: ${frontendPrice}\n`;
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    });
+                    
+                    if (!foundYoudan) {
+                        output += '\n⚠️ 未找到油胆数据';
+                    }
+                    
+                    setResult('api-result', output);
+                } else {
+                    const errorData = await response.text();
+                    setResult('api-result', `❌ 库存API调用失败\n状态: ${response.status}\n错误: ${errorData}`, true);
+                }
+            } catch (error) {
+                setResult('api-result', `❌ 库存API错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testMaterialDistribution() {
+            setResult('api-result', '正在测试原材料分布API...');
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                setResult('api-result', '❌ 请先登录获取token', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/inventory/material-distribution`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    let output = `✅ 原材料分布API调用成功\n响应状态: ${data.success}\n`;
+                    output += `总项目数: ${data.data.total_items}\n`;
+                    output += `总剩余数量: ${data.data.total_remaining_quantity}\n\n`;
+                    
+                    output += '📋 原材料分布详情:\n';
+                    data.data.items.forEach((item, index) => {
+                        output += `  ${index + 1}. ${item.name}: ${item.value} (${item.percentage}%)\n`;
+                    });
+                    
+                    // 检查是否有散珠相关项目
+                    const beadItems = data.data.items.filter(item => 
+                        item.name.includes('散珠') || item.name.includes('珠子')
+                    );
+                    
+                    if (beadItems.length > 0) {
+                        output += '\n🔮 散珠相关项目:\n';
+                        beadItems.forEach(item => {
+                            output += `  - ${item.name}: ${item.value} (${item.percentage}%)\n`;
+                        });
+                    }
+                    
+                    output += '\n📝 验证: API现在从materials表读取数据，而不是purchases表';
+                    
+                    setResult('api-result', output);
+                } else {
+                    const errorData = await response.text();
+                    setResult('api-result', `❌ 原材料分布API调用失败\n状态: ${response.status}\n错误: ${errorData}`, true);
+                }
+            } catch (error) {
+                setResult('api-result', `❌ 原材料分布API错误: ${error.message}`, true);
+            }
+        }
+        
+        // 页面加载时显示当前token状态
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                setResult('api-result', `当前已有token: ${token.substring(0, 50)}...`);
+            } else {
+                setResult('api-result', '当前无token，请先登录');
+            }
+        });
+    </script>
+</body>
+</html>

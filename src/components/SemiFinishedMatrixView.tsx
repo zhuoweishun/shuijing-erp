@@ -27,7 +27,7 @@ interface QualityData {
   quality: string
   remaining_quantity: number
   is_low_stock: boolean
-  price_per_unit: number | null
+  unit_cost: number | null
   price_per_gram: number | null
   batch_count: number
   batches: BatchData[]
@@ -43,7 +43,8 @@ interface BatchData {
   original_quantity: number
   used_quantity: number
   remaining_quantity: number
-  price_per_unit: number | null
+  unit_cost: number | null // 保留向后兼容
+  price_per_unit: number | null // 后端实际返回的字段
   price_per_bead: number | null
   price_per_gram: number | null
   photos?: string[]
@@ -196,7 +197,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
             qualityData.batches.forEach(batch => {
               // 统一使用material_name
               const material_name = batch.material_name || '未知原材料'
-              const size = specData.specification_value
+              const size = batch.specification || specData.specification_value
               
               productNames.add(material_name)
               
@@ -245,47 +246,25 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
         Object.values(productRow).forEach(cell => {
           const qualityPriceData: { [quality: string]: { total_price: number, total_quantity: number } } = {}
           
+          // 简化价格计算：直接使用批次的price_per_unit字段
+          let total_price = 0
+          let total_quantity = 0
+          
           cell.batches.forEach(batch => {
-            // 根据产品类型选择合适的价格字段
-            let price = 0
-            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
-              // 散珠和手串优先使用pricePerBead
-              price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-            } else {
-              // 其他产品类型使用原有逻辑
-              price = Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-            }
-            // 确保price是有效数字
-            if (isNaN(price) || price < 0) {
-              price = 0
-            }
-            if (price > 0) {
-              // 从批次数据中获取品相信息
-              const batchQuality = format_quality(
-                semiFinishedData.find(ptd => ptd.material_type === batch.material_type)
-                  ?.specifications.find(spec => spec.specification_value === cell.size)
-                  ?.qualities.find(q => q.batches.some(b => b.purchase_id === batch.purchase_id))
-                  ?.quality
-              )
+            const price = Number(batch.price_per_unit) || 0 // API返回的是price_per_unit字段
+            const remainingQty = Number(batch.remaining_quantity) || 0
+            
+            if (price > 0 && remainingQty > 0) {
+              total_price += price * remainingQty
+              total_quantity += remainingQty
               
-              if (!qualityPriceData[batchQuality]) {
-                qualityPriceData[batchQuality] = { total_price: 0, total_quantity: 0 }
-              }
-              
-              const remainingQty = Number(batch.remaining_quantity) || 0
-              qualityPriceData[batchQuality].total_price += price * remainingQty
-              qualityPriceData[batchQuality].total_quantity += remainingQty
+              // 为每个品相设置价格（简化逻辑）
+              const batchQuality = format_quality(batch.quality)
+              cell.qualityPrices[batchQuality] = price
             }
           })
           
-          // 计算每个品相的平均价格
-          Object.entries(qualityPriceData).forEach(([quality, data]) => {
-            cell.qualityPrices[quality] = data.total_quantity > 0 ? data.total_price / data.total_quantity : 0
-          })
-          
-          // 计算总体平均价格（加权平均）
-          const total_price = Object.values(qualityPriceData).reduce((sum, data) => sum + data.total_price, 0)
-          const total_quantity = Object.values(qualityPriceData).reduce((sum, data) => sum + data.total_quantity, 0)
+          // 计算加权平均价格
           cell.avg_price = total_quantity > 0 ? total_price / total_quantity : 0
         })
       })
@@ -343,7 +322,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               cell.batches.push(batch)
               
               // 在品相视图中，qualityDistribution显示尺寸分布
-              const sizeKey = `${specData.specification_value}mm`
+              const sizeKey = `${batch.bead_diameter || specData.specification_value}mm`
               cell.qualityDistribution[sizeKey] = (cell.qualityDistribution[sizeKey] || 0) + remainingQty
               
               // 检查低库存状态
@@ -374,45 +353,27 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
           let total_quantity = 0
           const sizePriceData: { [sizeKey: string]: { total_price: number, total_quantity: number } } = {}
           
+          // 简化价格计算：直接使用批次的price_per_unit字段
           cell.batches.forEach(batch => {
-            // 根据产品类型选择合适的价格字段
-            let price = 0
-            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
-              // 散珠和手串优先使用pricePerBead
-              price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-            } else {
-              // 其他产品类型使用原有逻辑
-              price = Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-            }
-            // 确保price是有效数字
-            if (isNaN(price) || price < 0) {
-              price = 0
-            }
-            if (price > 0) {
-              const remainingQty = Number(batch.remaining_quantity) || 0
+            const price = Number(batch.price_per_unit) || 0 // API返回的是price_per_unit字段
+            const remainingQty = Number(batch.remaining_quantity) || 0
+            
+            if (price > 0 && remainingQty > 0) {
               total_price += price * remainingQty
               total_quantity += remainingQty
               
-              // 根据批次找到对应的尺寸
-              const batchSpec = semiFinishedData.find(ptd => ptd.material_type === batch.material_type)
-                ?.specifications.find(spec => 
-                  spec.qualities.some(q => q.batches.some(b => b.purchase_id === batch.purchase_id))
-                )
-              
-              if (batchSpec) {
-                const sizeKey = `${batchSpec.specification_value}mm`
-                if (!sizePriceData[sizeKey]) {
-                  sizePriceData[sizeKey] = { total_price: 0, total_quantity: 0 }
-                }
-                sizePriceData[sizeKey].total_price += price * remainingQty
-                sizePriceData[sizeKey].total_quantity += remainingQty
+              // 根据视图模式设置价格
+              if (viewMode === 'size') {
+                // 尺寸视图：为每个尺寸设置价格
+                const batchSize = batch.bead_diameter || batch.specification || 12 // 默认12mm
+                const sizeKey = `${batchSize}mm`
+                cell.qualityPrices[sizeKey] = price
+              } else {
+                // 品相视图：为每个品相设置价格
+                const quality = batch.quality || '未知'
+                cell.qualityPrices[quality] = price
               }
             }
-          })
-          
-          // 计算每个尺寸的平均价格
-          Object.entries(sizePriceData).forEach(([sizeKey, data]) => {
-            cell.qualityPrices[sizeKey] = data.total_quantity > 0 ? data.total_price / data.total_quantity : 0
           })
           
           cell.avg_price = total_quantity > 0 ? total_price / total_quantity : 0
@@ -964,7 +925,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                           {viewMode === 'size' ? (
                             <>
                               <div className={`w-3 h-3 rounded-full ${get_quality_color(key)}`}></div>
-                              <span className="text-sm text-gray-700">{key === '未知' ? key : `${key}级`}</span>
+                              <span className="text-sm text-gray-700">{key}</span>
                             </>
                           ) : (
                             <>
@@ -1029,17 +990,8 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
                             </div>
                           )}
                           {user?.role === 'BOSS' && (() => {
-                            // 根据产品类型选择合适的价格字段
-                            let price = 0
-                            if (batch.material_type === 'LOOSE_BEADS' || batch.material_type === 'BRACELET') {
-                              price = Number(batch.price_per_bead) || Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-                            } else {
-                              price = Number(batch.price_per_unit) || Number(batch.price_per_gram) || 0
-                            }
-                            // 确保price是有效数字
-                            if (isNaN(price) || price < 0) {
-                              price = 0
-                            }
+                            // 简化价格显示：直接使用price_per_unit字段
+                            const price = Number(batch.price_per_unit) || 0
                             return price > 0 ? (
                               <div>
                                 <span className="font-medium text-gray-700">{

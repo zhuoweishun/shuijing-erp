@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-09-17T07:38:03.044Z",
+  "purchase_stats": {
+    "total_records": 10,
+    "active_records": 10,
+    "by_type": [
+      {
+        "total_count": 3,
+        "purchase_type": "LOOSE_BEADS",
+        "active_count": 3
+      },
+      {
+        "total_count": 5,
+        "purchase_type": "BRACELET",
+        "active_count": 5
+      },
+      {
+        "total_count": 1,
+        "purchase_type": "ACCESSORIES",
+        "active_count": 1
+      },
+      {
+        "total_count": 1,
+        "purchase_type": "FINISHED_MATERIAL",
+        "active_count": 1
+      }
+    ]
+  },
+  "material_stats": {
+    "total_records": 10,
+    "by_type": [
+      {
+        "total_count": 3,
+        "material_type": "LOOSE_BEADS"
+      },
+      {
+        "total_count": 5,
+        "material_type": "BRACELET"
+      },
+      {
+        "total_count": 1,
+        "material_type": "ACCESSORIES"
+      },
+      {
+        "total_count": 1,
+        "material_type": "FINISHED_MATERIAL"
+      }
+    ]
+  },
+  "missing_materials": [],
+  "data_inconsistencies": [],
+  "summary": {
+    "total_active_purchases": 10,
+    "total_materials": 10,
+    "missing_materials_count": 0,
+    "inconsistent_records_count": 0,
+    "sync_rate_percentage": 100,
+    "status": "PERFECT"
+  }
+}

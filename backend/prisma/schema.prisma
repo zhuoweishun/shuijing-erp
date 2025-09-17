@@ -8,26 +8,27 @@ datasource db {
 }
 
 model User {
-  id                  String              @id @default(cuid())
-  user_name           String              @unique
-  email               String?             @unique
-  password            String
-  role                UserRole            @default(EMPLOYEE)
-  name                String
-  phone               String?
-  avatar              String?
-  is_active           Boolean             @default(true)
-  last_login_at       DateTime?
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
-  customer_notes      CustomerNotes[]
-  edit_logs           EditLog[]
-  financial_records   FinancialRecords[]
-  created_skus        ProductSku[]
-  products            Product[]
-  last_edited_purchases Purchase[]        @relation("PurchaseLastEditedBy")
-  purchases           Purchase[]
-  sku_inventory_logs  SkuInventoryLog[]
+  id                    String             @id @default(cuid())
+  user_name             String             @unique
+  email                 String?            @unique
+  password              String
+  role                  UserRole           @default(EMPLOYEE)
+  name                  String
+  phone                 String?
+  avatar                String?
+  created_at            DateTime           @default(now())
+  is_active             Boolean            @default(true)
+  last_login_at         DateTime?
+  updated_at            DateTime           @updatedAt
+  customer_notes        CustomerNotes[]
+  edit_logs             EditLog[]
+  financial_records     FinancialRecords[]
+  created_materials     Material[]
+  created_skus          ProductSku[]
+  products              Product[]
+  last_edited_purchases Purchase[]         @relation("PurchaseLastEditedBy")
+  purchases             Purchase[]
+  sku_inventory_logs    SkuInventoryLog[]
 
   @@map("users")
 }
@@ -40,9 +41,10 @@ model Supplier {
   email       String?
   address     String?
   description String?    @db.Text
-  is_active   Boolean    @default(true)
   created_at  DateTime   @default(now())
+  is_active   Boolean    @default(true)
   updated_at  DateTime   @updatedAt
+  materials   Material[]
   purchases   Purchase[]
 
   @@map("suppliers")
@@ -50,37 +52,38 @@ model Supplier {
 
 model Purchase {
   id                     String           @id @default(cuid())
-  purchase_code          String           @unique
-  purchase_name          String
   quantity               Int?
-  min_stock_alert        Int?
-  price_per_gram         Decimal?         @db.Decimal(10, 1)
-  unit_price             Decimal?         @db.Decimal(10, 1)
-  total_price            Decimal?         @db.Decimal(10, 1)
   weight                 Decimal?         @db.Decimal(10, 1)
-  bead_diameter          Decimal?         @db.Decimal(10, 1)
-  beads_per_string       Int?
-  total_beads            Int?
-  price_per_bead         Decimal?         @db.Decimal(10, 4)
-  price_per_piece        Decimal?         @db.Decimal(10, 4)
   quality                Quality?
-  purchase_type          ProductType      @default(BRACELET)
-  unit_type              UnitType         @default(STRINGS)
   specification          Decimal?         @db.Decimal(10, 1)
-  piece_count            Int?
-  purchase_date          DateTime
-  natural_language_input String?          @db.Text
   photos                 Json
   notes                  String?          @db.Text
-  ai_recognition_result  Json?
   status                 purchases_status @default(ACTIVE)
+  ai_recognition_result  Json?
+  bead_diameter          Decimal?         @db.Decimal(10, 1)
+  beads_per_string       Int?
   created_at             DateTime         @default(now())
-  updated_at             DateTime         @updatedAt
-  supplier_id            String?
-  user_id                String
   last_edited_by_id      String?
+  min_stock_alert        Int?
+  natural_language_input String?          @db.Text
+  piece_count            Int?
+  price_per_bead         Decimal?         @db.Decimal(10, 4)
+  price_per_gram         Decimal?         @db.Decimal(10, 1)
+  price_per_piece        Decimal?         @db.Decimal(10, 4)
+  purchase_name          String
+  purchase_type          ProductType      @default(BRACELET)
+  purchase_code          String           @unique
+  purchase_date          DateTime
+  supplier_id            String?
+  total_beads            Int?
+  total_price            Decimal?         @db.Decimal(10, 1)
+  unit_price             Decimal?         @db.Decimal(10, 1)
+  unit_type              UnitType         @default(STRINGS)
+  updated_at             DateTime         @updatedAt
+  user_id                String
   edit_logs              EditLog[]
   material_usages        MaterialUsage[]
+  materials              Material[]
   last_edited_by         User?            @relation("PurchaseLastEditedBy", fields: [last_edited_by_id], references: [id])
   supplier               Supplier?        @relation(fields: [supplier_id], references: [id])
   user                   User             @relation(fields: [user_id], references: [id])
@@ -92,26 +95,25 @@ model Purchase {
 }
 
 model Product {
-  id               String          @id @default(cuid())
-  name             String
-  description      String?         @db.Text
-  category         String?
-  quantity         Int             @default(0)
-  unit             String
-  unit_price       Decimal         @db.Decimal(10, 2)
-  total_value      Decimal         @db.Decimal(10, 2)
-  status           ProductStatus   @default(AVAILABLE)
-  location         String?
-  notes            String?         @db.Text
-  images           String?         @db.Text
-  created_at       DateTime        @default(now())
-  updated_at       DateTime        @updatedAt
-  user_id          String
-  product_code     String?
-  sku_id           String?
-  material_usages  MaterialUsage[]
-  sku              ProductSku?     @relation(fields: [sku_id], references: [id])
-  user             User            @relation(fields: [user_id], references: [id])
+  id           String        @id @default(cuid())
+  name         String
+  description  String?       @db.Text
+  category     String?
+  quantity     Int           @default(0)
+  unit         String
+  status       ProductStatus @default(AVAILABLE)
+  location     String?
+  notes        String?       @db.Text
+  images       String?       @db.Text
+  created_at   DateTime      @default(now())
+  product_code String?
+  sku_id       String?
+  total_value  Decimal       @db.Decimal(10, 2)
+  unit_price   Decimal       @db.Decimal(10, 2)
+  updated_at   DateTime      @updatedAt
+  user_id      String
+  sku          ProductSku?   @relation(fields: [sku_id], references: [id])
+  user         User          @relation(fields: [user_id], references: [id])
 
   @@index([sku_id], map: "products_skuId_fkey")
   @@index([user_id], map: "products_userId_fkey")
@@ -131,12 +133,12 @@ model SystemConfig {
 
 model EditLog {
   id             String   @id @default(cuid())
-  purchase_id    String
-  user_id        String
   action         String
   details        String?  @db.Text
   changed_fields Json?
   created_at     DateTime @default(now())
+  purchase_id    String
+  user_id        String
   purchase       Purchase @relation(fields: [purchase_id], references: [id], onDelete: Cascade)
   user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -145,52 +147,102 @@ model EditLog {
   @@map("edit_logs")
 }
 
+model Material {
+  id                              String          @id @default(cuid())
+  material_code                   String          @unique
+  material_name                   String
+  material_type                   ProductType
+  quality                         Quality?        @default(UNKNOWN)
+  bead_diameter                   Decimal?        @db.Decimal(5, 2)
+  bracelet_inner_diameter         Decimal?        @db.Decimal(5, 2)
+  bracelet_bead_count             Int?
+  accessory_specification         String?
+  finished_material_specification String?
+  original_quantity               Int
+  used_quantity                   Int             @default(0)
+  inventory_unit                  UnitType
+  unit_cost                       Decimal         @db.Decimal(10, 4)
+  total_cost                      Decimal         @db.Decimal(12, 2)
+  min_stock_alert                 Int?
+  purchase_id                     String
+  supplier_id                     String?
+  photos                          Json?
+  material_date                   DateTime        @db.Date
+  notes                           String?         @db.Text
+  created_at                      DateTime        @default(now())
+  updated_at                      DateTime        @updatedAt
+  created_by                      String
+  remaining_quantity              Int?            @default(0)
+  stock_status                    String?         @default("SUFFICIENT")
+  material_usages                 MaterialUsage[]
+  creator                         User            @relation(fields: [created_by], references: [id])
+  purchase                        Purchase        @relation(fields: [purchase_id], references: [id])
+  supplier                        Supplier?       @relation(fields: [supplier_id], references: [id])
+
+  @@index([material_code])
+  @@index([material_name])
+  @@index([material_type, quality])
+  @@index([purchase_id])
+  @@index([supplier_id])
+  @@index([material_date])
+  @@index([material_name, material_code])
+  @@index([stock_status])
+  @@index([remaining_quantity])
+  @@index([purchase_id], map: "idx_materials_purchase_id")
+  @@index([created_by], map: "materials_created_by_fkey")
+  @@map("materials")
+}
+
 model MaterialUsage {
   id            String                @id @default(cuid())
-  purchase_id   String?
-  product_id    String?
-  created_at    DateTime              @default(now())
-  updated_at    DateTime              @updatedAt
-  total_cost    Decimal?              @db.Decimal(10, 2)
-  unit_cost     Decimal?              @db.Decimal(10, 4)
   action        material_usage_action @default(CREATE)
-  material_id   String
   notes         String?               @db.Text
+  created_at    DateTime              @default(now())
+  material_id   String
+  purchase_id   String?
   quantity_used Int
   sku_id        String?
-  product       Product?              @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  total_cost    Decimal?              @db.Decimal(10, 2)
+  unit_cost     Decimal?              @db.Decimal(10, 4)
+  updated_at    DateTime              @updatedAt
+  material      Material              @relation(fields: [material_id], references: [id])
   purchase      Purchase?             @relation(fields: [purchase_id], references: [id], onDelete: Restrict)
+  sku           ProductSku?           @relation(fields: [sku_id], references: [id], onDelete: Restrict)
 
-  @@index([product_id], map: "material_usage_productId_fkey")
+  @@index([material_id], map: "material_usage_materialId_fkey")
+  @@index([sku_id], map: "material_usage_skuId_fkey")
   @@index([purchase_id], map: "material_usage_purchaseId_fkey")
+  @@index([action])
+  @@index([material_id], map: "idx_material_usage_material_id")
   @@map("material_usage")
 }
 
 model ProductSku {
-  id                      String               @id @default(cuid())
-  sku_code                String               @unique
-  sku_name                String
-  material_signature_hash String
-  material_signature      Json
-  total_quantity          Int                  @default(0)
-  available_quantity      Int                  @default(0)
-  unit_price              Decimal              @db.Decimal(10, 2)
-  total_value             Decimal              @db.Decimal(10, 2)
+  id                      String              @id @default(cuid())
+  total_quantity          Int                 @default(0)
+  unit_price              Decimal             @db.Decimal(10, 2)
   photos                  Json?
-  description             String?              @db.Text
+  description             String?             @db.Text
   specification           String?
-  material_cost           Decimal?             @db.Decimal(10, 2)
-  labor_cost              Decimal?             @db.Decimal(10, 2)
-  craft_cost              Decimal?             @db.Decimal(10, 2)
-  total_cost              Decimal?             @db.Decimal(10, 2)
-  selling_price           Decimal              @db.Decimal(10, 2)
-  profit_margin           Decimal?             @db.Decimal(5, 2)
-  status                  SkuStatus            @default(ACTIVE)
-  created_at              DateTime             @default(now())
-  updated_at              DateTime             @updatedAt
+  status                  SkuStatus           @default(ACTIVE)
+  available_quantity      Int                 @default(0)
+  craft_cost              Decimal?            @db.Decimal(10, 2)
+  created_at              DateTime            @default(now())
   created_by              String
+  labor_cost              Decimal?            @db.Decimal(10, 2)
+  material_cost           Decimal?            @db.Decimal(10, 2)
+  material_signature      Json
+  material_signature_hash String
+  profit_margin           Decimal?            @db.Decimal(5, 2)
+  selling_price           Decimal             @db.Decimal(10, 2)
+  sku_code                String              @unique
+  sku_name                String
+  total_cost              Decimal?            @db.Decimal(10, 2)
+  total_value             Decimal             @db.Decimal(10, 2)
+  updated_at              DateTime            @updatedAt
   customer_purchases      CustomerPurchases[]
-  creator                 User                 @relation(fields: [created_by], references: [id])
+  material_usages         MaterialUsage[]
+  creator                 User                @relation(fields: [created_by], references: [id])
   products                Product[]
   inventory_logs          SkuInventoryLog[]
 
@@ -203,15 +255,15 @@ model ProductSku {
 
 model SkuInventoryLog {
   id              String                           @id @default(cuid())
-  sku_id          String
   action          sku_inventory_logs_action
-  quantity_change Int
-  quantity_before Int
-  quantity_after  Int
-  reference_type  sku_inventory_logs_referenceType
-  reference_id    String?
   notes           String?                          @db.Text
   created_at      DateTime                         @default(now())
+  quantity_after  Int
+  quantity_before Int
+  quantity_change Int
+  reference_id    String?
+  reference_type  sku_inventory_logs_referenceType
+  sku_id          String
   user_id         String
   sku             ProductSku                       @relation(fields: [sku_id], references: [id])
   user            User                             @relation(fields: [user_id], references: [id])
@@ -225,26 +277,26 @@ model SkuInventoryLog {
 
 model AuditLog {
   id          String   @id @default(cuid())
-  user_id     String?
   action      String
   resource    String
-  resource_id String?
   details     String?  @db.Text
-  ip_address  String?
-  user_agent  String?
   created_at  DateTime @default(now())
+  ip_address  String?
+  resource_id String?
+  user_agent  String?
+  user_id     String?
 
   @@map("audit_logs")
 }
 
 model CustomerNotes {
   id          String                  @id
-  customer_id String
   category    customer_notes_category
   content     String                  @db.Text
   created_at  DateTime                @default(now())
-  updated_at  DateTime
   created_by  String
+  customer_id String
+  updated_at  DateTime
   users       User                    @relation(fields: [created_by], references: [id])
   customers   Customers               @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 
@@ -256,21 +308,21 @@ model CustomerNotes {
 
 model CustomerPurchases {
   id             String                    @id
-  customer_id    String
-  sku_id         String
-  sku_name       String
   quantity       Int
   unit_price     Decimal                   @db.Decimal(10, 2)
-  original_price Decimal?                  @db.Decimal(10, 2)
   total_price    Decimal                   @db.Decimal(10, 2)
   status         customer_purchases_status @default(ACTIVE)
-  refund_date    DateTime?
-  refund_reason  String?
-  refund_notes   String?                   @db.Text
-  sale_channel   String?
   notes          String?                   @db.Text
-  purchase_date  DateTime                  @default(now())
   created_at     DateTime                  @default(now())
+  customer_id    String
+  original_price Decimal?                  @db.Decimal(10, 2)
+  purchase_date  DateTime                  @default(now())
+  refund_date    DateTime?
+  refund_notes   String?                   @db.Text
+  refund_reason  String?
+  sale_channel   String?
+  sku_id         String
+  sku_name       String
   updated_at     DateTime
   customers      Customers                 @relation(fields: [customer_id], references: [id])
   product_skus   ProductSku                @relation(fields: [sku_id], references: [id])
@@ -283,29 +335,29 @@ model CustomerPurchases {
 }
 
 model Customers {
-  id                        String               @id
+  id                        String              @id
   name                      String
-  phone                     String               @unique
-  address                   String?              @db.Text
-  notes                     String?              @db.Text
-  total_purchases           Decimal              @default(0.00) @db.Decimal(10, 2)
-  total_orders              Int                  @default(0)
-  first_purchase_date       DateTime?
-  last_purchase_date        DateTime?
-  created_at                DateTime             @default(now())
-  updated_at                DateTime
+  phone                     String              @unique
+  address                   String?             @db.Text
+  notes                     String?             @db.Text
   birthday                  DateTime?
   wechat                    String?
-  average_order_value       Decimal              @default(0.00) @db.Decimal(10, 2)
   city                      String?
+  province                  String?
+  average_order_value       Decimal             @default(0.00) @db.Decimal(10, 2)
+  created_at                DateTime            @default(now())
   customer_labels           Json?
   days_since_first_purchase Int?
   days_since_last_purchase  Int?
+  first_purchase_date       DateTime?
+  last_purchase_date        DateTime?
   primary_label             String?
-  province                  String?
-  refund_count              Int                  @default(0)
-  refund_rate               Decimal              @default(0.00) @db.Decimal(5, 2)
-  total_all_orders          Int                  @default(0)
+  refund_count              Int                 @default(0)
+  refund_rate               Decimal             @default(0.00) @db.Decimal(5, 2)
+  total_all_orders          Int                 @default(0)
+  total_orders              Int                 @default(0)
+  total_purchases           Decimal             @default(0.00) @db.Decimal(10, 2)
+  updated_at                DateTime
   customer_notes            CustomerNotes[]
   customer_purchases        CustomerPurchases[]
 
@@ -316,15 +368,15 @@ model Customers {
 
 model FinancialRecords {
   id               String                          @id
-  record_type      financial_records_recordType
   amount           Decimal                         @db.Decimal(10, 2)
   description      String
-  reference_type   financial_records_referenceType
-  reference_id     String?
   category         String?
-  transaction_date DateTime
   notes            String?                         @db.Text
   created_at       DateTime                        @default(now())
+  record_type      financial_records_recordType
+  reference_id     String?
+  reference_type   financial_records_referenceType
+  transaction_date DateTime
   updated_at       DateTime
   user_id          String
   users            User                            @relation(fields: [user_id], references: [id])
@@ -348,6 +400,7 @@ enum Quality {
   AB
   B
   C
+  UNKNOWN
 }
 
 enum ProductType {

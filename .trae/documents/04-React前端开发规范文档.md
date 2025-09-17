@@ -64,45 +64,136 @@ interface FinishedProductGridProps {
 
 # 文档 04：React前端开发规范文档
 
-## 一、TypeScript类型定义规范（重要更新）
+## 一、TypeScript类型定义规范（基于materials表架构）
 
-### 1.1 核心数据类型定义
+### 1.1 核心数据类型定义（materials表优先）
 
-**采购相关类型（已更新）：**
+**修复成果：**
+实现了完整的purchase到material映射机制、数据类型安全处理、层级式库存展示，重点关注字段规范、半成品库存、配件库存、成品原材料库存等核心功能的实现和优化。
+
+**materials表核心类型：**
 ```typescript
-// 采购记录类型（已修复）
+// materials表主要类型定义
+interface Material {
+  material_id: string
+  material_code: string
+  material_name: string
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
+  material_date: string
+  supplier_name: string
+  original_quantity: number
+  remaining_quantity: number
+  used_quantity: number
+  inventory_unit: 'BEADS' | 'ITEMS' | 'PIECES'
+  unit_cost: number
+  stock_status: 'SUFFICIENT' | 'LOW' | 'OUT_OF_STOCK'
+  purchase_id: string // 关联原始采购记录
+  photos: string[]
+  specification?: string
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  created_at: string
+  updated_at: string
+}
+
+// 库存查询响应类型
+interface InventoryResponse {
+  success: boolean
+  data: {
+    categories: {
+      [key: string]: {
+        batches: Material[]
+      }
+    }
+  }
+}
+
+// 半成品库存矩阵类型
+interface SemiFinishedMatrixData {
+  material_type: string // 统一使用material_type
+  total_quantity: number
+  total_variants: number
+  has_low_stock: boolean
+  specifications: SpecificationData[]
+}
+
+// 配件库存类型（字段映射兼容）
+interface AccessoryProduct {
+  purchase_id: string
+  purchase_code?: string // 兼容映射前后的字段
+  purchase_name: string
+  specification?: number
+  remaining_quantity: number
+  is_low_stock: boolean
+  price_per_unit?: number
+}
+
+// 成品原材料类型（字段映射兼容）
+interface FinishedProduct {
+  purchase_id: string
+  purchase_code?: string // 兼容映射前后的字段
+  purchase_name: string
+  specification: number
+  piece_count: number
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  remaining_quantity: number
+  is_low_stock: boolean
+  price_per_unit?: number
+  total_price?: number
+}
+```
+
+**采购相关类型（向后兼容，推荐使用Material类型）：**
+```typescript
+// 采购记录类型（原始数据存储）
 interface Purchase {
   id: string
-  purchase_code: string // 采购编号字段
-  purchase_name: string // 修复：统一使用purchase_name
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 修复：统一类型名称
+  purchase_code: string
+  purchase_name: string
+  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
   supplier: {
     id: string
     name: string
   }
   quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
   total_price: number
-  price_per_gram?: number // 克价（散珠/手串专用）
-  weight?: number // 重量（散珠/手串专用）
-  bead_diameter?: number // 珠子直径（散珠/手串专用）
-  beads_per_string?: number // 每串颗数（手串专用）
-  piece_count?: number // 片数/件数（配件/成品专用）
-  total_beads?: number // 总颗数（自动计算）
-  price_per_bead?: number // 每颗价格（自动计算）
-  price_per_piece?: number // 每片/件价格（自动计算）
-  min_stock_alert?: number // 最低预警颗数
+  price_per_gram?: number
+  weight?: number
+  bead_diameter?: number
+  beads_per_string?: number
+  piece_count?: number
+  total_beads?: number
+  price_per_bead?: number
+  price_per_piece?: number
+  min_stock_alert?: number
   photos: string[]
   purchase_date: string
-  remaining_quantity: number
-  natural_language_input?: string // 自然语言录入
-  ai_recognition_result?: any // AI识别结果
+  remaining_quantity: number // 注意：此字段已迁移到materials表
+  natural_language_input?: string
+  ai_recognition_result?: any
   created_at: string
 }
 
-// 可用原材料类型（已更新）
+// 注意：库存相关操作请优先使用Material类型，Purchase类型主要用于采购录入
+
+// 可用原材料类型（基于materials表，推荐使用）
 interface AvailableMaterial {
+  material_id: string
+  material_code: string
+  material_name: string // 使用material_name替代product_name
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
+  remaining_quantity: number // 使用remaining_quantity替代available_quantity
+  unit_cost: number
+  stock_status: 'SUFFICIENT' | 'LOW' | 'OUT_OF_STOCK'
+  inventory_unit: 'BEADS' | 'ITEMS' | 'PIECES'
+  photos: string[]
+  specification?: string
+  purchase_id: string // 关联原始采购记录
+}
+
+// 向后兼容类型（不推荐新项目使用）
+interface LegacyAvailableMaterial {
   purchase_id: string
-  purchase_code?: string // **新增：采购编号字段**
+  purchase_code?: string
   product_name: string
   product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
   available_quantity: number
@@ -308,16 +399,24 @@ const extractAccessoryProducts = (materials: AvailableMaterial[]): AccessoryProd
 }
 ```
 
-## 三、采购录入表单组件规范（重要更新）
+## 三、采购录入表单组件规范（已修复）
 
-### 3.1 PurchaseEntry组件结构
+### 3.1 PurchaseEntry组件结构（修复版）
+
+**修复内容：**
+- 统一字段名称：purchase_name替代product_name
+- 修复产品类型：FINISHED_MATERIAL替代FINISHED
+- 增强表单验证：按类型差异化验证规则
+- 优化图片处理：支持多文件上传和格式验证
+- 完善错误处理：用户友好的错误提示
+- 增强供应商管理：实时搜索和拼音排序
 
 **组件状态管理：**
 ```typescript
 interface PurchaseEntryState {
-  // 基础信息
-  purchase_name: string
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+  // 基础信息（修复：统一字段名）
+  purchase_name: string // 修复：使用purchase_name替代product_name
+  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 修复：FINISHED_MATERIAL替代FINISHED
   supplier_id: string
   quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
   total_price: number
@@ -336,7 +435,7 @@ interface PurchaseEntryState {
   min_stock_alert: number
   natural_language_input: string
   
-  // 图片相关
+  // 图片相关（增强）
   photos: string[]
   file_data_list: File[]
   
@@ -344,6 +443,28 @@ interface PurchaseEntryState {
   uploading: boolean
   ai_parsing: boolean
   submitting: boolean
+  
+  // 供应商管理（新增）
+  supplier_input: string
+  supplier_search_results: Supplier[]
+  show_supplier_dropdown: boolean
+}
+
+// 表单验证结果类型
+interface ValidationResult {
+  isValid: boolean
+  errors: string[]
+}
+
+// 供应商类型
+interface Supplier {
+  id: string
+  name: string
+  contact?: string
+  phone?: string
+  email?: string
+  address?: string
+}
   
   // 供应商相关
   suppliers: Supplier[]

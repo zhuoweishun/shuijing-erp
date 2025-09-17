@@ -77,22 +77,29 @@ export default function InventoryDashboard() {
   const [refreshing, setRefreshing] = useState(false)
 
   // 获取统计数据
-  const fetchStatistics = async () => {try {
+  const fetchStatistics = async () => {
+    console.log('🔄 [库存仪表盘] 开始获取统计数据...')
+    try {
       set_loading(true)
       const response = await inventory_api.get_statistics()
       
+      console.log('📊 [库存仪表盘] API响应:', response)
+      
       if (response.success) {
         setStatistics(response.data as InventoryStatistics)
-        console.log('📊 [库存仪表盘] 统计数据获取成功:', response.data)
+        console.log('✅ [库存仪表盘] 统计数据获取成功:', response.data)
       } else {
+        console.error('❌ [库存仪表盘] API返回失败:', response.message)
         toast.error('获取统计数据失败')
       }
     } catch (error: any) {
       console.error('❌ [库存仪表盘] 获取统计数据失败:', error)
       // 安全地访问错误信息
       const errorMessage = error?.response?.data?.message || error?.message || '获取统计数据失败'
+      console.error('❌ [库存仪表盘] 错误详情:', errorMessage)
       toast.error(errorMessage)
-    } finally {set_loading(false)
+    } finally {
+      set_loading(false)
     }
   }
 
@@ -106,6 +113,7 @@ export default function InventoryDashboard() {
 
   // 页面加载时获取数据
   useEffect(() => {
+    console.log('🚀 [库存仪表盘] 组件已挂载，开始获取数据')
     fetchStatistics()
   }, [])
 

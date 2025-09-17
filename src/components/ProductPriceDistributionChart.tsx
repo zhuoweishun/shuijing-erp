@@ -10,9 +10,6 @@ import { inventory_api } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
 import { useDeviceDetection } from '../hooks/useDeviceDetection'
 
-// 默认价格类型
-// const price_type = "sell_price"; // 暂时注释掉未使用的变量
-
 // 产品类型映射
 const PRODUCT_TYPE_MAP = {
   'LOOSE_BEADS': '散珠',
@@ -38,8 +35,8 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#8B5CF6'
 interface PriceDistributionData {
   material_type: string
   price_type: string
-  priceLabel: string
-  totalProducts: number
+  price_label: string
+  total_products: number
   // 单价区间分布数据
   price_ranges?: {
     name: string
@@ -52,8 +49,8 @@ interface PriceDistributionData {
   min_price?: number | null
   top_price_products?: {
     purchase_id: string
-    product_name: string
-    material_type: string
+    purchase_name: string
+    purchase_type: string
     bead_diameter?: number
     specification?: number
     quality?: string
@@ -70,7 +67,7 @@ interface PriceDistributionData {
     remaining_beads?: number
     used_beads?: number
   }[]
-  analysisDate: string
+  analysis_date: string
 }
 
 export default function ProductPriceDistributionChart() {
@@ -78,11 +75,12 @@ export default function ProductPriceDistributionChart() {
   const { is_mobile } = useDeviceDetection()
   const [loading, set_loading] = useState(true)
   const [data, setData] = useState<PriceDistributionData | null>(null)
-  const [material_type, setMaterial_type] = useState<string>('LOOSE_BEADS')
+  const [material_type, setMaterial_type] = useState<string>('BRACELET')
   const [priceType, setPriceType] = useState<string>('unit_price')
 
   // 获取价格分布数据
-  const fetchPriceDistribution = async () => {set_loading(true)
+  const fetchPriceDistribution = async () => {
+    set_loading(true)
     try {
       const response = await inventory_api.get_price_distribution({
         material_type: material_type as 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL',
@@ -101,7 +99,8 @@ export default function ProductPriceDistributionChart() {
     } catch (error) {
       console.error('获取价格分布数据失败:', error)
       toast.error('获取价格分布数据失败')
-    } finally {set_loading(false)
+    } finally {
+      set_loading(false)
     }
   }
 
@@ -123,6 +122,17 @@ export default function ProductPriceDistributionChart() {
     return `¥${numPrice.toFixed(2)}`
   }
 
+  // 获取单位显示
+  const get_unit = (material_type: string): string => {
+    switch (material_type) {
+      case 'LOOSE_BEADS': return '颗'
+      case 'BRACELET': return '颗'
+      case 'ACCESSORIES': return '片'
+      case 'FINISHED_MATERIAL': return '件'
+      default: return '个'
+    }
+  }
+
   // 自定义Tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -135,7 +145,7 @@ export default function ProductPriceDistributionChart() {
             <p className="font-medium text-gray-900">{data.name}</p>
             <p className="text-sm text-gray-600">产品类型：{PRODUCT_TYPE_MAP[material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
             <p className="text-sm text-blue-600 font-medium">
-              数量：{data.value}个产品
+              数量：{data.value}{get_unit(material_type)}
             </p>
             <p className="text-sm text-green-600">
               占比：{data.percentage}%
@@ -146,8 +156,8 @@ export default function ProductPriceDistributionChart() {
         // 总价分布的tooltip
         return (
           <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-            <p className="font-medium text-gray-900">{data.product_name || data.name}</p>
-            <p className="text-sm text-gray-600">类型：{PRODUCT_TYPE_MAP[data.material_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
+            <p className="font-medium text-gray-900">{data.purchase_name || data.name}</p>
+            <p className="text-sm text-gray-600">类型：{PRODUCT_TYPE_MAP[data.purchase_type as keyof typeof PRODUCT_TYPE_MAP]}</p>
             {data.quality && (
               <p className="text-sm text-gray-600">品相：{QUALITY_MAP[data.quality as keyof typeof QUALITY_MAP]}</p>
             )}
@@ -164,65 +174,24 @@ export default function ProductPriceDistributionChart() {
     return null
   }
 
-  if (loading) {
-    return (
-      <div className={is_mobile ? 'p-mobile' : 'p-6'}>
-        <div className={`flex items-center justify-center ${is_mobile ? 'py-8' : 'py-12'}`}>
-          <div className={`flex items-center ${is_mobile ? 'space-x-2' : 'space-x-3'}`}>
-            <RefreshCw className={`${is_mobile ? 'h-5 w-5' : 'h-6 w-6'} animate-spin text-blue-500`} />
-            <span className={`text-gray-600 ${is_mobile ? 'text-mobile-caption' : ''}`}>加载价格分布数据中...</span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!data || (priceType === "unit_price" ? !data.price_ranges?.length : !data.top_price_products?.length)) {
-    return (
-      <div className={is_mobile ? 'p-mobile' : 'p-6'}>
-        <div className={`flex items-center ${is_mobile ? 'flex-col space-y-3' : 'justify-between'} mb-6`}>
-          <div className={`flex items-center ${is_mobile ? 'space-x-2' : 'space-x-3'}`}>
-            <DollarSign className={`${is_mobile ? 'h-5 w-5' : 'h-6 w-6'} text-green-500`} />
-            <h3 className={`${is_mobile ? 'text-mobile-subtitle' : 'text-lg'} font-semibold text-gray-900`}>
-              {priceType === "unit_price" ? '单价区间分布' : '总价分布 - 前10名'}
-            </h3>
-          </div>
-          <button
-            onClick={fetchPriceDistribution}
-            className={is_mobile ? 'btn-mobile-primary w-full' : 'px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm'}
-          >
-            重新加载
-          </button>
-        </div>
-        <div className={`flex flex-col items-center justify-center ${is_mobile ? 'py-8' : 'py-12'}`}>
-          <Package className={`${is_mobile ? 'h-10 w-10' : 'h-12 w-12'} text-gray-400 mb-4`} />
-          <h3 className={`${is_mobile ? 'text-mobile-subtitle' : 'text-lg'} font-medium text-gray-900 mb-2`}>暂无价格数据</h3>
-          <p className={`text-gray-600 text-center max-w-md ${is_mobile ? 'text-mobile-body px-2' : ''}`}>
-            当前筛选条件下没有找到价格数据，请尝试切换产品类型或价格维度。
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   // 准备图表数据
   const chartData = priceType === "unit_price" 
     ? // 单价区间分布数据
-      data.price_ranges?.map((item, index) => ({
+      data?.price_ranges?.map((item: any, index: number) => ({
         name: item.name,
         value: item.value,
         percentage: item.percentage,
         color: COLORS[index % COLORS.length]
       })) || []
     : // 总价分布数据
-      data.top_price_products?.map((item, index) => {
+      data?.top_price_products?.map((item: any, index: number) => {
         const rawValue = item.total_price
         const num_value = typeof rawValue === 'string' ? parseFloat(rawValue) : rawValue
         const value = (num_value && !isNaN(num_value) && isFinite(num_value)) ? num_value : 0
         
         return {
           ...item,
-          name: item.product_name,
+          name: item.purchase_name,
           value: value,
           color: COLORS[index % COLORS.length]
         }
@@ -238,7 +207,7 @@ export default function ProductPriceDistributionChart() {
         </h3>
       </div>
 
-      {/* 产品类型和价格维度切换 */}
+      {/* 产品类型和价格维度切换 - 始终显示 */}
       <div className="mb-4">
         <div className={`flex flex-wrap ${is_mobile ? 'gap-mobile-xs' : 'gap-2'} items-center`}>
           {/* 产品类型按钮 */}
@@ -283,35 +252,53 @@ export default function ProductPriceDistributionChart() {
         </div>
       </div>
 
-      {/* 价格分布饼图 */}
-      <div className={is_mobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: is_mobile ? '256px' : '256px' }}>
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-          <PieChart width={is_mobile ? 300 : 400} height={is_mobile ? 256 : 256}>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={is_mobile ? false : ({ name, value, percent }: any) => 
-                priceType === 'unit_price' 
-                  ? `${name}: ${value}个 (${(((percent as number) || 0) * 100).toFixed(1)}%)`
-                  : `${name}: ${format_price(value as number)} (${(((percent as number) || 0) * 100).toFixed(1)}%)`
-              }
-              outerRadius={is_mobile ? 70 : 80}
-              innerRadius={is_mobile ? 20 : 0}
-              fill="#8884d8"
-              dataKey="value"
-              stroke="#fff"
-              strokeWidth={2}
-            >
-              {chartData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+      {/* 图表内容区域 */}
+      {loading ? (
+        <div className={`flex items-center justify-center ${is_mobile ? 'py-8' : 'py-12'}`}>
+          <div className={`flex items-center ${is_mobile ? 'space-x-2' : 'space-x-3'}`}>
+            <RefreshCw className={`${is_mobile ? 'h-5 w-5' : 'h-6 w-6'} animate-spin text-blue-500`} />
+            <span className={`text-gray-600 ${is_mobile ? 'text-mobile-caption' : ''}`}>加载价格分布数据中...</span>
+          </div>
+        </div>
+      ) : (!data || (priceType === "unit_price" ? !data.price_ranges?.length : !data.top_price_products?.length)) ? (
+        <div className={`flex flex-col items-center justify-center ${is_mobile ? 'py-8' : 'py-12'}`}>
+          <Package className={`${is_mobile ? 'h-10 w-10' : 'h-12 w-12'} text-gray-400 mb-4`} />
+          <h3 className={`${is_mobile ? 'text-mobile-subtitle' : 'text-lg'} font-medium text-gray-900 mb-2`}>暂无价格数据</h3>
+          <p className={`text-gray-600 text-center max-w-md ${is_mobile ? 'text-mobile-body px-2' : ''}`}>
+            当前筛选条件下没有找到价格数据，请尝试切换产品类型或价格维度。
+          </p>
+        </div>
+      ) : (
+        /* 价格分布饼图 */
+        <div className={is_mobile ? 'h-64 w-full' : 'h-64'} style={{ minHeight: is_mobile ? '256px' : '256px' }}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <PieChart width={is_mobile ? 300 : 400} height={is_mobile ? 256 : 256}>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={is_mobile ? false : ({ name, value, percent }: any) => 
+                  priceType === 'unit_price' 
+                    ? `${name}: ${value}${get_unit(material_type)} (${(((percent as number) || 0) * 100).toFixed(1)}%)`
+                    : `${name}: ${format_price(value as number)} (${(((percent as number) || 0) * 100).toFixed(1)}%)`
+                }
+                outerRadius={is_mobile ? 70 : 80}
+                innerRadius={is_mobile ? 20 : 0}
+                fill="#8884d8"
+                dataKey="value"
+                stroke="#fff"
+                strokeWidth={2}
+              >
+                {chartData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   )
 }

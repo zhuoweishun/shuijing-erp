@@ -1,0 +1,136 @@
+{
+  "timestamp": "2025-09-17T07:36:59.813Z",
+  "purchase_stats": {
+    "total_records": 10,
+    "active_records": 10,
+    "by_type": [
+      {
+        "total_count": 3,
+        "purchase_type": "LOOSE_BEADS",
+        "active_count": 3
+      },
+      {
+        "total_count": 5,
+        "purchase_type": "BRACELET",
+        "active_count": 5
+      },
+      {
+        "total_count": 1,
+        "purchase_type": "ACCESSORIES",
+        "active_count": 1
+      },
+      {
+        "total_count": 1,
+        "purchase_type": "FINISHED_MATERIAL",
+        "active_count": 1
+      }
+    ]
+  },
+  "material_stats": {
+    "total_records": 10,
+    "by_type": [
+      {
+        "total_count": 3,
+        "material_type": "LOOSE_BEADS"
+      },
+      {
+        "total_count": 5,
+        "material_type": "BRACELET"
+      },
+      {
+        "total_count": 1,
+        "material_type": "ACCESSORIES"
+      },
+      {
+        "total_count": 1,
+        "material_type": "FINISHED_MATERIAL"
+      }
+    ]
+  },
+  "missing_materials": [],
+  "data_inconsistencies": [
+    {
+      "purchase_id": "cmfm68deo000n13k5idfau1cs",
+      "purchase_code": "CG20250916254490",
+      "purchase_name": "玻利维亚紫水晶",
+      "material_name": "玻利维亚紫水晶",
+      "purchase_type": "BRACELET",
+      "material_type": "BRACELET",
+      "total_price": "335.6",
+      "total_cost": "335.60",
+      "purchase_quality": "AA",
+      "material_quality": "AA",
+      "purchase_bead_diameter": "8.0",
+      "material_bead_diameter": null,
+      "consistency_status": "diameter_mismatch"
+    },
+    {
+      "purchase_id": "cmfm67n2e000j13k54ao2tkts",
+      "purchase_code": "CG20250916714781",
+      "purchase_name": "白发晶",
+      "material_name": "白发晶",
+      "purchase_type": "BRACELET",
+      "material_type": "BRACELET",
+      "total_price": "864.0",
+      "total_cost": "864.00",
+      "purchase_quality": "AB",
+      "material_quality": "AB",
+      "purchase_bead_diameter": "10.0",
+      "material_bead_diameter": null,
+      "consistency_status": "diameter_mismatch"
+    },
+    {
+      "purchase_id": "cmfm678m2000f13k5ahjxizci",
+      "purchase_code": "CG20250916636417",
+      "purchase_name": "巴西黄水晶",
+      "material_name": "巴西黄水晶",
+      "purchase_type": "BRACELET",
+      "material_type": "BRACELET",
+      "total_price": "109.2",
+      "total_cost": "109.20",
+      "purchase_quality": null,
+      "material_quality": "A",
+      "purchase_bead_diameter": "10.0",
+      "material_bead_diameter": null,
+      "consistency_status": "diameter_mismatch"
+    },
+    {
+      "purchase_id": "cmfm66o1z000b13k5hzq69vin",
+      "purchase_code": "CG20250916906775",
+      "purchase_name": "黑闪灵",
+      "material_name": "黑闪灵",
+      "purchase_type": "BRACELET",
+      "material_type": "BRACELET",
+      "total_price": "273.6",
+      "total_cost": "273.60",
+      "purchase_quality": "A",
+      "material_quality": "A",
+      "purchase_bead_diameter": "14.0",
+      "material_bead_diameter": null,
+      "consistency_status": "diameter_mismatch"
+    },
+    {
+      "purchase_id": "cmfm65noz000713k5l19smhzu",
+      "purchase_code": "CG20250916198923",
+      "purchase_name": "黑闪灵",
+      "material_name": "黑闪灵",
+      "purchase_type": "BRACELET",
+      "material_type": "BRACELET",
+      "total_price": "274.5",
+      "total_cost": "274.50",
+      "purchase_quality": "B",
+      "material_quality": "B",
+      "purchase_bead_diameter": "8.0",
+      "material_bead_diameter": null,
+      "consistency_status": "diameter_mismatch"
+    }
+  ],
+  "summary": {
+    "total_active_purchases": 10,
+    "total_materials": 10,
+    "missing_materials_count": 0,
+    "inconsistent_records_count": 5,
+    "sync_rate_percentage": 100,
+    "status": "DATA_INCONSISTENT"
+  }
+}

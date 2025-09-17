@@ -1004,6 +1004,28 @@ export interface CustomerAnalyticsParams {
   time_period?: 'week' | 'month' | 'half_year' | 'year' | 'all'
 }
 
+// 库存统计相关类型
+export interface InventoryStatistics {
+  total_stats: {
+    total_items: number // 总库存项目数
+    total_quantity: number // 总库存数量
+  }
+  type_statistics: InventoryTypeStatistic[] // 按类型统计
+}
+
+export interface InventoryTypeStatistic {
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED' // 原材料类型（映射后的字段）
+  total_items: number // 该类型的项目数
+  total_quantity: number // 该类型的总数量
+}
+
+// 库存统计API响应类型
+export interface InventoryStatisticsResponse {
+  success: boolean
+  message: string
+  data: InventoryStatistics
+}
+
 // 主页仪表板相关类型
 export interface DashboardStats {
   total_purchases: number // 总采购数量

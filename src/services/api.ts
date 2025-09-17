@@ -856,6 +856,13 @@ export const material_api = {
   
   // 删除材料记录
   delete: (id: string) => apiClient.delete(`/materials/${id}`),
+  
+  // 获取原材料价格分布数据
+  get_price_distribution: (params?: {
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL' // 原材料类型
+    price_type?: 'unit_price' | 'total_price'
+    limit?: number
+  }) => apiClient.get(`/materials/price-distribution${buildQueryString(params)}`)
 }
 
 // 库存API
@@ -932,7 +939,7 @@ export const inventory_api = {
   
   // 获取原材料分布数据（饼图）
   get_material_distribution: (params?: {
-    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型
+    purchase_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型（后端使用purchase_type）
     limit?: number
   }) => apiClient.get(`/inventory/material-distribution${buildQueryString(params)}`),
   
@@ -941,14 +948,13 @@ export const inventory_api = {
     time_range?: '7d' | '30d' | '90d' | '6m' | '1y' | 'all'
     limit?: number
   }) => apiClient.get(`/inventory/consumption-analysis${buildQueryString(params)}`),
-  
-  // 获取原材料价格分布数据
+
+  // 获取价格分布数据
   get_price_distribution: (params?: {
-    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL' // 原材料类型
+    material_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' | 'ALL'
     price_type?: 'unit_price' | 'total_price'
     limit?: number
-  }) => apiClient.get(`/inventory/price-distribution${buildQueryString(params)}`),
-  
+  }) => apiClient.get(`/inventory/price-distribution${buildQueryString(params)}`)
 
 }
 

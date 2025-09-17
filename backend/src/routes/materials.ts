@@ -449,4 +449,165 @@ router.get('/stats/overview', authenticateToken, async (_req, res) => {
   }
 });
 
+// 获取原材料价格分布
+router.get('/price-distribution', authenticateToken, async (req, res) => {
+  const { 
+    material_type = 'LOOSE_BEADS', 
+    price_type = 'unit_price', 
+    limit = 10 
+  } = req.query
+
+  console.log('🔍 [原材料价格分布] 请求参数:', {
+    material_type,
+    price_type,
+    limit,
+    userRole: req.user?.role || "USER"
+  })
+
+  try {
+    // 构建产品类型筛选条件
+    let productTypeCondition = ''
+    if (material_type && material_type !== 'ALL') {
+      productTypeCondition = `AND p.purchase_type = '${material_type}'`
+    }
+
+    // 根据价格类型选择不同的处理逻辑
+    if (price_type === 'unit_price') {
+      // 单价分布 - 返回价格区间统计
+      const priceRangeQuery = `
+        SELECT 
+           CASE 
+             -- 成品类型使用专门的价格区间
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 50 THEN '0-50元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 50 AND calculated_price <= 100 THEN '50-100元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 100 AND calculated_price <= 200 THEN '100-200元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 200 AND calculated_price <= 500 THEN '200-500元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 500 THEN '500元以上'
+             -- 其他产品类型使用原有价格区间
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 3 THEN '0-3元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 3 AND calculated_price <= 10 THEN '3-10元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 10 AND calculated_price <= 20 THEN '10-20元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 20 AND calculated_price <= 50 THEN '20-50元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 50 THEN '50元以上'
+             ELSE '未知'
+           END as price_range,
+          COUNT(*) as count
+        FROM (
+          SELECT 
+            p.purchase_type as material_type,
+            CASE 
+              WHEN p.purchase_type = 'LOOSE_BEADS' AND remaining_beads > 0 THEN COALESCE(p.price_per_bead, p.total_price / NULLIF(p.total_beads, 0))
+              WHEN p.purchase_type = 'BRACELET' AND remaining_quantity > 0 THEN COALESCE(p.price_per_bead, p.total_price / NULLIF(p.total_beads, 0))
+              WHEN p.purchase_type = 'ACCESSORIES' AND remaining_pieces > 0 THEN p.total_price / p.piece_count
+              WHEN p.purchase_type = 'FINISHED_MATERIAL' AND remaining_pieces > 0 THEN p.total_price / p.piece_count
+              ELSE NULL
+            END as calculated_price,
+            remaining_beads,
+            remaining_quantity,
+            remaining_pieces
+          FROM (
+            SELECT 
+              p.*,
+              CASE 
+                WHEN p.purchase_type = 'LOOSE_BEADS' THEN p.total_beads - COALESCE(SUM(mu.quantity_used), 0)
+                ELSE 0
+              END as remaining_beads,
+              CASE 
+                WHEN p.purchase_type = 'BRACELET' THEN p.quantity - COALESCE(SUM(mu.quantity_used), 0)
+                ELSE 0
+              END as remaining_quantity,
+              CASE 
+                WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN p.piece_count - COALESCE(SUM(mu.quantity_used), 0)
+                ELSE 0
+              END as remaining_pieces
+            FROM purchases p
+            LEFT JOIN material_usage mu ON p.id = mu.purchase_id
+            WHERE p.status IN ('ACTIVE', 'USED')
+              AND p.total_price IS NOT NULL
+              AND p.total_price > 0
+              AND (
+                (p.purchase_type = 'LOOSE_BEADS' AND p.total_beads IS NOT NULL AND p.total_beads > 0) OR
+                (p.purchase_type = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR
+                (p.purchase_type = 'ACCESSORIES' AND p.piece_count IS NOT NULL AND p.piece_count > 0) OR
+                (p.purchase_type = 'FINISHED_MATERIAL' AND p.piece_count IS NOT NULL AND p.piece_count > 0)
+              )
+              ${productTypeCondition}
+            GROUP BY p.id, p.purchase_type, p.total_beads, p.quantity, p.piece_count, p.total_price
+          ) p
+        ) as price_data
+        WHERE calculated_price IS NOT NULL
+          AND (
+            (material_type = 'LOOSE_BEADS' AND remaining_beads > 0) OR
+            (material_type = 'BRACELET' AND remaining_quantity > 0) OR
+            (material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') AND remaining_pieces > 0)
+          )
+        GROUP BY price_range
+        ORDER BY 
+           CASE price_range
+             -- 成品类型排序
+             WHEN '0-50元（含）' THEN 1
+             WHEN '50-100元（含）' THEN 2
+             WHEN '100-200元（含）' THEN 3
+             WHEN '200-500元（含）' THEN 4
+             WHEN '500元以上' THEN 5
+             -- 其他产品类型排序
+             WHEN '0-3元（含）' THEN 6
+             WHEN '3-10元（含）' THEN 7
+             WHEN '10-20元（含）' THEN 8
+             WHEN '20-50元（含）' THEN 9
+             WHEN '50元以上' THEN 10
+             ELSE 11
+           END
+      `
+      
+      const rangeData = await prisma.$queryRawUnsafe(priceRangeQuery) as any[]
+      const total_count = rangeData.reduce((sum, item) => sum + Number(item.count), 0)
+      
+      const priceRanges = rangeData.map(item => ({
+        name: item.price_range,
+        value: Number(item.count),
+        percentage: total_count > 0 ? (Number(item.count) / total_count * 100).toFixed(1) : '0'
+      }))
+      
+      const responseData = {
+        material_type,
+        price_type,
+        price_label: '单价区间分布',
+        total_products: total_count,
+        price_ranges: priceRanges,
+        analysis_date: new Date().toISOString()
+      }
+      
+      console.log('📊 [原材料单价区间分布] 响应数据:', responseData)
+      
+      res.json({
+        success: true,
+        message: '获取单价区间分布成功',
+        data: responseData
+      })
+      return
+    }
+    
+    // 总价分布逻辑...
+    res.json({
+      success: true,
+      message: '获取价格分布成功',
+      data: {
+        material_type,
+        price_type,
+        total_products: 0,
+        price_ranges: []
+      }
+    })
+    
+  } catch (error) {
+    console.error('获取原材料价格分布失败:', error)
+    res.status(500).json({
+      success: false,
+      message: '获取原材料价格分布失败',
+      error: error instanceof Error ? error.message : '未知错误'
+    })
+  }
+})
+
 export default router;

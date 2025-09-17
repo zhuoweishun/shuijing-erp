@@ -65,17 +65,25 @@ Authorization: Bearer <token>
 
 ## 三、采购管理接口
 
-### 3.1 采购列表查询（完整更新版）
+### 3.1 采购列表查询（完整修复版）
 
 **接口地址：** `GET /purchases`
+
+**修复成果：**
+- 实现了完整的多维度搜索、高级筛选、智能排序和响应式设计
+- 支持产品名称和采购编号的独立搜索，500ms防抖处理
+- 表头筛选器系统：多选、范围、日期、搜索筛选器
+- 智能排序系统：规格动态排序，根据产品类型自动选择对应规格字段
+- 分页管理系统：自定义分页、页码跳转、响应式分页
+- 权限控制系统：角色检查、敏感数据过滤、操作权限控制
 
 **请求参数：**
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | page | number | 否 | 页码，默认1 |
-| limit | number | 否 | 每页数量，默认10 |
-| search | string | 否 | 产品名称搜索（模糊匹配） |
-| purchase_code_search | string | 否 | **采购编号搜索（支持模糊匹配）** |
+| limit | number | 否 | 每页数量，默认10，支持10/20/50/100 |
+| search | string | 否 | 产品名称搜索（模糊匹配，500ms防抖） |
+| purchase_code_search | string | 否 | **采购编号搜索（支持精确和模糊匹配）** |
 | quality | array/string | 否 | 品质筛选（支持多选：AA/A/AB/B/C/UNKNOWN） |
 | purchase_types | array/string | 否 | 产品类型筛选（支持多选：LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL） |
 | supplier | array/string | 否 | 供应商筛选（支持多选和模糊匹配） |
@@ -90,16 +98,61 @@ Authorization: Bearer <token>
 | total_price_min | number | 否 | 总价最小值（元） |
 | total_price_max | number | 否 | 总价最大值（元） |
 | sort_by | string | 否 | 排序字段（purchase_date/purchase_code/purchase_name/supplier/quantity/price_per_gram/total_price/bead_diameter/specification） |
-| sort_order | string | 否 | 排序方式（asc/desc） |
+| sort_order | string | 否 | 排序方式（asc/desc），默认采购日期倒序 |
 
 **核心功能特性：**
-- **多维度搜索**：支持产品名称和采购编号的独立搜索
-- **多选筛选**：品质、产品类型、供应商支持多选筛选
-- **范围筛选**：珠径、规格、价格支持最小值-最大值范围筛选
-- **日期筛选**：支持采购日期范围筛选
-- **智能排序**：支持多字段排序，包括规格动态字段选择
-- **权限控制**：EMPLOYEE角色自动过滤敏感价格字段
-- **分页优化**：支持自定义每页数量（10/20/50/100条）
+- **多维度搜索**：支持产品名称和采购编号的独立搜索，组合搜索
+- **表头筛选器系统**：多选筛选器、范围筛选器、日期筛选器、搜索筛选器
+- **智能排序系统**：规格动态排序，根据产品类型自动选择对应规格字段
+- **分页管理系统**：自定义分页、页码跳转、响应式分页显示
+- **权限控制系统**：EMPLOYEE角色自动过滤敏感价格字段
+- **响应式设计**：桌面端表格、移动端卡片、自适应布局
+- **性能优化**：数据缓存、防抖搜索、虚拟滚动、图片懒加载
+
+**筛选器类型映射：**
+```typescript
+const filter_types = {
+  purchase_name: 'search',
+  purchase_code: 'search', 
+  quality: 'multi_select',
+  purchase_type: 'multi_select',
+  supplier: 'multi_select_with_search',
+  bead_diameter: 'range',
+  specification: 'range',
+  price_per_gram: 'range',
+  total_price: 'range',
+  purchase_date: 'date_range'
+}
+```
+
+**规格字段动态映射：**
+```typescript
+const get_specification_field = (purchase_type: string) => {
+  const field_mapping = {
+    'LOOSE_BEADS': 'bead_diameter',
+    'BRACELET': 'bracelet_inner_diameter',
+    'ACCESSORIES': 'accessory_specification', 
+    'FINISHED_MATERIAL': 'finished_material_specification'
+  }
+  return field_mapping[purchase_type] || 'bead_diameter'
+}
+```
+
+**权限控制逻辑：**
+```typescript
+// 敏感字段过滤
+const filter_sensitive_fields = (purchases: Purchase[], user_role: string) => {
+  if (user_role === 'EMPLOYEE') {
+    return purchases.map(purchase => ({
+      ...purchase,
+      price_per_gram: null,
+      total_price: null,
+      weight: null
+    }))
+  }
+  return purchases
+}
+```
 
 **响应示例：**
 ```json
@@ -146,6 +199,13 @@ Authorization: Bearer <token>
 
 **接口地址：** `POST /purchases`
 
+**修复内容：**
+- 统一字段名称：purchase_name替代product_name
+- 修复产品类型：FINISHED_MATERIAL替代FINISHED
+- 增强表单验证：按类型差异化验证规则
+- 优化图片处理：支持多文件上传和格式验证
+- 完善错误处理：用户友好的错误提示
+
 **请求参数：**
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
@@ -164,6 +224,43 @@ Authorization: Bearer <token>
 | min_stock_alert | number | 否 | 最低预警颗数 |
 | natural_language_input | string | 否 | 自然语言录入信息 |
 | ai_recognition_result | object | 否 | AI识别结果 |
+
+**表单验证规则：**
+```typescript
+// 基础验证
+if (!data.purchase_name.trim()) errors.push('采购名称不能为空')
+if (!data.supplier_id) errors.push('请选择供应商')
+if (data.total_price <= 0) errors.push('总价格必须大于0')
+if (data.photos.length === 0) errors.push('请至少上传一张图片')
+
+// 按类型差异化验证
+if (['LOOSE_BEADS', 'BRACELET'].includes(data.purchase_type)) {
+  if (data.price_per_gram <= 0) errors.push('克价必须大于0')
+  if (data.weight <= 0) errors.push('重量必须大于0')
+  if (data.bead_diameter <= 0) errors.push('珠子直径必须大于0')
+  
+  if (data.purchase_type === 'BRACELET' && data.beads_per_string <= 0) {
+    errors.push('每串颗数必须大于0')
+  }
+}
+
+if (['ACCESSORIES', 'FINISHED_MATERIAL'].includes(data.purchase_type)) {
+  if (data.piece_count <= 0) errors.push('片数/件数必须大于0')
+}
+```
+
+**自动计算逻辑：**
+```sql
+-- 散珠总颗数计算
+total_beads = CASE 
+  WHEN bead_diameter = 4.0 THEN weight * 25
+  WHEN bead_diameter = 6.0 THEN weight * 11
+  WHEN bead_diameter = 8.0 THEN weight * 6
+  WHEN bead_diameter = 10.0 THEN weight * 4
+  WHEN bead_diameter = 12.0 THEN weight * 3
+  ELSE weight * 5
+END
+```
 
 **请求示例：**
 ```json
@@ -377,13 +474,252 @@ Authorization: Bearer <token>
 }
 ```
 
-## 五、原材料库存管理接口（重要更新）
+## 五、库存管理接口（基于materials表架构）
 
-### 5.1 层级式库存查询（核心接口）
+### 5.1 materials库存查询接口
+
+#### 5.1.1 材料库存列表查询
+
+**接口地址：** `GET /api/materials`
+
+**请求参数：**
+```typescript
+interface MaterialListRequest {
+  page?: number
+  limit?: number
+  search?: string  // 搜索材料名称或编号
+  material_type?: ProductType[]
+  quality?: Quality[]
+  stock_status?: ('SUFFICIENT' | 'LOW' | 'OUT')[]
+  supplier_id?: string[]
+  date_from?: string
+  date_to?: string
+  sort_by?: 'material_date' | 'material_name' | 'remaining_quantity' | 'unit_cost'
+  sort_order?: 'asc' | 'desc'
+}
+```
+
+**响应数据：**
+```typescript
+interface MaterialListResponse {
+  materials: Material[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
+
+interface Material {
+  id: string
+  material_code: string
+  material_name: string
+  material_type: ProductType
+  quality: Quality
+  
+  // 规格信息（根据类型动态显示）
+  bead_diameter?: number
+  bracelet_inner_diameter?: number
+  bracelet_bead_count?: number
+  accessory_specification?: string
+  finished_material_specification?: string
+  
+  // 库存信息
+  original_quantity: number
+  used_quantity: number
+  remaining_quantity: number
+  inventory_unit: UnitType
+  
+  // 价格信息
+  unit_cost: number
+  total_cost: number
+  
+  // 状态信息
+  min_stock_alert?: number
+  stock_status: 'SUFFICIENT' | 'LOW' | 'OUT'
+  
+  // 关联信息
+  supplier?: {
+    id: string
+    name: string
+  }
+  source_purchase: {
+    id: string
+    purchase_code: string
+    status: 'ACTIVE' | 'USED'
+  }
+  
+  // 附加信息
+  photos?: string[]
+  material_date: string
+  notes?: string
+  
+  // 审计信息
+  created_at: string
+  updated_at: string
+  created_by: {
+    id: string
+    name: string
+  }
+}
+```
+
+#### 5.1.2 材料详情查询
+
+**接口地址：** `GET /api/materials/:id`
+
+**响应数据：**
+```typescript
+interface MaterialDetailResponse {
+  material: Material
+  usage_history: MaterialUsageRecord[]
+  related_products: RelatedProduct[]
+}
+
+interface MaterialUsageRecord {
+  id: string
+  action: 'CREATE' | 'USE' | 'RETURN' | 'ADJUST'
+  quantity_used: number
+  total_cost: number
+  unit_cost: number
+  notes?: string
+  created_at: string
+  product?: {
+    id: string
+    name: string
+    sku_code?: string
+  }
+  sku?: {
+    id: string
+    sku_code: string
+    sku_name: string
+  }
+}
+
+interface RelatedProduct {
+  id: string
+  name: string
+  sku_code?: string
+  quantity_used: number
+  created_at: string
+}
+```
+
+#### 5.1.3 材料使用记录创建
+
+**接口地址：** `POST /api/materials/:id/usage`
+
+**请求参数：**
+```typescript
+interface CreateMaterialUsageRequest {
+  action: 'USE' | 'RETURN' | 'ADJUST'
+  quantity_used: number
+  product_id?: string
+  sku_id?: string
+  notes?: string
+}
+```
+
+**响应数据：**
+```typescript
+interface CreateMaterialUsageResponse {
+  usage_record: MaterialUsageRecord
+  updated_material: {
+    id: string
+    used_quantity: number
+    remaining_quantity: number
+    stock_status: 'SUFFICIENT' | 'LOW' | 'OUT'
+  }
+}
+```
+
+#### 5.1.4 库存统计接口
+
+**接口地址：** `GET /api/materials/statistics`
+
+**响应数据：**
+```typescript
+interface MaterialStatisticsResponse {
+  total_materials: number
+  by_type: {
+    [key in ProductType]: {
+      count: number
+      total_value: number
+      sufficient: number
+      low: number
+      out: number
+    }
+  }
+  by_quality: {
+    [key in Quality]: {
+      count: number
+      total_value: number
+    }
+  }
+  stock_alerts: {
+    low_stock_count: number
+    out_of_stock_count: number
+    low_stock_materials: Material[]
+  }
+  recent_usage: {
+    last_7_days: number
+    last_30_days: number
+    top_used_materials: {
+      material: Material
+      usage_count: number
+      usage_quantity: number
+    }[]
+  }
+}
+```
+
+### 5.2 层级式库存查询接口（原材料库存页面专用）
+
+**接口地址：** `GET /api/inventory/hierarchical`
+
+**请求参数：**
+```typescript
+interface InventoryQueryParams {
+  page?: number
+  limit?: number
+  search?: string
+  material_types?: string[] // 原材料类型筛选
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  low_stock_only?: boolean
+  diameter_min?: number
+  diameter_max?: number
+  specification_min?: number
+  specification_max?: number
+  sort?: 'asc' | 'desc'
+  sort_by?: string
+}
+```
+
+**响应数据：**
+```typescript
+interface HierarchicalInventoryResponse {
+  success: boolean
+  data: {
+    hierarchy: MaterialTypeGroup[]
+    pagination: PaginationInfo
+  }
+}
+
+interface MaterialTypeGroup {
+  material_type: string
+  total_quantity: number
+  total_variants: number
+  has_low_stock: boolean
+  specifications: SpecificationData[]
+}
+```
+
+### 5.3 层级式库存查询（核心接口）
 
 **接口地址：** `GET /inventory/hierarchical`
 
-**功能说明：** 获取按产品类型→规格→品相分层的库存数据，支持半成品、配件、成品原材料的统一查询
+**功能说明：** 基于materials表获取按原材料类型→规格→品相分层的库存数据，支持半成品、配件、成品原材料的统一查询
+
+**数据源：** 直接查询materials表，无需复杂计算，性能优异
 
 **请求参数：**
 | 参数名 | 类型 | 必填 | 说明 |
@@ -402,11 +738,13 @@ Authorization: Bearer <token>
 | sort_by | string | 否 | 排序字段（total_quantity/material_type/crystal_type） |
 
 **核心功能特性：**
-- **purchase到material映射**：后端自动将purchase字段映射为material字段
-- **层级数据结构**：产品类型→规格→品相→批次的四级层级
-- **库存计算逻辑**：remaining_quantity = original_quantity - used_quantity
+- **materials表直查**：直接查询materials表，避免复杂的purchase表计算
+- **层级数据结构**：原材料类型→规格→品相→批次的四级层级
+- **库存计算逻辑**：remaining_quantity = original_quantity - used_quantity（数据库计算字段）
+- **库存状态自动判断**：stock_status根据remaining_quantity和min_stock_alert自动计算
 - **权限控制**：EMPLOYEE角色自动过滤价格敏感信息
 - **数据类型安全**：所有数值字段强制Number()转换
+- **触发器同步**：purchase表变更自动同步到materials表
 
 **响应示例：**
 ```json
@@ -436,7 +774,7 @@ Authorization: Bearer <token>
                 "batch_count": 1,
                 "batches": [
                   {
-                    "purchase_id": "purchase_001",
+                    "material_id": "material_001",
                     "material_code": "CG20250116001",
                     "material_name": "紫水晶成品手串",
                     "material_type": "FINISHED_MATERIAL",
@@ -445,7 +783,10 @@ Authorization: Bearer <token>
                     "original_quantity": 20,
                     "used_quantity": 5,
                     "remaining_quantity": 15,
-                    "price_per_unit": 280.00,
+                    "inventory_unit": "ITEMS",
+                    "unit_cost": 280.00,
+                    "stock_status": "SUFFICIENT",
+                    "purchase_id": "purchase_001",
                     "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"]
                   }
                 ]
@@ -471,6 +812,9 @@ Authorization: Bearer <token>
 
 **映射函数：** `mapPurchaseToMaterial(data)`
 
+**修复成果：**
+实现了完整的purchase到material映射机制、数据类型安全处理、层级式库存展示，重点关注字段规范、半成品库存、配件库存、成品原材料库存等核心功能的实现和优化。
+
 **字段映射规则：**
 | 原字段名（purchase） | 映射字段名（material） | 说明 |
 |---------------------|----------------------|------|
@@ -480,11 +824,60 @@ Authorization: Bearer <token>
 | purchase_id | material_id | 产品ID |
 | purchase_date | material_date | 采购日期 |
 
+**核心映射逻辑：**
+```typescript
+const mapPurchaseToMaterial = (data: any): any => {
+  if (Array.isArray(data)) {
+    return data.map(mapPurchaseToMaterial)
+  }
+  
+  if (data instanceof Date) {
+    return data // 保护Date对象
+  }
+  
+  if (data && typeof data === 'object') {
+    const mapped: any = {}
+    
+    for (const [key, value] of Object.entries(data)) {
+      // 字段映射规则
+      let newKey = key
+      if (key === 'purchase_name') newKey = 'material_name'
+      else if (key === 'purchase_type') newKey = 'material_type'
+      else if (key === 'purchase_code') newKey = 'material_code'
+      else if (key === 'purchase_id') newKey = 'material_id'
+      else if (key === 'purchase_date') newKey = 'material_date'
+      
+      mapped[newKey] = mapPurchaseToMaterial(value)
+    }
+    
+    // 添加库存特有字段
+    if (mapped.material_type && mapped.original_quantity !== undefined) {
+      mapped.inventory_unit = getUnit(mapped.material_type)
+      mapped.usage_rate = Math.round((mapped.used_quantity / mapped.original_quantity) * 100)
+      mapped.remaining_rate = 100 - mapped.usage_rate
+      
+      if (mapped.remaining_quantity <= 0) {
+        mapped.stock_status = 'out'
+      } else if (mapped.min_stock_alert && mapped.remaining_quantity <= mapped.min_stock_alert) {
+        mapped.stock_status = 'low'
+      } else {
+        mapped.stock_status = 'sufficient'
+      }
+    }
+    
+    return mapped
+  }
+  
+  return data
+}
+```
+
 **映射逻辑特点：**
 - **递归处理**：支持嵌套对象和数组的深度映射
 - **Date对象保护**：特殊处理Date对象，避免被当作普通对象处理
 - **库存增强**：自动添加inventory_unit、usage_rate、stock_status等库存特有字段
 - **数据一致性**：确保前后端字段名完全一致
+- **前端兼容**：前端组件兼容映射前后的字段名
 
 **增强字段计算：**
 ```typescript
@@ -530,21 +923,46 @@ interface MaterialEnhancement {
 | time_range | string | 否 | 时间范围（7d/30d/90d/1y） |
 | material_type | string | 否 | **原材料类型筛选（使用material_type替代product_type）** |
 
-**数据类型安全处理：**
-- **后端计算**：使用Number()强制类型转换，避免字符串拼接
-- **前端防护**：显示前进行Number()转换，确保数值正确
-- **SQL查询**：使用CAST()确保返回正确数据类型
+**数据类型安全处理（重要修复）：**
 
-**核心修复：**
-```javascript
-// 后端：强制数字类型转换（避免"16"+"1"="161"的问题）
+**问题背景：**
+- 库存消耗分析显示"161"而不是"17"
+- 后端reduce计算时发生字符串拼接："16" + "1" = "161"
+- 前端未对API返回数据进行类型验证
+
+**解决方案：**
+```typescript
+// 后端：强制数字类型转换
 const totalConsumption = convertedData.reduce((sum, item) => {
-  return sum + Number(item.total_consumed); // 关键修复点
-}, 0);
+  return sum + Number(item.total_consumed) // 关键修复点
+}, 0)
 
 // 前端：防护性类型转换
-const displayValue = Number(data.total_consumption).toLocaleString();
+const displayValue = Number(data.total_consumption).toLocaleString()
+
+// 数值字段安全处理函数
+const safe_number_conversion = (value: any): number => {
+  if (value === null || value === undefined) return 0
+  const num = Number(value)
+  return isNaN(num) ? 0 : num
+}
 ```
+
+**SQL类型转换规范：**
+```sql
+-- 确保返回数字类型，避免字符串拼接问题
+CAST(COALESCE(SUM(mu.quantity_used_beads), 0) + COALESCE(SUM(mu.quantity_used_pieces), 0) AS UNSIGNED) as total_consumed
+
+-- 价格字段处理
+CAST(p.price_per_gram AS DECIMAL(10,2)) as price_per_gram,
+CAST(p.total_price AS DECIMAL(12,2)) as total_price
+```
+
+**修复效果：**
+- ✅ 库存消耗分析显示正确数值
+- ✅ 所有库存数量字段显示正确
+- ✅ 价格计算准确无误
+- ✅ 前后端数据类型一致
 
 **响应示例：**
 ```json

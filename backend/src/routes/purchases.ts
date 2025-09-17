@@ -1518,10 +1518,10 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
       },
       material_usages: {
         include: {
-          product: {
+          sku: {
             select: {
               id: true,
-              name: true
+              sku_name: true
             }
           }
         }
@@ -1627,6 +1627,12 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
   // 根据产品类型计算相关的派生字段
   const finalPieceCount = dbData.piece_count ?? existingPurchase.piece_count
   const purchase_type = existingPurchase.purchase_type
+  
+  // 对于散珠类型，total_beads应该等于piece_count
+  if (purchase_type === 'LOOSE_BEADS' && finalPieceCount !== undefined) {
+    updateData.total_beads = finalPieceCount
+    console.log('🔍 [散珠类型] 同步total_beads字段:', finalPieceCount)
+  }
   
   if (finalTotalPrice) {
     if (purchase_type === 'LOOSE_BEADS') {
@@ -1810,14 +1816,13 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
           user_name: true
         }
       },
-      material_usages: {
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
+      materials: {
+        select: {
+          id: true,
+          material_name: true,
+          original_quantity: true,
+          remaining_quantity: true,
+          used_quantity: true
         }
       }
     }
@@ -1830,20 +1835,30 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
     })
   }
   
-  // 检查是否有成品使用了该采购记录的珠子
-  if (existingPurchase.material_usages && existingPurchase.material_usages.length > 0) {
-    const usedByProducts = existingPurchase.material_usages.map(usage => usage.product?.name || "未知产品").join('、')
-    return res.status(400).json({
-      success: false,
-      message: `无法删除该采购记录，因为以下成品正在使用其珠子：${usedByProducts}。请先将这些成品拆散，使珠子回退到库存后再删除。`,
-      data: {
-        usedByProducts: existingPurchase.material_usages.map(usage => ({
-          product_id: usage.product?.id || "",
-          purchase_name: usage.product?.name || "未知产品",
-          quantityUsed: usage.quantity_used
-        }))
-      }
+  // 检查关联的materials是否有被使用过
+  if (existingPurchase.materials && existingPurchase.materials.length > 0) {
+    const usedMaterials = existingPurchase.materials.filter(material => {
+      const remaining = material.remaining_quantity || 0
+      const original = material.original_quantity || 0
+      return remaining !== original
     })
+    
+    if (usedMaterials.length > 0) {
+      const usedMaterialNames = usedMaterials.map(material => material.material_name).join('、')
+      return res.status(400).json({
+        success: false,
+        message: `无法删除该采购记录，因为以下原材料已被SKU使用：${usedMaterialNames}。请先将相关SKU拆散，使原材料完全回退到库存后再删除。`,
+        data: {
+          usedMaterials: usedMaterials.map(material => ({
+            material_id: material.id,
+            material_name: material.material_name,
+            original_quantity: material.original_quantity,
+            remaining_quantity: material.remaining_quantity,
+            used_quantity: material.used_quantity
+          }))
+        }
+      })
+    }
   }
   
   // 获取用户信息用于日志记录
@@ -1883,7 +1898,16 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
         }
       })
       
-      // 删除采购记录（库存数据基于采购记录计算，删除采购记录后库存会自动更新）
+      // 先删除关联的materials记录
+      if (existingPurchase.materials && existingPurchase.materials.length > 0) {
+        await tx.material.deleteMany({
+          where: {
+            purchase_id: id
+          }
+        })
+      }
+      
+      // 再删除采购记录
       await tx.purchase.delete({
         where: { id }
       })
@@ -1893,7 +1917,7 @@ router.delete('/:id', authenticateToken, asyncHandler(async (req, res) => {
       success: true,
       message: '采购记录删除成功，相关库存数据已同步更新',
       data: {
-        deletedPurchase: {
+        deleted_purchase: {
           id: existingPurchase.id,
           purchase_name: existingPurchase.purchase_name,
           purchase_code: existingPurchase.purchase_code

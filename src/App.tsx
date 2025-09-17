@@ -19,6 +19,7 @@ import CustomerManagement from './pages/CustomerManagement'
 import UserManagement from './pages/UserManagement'
 import Settings from './pages/Settings'
 import Financial from './pages/Financial'
+import InventoryDashboardTest from './pages/InventoryDashboardTest'
 import { useAuth } from './hooks/useAuth'
 
 // 主App组件，包装AuthProvider
@@ -152,6 +153,14 @@ function AppContent() {
               <ProtectedRoute>
                 <Layout>
                   <Settings />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/inventory-dashboard-test" element={
+              <ProtectedRoute>
+                <Layout>
+                  <InventoryDashboardTest />
                 </Layout>
               </ProtectedRoute>
             } />

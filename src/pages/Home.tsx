@@ -19,6 +19,7 @@ import { dashboard_api } from '../services/api'
 import { DashboardStats } from '../types'
 import { toast } from 'sonner'
 
+
 export default function Home() {
   const [stats, set_stats] = useState<DashboardStats | null>(null)
   const [is_loading, set_is_loading] = useState(true)
@@ -308,6 +309,8 @@ export default function Home() {
           )}
         </div>
       </div>
+
+
 
       {/* 智能助手 */}
       <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">

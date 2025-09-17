@@ -46,7 +46,7 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
     set_loading(true)
     try {
       const response = await inventory_api.get_material_distribution({
-        material_type: purchase_type,
+        purchase_type: purchase_type,
         limit: 20
       })
       
@@ -68,17 +68,19 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
         
         // 计算总数量用于百分比计算
         const total_quantity = backendData.items.reduce((sum, item) => {
-          return sum + (item.total_remaining_quantity || 0)
+          return sum + (item.total_quantity || 0)
         }, 0)
         
         const chartItems: ChartDataItem[] = backendData.items.map((item: any, index: number) => {
-          const percentage = total_quantity > 0 ? (item.total_remaining_quantity / total_quantity) * 100 : 0
+          const percentage = total_quantity > 0 ? (item.total_quantity / total_quantity) * 100 : 0
+          // 使用material_type字段（映射后的字段）
+          const materialType = item.material_type || item.purchase_type
           return {
-            name: item.purchase_type === 'LOOSE_BEADS' ? '散珠' : 
-                  item.purchase_type === 'BRACELET' ? '手串' :
-                  item.purchase_type === 'ACCESSORIES' ? '饰品配件' :
-                  item.purchase_type === 'FINISHED_MATERIAL' ? '成品' : item.purchase_type,
-            value: item.total_remaining_quantity,
+            name: materialType === 'LOOSE_BEADS' ? '散珠' : 
+                  materialType === 'BRACELET' ? '手串' :
+                  materialType === 'ACCESSORIES' ? '饰品配件' :
+                  materialType === 'FINISHED' ? '成品' : materialType,
+            value: item.total_quantity,
             percentage: percentage,
             color: generateColor(baseColor, index, (backendData as any).items.length)
           }
@@ -86,15 +88,19 @@ const InventoryPieChart: React.FC = () => {const [selected_type, setSelectedType
         
         // 转换数据格式以兼容现有的显示逻辑
         const compatibleData = {
-          topProducts: backendData.items.map(item => ({
-            purchase_name: item.purchase_type === 'LOOSE_BEADS' ? '散珠' : 
-                         item.purchase_type === 'BRACELET' ? '手串' :
-                         item.purchase_type === 'ACCESSORIES' ? '饰品配件' :
-                         item.purchase_type === 'FINISHED_MATERIAL' ? '成品' : item.purchase_type,
-            purchase_type: item.purchase_type,
-            total_quantity: item.total_remaining_quantity,
-            percentage: total_quantity > 0 ? (item.total_remaining_quantity / total_quantity) * 100 : 0
-          }))
+          topProducts: backendData.items.map(item => {
+            // 使用material_type字段（映射后的字段）
+            const materialType = item.material_type || item.purchase_type
+            return {
+              purchase_name: materialType === 'LOOSE_BEADS' ? '散珠' : 
+                           materialType === 'BRACELET' ? '手串' :
+                           materialType === 'ACCESSORIES' ? '饰品配件' :
+                           materialType === 'FINISHED' ? '成品' : materialType,
+              purchase_type: materialType,
+              total_quantity: item.total_quantity,
+              percentage: total_quantity > 0 ? (item.total_quantity / total_quantity) * 100 : 0
+            }
+          })
         }
         
         setData(compatibleData as ProductDistributionData)

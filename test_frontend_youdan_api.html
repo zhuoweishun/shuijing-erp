@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试油胆价格API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+        .price-highlight {
+            background: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 油胆价格显示API测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 测试层级式库存API</h3>
+            <p>测试 <code>/api/inventory/hierarchical</code> 接口返回的油胆价格数据</p>
+            <button onclick="testHierarchicalAPI()">测试层级式库存API</button>
+            <div id="hierarchical-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 测试油胆数据调试API</h3>
+            <p>测试 <code>/api/inventory/debug/youdan</code> 接口的油胆专用调试数据</p>
+            <button onclick="testYoudanDebugAPI()">测试油胆调试API</button>
+            <div id="youdan-debug-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 分析价格字段映射</h3>
+            <p>分析前端接收到的价格字段名称和数值</p>
+            <button onclick="analyzePriceFields()">分析价格字段</button>
+            <div id="price-analysis-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api';
+        const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidXNlcl8xNzM3MzU5NzE5NzI5IiwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJCT1NTIiwiaWF0IjoxNzM3MzU5NzIwLCJleHAiOjE3Mzc0NDYxMjB9.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
+        
+        let hierarchicalData = null;
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${AUTH_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('请求失败:', error);
+                throw error;
+            }
+        }
+        
+        async function testHierarchicalAPI() {
+            const resultDiv = document.getElementById('hierarchical-result');
+            resultDiv.textContent = '正在测试层级式库存API...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await makeRequest(`${API_BASE_URL}/inventory/hierarchical?material_types=LOOSE_BEADS&search=油胆`);
+                hierarchicalData = response;
+                
+                let output = '✅ 层级式库存API调用成功\n\n';
+                output += `响应状态: ${response.success}\n`;
+                output += `数据结构: ${JSON.stringify(response.data, null, 2)}\n\n`;
+                
+                // 查找油胆数据
+                const hierarchy = response.data?.hierarchy || [];
+                const youdanData = hierarchy.filter(item => 
+                    item.material_type === 'LOOSE_BEADS' && 
+                    item.specifications?.some(spec => 
+                        spec.qualities?.some(quality => 
+                            quality.batches?.some(batch => 
+                                batch.material_name?.includes('油胆')
+                            )
+                        )
+                    )
+                );
+                
+                if (youdanData.length > 0) {
+                    output += '🔍 找到油胆数据:\n';
+                    youdanData.forEach((typeGroup, index) => {
+                        output += `\n类型组 ${index + 1}: ${typeGroup.material_type}\n`;
+                        typeGroup.specifications?.forEach((spec, specIndex) => {
+                            output += `  规格 ${specIndex + 1}: ${spec.specification_value}${spec.specification_unit}\n`;
+                            spec.qualities?.forEach((quality, qualityIndex) => {
+                                output += `    品相 ${qualityIndex + 1}: ${quality.quality}级\n`;
+                                output += `    剩余数量: ${quality.remaining_quantity}\n`;
+                                output += `    price_per_unit: ${quality.price_per_unit}\n`;
+                                output += `    price_per_gram: ${quality.price_per_gram}\n`;
+                                
+                                quality.batches?.forEach((batch, batchIndex) => {
+                                    if (batch.material_name?.includes('油胆')) {
+                                        output += `      批次 ${batchIndex + 1}:\n`;
+                                        output += `        - material_name: ${batch.material_name}\n`;
+                                        output += `        - remaining_quantity: ${batch.remaining_quantity}\n`;
+                                        output += `        - price_per_unit: ${batch.price_per_unit} (类型: ${typeof batch.price_per_unit})\n`;
+                                        output += `        - unit_cost: ${batch.unit_cost} (类型: ${typeof batch.unit_cost})\n`;
+                                        output += `        - price_per_gram: ${batch.price_per_gram}\n`;
+                                        output += `        - supplier_name: ${batch.supplier_name}\n`;
+                                    }
+                                });
+                            });
+                        });
+                    });
+                } else {
+                    output += '⚠️ 未找到油胆数据\n';
+                }
+                
+                resultDiv.textContent = output;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ 测试失败: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        async function testYoudanDebugAPI() {
+            const resultDiv = document.getElementById('youdan-debug-result');
+            resultDiv.textContent = '正在测试油胆调试API...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await makeRequest(`${API_BASE_URL}/inventory/debug/youdan`);
+                
+                let output = '✅ 油胆调试API调用成功\n\n';
+                output += `响应状态: ${response.success}\n`;
+                output += `消息: ${response.data?.message}\n\n`;
+                
+                // 分析materials数据
+                const materialsData = response.data?.materials_data || [];
+                if (materialsData.length > 0) {
+                    output += `📊 Materials表数据 (${materialsData.length} 条记录):\n`;
+                    materialsData.forEach((record, index) => {
+                        output += `\n记录 ${index + 1}:\n`;
+                        output += `  - material_name: ${record.material_name}\n`;
+                        output += `  - quality: ${record.quality}\n`;
+                        output += `  - bead_diameter: ${record.bead_diameter}\n`;
+                        output += `  - remaining_quantity: ${record.remaining_quantity}\n`;
+                        output += `  - unit_cost: ${record.unit_cost} (类型: ${typeof record.unit_cost})\n`;
+                    });
+                }
+                
+                // 分析原始库存计算数据
+                const rawInventory = response.data?.raw_inventory_calculation || [];
+                if (rawInventory.length > 0) {
+                    output += `\n\n📊 原始库存计算数据 (${rawInventory.length} 条记录):\n`;
+                    rawInventory.forEach((record, index) => {
+                        output += `\n记录 ${index + 1}:\n`;
+                        output += `  - material_name: ${record.material_name}\n`;
+                        output += `  - material_type: ${record.material_type}\n`;
+                        output += `  - quality: ${record.quality}\n`;
+                        output += `  - remaining_quantity: ${record.remaining_quantity}\n`;
+                        output += `  - price_per_unit: ${record.price_per_unit} (类型: ${typeof record.price_per_unit})\n`;
+                    });
+                }
+                
+                resultDiv.textContent = output;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ 测试失败: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        async function analyzePriceFields() {
+            const resultDiv = document.getElementById('price-analysis-result');
+            
+            if (!hierarchicalData) {
+                resultDiv.textContent = '请先运行"测试层级式库存API"获取数据';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            let output = '🔍 价格字段分析\n\n';
+            
+            const hierarchy = hierarchicalData.data?.hierarchy || [];
+            let foundYoudan = false;
+            
+            hierarchy.forEach((typeGroup, typeIndex) => {
+                if (typeGroup.material_type === 'LOOSE_BEADS') {
+                    typeGroup.specifications?.forEach((spec, specIndex) => {
+                        spec.qualities?.forEach((quality, qualityIndex) => {
+                            quality.batches?.forEach((batch, batchIndex) => {
+                                if (batch.material_name?.includes('油胆')) {
+                                    foundYoudan = true;
+                                    output += `油胆批次 ${batchIndex + 1} (${batch.material_name} - ${quality.quality}级):\n`;
+                                    
+                                    // 检查所有可能的价格字段
+                                    const priceFields = [
+                                        'price_per_unit',
+                                        'unit_cost', 
+                                        'price_per_bead',
+                                        'price_per_gram'
+                                    ];
+                                    
+                                    priceFields.forEach(field => {
+                                        const value = batch[field];
+                                        const type = typeof value;
+                                        const isValid = value !== null && value !== undefined && value !== 0;
+                                        
+                                        output += `  - ${field}: ${value} (类型: ${type}, 有效: ${isValid})\n`;
+                                    });
+                                    
+                                    // 检查前端应该使用哪个字段
+                                    const frontendPrice = batch.price_per_unit || batch.unit_cost;
+                                    output += `  - 前端应使用价格: ${frontendPrice}\n`;
+                                    output += `  - 数值转换结果: ${Number(frontendPrice)}\n\n`;
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+            
+            if (!foundYoudan) {
+                output += '⚠️ 在层级数据中未找到油胆记录\n';
+            }
+            
+            // 模拟前端价格计算逻辑
+            output += '\n📊 模拟前端价格计算逻辑:\n';
+            output += '前端代码: const price = Number(batch.price_per_unit) || 0\n';
+            output += '如果price_per_unit为null，则使用0\n';
+            output += '如果price_per_unit有值，则转换为数字\n\n';
+            
+            output += '🔧 修复建议:\n';
+            output += '1. 确保后端返回price_per_unit字段\n';
+            output += '2. 前端使用price_per_unit而不是unit_cost\n';
+            output += '3. 添加向后兼容：price_per_unit || unit_cost\n';
+            
+            resultDiv.textContent = output;
+            resultDiv.className = 'result success';
+        }
+    </script>
+</body>
+</html>

@@ -40,27 +40,42 @@ const Material_distribution_pie_chart: React.FC = () => {
 
   // 获取原材料分布数据
   const fetch_material_distribution = async (material_type: MaterialType) => {
+    console.log('🔄 [原材料分布] 开始获取数据:', material_type)
     set_loading(true)
     try {
       const response = await inventory_api.get_material_distribution({
-        material_type: material_type,
+        purchase_type: material_type, // 后端使用purchase_type参数
         limit: 10 // 仪表盘中显示前10名即可
       })
       
+      console.log('📊 [原材料分布] API响应:', response)
+      
       if (response.success && response.data && (response.data as any).items) {
         // 转换为图表数据格式
-        const chart_items: ChartDataItem[] = (response.data as any).items.map((item: any, index: number) => ({
-          name: item.material_type || '未知类型',
-          value: item.total_remaining_quantity || 0,
-          percentage: 0, // 需要计算百分比
-          color: generate_color(index)
-        }))
-        
-        // 计算百分比
-        const total_value = chart_items.reduce((sum, item) => sum + item.value, 0)
-        chart_items.forEach(item => {
-          item.percentage = total_value > 0 ? (item.value / total_value) * 100 : 0
+        const chart_items: ChartDataItem[] = (response.data as any).items.map((item: any, index: number) => {
+          // 优先使用映射后的material字段，向后兼容purchase字段，如果都没有则使用当前选中的类型
+          const materialType = item.material_type || item.purchase_type || material_type
+          const materialName = item.material_name || item.purchase_name || item.name || '未知产品'
+          
+          console.log('🔄 [数据转换] item:', item, 'materialType:', materialType, 'selected_type:', material_type)
+          
+          return {
+            name: materialName, // 使用映射后的material_name字段
+            value: Number(item.value) || Number(item.total_remaining_quantity) || 0, // 优先使用后端返回的value字段
+            percentage: Number(item.percentage) || 0, // 使用后端计算的百分比
+            color: generate_color(index),
+            material_type: materialType // 保留类型信息，确保有值
+          }
         })
+        
+        // 如果后端没有返回百分比，前端计算
+        const has_backend_percentage = chart_items.some(item => item.percentage > 0)
+        if (!has_backend_percentage) {
+          const total_value = chart_items.reduce((sum, item) => sum + item.value, 0)
+          chart_items.forEach(item => {
+            item.percentage = total_value > 0 ? (item.value / total_value) * 100 : 0
+          })
+        }
         
         set_chart_data(chart_items)
       } else {
@@ -95,15 +110,30 @@ const Material_distribution_pie_chart: React.FC = () => {
     return CHART_COLORS[index % CHART_COLORS.length]
   }
 
+  // 获取单位显示
+  const get_unit = (material_type: string): string => {
+    switch (material_type) {
+      case 'LOOSE_BEADS': return '颗'
+      case 'BRACELET': return '颗'
+      case 'ACCESSORIES': return '片'
+      case 'FINISHED_MATERIAL': return '件'
+      default: return '个'
+    }
+  }
+
   // 自定义Tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
+      // 优先使用数据中的material_type，如果没有则使用当前选中的类型
+      const material_type = data.material_type || selected_type
+      const unit = get_unit(material_type)
+      console.log('🔍 [Tooltip] material_type:', material_type, 'unit:', unit, 'data:', data)
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-medium text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            数量: {data.value.toLocaleString()} 颗/件
+            数量: {data.value.toLocaleString()} {unit}
           </p>
           <p className="text-sm text-gray-600">
             占比: {data.percentage.toFixed(1)}%

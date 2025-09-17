@@ -122,7 +122,7 @@ router.get('/debug/raw-inventory', authenticateToken, asyncHandler(async (_req, 
          p.purchase_type as purchase_type,
          p.quality,
          p.bead_diameter,
-         p.specification,
+         p.specification as purchase_specification,
         CASE 
           WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
           WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
@@ -158,7 +158,7 @@ router.get('/debug/raw-inventory', authenticateToken, asyncHandler(async (_req, 
        purchase_type: item.purchase_type,
        quality: item.quality,
        bead_diameter: item.bead_diameter ? Number(item.bead_diameter) : null,
-       specification: item.specification ? Number(item.specification) : null,
+       purchase_specification: item.purchase_specification ? Number(item.purchase_specification) : null,
        original_quantity: Number(item.original_quantity),
        used_quantity: Number(item.used_quantity),
        remaining_quantity: Number(item.remaining_quantity)
@@ -173,6 +173,167 @@ router.get('/debug/raw-inventory', authenticateToken, asyncHandler(async (_req, 
     })
   } catch (error) {
     console.error('❌ [原始库存调试] 查询失败:', error)
+    res.status(500).json(
+      ErrorResponses.internal('查询失败', (error as Error).message)
+    )
+  }
+}))
+
+// 添加"油胆"数据调试端点
+router.get('/debug/youdan', authenticateToken, asyncHandler(async (_req, res) => {
+  try {
+    // 查询purchases表中的"油胆"数据
+    const purchasesData = await prisma.purchase.findMany({
+      where: {
+        purchase_name: {
+          contains: '油胆'
+        }
+      },
+      select: {
+        id: true,
+        purchase_code: true,
+        purchase_name: true,
+        purchase_type: true,
+        quantity: true,
+        piece_count: true,
+        total_beads: true,
+        quality: true,
+        bead_diameter: true,
+        specification: true,
+        created_at: true
+      },
+      orderBy: {
+        created_at: 'desc'
+      }
+    })
+    
+    // 查询materials表中的"油胆"数据
+     const materialsData = await prisma.material.findMany({
+       where: {
+         material_name: {
+           contains: '油胆'
+         }
+       },
+       select: {
+         id: true,
+         purchase_id: true,
+         material_name: true,
+         material_type: true,
+         original_quantity: true,
+         used_quantity: true,
+         remaining_quantity: true,
+         quality: true,
+         bead_diameter: true,
+         bracelet_inner_diameter: true,
+         bracelet_bead_count: true,
+         accessory_specification: true,
+         finished_material_specification: true,
+         created_at: true,
+         updated_at: true
+       },
+       orderBy: {
+         created_at: 'desc'
+       }
+     })
+    
+    // 查询material_usage表中的"油胆"相关数据
+     const usageData = await prisma.materialUsage.findMany({
+       where: {
+         purchase: {
+           purchase_name: {
+             contains: '油胆'
+           }
+         }
+       },
+       select: {
+         id: true,
+         purchase_id: true,
+         material_id: true,
+         quantity_used: true,
+         action: true,
+         created_at: true,
+         updated_at: true,
+         purchase: {
+           select: {
+             purchase_name: true,
+             purchase_type: true
+           }
+         }
+       },
+       orderBy: {
+         created_at: 'desc'
+       }
+     })
+    
+    // 执行原始SQL查询"油胆"的库存计算
+    const rawInventoryQuery = `
+      SELECT 
+        p.id as purchase_id,
+        p.purchase_code,
+        p.purchase_name,
+        p.purchase_type,
+        p.quality,
+        p.bead_diameter,
+        p.specification,
+        CASE 
+          WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
+          WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
+          WHEN p.purchase_type = 'ACCESSORIES' THEN COALESCE(p.piece_count, 0)
+          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN COALESCE(p.piece_count, 0)
+          ELSE COALESCE(p.quantity, 0)
+        END as original_quantity,
+        COALESCE(mu.used_quantity, 0) as used_quantity,
+        (CASE 
+          WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
+          WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
+          WHEN p.purchase_type = 'ACCESSORIES' THEN COALESCE(p.piece_count, 0)
+          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN COALESCE(p.piece_count, 0)
+          ELSE COALESCE(p.quantity, 0)
+        END - COALESCE(mu.used_quantity, 0)) as remaining_quantity
+      FROM purchases p
+      LEFT JOIN (
+        SELECT purchase_id, SUM(quantity_used) as used_quantity
+        FROM material_usage
+        GROUP BY purchase_id
+      ) mu ON p.id = mu.purchase_id
+      WHERE p.purchase_name LIKE '%油胆%'
+      ORDER BY p.created_at DESC
+    `
+    
+    const rawResults = await prisma.$queryRawUnsafe(rawInventoryQuery) as any[]
+    
+    // 转换BigInt为普通数字
+    const processedRawResults = rawResults.map(item => ({
+      purchase_id: item.purchase_id,
+      purchase_code: item.purchase_code,
+      purchase_name: item.purchase_name,
+      purchase_type: item.purchase_type,
+      quality: item.quality,
+      bead_diameter: item.bead_diameter ? Number(item.bead_diameter) : null,
+      specification: item.specification ? Number(item.specification) : null,
+      original_quantity: Number(item.original_quantity),
+      used_quantity: Number(item.used_quantity),
+      remaining_quantity: Number(item.remaining_quantity)
+    }))
+    
+    res.json({
+      success: true,
+      data: {
+        purchases_data: purchasesData,
+        materials_data: materialsData,
+        usage_data: usageData,
+        raw_inventory_calculation: processedRawResults,
+        summary: {
+          purchases_count: purchasesData.length,
+          materials_count: materialsData.length,
+          usage_records_count: usageData.length,
+          raw_results_count: processedRawResults.length
+        },
+        message: '"油胆"数据调试信息'
+      }
+    })
+  } catch (error) {
+    console.error('❌ [油胆数据调试] 查询失败:', error)
     res.status(500).json(
       ErrorResponses.internal('查询失败', (error as Error).message)
     )
@@ -479,80 +640,37 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
   })
 
   try {
-    // 查询所有库存数据
+    // 查询所有库存数据 - 直接从material表查询
     const inventoryQuery = `
       SELECT 
-        p.id as purchase_id,
-        p.purchase_code as purchase_code,
-        p.purchase_name as purchase_name,
-        p.purchase_type as purchase_type,
-        p.unit_type as unit_type,
-        p.bead_diameter as bead_diameter,
-        p.specification,
-        p.quality,
-        p.photos,
-        CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
-          WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
-          WHEN p.purchase_type = 'ACCESSORIES' THEN COALESCE(p.piece_count, 0)
-          WHEN p.purchase_type = 'FINISHED' THEN COALESCE(p.piece_count, 0)
-          ELSE COALESCE(p.quantity, 0)
-        END as original_quantity,
-        COALESCE(mu.used_quantity, 0) as used_quantity,
-        (CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
-          WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
-          WHEN p.purchase_type = 'ACCESSORIES' THEN COALESCE(p.piece_count, 0)
-          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN COALESCE(p.piece_count, 0)
-          ELSE COALESCE(p.quantity, 0)
-        END - COALESCE(mu.used_quantity, 0)) as remaining_quantity,
-        CASE WHEN p.min_stock_alert IS NOT NULL AND 
-                 (CASE 
-                   WHEN p.purchase_type = 'LOOSE_BEADS' THEN COALESCE(p.piece_count, 0)
-                   WHEN p.purchase_type = 'BRACELET' THEN COALESCE(p.total_beads, p.piece_count, 0)
-                   WHEN p.purchase_type = 'ACCESSORIES' THEN COALESCE(p.piece_count, 0)
-                   WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN COALESCE(p.piece_count, 0)
-                   ELSE COALESCE(p.quantity, 0)
-                 END - COALESCE(mu.used_quantity, 0)) <= p.min_stock_alert 
+        m.id as material_id,
+        m.material_code as material_code,
+        m.material_name as material_name,
+        m.material_type as material_type,
+        m.inventory_unit as inventory_unit,
+        m.bead_diameter as bead_diameter,
+        m.bracelet_inner_diameter,
+        m.bracelet_bead_count,
+        m.accessory_specification,
+        m.finished_material_specification,
+        m.quality,
+        m.photos,
+        m.original_quantity,
+        m.used_quantity,
+        COALESCE(m.remaining_quantity, m.original_quantity - m.used_quantity) as remaining_quantity,
+        CASE WHEN m.min_stock_alert IS NOT NULL AND 
+                 COALESCE(m.remaining_quantity, m.original_quantity - m.used_quantity) <= m.min_stock_alert 
             THEN 1 ELSE 0 END as is_low_stock,
-        CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN p.price_per_bead
-          WHEN p.purchase_type = 'BRACELET' THEN 
-            CASE 
-              WHEN p.price_per_bead IS NOT NULL THEN p.price_per_bead
-              WHEN p.total_price IS NOT NULL AND p.total_beads IS NOT NULL AND p.total_beads > 0 
-                THEN p.total_price / p.total_beads
-              ELSE NULL
-            END
-          WHEN p.purchase_type = 'ACCESSORIES' THEN 
-            CASE 
-              WHEN p.unit_price IS NOT NULL THEN p.unit_price
-              WHEN p.total_price IS NOT NULL AND p.piece_count IS NOT NULL AND p.piece_count > 0 
-                THEN p.total_price / p.piece_count
-              ELSE NULL
-            END
-          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN 
-            CASE 
-              WHEN p.unit_price IS NOT NULL THEN p.unit_price
-              WHEN p.total_price IS NOT NULL AND p.piece_count IS NOT NULL AND p.piece_count > 0 
-                THEN p.total_price / p.piece_count
-              ELSE NULL
-            END
-          ELSE p.price_per_bead
-        END as price_per_unit,
-        p.price_per_gram as price_per_gram,
-        p.purchase_date as purchase_date,
-        s.name as supplier_name
-      FROM purchases p
-      LEFT JOIN (
-        SELECT purchase_id, SUM(quantity_used) as used_quantity
-        FROM material_usage
-        GROUP BY purchase_id
-      ) mu ON p.id = mu.purchase_id
-      LEFT JOIN suppliers s ON p.supplier_id = s.id
+        m.unit_cost as price_per_unit,
+        NULL as price_per_gram,
+        m.material_date as material_date,
+        s.name as supplier_name,
+        COALESCE(m.stock_status, 'SUFFICIENT') as stock_status
+      FROM materials m
+      LEFT JOIN suppliers s ON m.supplier_id = s.id
       WHERE 1=1
-      ORDER BY p.purchase_type, p.purchase_name, 
-               COALESCE(p.bead_diameter, p.specification), p.quality, p.purchase_date
+      ORDER BY m.material_type, m.material_name, 
+               COALESCE(m.bead_diameter, m.bracelet_inner_diameter), m.quality, m.material_date
     `
     
     const allInventory = await prisma.$queryRawUnsafe(inventoryQuery) as any[]
@@ -562,19 +680,37 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
       firstItem: allInventory[0]
     })
     
-    // 调试所有类型的数据
-    const allTypes = [...new Set(allInventory.map(item => item.purchase_type))]
-    console.log('🔍 [类型调试] 所有存在的purchase_type:', allTypes)
+    // 如果没有数据，直接返回空结果
+    if (!allInventory || allInventory.length === 0) {
+      console.log('⚠️ [层级式库存查询] 没有找到任何库存数据')
+      return res.json({
+        success: true,
+        message: '获取层级式库存列表成功',
+        data: {
+          hierarchy: [],
+          pagination: {
+            page: pageNum,
+            limit: limitNum,
+            total: 0,
+            pages: 0
+          }
+        }
+      })
+    }
     
-    // 调试采购日期字段
+    // 调试所有类型的数据
+    const allTypes = [...new Set(allInventory.map(item => item.material_type))]
+    console.log('🔍 [类型调试] 所有存在的material_type:', allTypes)
+    
+    // 调试原材料日期字段
     if (allInventory.length > 0) {
-      console.log('🔍 [采购日期调试] 前5条记录的purchase_date:', 
+      console.log('🔍 [原材料日期调试] 前5条记录的material_date:', 
         allInventory.slice(0, 5).map(item => ({
-          purchase_id: item.purchase_id,
-          purchase_name: item.purchase_name,
-          purchase_date: item.purchase_date,
-          purchase_date_type: typeof item.purchase_date,
-          purchase_date_string: String(item.purchase_date)
+          material_id: item.material_id,
+          material_name: item.material_name,
+          material_date: item.material_date,
+          material_date_type: typeof item.material_date,
+          material_date_string: String(item.material_date)
         }))
       )
     }
@@ -583,18 +719,47 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     const hierarchicalData = new Map()
     
     allInventory.forEach((item: any) => {
-      const purchase_type = item.purchase_type
-      const diameter = item.bead_diameter ? Number(item.bead_diameter) : 0
-      // const specification = item.specification ? Number(item.specification) : null
+      const material_type = item.material_type
+      
+      // 统一规格字段映射：根据material_type选择对应的规格字段
+      let specValue = 0
+      let specUnit = 'mm'
+      
+      switch (material_type) {
+        case 'LOOSE_BEADS':
+          // 散珠使用bead_diameter
+          specValue = item.bead_diameter ? Number(item.bead_diameter) : 0
+          break
+        case 'BRACELET':
+          // 手串使用bracelet_inner_diameter
+          specValue = item.bracelet_inner_diameter ? Number(item.bracelet_inner_diameter) : 0
+          break
+        case 'ACCESSORIES':
+          // 配件使用accessory_specification
+          specValue = item.accessory_specification ? Number(item.accessory_specification) : 0
+          break
+        case 'FINISHED_MATERIAL':
+          // 成品使用finished_material_specification
+          specValue = item.finished_material_specification ? Number(item.finished_material_specification) : 0
+          break
+        default:
+          // 默认情况，尝试从各个字段中获取值
+          specValue = item.bead_diameter ? Number(item.bead_diameter) :
+                     item.bracelet_inner_diameter ? Number(item.bracelet_inner_diameter) :
+                     item.accessory_specification ? Number(item.accessory_specification) :
+                     item.finished_material_specification ? Number(item.finished_material_specification) : 0
+          break
+      }
+      
       const quality = item.quality || '未知'
       
       // 应用筛选条件
-      if (search && !item.purchase_name.toLowerCase().includes(search.toLowerCase())) return
+      if (search && !item.material_name.toLowerCase().includes(search.toLowerCase())) return
       
       // 原材料类型筛选（多选）
       if (actualPurchaseTypes) {
-        const purchaseTypesArray = Array.isArray(actualPurchaseTypes) ? actualPurchaseTypes : [actualPurchaseTypes]
-        if (!purchaseTypesArray.includes(purchase_type)) return
+        const materialTypesArray = Array.isArray(actualPurchaseTypes) ? actualPurchaseTypes : [actualPurchaseTypes]
+        if (!materialTypesArray.includes(material_type)) return
       }
       
       // 修复品相筛选逻辑：比较转换后的品相值
@@ -602,25 +767,23 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
       if (quality && itemQuality !== quality) return
       if (String(low_stock_only) === 'true' && Number(item.is_low_stock) !== 1) return
       
-      // 珠子直径范围筛选（散珠和手串）
-      if (diameter && diameter_min && diameter < Number(diameter_min)) return
-      if (diameter && diameter_max && diameter > Number(diameter_max)) return
+      // 统一规格范围筛选（适用于所有类型）
+      if (specification_min && specValue && specValue < Number(specification_min)) return
+      if (specification_max && specValue && specValue > Number(specification_max)) return
       
-      // 规格范围筛选（饰品配件和成品）
-      if (specification_min && specification_min && item.specification && Number(item.specification) < Number(specification_min)) return
-      if (specification_min && specification_max && item.specification && Number(item.specification) > Number(specification_max)) return
+      // 兼容旧的diameter筛选参数（向后兼容）
+      if (diameter_min && specValue && specValue < Number(diameter_min)) return
+      if (diameter_max && specValue && specValue > Number(diameter_max)) return
       
       // 构建层级键
-      const specValue = diameter || (item.specification ? Number(item.specification) : 0) || 0
-      const specUnit = diameter ? 'mm' : 'mm'
-      const level1Key = purchase_type
-      const level2Key = `${purchase_type}|${specValue}${specUnit}`
-      const level3Key = `${purchase_type}|${specValue}${specUnit}|${quality}`
+      const level1Key = material_type
+      const level2Key = `${material_type}|${specValue}${specUnit}`
+      const level3Key = `${material_type}|${specValue}${specUnit}|${quality}`
       
       // 初始化层级结构
       if (!hierarchicalData.has(level1Key)) {
         hierarchicalData.set(level1Key, {
-          purchase_type: purchase_type,
+          material_type: material_type,
           total_quantity: 0,
           total_variants: 0,
           has_low_stock: false,
@@ -679,19 +842,27 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
       }
 
       level3.batches.push({
-        purchase_id: item.purchase_id,
-        purchase_code: item.purchase_code,
-        purchase_name: item.purchase_name,
-        purchase_type: item.purchase_type,
-        purchase_date: item.purchase_date,
+        material_id: item.material_id,
+        material_code: item.material_code,
+        material_name: item.material_name,
+        material_type: item.material_type,
+        material_date: item.material_date,
         supplier_name: item.supplier_name,
         original_quantity: originalQuantity,
         used_quantity: Number(item.used_quantity),
         remaining_quantity: remainingQuantity,
+        // 统一的规格字段
+        specification: specValue,
+        specification_unit: specUnit,
+        // 保留原始字段用于调试和兼容性
         bead_diameter: item.bead_diameter ? Number(item.bead_diameter) : null,
-        specification: item.specification ? Number(item.specification) : null,
+        bracelet_inner_diameter: item.bracelet_inner_diameter ? Number(item.bracelet_inner_diameter) : null,
+        bracelet_bead_count: item.bracelet_bead_count ? Number(item.bracelet_bead_count) : null,
+        accessory_specification: item.accessory_specification,
+        finished_material_specification: item.finished_material_specification,
         price_per_unit: (req.user?.role || "USER") === 'BOSS' ? Number(item.price_per_unit) : null,
         price_per_gram: (req.user?.role || "USER") === 'BOSS' ? Number(item.price_per_gram) : null,
+        stock_status: item.stock_status,
         photos: photos
       })
       
@@ -752,7 +923,7 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
       
       level1.total_variants = specificationsArray.reduce((sum, spec) => sum + spec.total_variants, 0)
       return {
-        purchase_type: level1.purchase_type,
+        material_type: level1.material_type,
         total_quantity: level1.total_quantity,
         total_variants: level1.total_variants,
         has_low_stock: level1.has_low_stock,
@@ -761,10 +932,10 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     })
     
     // 排序
-    const sortField = sort_by === 'purchase_type' ? 'purchase_type' : 'total_quantity'
+    const sortField = sort_by === 'material_type' ? 'material_type' : 'total_quantity'
     processedData.sort((a, b) => {
-      if (sortField === 'purchase_type') {
-        return sort === 'asc' ? a.purchase_type.localeCompare(b.purchase_type) : b.purchase_type.localeCompare(a.purchase_type)
+      if (sortField === 'material_type') {
+        return sort === 'asc' ? a.material_type.localeCompare(b.material_type) : b.material_type.localeCompare(a.material_type)
       } else {
         return sort === 'asc' ? a.total_quantity - b.total_quantity : b.total_quantity - a.total_quantity
       }
@@ -779,8 +950,8 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     const total = processedData.length
     const paginatedData = processedData.slice(offset, offset + limitNum)
     
-    // 应用字段映射：purchase → material
-    const mappedData = mapPurchaseToMaterial(paginatedData)
+    // 数据已经是material表格式，无需映射
+    const mappedData = paginatedData
     
     res.json({
       success: true,
@@ -1573,7 +1744,7 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
   // 函数结束
 }))
 
-// 获取库存统计数据（仪表盘）
+// 获取库存统计数据（仪表盘）- 修复四种material类型的正确处理
 router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
   console.log('🔍 [库存统计] 接收到statistics请求:', {
     method: req.method,
@@ -1583,24 +1754,25 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
   })
   
   try {
-    // 修复的统计查询，避免嵌套聚合函数
+    // 修复的统计查询，正确处理四种material类型的单位计算
     const basicStatsQuery = `
       SELECT 
         p.purchase_type as purchase_type,
         COUNT(DISTINCT p.id) as total_items,
         SUM(CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'BRACELET' THEN (p.total_beads - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'ACCESSORIES' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'FINISHED' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'LOOSE_BEADS' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'BRACELET' THEN (COALESCE(p.total_beads, p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'ACCESSORIES' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
           ELSE 0
-        END) as total_quantity
+        END) as total_remaining_quantity
       FROM purchases p
       LEFT JOIN (
         SELECT purchase_id, SUM(quantity_used) as used_quantity
         FROM material_usage
         GROUP BY purchase_id
       ) mu ON p.id = mu.purchase_id
+      WHERE p.purchase_type IN ('LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL')
       GROUP BY p.purchase_type
       ORDER BY p.purchase_type
     `
@@ -1613,8 +1785,8 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
       data: typeStats
     })
     
-    // 转换BigInt字段并应用字段格式转换
-    const convertBigInt = (data: any[]) => {
+    // 转换BigInt字段并应用purchase到material的映射
+    const convertAndMapData = (data: any[]) => {
       return data.map(item => {
         // 先转换BigInt为Number
         const converted = { ...item }
@@ -1624,32 +1796,39 @@ router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
           }
         })
         console.log('🔧 [库存统计] BigInt转换后的项目:', converted)
-        // 字段已经是蛇形命名，无需转换
-        return converted
+        
+        // 应用purchase到material的字段映射
+        const mapped = mapPurchaseToMaterial(converted)
+        
+        // 添加单位信息
+        if (mapped.material_type) {
+          mapped.inventory_unit = getUnit(mapped.material_type)
+        }
+        
+        return mapped
       })
     }
 
     // 计算总体统计
+    const rawTypeStats = typeStats as any[]
     const total_stats = {
-      total_items: (typeStats as any[]).reduce((sum, item) => sum + Number(item.total_items), 0),
-      total_quantity: (typeStats as any[]).reduce((sum, item) => sum + Number(item.total_quantity), 0)
+      total_items: rawTypeStats.reduce((sum, item) => sum + Number(item.total_items), 0),
+      total_quantity: rawTypeStats.reduce((sum, item) => sum + Number(item.total_remaining_quantity), 0)
     }
     console.log('📊 [库存统计] 总体统计:', total_stats)
 
+    // 应用映射并构建响应数据
+    const mappedTypeStats = convertAndMapData(rawTypeStats)
     const responseData = {
       total_stats: total_stats,
-      type_statistics: convertBigInt(typeStats as any[])
+      type_statistics: mappedTypeStats
     }
-    console.log('📊 [库存统计] 响应数据:', responseData)
-
-    // 字段已经是蛇形命名，无需转换
-    const convertedData = responseData
-    console.log('📊 [库存统计] 转换后数据:', convertedData)
+    console.log('📊 [库存统计] 映射后响应数据:', responseData)
 
     res.json({
       success: true,
       message: '获取库存统计数据成功',
-      data: convertedData
+      data: responseData
     })
   } catch (error) {
     console.error('❌ [库存统计] 查询失败:', error)
@@ -1680,28 +1859,28 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
       whereClause = `WHERE p.purchase_type = '${purchase_type}'`
     }
     
-    // 查询产品分布数据（前N名 + 其他）
+    // 查询产品分布数据（前N名 + 其他）- 修复字段名和使用剩余数量
     const distributionQuery = `
       SELECT 
         p.purchase_name as purchase_name,
         p.purchase_type as purchase_type,
         SUM(CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'BRACELET' THEN (p.total_beads - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'ACCESSORIES' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'FINISHED' THEN (p.piece_count - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'LOOSE_BEADS' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'BRACELET' THEN (COALESCE(p.total_beads, p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'ACCESSORIES' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'FINISHED' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
           ELSE 0
-        END) as total_quantity
+        END) as total_remaining_quantity
       FROM purchases p
       LEFT JOIN (
-        SELECT purchase_id, SUM(quantity_used_beads) as used_quantity
+        SELECT purchase_id, SUM(quantity_used) as used_quantity
         FROM material_usage
         GROUP BY purchase_id
       ) mu ON p.id = mu.purchase_id
       ${whereClause}
       GROUP BY p.purchase_name, p.purchase_type
-      HAVING total_quantity > 0
-      ORDER BY total_quantity DESC
+      HAVING total_remaining_quantity > 0
+      ORDER BY total_remaining_quantity DESC
     `
 
     console.log('🔍 [产品分布] 执行SQL查询:', distributionQuery)
@@ -1711,7 +1890,7 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
       sample: allProducts.slice(0, 3)
     })
     
-    // 转换BigInt字段
+    // 转换BigInt字段并应用purchase到material映射
     const convertedProducts = allProducts.map(item => {
       const converted = { ...item }
       Object.keys(converted).forEach(key => {
@@ -1719,27 +1898,29 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
           converted[key] = Number(converted[key])
         }
       })
-      return converted
+      // 应用purchase到material的字段映射
+      return mapPurchaseToMaterial(converted)
     })
     
-    // 计算该产品类型的总数量（确保数字相加而不是字符串拼接）
-    const total_quantity = convertedProducts.reduce((sum, item) => {
-      const quantity = Number(item.total_quantity) || 0
+    // 计算该产品类型的总剩余数量（确保数字相加而不是字符串拼接）
+    const total_remaining_quantity = convertedProducts.reduce((sum, item) => {
+      const quantity = Number(item.total_remaining_quantity) || 0
       return sum + quantity
     }, 0)
     
     // 获取前N名产品
     const topProducts = convertedProducts.slice(0, parseInt(String(limit)))
-    const topQuantity = topProducts.reduce((sum, item) => sum + item.total_quantity, 0)
+    const topQuantity = topProducts.reduce((sum, item) => sum + (Number(item.total_remaining_quantity) || 0), 0)
     
     // 计算其他产品的数量
-    const othersQuantity = total_quantity - topQuantity
+    const othersQuantity = total_remaining_quantity - topQuantity
     
-    // 构建饼图数据 - 百分比基于该产品类型的总量计算
+    // 构建饼图数据 - 百分比基于该产品类型的总剩余量计算，使用material字段
     const pieChartData = topProducts.map(item => ({
-      name: item.purchase_name,
-      value: item.total_quantity,
-      percentage: ((item.total_quantity / total_quantity) * 100).toFixed(1)
+      name: item.material_name || item.purchase_name, // 优先使用映射后的字段
+      value: Number(item.total_remaining_quantity) || 0,
+      percentage: total_remaining_quantity > 0 ? ((Number(item.total_remaining_quantity) || 0) / total_remaining_quantity * 100).toFixed(1) : '0.0',
+      material_type: item.material_type || item.purchase_type
     }))
     
     // 如果有其他产品，添加到数据中
@@ -1747,20 +1928,21 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
       pieChartData.push({
         name: '其他',
         value: othersQuantity,
-        percentage: ((othersQuantity / total_quantity) * 100).toFixed(1)
+        percentage: total_remaining_quantity > 0 ? (othersQuantity / total_remaining_quantity * 100).toFixed(1) : '0.0',
+        material_type: 'OTHER'
       })
     }
     
     const responseData = {
-      total_quantity: total_quantity,
+      total_remaining_quantity: total_remaining_quantity,
       top_products_count: topProducts.length,
       others_count: convertedProducts.length - topProducts.length,
-      top_products: pieChartData
+      items: pieChartData // 修改字段名以保持一致性
     }
     
     console.log('📊 [产品分布] 响应数据:', responseData)
     
-    // 字段已经是蛇形命名，无需转换
+    // 应用完整的字段映射
     const convertedData = responseData
     
     res.json({
@@ -1797,26 +1979,18 @@ router.get('/material-distribution', authenticateToken, asyncHandler(async (req,
       whereClause += ` AND p.purchase_type = '${purchase_type}'`
     }
     
-    // 查询原材料分布数据
+    // 查询原材料分布数据 - 从materials表获取数据
     const distributionQuery = `
       SELECT 
-        p.purchase_name as purchase_name,
-        SUM(CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN (COALESCE(p.total_beads, 0) - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'BRACELET' THEN (COALESCE(p.total_beads, 0) - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'ACCESSORIES' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
-          ELSE 0
-        END) as total_remaining_quantity,
-        COUNT(DISTINCT p.id) as count
-      FROM purchases p
-      LEFT JOIN (
-        SELECT purchase_id, SUM(quantity_used) as used_quantity
-        FROM material_usage
-        GROUP BY purchase_id
-      ) mu ON p.id = mu.purchase_id
-      ${whereClause}
-      GROUP BY p.purchase_name
+        m.material_name as purchase_name,
+        SUM(m.remaining_quantity) as total_remaining_quantity,
+        COUNT(DISTINCT m.id) as count
+      FROM materials m
+      INNER JOIN purchases p ON m.purchase_id = p.id
+      WHERE m.remaining_quantity > 0
+        AND p.status = 'ACTIVE'
+        ${purchase_type && purchase_type !== 'ALL' ? `AND p.purchase_type = '${purchase_type}'` : ''}
+      GROUP BY m.material_name
       ORDER BY total_remaining_quantity DESC
       LIMIT ?
     `
@@ -1839,10 +2013,22 @@ router.get('/material-distribution', authenticateToken, asyncHandler(async (req,
       return converted
     })
     
+    // 计算总量用于百分比计算
+    const totalQuantity = convertedMaterials.reduce((sum, item) => sum + Number(item.total_remaining_quantity), 0)
+    
+    // 转换为前端期望的格式，添加百分比计算和字段映射
+    const formattedItems = convertedMaterials.map(item => ({
+      name: item.purchase_name,
+      value: Number(item.total_remaining_quantity),
+      percentage: totalQuantity > 0 ? Number(((Number(item.total_remaining_quantity) / totalQuantity) * 100).toFixed(2)) : 0,
+      count: Number(item.count)
+    }))
+    
     const responseData = {
       purchase_type: purchase_type || 'ALL',
-      total_items: convertedMaterials.length,
-      items: convertedMaterials
+      total_items: formattedItems.length,
+      total_remaining_quantity: totalQuantity,
+      items: formattedItems
     }
     
     console.log('📊 [原材料分布] 响应数据:', responseData)
@@ -1904,47 +2090,57 @@ router.get('/consumption-analysis', authenticateToken, asyncHandler(async (req, 
         break
     }
 
-    // 查询库存消耗统计数据
+    // 查询库存消耗统计数据（修复：使用materials表作为主表）
     const consumptionQuery = `
       SELECT 
-        p.id as purchase_id,
-        p.purchase_name as purchase_name,
-        p.purchase_type as purchase_type,
-        p.bead_diameter as bead_diameter,
-        p.specification,
-        p.quality,
+        m.id as material_id,
+        m.material_name as material_name,
+        m.material_type as material_type,
+        m.bead_diameter as bead_diameter,
+        CASE 
+          WHEN m.material_type = 'ACCESSORIES' THEN m.accessory_specification
+          WHEN m.material_type = 'FINISHED_MATERIAL' THEN m.finished_material_specification
+          ELSE NULL
+        END as specification,
+        m.quality,
         s.name as supplier_name,
         SUM(
           CASE 
-            WHEN p.purchase_type IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantity_used
-            WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN mu.quantity_used
+            WHEN m.material_type IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantity_used
+            WHEN m.material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN mu.quantity_used
             ELSE 0
           END
         ) as total_consumed,
         COUNT(mu.id) as consumption_count,
         AVG(
           CASE 
-            WHEN p.purchase_type IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantity_used
-            WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN mu.quantity_used
+            WHEN m.material_type IN ('LOOSE_BEADS', 'BRACELET') THEN mu.quantity_used
+            WHEN m.material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN mu.quantity_used
             ELSE 0
           END
         ) as avg_consumption,
         MAX(mu.created_at) as last_consumption_date,
         MIN(mu.created_at) as first_consumption_date,
         CASE 
-          WHEN p.purchase_type IN ('LOOSE_BEADS', 'BRACELET') THEN '颗'
-          WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN '件'
+          WHEN m.material_type IN ('LOOSE_BEADS', 'BRACELET') THEN '颗'
+          WHEN m.material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN '件'
           ELSE '个'
         END as unit_type
       FROM material_usage mu
-      INNER JOIN purchases p ON mu.purchase_id = p.id
+      INNER JOIN materials m ON mu.material_id = m.id
+      LEFT JOIN purchases p ON m.purchase_id = p.id
       LEFT JOIN suppliers s ON p.supplier_id = s.id
       WHERE 1=1 ${timeCondition}
         AND (
-          (p.purchase_type IN ('LOOSE_BEADS', 'BRACELET') AND mu.quantity_used > 0) OR
-          (p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') AND mu.quantity_used > 0)
+          (m.material_type IN ('LOOSE_BEADS', 'BRACELET') AND mu.quantity_used > 0) OR
+          (m.material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') AND mu.quantity_used > 0)
         )
-      GROUP BY p.id, p.purchase_name, p.purchase_type, p.bead_diameter, p.specification, p.quality, s.name
+      GROUP BY m.id, m.material_name, m.material_type, m.bead_diameter, m.quality, s.name, 
+               CASE 
+                 WHEN m.material_type = 'ACCESSORIES' THEN m.accessory_specification
+                 WHEN m.material_type = 'FINISHED_MATERIAL' THEN m.finished_material_specification
+                 ELSE NULL
+               END
       ORDER BY total_consumed DESC
       LIMIT ?
     `
@@ -2008,13 +2204,13 @@ router.get('/consumption-analysis', authenticateToken, asyncHandler(async (req, 
 // 获取产品价格分布
 router.get('/price-distribution', authenticateToken, asyncHandler(async (req, res) => {
   const { 
-    purchase_type = 'LOOSE_BEADS', 
+    material_type = 'LOOSE_BEADS', 
     price_type = 'unit_price', 
     limit = 10 
   } = req.query
 
   console.log('🔍 [产品价格分布] 请求参数:', {
-    purchase_type,
+    material_type,
     price_type,
     limit,
     userRole: req.user?.role || "USER"
@@ -2023,33 +2219,44 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
   try {
     // 构建产品类型筛选条件
     let productTypeCondition = ''
-    if (purchase_type && purchase_type !== 'ALL') {
-      productTypeCondition = `AND p.purchase_type = '${purchase_type}'`
+    if (material_type && material_type !== 'ALL') {
+      productTypeCondition = `AND p.purchase_type = '${material_type}'`
     }
 
     // 根据价格类型选择不同的处理逻辑
     if (price_type === 'unit_price') {
-      // 单价分布 - 返回价格区间统计
+      // 单价分布 - 返回价格区间统计（修复：使用materials表而不是purchases表）
       const priceRangeQuery = `
         SELECT 
            CASE 
              -- 成品类型使用专门的价格区间
-             WHEN purchase_type = 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 50 THEN '0-50元（含）'
-             WHEN purchase_type = 'FINISHED_MATERIAL' AND calculated_price > 50 AND calculated_price <= 100 THEN '50-100元（含）'
-             WHEN purchase_type = 'FINISHED_MATERIAL' AND calculated_price > 100 AND calculated_price <= 200 THEN '100-200元（含）'
-             WHEN purchase_type = 'FINISHED_MATERIAL' AND calculated_price > 200 AND calculated_price <= 500 THEN '200-500元（含）'
-             WHEN purchase_type = 'FINISHED_MATERIAL' AND calculated_price > 500 THEN '500元以上'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 50 THEN '0-50元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 50 AND calculated_price <= 100 THEN '50-100元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 100 AND calculated_price <= 200 THEN '100-200元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 200 AND calculated_price <= 500 THEN '200-500元（含）'
+             WHEN material_type = 'FINISHED_MATERIAL' AND calculated_price > 500 THEN '500元以上'
              -- 其他产品类型使用原有价格区间
-             WHEN purchase_type != 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 3 THEN '0-3元（含）'
-             WHEN purchase_type != 'FINISHED_MATERIAL' AND calculated_price > 3 AND calculated_price <= 10 THEN '3-10元（含）'
-             WHEN purchase_type != 'FINISHED_MATERIAL' AND calculated_price > 10 AND calculated_price <= 20 THEN '10-20元（含）'
-             WHEN purchase_type != 'FINISHED_MATERIAL' AND calculated_price > 20 AND calculated_price <= 50 THEN '20-50元（含）'
-             WHEN purchase_type != 'FINISHED_MATERIAL' AND calculated_price > 50 THEN '50元以上'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price >= 0 AND calculated_price <= 3 THEN '0-3元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 3 AND calculated_price <= 10 THEN '3-10元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 10 AND calculated_price <= 20 THEN '10-20元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 20 AND calculated_price <= 50 THEN '20-50元（含）'
+             WHEN material_type != 'FINISHED_MATERIAL' AND calculated_price > 50 THEN '50元以上'
              ELSE '未知'
            END as price_range,
-          COUNT(*) as count
-        FROM (          SELECT             p.purchase_type as purchase_type,            CASE               WHEN p.purchase_type = 'LOOSE_BEADS' AND p.total_beads > 0 THEN p.total_price / p.total_beads              WHEN p.purchase_type = 'BRACELET' AND p.quantity > 0 THEN p.total_price / p.quantity              WHEN p.purchase_type = 'ACCESSORIES' AND p.piece_count > 0 THEN p.total_price / p.piece_count              WHEN p.purchase_type = 'FINISHED_MATERIAL' AND p.piece_count > 0 THEN p.total_price / p.piece_count              ELSE NULL            END as calculated_price          FROM purchases p          WHERE p.status IN ('ACTIVE', 'PENDING')             AND p.total_price IS NOT NULL             AND p.total_price > 0            AND (              (p.purchase_type = 'LOOSE_BEADS' AND p.total_beads IS NOT NULL AND p.total_beads > 0) OR              (p.purchase_type = 'BRACELET' AND p.quantity IS NOT NULL AND p.quantity > 0) OR              (p.purchase_type = 'ACCESSORIES' AND p.piece_count IS NOT NULL AND p.piece_count > 0) OR              (p.purchase_type = 'FINISHED_MATERIAL' AND p.piece_count IS NOT NULL AND p.piece_count > 0)            )            ${productTypeCondition}        ) as price_data
+          SUM(remaining_quantity) as count
+        FROM (
+          SELECT 
+            m.material_type,
+            m.unit_cost as calculated_price,
+            m.remaining_quantity
+          FROM materials m
+          WHERE m.remaining_quantity > 0
+            AND m.unit_cost IS NOT NULL
+            AND m.unit_cost > 0
+            ${productTypeCondition.replace('p.purchase_type', 'm.material_type')}
+        ) as price_data
         WHERE calculated_price IS NOT NULL
+          AND remaining_quantity > 0
         GROUP BY price_range
         ORDER BY 
            CASE price_range
@@ -2079,10 +2286,10 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
       }))
       
       const responseData = {
-        purchase_type,
+        material_type,
         price_type,
         price_label: '单价区间分布',
-        total_products: total_count,
+        total_units: total_count, // 改为最小单位总数
         price_ranges: priceRanges,
         analysis_date: new Date().toISOString()
       }
@@ -2123,12 +2330,17 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
          p.purchase_date as purchase_date,
          p.created_at as created_at,
          COALESCE(SUM(mu.quantity_used), 0) as used_beads,
-         (p.total_beads - COALESCE(SUM(mu.quantity_used), 0)) as remaining_beads,
+         CASE 
+           WHEN p.purchase_type = 'LOOSE_BEADS' THEN p.total_beads - COALESCE(SUM(mu.quantity_used), 0)
+           WHEN p.purchase_type = 'BRACELET' THEN p.quantity - COALESCE(SUM(mu.quantity_used), 0)
+           WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN p.piece_count - COALESCE(SUM(mu.quantity_used), 0)
+           ELSE 0
+         END as remaining_quantity,
          ${priceField} as calculated_price
        FROM purchases p
        LEFT JOIN suppliers s ON p.supplier_id = s.id
        LEFT JOIN material_usage mu ON p.id = mu.purchase_id
-       WHERE p.status IN ('ACTIVE', 'PENDING') 
+       WHERE p.status IN ('ACTIVE', 'USED') 
          AND p.total_price IS NOT NULL 
          AND p.total_price > 0
          AND (
@@ -2141,6 +2353,7 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
                 p.quality, p.quantity, p.piece_count, p.total_beads, p.unit_price, 
                 p.total_price, p.price_per_bead, p.price_per_piece, p.price_per_gram, p.weight, 
                 s.name, p.purchase_date, p.created_at
+       HAVING remaining_quantity > 0
        ORDER BY calculated_price DESC
        LIMIT ?
      `
@@ -2178,7 +2391,7 @@ router.get('/price-distribution', authenticateToken, asyncHandler(async (req, re
        Math.min(...convertedData.map(item => item.calculated_price || 0)) : 0
 
     const responseData = {
-      purchase_type,
+      material_type,
       price_type,
       price_label: priceLabel,
       total_products: totalProducts,

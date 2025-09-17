@@ -181,7 +181,7 @@ export default function FinishedProductGrid({search_term,
                   purchase_id: batch.purchase_id,
                   purchase_code: purchase_code,
                   purchase_name: batch.material_name || batch.purchase_name || get_product_type_display(type_group.purchase_type),
-                  specification: parseFloat(spec_group.specification_value) || 0,
+                  specification: batch.specification || parseFloat(spec_group.specification_value) || 0,
                   piece_count: remaining_qty, // 修复：使用转换后的数量
                   quality: quality_group.quality,
                   photos: photos,

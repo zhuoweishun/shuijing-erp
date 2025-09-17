@@ -28,6 +28,7 @@ import financialRoutes from './routes/financial.js'
 // 导入products路由
 import productRoutes from './routes/products.js'
 import skuRoutes from './routes/skus.js'
+import materialRoutes from './routes/materials.js'
 
 // 导入中间件和工具
 import { errorHandler } from './middleware/errorHandler.js'
@@ -201,6 +202,7 @@ app.use('/api/v1/purchases', purchaseRoutes)
 // 注意：finished-products路由必须在inventory路由之前，避免路由冲突
 app.use('/api/v1/finished-products', productRoutes)
 app.use('/api/v1/skus', skuRoutes)
+app.use('/api/v1/materials', materialRoutes)
 app.use('/api/v1/inventory', inventoryRoutes)
 app.use('/api/v1/suppliers', supplierRoutes)
 app.use('/api/v1/customers', customerRoutes)

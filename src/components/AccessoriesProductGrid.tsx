@@ -147,18 +147,38 @@ export default function AccessoriesProductGrid({search_term,
                 const purchase_code = batch.material_code || batch.purchase_code || batch.material_id || batch.purchase_id || ''
                 
                 console.log('🔍 [配件字段转换] remaining_qty:', remaining_qty, 'price_unit:', price_unit, 'purchase_code:', purchase_code)
+                console.log('🔍 [配件photos调试] batch.photos:', batch.photos, '类型:', typeof batch.photos)
+                
+                // 处理photos字段 - 确保是数组格式
+                let photos = []
+                if (batch.photos) {
+                  try {
+                    if (typeof batch.photos === 'string') {
+                      photos = JSON.parse(batch.photos)
+                    } else if (Array.isArray(batch.photos)) {
+                      photos = batch.photos
+                    }
+                    if (!Array.isArray(photos)) {
+                      photos = []
+                    }
+                  } catch (error) {
+                    console.error('🔍 [配件photos解析失败]:', error, 'batch.photos:', batch.photos)
+                    photos = []
+                  }
+                }
+                console.log('🔍 [配件photos处理后]:', photos)
                 
                 products.push({
                   purchase_id: batch.purchase_id,
                   purchase_code: purchase_code, // 修复：添加purchase_code字段
                   purchase_name: batch.material_name || batch.purchase_name || get_product_type_display(type_group.purchase_type),
-                  specification: spec_group.specification_value,
+                  specification: batch.specification || spec_group.specification_value,
                   quality: quality_group.quality,
                   remaining_quantity: remaining_qty, // 修复：使用转换后的数量
                   is_low_stock: batch.is_low_stock || quality_group.is_low_stock || false,
                   price_per_unit: price_unit, // 修复：使用转换后的价格
                   price_per_gram: price_gram, // 修复：使用转换后的价格
-                  photos: batch.photos || [],
+                  photos: photos,
                   supplier_name: batch.supplier_name,
                   purchase_date: finalDate,
                   key
