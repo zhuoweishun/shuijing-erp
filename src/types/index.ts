@@ -415,13 +415,13 @@ export interface networkConfig {
 export interface FinishedProduct {
   id: string
   material_code: string // 成品原材料编号，格式：FP+日期+3位序号
-  purchase_name: string // 采购名称
+  sku_name: string // SKU成品名称
   description?: string
   specification?: string
   photos?: string[]
   
   // 成本信息（雇员不可见）
-  materialCost?: number // 原材料成本
+  material_cost?: number // 原材料成本
   labor_cost?: number // 人工成本
   craft_cost?: number // 工艺成本
   total_cost?: number // 总制作成本
@@ -456,7 +456,7 @@ export interface FinishedProductMaterialUsage {
 
 // 原材料使用请求
 export interface MaterialUsageRequest {
-  purchase_id: string
+  material_id: string
   quantity_used_beads?: number
   quantity_used_pieces?: number
 }
@@ -472,64 +472,72 @@ export interface CostCalculationRequest {
 // 成本计算响应
 export interface CostCalculationResponse {
   // 直接字段（用于前端直接访问）
-  materialCost: number
+  material_cost: number
   labor_cost: number
   craft_cost: number
   total_cost: number
-  suggestedPrice?: number
+  suggested_price?: number
   profit_margin?: number
-  profitAmount?: number
+  profit_amount?: number
   
   // 嵌套结构（保持向后兼容）
   cost_breakdown?: {
-    materialCost: number
+    material_cost: number
     labor_cost: number
     craft_cost: number
     total_cost: number
   }
   pricing_suggestion?: {
-    suggestedPrice: number
+    suggested_price: number
     profit_margin: number
-    profitAmount: number
+    profit_amount: number
   }
   material_details?: {
-    purchase_id: string
-    purchase_name: string // 采购名称
+    material_id: string
+    material_name: string // 原材料名称
     quantity_used: number
-    unitCost: number
+    unit_cost: number
     total_cost: number
   }[]
 }
 
-// 可用原材料
+// 可用原材料（基于materials表结构）
 export interface AvailableMaterial {
-  purchase_id: string
-  purchase_code?: string
-  purchase_name: string // 采购名称
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 采购类型
+  id: string
+  material_id?: string // 兼容字段
+  material_code: string
+  material_name: string // 材料名称
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 材料类型
+  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C' | 'UNKNOWN'
+  
+  // 规格信息（根据类型动态显示）
   bead_diameter?: number
-  specification?: number
-  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
+  accessory_specification?: string
+  finished_material_specification?: string
+  specification?: string // 兼容字段，通用规格
   
-  // 核心数量字段
-  available_quantity: number // 可用数量（颗数/串数/片数/件数）
+  // 库存信息
+  original_quantity: number
+  used_quantity: number
+  remaining_quantity: number
+  available_quantity: number // 可用数量（主要字段）
+  inventory_unit: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
   
-  // 手串相关字段（用户强调的重要逻辑）
-  quantity?: number // 串数（手串类型）
-  beads_per_string?: number // 每串颗数（手串类型）
-  total_beads?: number // 总颗数（散珠、手串类型）
-  piece_count?: number // 片数/件数（饰品配件、成品类型）
+  // 价格信息
+  unit_cost: number
+  total_cost: number
   
-  // 使用情况字段
-  used_beads?: number // 已用颗数
-  used_pieces?: number // 已用片数/件数
-  remaining_beads?: number // 剩余颗数（散珠、手串）
-  remaining_pieces?: number // 剩余片数/件数（饰品配件、成品）
+  // 关联信息
+  supplier_name?: string // 供应商名称
   
-  // 成本和供应商信息
-  unitCost?: number // 单位成本（雇员不可见）
-  supplier_name?: string // 供应商名称（雇员不可见）
-  photos?: string[]
+  // 附加信息
+  photos?: string[] | null
+  material_date?: string
+  notes?: string
+  
+  // 审计信息
+  created_at: string
+  updated_at: string
 }
 
 // 成品原材料制作请求
@@ -551,7 +559,7 @@ export type ProductionMode = 'DIRECT_TRANSFORM' | 'COMBINATION_CRAFT'
 // 成品原材料制作表单数据
 export interface ProductionFormData {
   mode: ProductionMode
-  purchase_name: string // 采购名称
+  sku_name: string // SKU成品名称
   description: string
   specification: string
   selected_materials: {
@@ -570,14 +578,14 @@ export interface ProductionFormData {
 // 批量创建的单个成品原材料信息
 export interface BatchProductInfo {
   material_id: string                           // 对应的原材料ID
-  purchase_name: string                        // 采购名称
+  sku_name: string                            // SKU成品名称
   description: string                          // 成品描述
   specification: string | number               // 规格
   labor_cost: number                          // 人工成本
   craft_cost: number                          // 工艺成本
   selling_price: number                       // 销售价格
   photos: string[]                            // 成品图片
-  materialCost: number                       // 原材料成本（自动计算）
+  material_cost: number                       // 原材料成本（自动计算）
   total_cost: number                          // 总成本（自动计算）
   profit_margin: number                       // 利润率（自动计算）
 }
@@ -586,7 +594,7 @@ export interface BatchProductInfo {
 export interface BatchProductCreateRequest {
   products: {
     material_id: string
-    purchase_name: string // 成品原材料名称
+    sku_name: string // SKU成品名称
     description?: string
     specification?: string | number
     labor_cost: number
@@ -604,7 +612,7 @@ export interface BatchProductCreateResponse {
     id: string
     material_code: string // 成品原材料编码
     sku_name: string // 成品SKU名称
-    materialCost: number
+    material_cost: number
     total_cost: number
     selling_price: number
     profit_margin: number
@@ -627,7 +635,7 @@ export interface SkuItem {
   available_quantity: number
   photos?: string[]
   specification?: string
-  materialCost?: number
+  material_cost?: number
   labor_cost?: number
   craft_cost?: number
   total_cost?: number
@@ -636,7 +644,7 @@ export interface SkuItem {
   total_value?: number
   profit_margin?: number
   created_at: string
-  last_sale_date?: string
+  last_purchase_date?: string
   created_by: string
   updated_at?: string
   status?: 'ACTIVE' | 'INACTIVE'
@@ -653,9 +661,9 @@ export interface MaterialTrace {
   material_name: string
   quantity_used: number
   unit: string
-  costPerUnit: number
+  cost_per_unit: number
   supplier: string
-  batchNumber: string
+  batch_number: string
 }
 
 // SKU溯源节点信息
@@ -670,11 +678,11 @@ export interface TraceNode {
   status: 'completed' | 'in_progress' | 'pending'
   details: {
     supplier: string
-    batchNumber: string
+    batch_number: string
     quantity: string
-    qualityGrade: string
+    quality_grade: string
     diameter: string
-    purchasePrice: string
+    purchase_price: string
   }
   materials: MaterialTrace[]
 }
@@ -743,17 +751,17 @@ export interface DestroyData {
   reason: string
   return_to_material: boolean
   selected_materials?: string[] // 选择退回的原材料ID列表（仅当reason为"拆散重做"时使用）
-  custom_return_quantities?: { [purchase_id: string]: number } // 自定义退回数量（仅当reason为"拆散重做"时使用）
+  custom_return_quantities?: { [material_id: string]: number } // 自定义退回数量（仅当reason为"拆散重做"时使用）
 }
 
 // SKU原材料信息（用于销毁时选择退回的原材料）
 export interface SkuMaterialInfo {
-  purchase_id: string
-  purchase_name: string // 原材料名称
+  material_id: string
+  material_name: string // 原材料名称
   supplier_name?: string
   quantity_used_beads: number
   quantity_used_pieces: number
-  unitCost?: number
+  unit_cost?: number
   total_cost?: number
 }
 
@@ -762,7 +770,7 @@ export interface AdjustData {
   type: 'increase' | 'decrease'
   quantity: number
   reason: string
-  costAdjustment?: number
+  cost_adjustment?: number
 }
 
 // SKU补货操作数据
@@ -784,19 +792,19 @@ export interface RestockInfo { sku_id: string
 
 // 补货所需原材料信息（用于SKU补货的原材料）
 export interface RestockMaterial {
-  purchase_id: string
-  purchase_name: string // 原材料名称
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型（半成品material和成品material）
+  material_id: string
+  material_name: string // 原材料名称
+  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 原材料类型（半成品material和成品material）
   supplier_name: string
-  purchase_code: string // 批次号
+  material_code: string // 批次号
   bead_diameter?: number
   specification?: number
   quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  quantityNeededPerSku: number // 每个SKU需要的数量
+  quantity_needed_per_sku: number // 每个SKU需要的数量
   available_quantity: number // 当前库存数量
-  unitCost: number
+  unit_cost: number
   unit: string // 单位（颗/串/片/件）
-  isSufficient: boolean // 库存是否充足
+  is_sufficient: boolean // 库存是否充足
 }
 
 // SKU补货API响应类型
@@ -815,8 +823,8 @@ export interface RestockResponse {
     new_total_quantity: number
     new_available_quantity: number
     consumed_materials: {
-      purchase_id: string
-      purchase_name: string // 改为materialName保持一致性
+      material_id: string
+      material_name: string // 原材料名称
       consumed_quantity: number
       remaining_quantity: number
     }[]
@@ -837,7 +845,7 @@ export interface SkuPermissions { can_view_price: boolean
   can_destroy: boolean
   can_adjust: boolean
   can_refund: boolean
-  canViewTrace: boolean
+  can_view_trace: boolean
 }
 
 // SKU API响应类型
@@ -861,11 +869,11 @@ export interface SkuDetailResponse {
   data: {
     sku: SkuItem
     material_traces: MaterialTrace[]
-    purchaseList: {
+    material_list: {
       id: string
-      purchase_name: string // 改为materialName保持一致性
+      material_name: string // 原材料名称
       supplier: string
-      purchase_date: string
+      material_date: string
       total_price: number
       remaining_quantity: number
     }[]
@@ -937,7 +945,7 @@ export interface CustomerPurchase {
   sale_channel: string // 销售渠道
   sale_source: 'SKU_PAGE' | 'CUSTOMER_PAGE' // 销售来源：SKU页面 或 客户管理页面
   notes?: string // 购买备注
-  purchase_date: string // 购买日期
+  sale_date: string // 销售日期
   created_at: string
   sku?: {
     id: string

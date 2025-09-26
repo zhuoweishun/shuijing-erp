@@ -29,7 +29,7 @@ async function fix_photos_migration() {
         photos,
         LENGTH(photos) as photos_length
       FROM purchases 
-      WHERE purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL')
+      WHERE purchase_type IN ('LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL')
         AND photos IS NOT NULL
       ORDER BY purchase_type, purchase_name
     `)
@@ -69,7 +69,7 @@ async function fix_photos_migration() {
         p.photos as purchase_photos
       FROM materials m
       LEFT JOIN purchases p ON m.purchase_id = p.id
-      WHERE m.material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL')
+      WHERE m.material_type IN ('LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL')
         AND (m.photos IS NULL OR m.photos = 'null')
         AND p.photos IS NOT NULL
       ORDER BY m.material_type, m.material_name
@@ -142,7 +142,7 @@ async function fix_photos_migration() {
         photos,
         LENGTH(photos) as photos_length
       FROM materials 
-      WHERE material_type IN ('ACCESSORIES', 'FINISHED_MATERIAL')
+      WHERE material_type IN ('LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL')
       ORDER BY material_type, material_name
     `)
     

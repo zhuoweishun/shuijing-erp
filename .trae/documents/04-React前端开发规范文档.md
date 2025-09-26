@@ -1,493 +1,126 @@
-import React from 'react'
-import { fixImageUrl } from '@/services/api'
-
-interface ImageWithErrorHandlingProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src: string
-  alt: string
-  fallbackSrc?: string
-}
-
-const ImageWithErrorHandling: React.FC<ImageWithErrorHandlingProps> = ({ 
-  src, 
-  alt, 
-  fallbackSrc = '/placeholder-image.png',
-  onError,
-  ...props 
-}) => {
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement
-    
-    // 检查是否是CORS错误
-    if (src.includes('api.dorblecapital.com') && window.location.hostname === 'localhost') {
-      console.warn('图片CORS错误，尝试URL转换:', src)
-      
-      // 使用fixImageUrl函数进行URL转换
-      const convertedUrl = fixImageUrl(src)
-      
-      if (convertedUrl !== src) {
-        console.log('图片URL已转换:', { originalUrl: src, convertedUrl })
-        target.src = convertedUrl
-        return
-      }
-    }
-    
-    // 其他错误，显示占位图片
-    console.error('图片加载失败，显示占位图片:', src)
-    target.src = fallbackSrc
-    target.alt = '图片加载失败'
-    
-    // 调用外部传入的错误处理函数
-    if (onError) {
-      onError(e)
-    }
-  }
-  
-  return (
-    <img
-      src={fixImageUrl(src)}
-      alt={alt}
-      onError={handleImageError}
-      {...props}
-    />
-  )
-}
-
-export default ImageWithErrorHandling
-
-interface FinishedProductGridProps {
-  searchTerm?: string
-  selectedQuality?: string
-  lowStockOnly?: boolean
-  specificationMin?: string
-  specificationMax?: string
-}
-
 # 文档 04：React前端开发规范文档
 
-## 一、TypeScript类型定义规范（基于materials表架构）
+## 一、项目结构与组件架构
 
-### 1.1 核心数据类型定义（materials表优先）
+### 1.1 目录结构规范
 
-**修复成果：**
-实现了完整的purchase到material映射机制、数据类型安全处理、层级式库存展示，重点关注字段规范、半成品库存、配件库存、成品原材料库存等核心功能的实现和优化。
+```
+src/
+├── components/          # 通用组件
+│   ├── Layout.tsx       # 布局组件
+│   ├── ProtectedRoute.tsx # 路由保护
+│   └── ui/              # UI基础组件
+├── pages/               # 页面组件
+│   ├── Login.tsx
+│   ├── Home.tsx
+│   ├── PurchaseEntry.tsx
+│   ├── PurchaseList.tsx
+│   ├── InventoryList.tsx
+│   ├── ProductEntry.tsx
+│   └── SalesList.tsx
+├── hooks/               # 自定义Hook
+│   ├── useAuth.tsx
+│   └── useDeviceDetection.tsx
+├── services/            # API服务
+│   ├── api.ts
+│   └── errorHandler.ts
+├── types/               # TypeScript类型定义
+│   └── index.ts
+├── utils/               # 工具函数
+│   ├── format.ts
+│   ├── validation.ts
+│   └── pinyinSort.ts
+└── styles/              # 样式文件
+    └── mobile.css
+```
 
-**materials表核心类型：**
+### 1.2 组件命名规范
+
+- **页面组件**：使用PascalCase，如`PurchaseEntry`、`InventoryList`
+- **通用组件**：使用PascalCase，如`Layout`、`ProtectedRoute`
+- **Hook函数**：使用camelCase，以`use`开头，如`useAuth`、`useDeviceDetection`
+- **工具函数**：使用camelCase，如`formatPrice`、`validateForm`
+- **类型定义**：使用PascalCase，如`PurchaseItem`、`ApiResponse`
+
+### 1.3 状态管理规范
+
+**使用Context + useReducer模式：**
 ```typescript
-// materials表主要类型定义
-interface Material {
-  material_id: string
-  material_code: string
-  material_name: string
-  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
-  material_date: string
-  supplier_name: string
-  original_quantity: number
-  remaining_quantity: number
-  used_quantity: number
-  inventory_unit: 'BEADS' | 'ITEMS' | 'PIECES'
-  unit_cost: number
-  stock_status: 'SUFFICIENT' | 'LOW' | 'OUT_OF_STOCK'
-  purchase_id: string // 关联原始采购记录
-  photos: string[]
-  specification?: string
-  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  created_at: string
-  updated_at: string
+// AuthContext示例
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  loading: boolean
 }
 
-// 库存查询响应类型
-interface InventoryResponse {
-  success: boolean
-  data: {
-    categories: {
-      [key: string]: {
-        batches: Material[]
-      }
-    }
+type AuthAction = 
+  | { type: 'LOGIN_SUCCESS'; payload: User }
+  | { type: 'LOGOUT' }
+  | { type: 'SET_LOADING'; payload: boolean }
+
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case 'LOGIN_SUCCESS':
+      return { ...state, user: action.payload, isAuthenticated: true, loading: false }
+    case 'LOGOUT':
+      return { ...state, user: null, isAuthenticated: false, loading: false }
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload }
+    default:
+      return state
   }
 }
-
-// 半成品库存矩阵类型
-interface SemiFinishedMatrixData {
-  material_type: string // 统一使用material_type
-  total_quantity: number
-  total_variants: number
-  has_low_stock: boolean
-  specifications: SpecificationData[]
-}
-
-// 配件库存类型（字段映射兼容）
-interface AccessoryProduct {
-  purchase_id: string
-  purchase_code?: string // 兼容映射前后的字段
-  purchase_name: string
-  specification?: number
-  remaining_quantity: number
-  is_low_stock: boolean
-  price_per_unit?: number
-}
-
-// 成品原材料类型（字段映射兼容）
-interface FinishedProduct {
-  purchase_id: string
-  purchase_code?: string // 兼容映射前后的字段
-  purchase_name: string
-  specification: number
-  piece_count: number
-  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  remaining_quantity: number
-  is_low_stock: boolean
-  price_per_unit?: number
-  total_price?: number
-}
 ```
 
-**采购相关类型（向后兼容，推荐使用Material类型）：**
-```typescript
-// 采购记录类型（原始数据存储）
-interface Purchase {
-  id: string
-  purchase_code: string
-  purchase_name: string
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
-  supplier: {
-    id: string
-    name: string
-  }
-  quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  total_price: number
-  price_per_gram?: number
-  weight?: number
-  bead_diameter?: number
-  beads_per_string?: number
-  piece_count?: number
-  total_beads?: number
-  price_per_bead?: number
-  price_per_piece?: number
-  min_stock_alert?: number
-  photos: string[]
-  purchase_date: string
-  remaining_quantity: number // 注意：此字段已迁移到materials表
-  natural_language_input?: string
-  ai_recognition_result?: any
-  created_at: string
-}
+## 二、采购录入组件规范（PurchaseEntry）
 
-// 注意：库存相关操作请优先使用Material类型，Purchase类型主要用于采购录入
+### 2.1 组件状态管理
 
-// 可用原材料类型（基于materials表，推荐使用）
-interface AvailableMaterial {
-  material_id: string
-  material_code: string
-  material_name: string // 使用material_name替代product_name
-  material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORY' | 'PACKAGING' | 'FINISHED_MATERIAL'
-  remaining_quantity: number // 使用remaining_quantity替代available_quantity
-  unit_cost: number
-  stock_status: 'SUFFICIENT' | 'LOW' | 'OUT_OF_STOCK'
-  inventory_unit: 'BEADS' | 'ITEMS' | 'PIECES'
-  photos: string[]
-  specification?: string
-  purchase_id: string // 关联原始采购记录
-}
-
-// 向后兼容类型（不推荐新项目使用）
-interface LegacyAvailableMaterial {
-  purchase_id: string
-  purchase_code?: string
-  product_name: string
-  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
-  available_quantity: number
-  unit_cost: number
-  photos: string[]
-  specification?: string
-}
-```
-
-**成品相关类型（已更新）：**
-```typescript
-// 配饰产品类型
-interface AccessoryProduct {
-  purchase_id: string
-  purchase_code?: string // **新增：采购编号字段**
-  product_name: string
-  product_type: 'ACCESSORIES'
-  available_quantity: number
-  unit_cost: number
-  photos: string[]
-  specification?: string
-}
-
-// 成品类型
-interface FinishedProduct {
-  id: string
-  product_code: string
-  purchase_code?: string // **新增：采购编号字段**
-  product_name: string
-  description?: string
-  specification?: string
-  photos: string[]
-  material_cost: number
-  labor_cost: number
-  craft_cost: number
-  total_cost: number
-  selling_price: number
-  profit_margin: number
-  status: 'AVAILABLE' | 'SOLD' | 'RESERVED'
-  sku_id?: string // **新增：SKU关联字段**
-  created_at: string
-}
-
-// 成本计算响应类型
-interface CostCalculationResponse {
-  material_cost: number
-  labor_cost: number
-  craft_cost: number
-  total_cost: number
-  profit_margin: number
-  pricing_suggestion: {
-    suggested_price: number
-    min_price: number
-    max_price: number
-  }
-  material_details: MaterialCostDetail[]
-}
-
-interface MaterialCostDetail {
-  purchase_id: string
-  product_name: string
-  used_beads: number
-  used_pieces: number
-  unit_cost: number
-  material_cost: number
-}
-```
-
-**批次数据类型（已更新）：**
-```typescript
-// 批次数据类型
-interface BatchData {
-  purchase_id: string
-  purchase_code?: string // **新增：采购编号字段**
-  product_name: string
-  product_type: string
-  available_quantity: number
-  photos: string[]
-  specification?: string
-  unit_cost: number
-}
-```
-
-### 1.2 拼音排序功能类型
-
-```typescript
-// 拼音排序函数类型
-type SortByPinyinFunction = <T extends { product_name: string }>(
-  items: T[]
-) => T[]
-
-// 拼音首字母映射类型
-interface PinyinMapping {
-  [key: string]: string
-}
-
-// 排序配置类型
-interface SortConfig {
-  field: string
-  direction: 'asc' | 'desc'
-  type: 'pinyin' | 'alphabetic' | 'numeric'
-}
-```
-
-## 二、拼音排序功能规范（新增）
-
-### 2.1 拼音排序工具函数
-
-**核心实现：**
-```typescript
-// utils/pinyinSort.ts
-
-// 拼音首字母映射表（已完善）
-const PINYIN_FIRST_LETTER_MAP: { [key: string]: string } = {
-  '紫': 'Z', '水': 'S', '晶': 'J', '玛': 'M', '瑙': 'N',
-  '翡': 'F', '翠': 'C', '和': 'H', '田': 'T', '玉': 'Y',
-  '蜜': 'M', // **新增：修复蜜蜡排序问题**
-  '蜡': 'L', '琥': 'H', '珀': 'P', '珊': 'S', '瑚': 'H',
-  '镀': 'D', // **新增：修复镀金排序问题**
-  '金': 'J', '银': 'Y', '铜': 'T', '铁': 'T', '钢': 'G',
-  // ... 更多映射
-}
-
-// 获取拼音首字母
-export const getPinyinFirstLetter = (char: string): string => {
-  return PINYIN_FIRST_LETTER_MAP[char] || char.toUpperCase()
-}
-
-// 拼音排序函数
-export const sortByPinyin = <T extends { product_name: string }>(
-  items: T[]
-): T[] => {
-  return items.sort((a, b) => {
-    const firstLetterA = getPinyinFirstLetter(a.product_name[0])
-    const firstLetterB = getPinyinFirstLetter(b.product_name[0])
-    
-    if (firstLetterA !== firstLetterB) {
-      return firstLetterA.localeCompare(firstLetterB)
-    }
-    
-    return a.product_name.localeCompare(b.product_name)
-  })
-}
-
-// 按类型和拼音排序
-export const sortMaterialsByTypeAndPinyin = <T extends { 
-  product_name: string
-  product_type: string 
-}>(
-  items: T[]
-): T[] => {
-  return items.sort((a, b) => {
-    // 先按产品类型排序
-    if (a.product_type !== b.product_type) {
-      return a.product_type.localeCompare(b.product_type)
-    }
-    
-    // 同类型内按拼音排序
-    const firstLetterA = getPinyinFirstLetter(a.product_name[0])
-    const firstLetterB = getPinyinFirstLetter(b.product_name[0])
-    
-    if (firstLetterA !== firstLetterB) {
-      return firstLetterA.localeCompare(firstLetterB)
-    }
-    
-    return a.product_name.localeCompare(b.product_name)
-  })
-}
-```
-
-### 2.2 组件中的使用规范
-
-**在ProductEntry组件中：**
-```typescript
-import { sortByPinyin } from '@/utils/pinyinSort'
-
-// 散珠和手串排序
-const sortedLooseBeads = sortByPinyin(looseBeads)
-const sortedBracelets = sortByPinyin(bracelets)
-```
-
-**在AccessoriesProductGrid组件中：**
-```typescript
-import { sortByPinyin } from '@/utils/pinyinSort'
-
-// 配饰产品排序
-const extractAccessoryProducts = (materials: AvailableMaterial[]): AccessoryProduct[] => {
-  const accessories = materials
-    .filter(material => material.product_type === 'ACCESSORIES')
-    .map(material => ({
-      purchase_id: material.purchase_id,
-      purchase_code: material.purchase_code,
-      product_name: material.product_name,
-      product_type: 'ACCESSORIES' as const,
-      available_quantity: material.available_quantity,
-      unit_cost: material.unit_cost,
-      photos: material.photos,
-      specification: material.specification
-    }))
-  
-  // **重要：应用拼音排序**
-  return sortByPinyin(accessories)
-}
-```
-
-## 三、采购录入表单组件规范（已修复）
-
-### 3.1 PurchaseEntry组件结构（修复版）
-
-**修复内容：**
-- 统一字段名称：purchase_name替代product_name
-- 修复产品类型：FINISHED_MATERIAL替代FINISHED
-- 增强表单验证：按类型差异化验证规则
-- 优化图片处理：支持多文件上传和格式验证
-- 完善错误处理：用户友好的错误提示
-- 增强供应商管理：实时搜索和拼音排序
-
-**组件状态管理：**
+**状态接口定义：**
 ```typescript
 interface PurchaseEntryState {
-  // 基础信息（修复：统一字段名）
-  purchase_name: string // 修复：使用purchase_name替代product_name
-  purchase_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL' // 修复：FINISHED_MATERIAL替代FINISHED
-  supplier_id: string
-  quality: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  total_price: number
-  notes: string
+  // 基础信息
+  purchaseName: string
+  purchaseType: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+  supplierId: string
+  totalPrice: number
   
-  // 散珠/手串专用字段
-  price_per_gram: number
-  weight: number
-  bead_diameter: number
-  beads_per_string: number // 手串专用
+  // 类型特定字段
+  pricePerGram?: number
+  weight?: number
+  beadDiameter?: number
+  beadsPerString?: number
+  pieceCount?: number
   
-  // 配件/成品专用字段
-  piece_count: number
-  
-  // 可选字段
-  min_stock_alert: number
-  natural_language_input: string
-  
-  // 图片相关（增强）
+  // 图片和描述
   photos: string[]
-  file_data_list: File[]
+  description?: string
+  quality?: string
   
   // UI状态
+  loading: boolean
   uploading: boolean
-  ai_parsing: boolean
-  submitting: boolean
-  
-  // 供应商管理（新增）
-  supplier_input: string
-  supplier_search_results: Supplier[]
-  show_supplier_dropdown: boolean
-}
-
-// 表单验证结果类型
-interface ValidationResult {
-  isValid: boolean
-  errors: string[]
-}
-
-// 供应商类型
-interface Supplier {
-  id: string
-  name: string
-  contact?: string
-  phone?: string
-  email?: string
-  address?: string
-}
+  errors: { [key: string]: string }
   
   // 供应商相关
   suppliers: Supplier[]
-  supplier_input: string
-  show_supplier_dropdown: boolean
+  supplierInput: string
+  showSupplierDropdown: boolean
 }
-```
 
-**表单验证规则：**
-```typescript
 const validatePurchaseForm = (data: PurchaseEntryState): ValidationResult => {
   const errors: string[] = []
   
   // 基础验证
-  if (!data.purchase_name.trim()) {
+  if (!data.purchaseName.trim()) {
     errors.push('采购名称不能为空')
   }
   
-  if (!data.supplier_id) {
+  if (!data.supplierId) {
     errors.push('请选择供应商')
   }
   
-  if (data.total_price <= 0) {
+  if (data.totalPrice <= 0) {
     errors.push('总价格必须大于0')
   }
   
@@ -496,25 +129,25 @@ const validatePurchaseForm = (data: PurchaseEntryState): ValidationResult => {
   }
   
   // 按类型验证
-  if (data.purchase_type === 'LOOSE_BEADS' || data.purchase_type === 'BRACELET') {
-    if (data.price_per_gram <= 0) {
+  if (data.purchaseType === 'LOOSE_BEADS' || data.purchaseType === 'BRACELET') {
+    if (data.pricePerGram <= 0) {
       errors.push('克价必须大于0')
     }
     if (data.weight <= 0) {
       errors.push('重量必须大于0')
     }
-    if (data.bead_diameter <= 0) {
+    if (data.beadDiameter <= 0) {
       errors.push('珠子直径必须大于0')
     }
     
     // 手串额外验证
-    if (data.purchase_type === 'BRACELET' && data.beads_per_string <= 0) {
+    if (data.purchaseType === 'BRACELET' && data.beadsPerString <= 0) {
       errors.push('每串颗数必须大于0')
     }
   }
   
-  if (data.purchase_type === 'ACCESSORIES' || data.purchase_type === 'FINISHED_MATERIAL') {
-    if (data.piece_count <= 0) {
+  if (data.purchaseType === 'ACCESSORIES' || data.purchaseType === 'FINISHED_MATERIAL') {
+    if (data.pieceCount <= 0) {
       errors.push('片数/件数必须大于0')
     }
   }
@@ -526,13 +159,13 @@ const validatePurchaseForm = (data: PurchaseEntryState): ValidationResult => {
 }
 ```
 
-### 3.2 图片上传组件规范
+### 2.2 图片上传组件规范
 
 **ImageUpload组件：**
 ```typescript
 interface ImageUploadProps {
   photos: string[]
-  file_data_list: File[]
+  fileDataList: File[]
   uploading: boolean
   onPhotosChange: (photos: string[]) => void
   onFileDataChange: (files: File[]) => void
@@ -568,9 +201,9 @@ const handleFilesDrop = async (acceptedFiles: File[]) => {
     const response = await uploadApi.uploadPurchaseImages(formData)
     
     if (response.success) {
-      const newPhotos = response.data.uploaded_files.map(file => file.url)
+      const newPhotos = response.data.uploadedFiles.map(file => file.url)
       onPhotosChange([...photos, ...newPhotos])
-      onFileDataChange([...file_data_list, ...acceptedFiles])
+      onFileDataChange([...fileDataList, ...acceptedFiles])
     }
   } catch (error) {
     console.error('图片上传失败:', error)
@@ -581,7 +214,7 @@ const handleFilesDrop = async (acceptedFiles: File[]) => {
 }
 ```
 
-### 3.3 供应商选择组件规范
+### 2.3 供应商选择组件规范
 
 **SupplierSelect组件：**
 ```typescript
@@ -605,9 +238,9 @@ const filteredSuppliers = suppliers.filter(supplier =>
 const sortedSuppliers = sortByPinyin(filteredSuppliers)
 ```
 
-## 四、采购列表组件规范（完整更新版）
+## 三、采购列表组件规范（完整更新版）
 
-### 4.1 PurchaseList组件状态管理
+### 3.1 PurchaseList组件状态管理
 
 **完整状态接口：**
 ```typescript
@@ -617,70 +250,70 @@ interface PurchaseListState {
   error: string | null
   
   // 分页状态
-  current_page: number
-  items_per_page: number
-  total_items: number
-  total_pages: number
+  currentPage: number
+  itemsPerPage: number
+  totalItems: number
+  totalPages: number
   
   // 搜索和筛选状态
-  search_term: string
-  purchase_code_search: string
-  selected_qualities: string[]
-  selected_types: string[]
-  selected_suppliers: string[]
+  searchTerm: string
+  purchaseCodeSearch: string
+  selectedQualities: string[]
+  selectedTypes: string[]
+  selectedSuppliers: string[]
   
   // 范围筛选状态
-  date_range: { start: string; end: string }
-  diameter_range: { min: number | null; max: number | null }
-  specification_range: { min: number | null; max: number | null }
-  price_per_gram_range: { min: number | null; max: number | null }
-  total_price_range: { min: number | null; max: number | null }
+  dateRange: { start: string; end: string }
+  diameterRange: { min: number | null; max: number | null }
+  specificationRange: { min: number | null; max: number | null }
+  pricePerGramRange: { min: number | null; max: number | null }
+  totalPriceRange: { min: number | null; max: number | null }
   
   // 排序状态
-  sort_by: string
-  sort_order: 'asc' | 'desc'
+  sortBy: string
+  sortOrder: 'asc' | 'desc'
   
   // UI状态
-  show_filters: { [key: string]: boolean }
-  show_mobile_filters: boolean
-  show_detail_modal: boolean
-  selected_purchase: Purchase | null
+  showFilters: { [key: string]: boolean }
+  showMobileFilters: boolean
+  showDetailModal: boolean
+  selectedPurchase: Purchase | null
   
   // 供应商数据
   suppliers: Supplier[]
 }
 ```
 
-### 4.2 表头筛选器组件规范
+### 3.2 表头筛选器组件规范
 
 **筛选器渲染函数：**
 ```typescript
-const render_column_filter = (column: string) => {
-  const filter_types = {
-    purchase_name: 'search',
-    purchase_code: 'search',
-    quality: 'multi_select',
-    purchase_type: 'multi_select',
-    supplier: 'multi_select_with_search',
-    bead_diameter: 'range',
+const renderColumnFilter = (column: string) => {
+  const filterTypes = {
+    purchaseName: 'search',
+    purchaseCode: 'search',
+    quality: 'multiSelect',
+    purchaseType: 'multiSelect',
+    supplier: 'multiSelectWithSearch',
+    beadDiameter: 'range',
     specification: 'range',
-    price_per_gram: 'range',
-    total_price: 'range',
-    purchase_date: 'date_range'
+    pricePerGram: 'range',
+    totalPrice: 'range',
+    purchaseDate: 'dateRange'
   }
   
   return (
     <div className="relative">
       <button 
-        onClick={() => toggle_filter(column)}
+        onClick={() => toggleFilter(column)}
         className="p-1 hover:bg-gray-100 rounded"
       >
         <FunnelIcon className="h-4 w-4" />
       </button>
       
-      {show_filters[column] && (
+      {showFilters[column] && (
         <div className="absolute top-8 left-0 z-50 bg-white border rounded-lg shadow-lg p-4 min-w-64">
-          {render_filter_content(column, filter_types[column])}
+          {renderFilterContent(column, filterTypes[column])}
         </div>
       )}
     </div>
@@ -690,13 +323,13 @@ const render_column_filter = (column: string) => {
 
 **多选筛选器实现：**
 ```typescript
-const render_multi_select_filter = (column: string, options: any[], selected: string[]) => {
+const renderMultiSelectFilter = (column: string, options: any[], selected: string[]) => {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <span className="font-medium">选择{getColumnLabel(column)}</span>
         <button 
-          onClick={() => clear_filter(column)}
+          onClick={() => clearFilter(column)}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
           清除
@@ -709,7 +342,7 @@ const render_multi_select_filter = (column: string, options: any[], selected: st
             <input
               type="checkbox"
               checked={selected.includes(option.value)}
-              onChange={(e) => handle_multi_select_change(column, option.value, e.target.checked)}
+              onChange={(e) => handleMultiSelectChange(column, option.value, e.target.checked)}
               className="rounded"
             />
             <span className="text-sm">{option.label}</span>
@@ -718,7 +351,7 @@ const render_multi_select_filter = (column: string, options: any[], selected: st
       </div>
       
       <button
-        onClick={() => apply_filters()}
+        onClick={() => applyFilters()}
         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
       >
         应用筛选
@@ -728,17 +361,17 @@ const render_multi_select_filter = (column: string, options: any[], selected: st
 }
 ```
 
-### 4.3 范围筛选器实现
+### 3.3 范围筛选器实现
 
 **数值范围筛选：**
 ```typescript
-const render_range_filter = (column: string, range: { min: number | null; max: number | null }) => {
+const renderRangeFilter = (column: string, range: { min: number | null; max: number | null }) => {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
         <span className="font-medium">{getColumnLabel(column)}范围</span>
         <button 
-          onClick={() => clear_range_filter(column)}
+          onClick={() => clearRangeFilter(column)}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
           清除
@@ -751,7 +384,7 @@ const render_range_filter = (column: string, range: { min: number | null; max: n
           <input
             type="number"
             value={range.min || ''}
-            onChange={(e) => handle_range_change(column, 'min', e.target.value)}
+            onChange={(e) => handleRangeChange(column, 'min', e.target.value)}
             placeholder="最小值"
             className="w-full px-2 py-1 text-sm border rounded"
           />
@@ -761,7 +394,7 @@ const render_range_filter = (column: string, range: { min: number | null; max: n
           <input
             type="number"
             value={range.max || ''}
-            onChange={(e) => handle_range_change(column, 'max', e.target.value)}
+            onChange={(e) => handleRangeChange(column, 'max', e.target.value)}
             placeholder="最大值"
             className="w-full px-2 py-1 text-sm border rounded"
           />
@@ -770,13 +403,13 @@ const render_range_filter = (column: string, range: { min: number | null; max: n
       
       <div className="flex space-x-2">
         <button
-          onClick={() => apply_range_filter(column)}
+          onClick={() => applyRangeFilter(column)}
           className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 text-sm"
         >
           应用
         </button>
         <button
-          onClick={() => clear_range_filter(column)}
+          onClick={() => clearRangeFilter(column)}
           className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 text-sm"
         >
           清除
@@ -787,1076 +420,473 @@ const render_range_filter = (column: string, range: { min: number | null; max: n
 }
 ```
 
-**筛选器渲染函数：**
-```typescript
-const renderColumnFilter = (column: string, filter: any) => {
-  if (filter.type === 'search') {
-    return (
-      <div className="flex items-center space-x-2">
-        <input
-          type="text"
-          placeholder={`搜索${column === 'purchaseCode' ? '采购编号' : '产品名称'}...`}
-          value={filter.value}
-          onChange={(e) => handleFilterChange(column, e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && applyFilters()}
-          className="px-2 py-1 text-xs border rounded"
-        />
-        <button
-          onClick={() => handleFilterChange(column, '')}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          <X className="h-3 w-3" />
-        </button>
-      </div>
-    )
-  }
-  // ... 其他筛选器类型
-}
-```
-
-### 3.2 API调用规范
-
-**fetchPurchases函数更新：**
-```typescript
-const fetchPurchases = async () => {
-  try {
-    setLoading(true)
-    
-    const params: any = {
-      page: pagination.page,
-      limit: pagination.limit,
-      search: filters.search,
-      purchase_code_search: filters.purchaseCodeSearch, // **新增参数**
-      quality: filters.quality,
-      product_type: filters.productType,
-      supplier_id: filters.supplierId,
-      sort: sorting.direction,
-      sort_by: sorting.field
-    }
-    
-    // 移除空值参数
-    Object.keys(params).forEach(key => {
-      if (!params[key]) delete params[key]
-    })
-    
-    const response = await purchaseApi.list(params)
-    
-    if (response.success) {
-      setPurchases(response.data.purchases)
-      setPagination(prev => ({
-        ...prev,
-        total: response.data.pagination.total,
-        totalPages: response.data.pagination.total_pages
-      }))
-    }
-  } catch (error) {
-    setError('获取采购列表失败')
-  } finally {
-    setLoading(false)
-  }
-}
-```
-
 ## 四、原材料库存组件开发规范（重要更新）
 
-### 4.1 purchase到material字段映射前端处理
+### 4.1 InventoryList组件架构
 
-**核心原则：**
-- 前端统一使用material_*字段名
-- 后端mapPurchaseToMaterial函数自动映射
-- 组件中处理字段映射的兼容性
-
-**字段映射处理示例：**
+**组件状态管理：**
 ```typescript
-// 处理后端映射后的字段（优先使用mapped字段）
-const extract_finished_products = (hierarchy_data: any[]): FinishedProduct[] => {
-  // 后端mapPurchaseToMaterial函数将purchase_code映射为material_code
-  const purchase_code = batch.material_code || batch.purchase_code || batch.material_id || batch.purchase_id || ''
+interface InventoryListState {
+  materials: MaterialItem[]
+  loading: boolean
+  error: string | null
   
-  // 后端mapPurchaseToMaterial函数将purchase_date映射为material_date
-  const finalDate = batch.material_date || batch.purchase_date || new Date().toISOString()
+  // 分页和筛选
+  pagination: PaginationInfo
+  filters: InventoryFilters
   
-  // 确保数值字段正确转换（考虑字段映射）
-  const remaining_qty = Number(batch.remaining_quantity) || Number(batch.material_remaining_quantity) || 0
-  const price_unit = Number(batch.price_per_unit) || Number(batch.material_price_per_unit) || 0
-  
-  return {
-    purchase_id: batch.purchase_id,
-    purchase_code: purchase_code,
-    purchase_name: batch.material_name || batch.purchase_name,
-    remaining_quantity: remaining_qty,
-    price_per_unit: price_unit,
-    purchase_date: finalDate
+  // UI状态
+  selectedMaterial: MaterialItem | null
+  showDetailModal: boolean
+  showRestockModal: boolean
+  showAdjustModal: boolean
+}
+
+interface MaterialItem {
+  id: string
+  materialCode: string
+  materialName: string
+  materialType: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+  quality: string
+  remainingQuantity: number
+  inventoryUnit: string
+  unitCost: number
+  totalValue: number
+  stockStatus: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK'
+  supplierName: string
+  photos: string[]
+  lastUpdated: string
+}
+```
+
+### 4.2 库存状态显示组件
+
+**库存状态标签：**
+```typescript
+const StockStatusBadge = ({ status, quantity }: { status: string; quantity: number }) => {
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'IN_STOCK':
+        return { color: 'bg-green-100 text-green-800', label: '充足' }
+      case 'LOW_STOCK':
+        return { color: 'bg-yellow-100 text-yellow-800', label: '偏低' }
+      case 'OUT_OF_STOCK':
+        return { color: 'bg-red-100 text-red-800', label: '缺货' }
+      default:
+        return { color: 'bg-gray-100 text-gray-800', label: '未知' }
+    }
   }
-}
-```
-
-### 4.2 数据类型安全处理规范
-
-**数值字段处理：**
-```typescript
-// 1. 后端返回数据的防护性转换
-const safe_number_conversion = (value: any): number => {
-  if (value === null || value === undefined) return 0
-  const num = Number(value)
-  return isNaN(num) ? 0 : num
-}
-
-// 2. 显示前的类型转换
-const format_quantity = (quantity: any): string => {
-  return Number(quantity).toLocaleString()
-}
-
-// 3. 价格字段的安全处理
-const format_price = (price: any): string => {
-  const safe_price = Number(price) || 0
-  return `¥${safe_price.toFixed(2)}`
-}
-```
-
-### 4.3 库存组件类型定义规范
-
-**半成品库存类型：**
-```typescript
-interface SemiFinishedMatrixData {
-  material_type: string // 统一使用material_type
-  total_quantity: number
-  total_variants: number
-  has_low_stock: boolean
-  specifications: SpecificationData[]
-}
-
-interface BatchData {
-  purchase_id: number
-  material_code?: string // 映射后的字段
-  material_name: string // 统一使用material_name
-  material_type: string // 统一使用material_type
-  purchase_date: string
-  supplier_name: string
-  original_quantity: number
-  used_quantity: number
-  remaining_quantity: number
-  price_per_unit: number | null
-  photos?: string[]
-}
-```
-
-**配件库存类型：**
-```typescript
-interface AccessoryProduct {
-  purchase_id: string
-  purchase_code?: string // 兼容映射前后的字段
-  purchase_name: string
-  specification?: number
-  piece_count?: number
-  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  photos?: string[]
-  price_per_unit?: number
-  price_per_piece?: number
-  remaining_quantity: number
-  is_low_stock: boolean
-}
-```
-
-**成品原材料类型：**
-```typescript
-interface FinishedProduct {
-  purchase_id: string
-  purchase_code?: string // 兼容映射前后的字段
-  purchase_name: string
-  specification: number
-  piece_count: number
-  quality?: 'AA' | 'A' | 'AB' | 'B' | 'C'
-  photos?: string[]
-  price_per_unit?: number
-  total_price?: number
-  supplier_name?: string
-  purchase_date: string
-  remaining_quantity: number
-  is_low_stock: boolean
-}
-```
-
-### 4.4 库存状态处理规范
-
-**库存状态计算：**
-```typescript
-// 获取库存状态颜色
-const get_stock_status_color = (quantity: number, is_low_stock: boolean) => {
-  if (is_low_stock || quantity <= 50) {
-    return 'bg-red-100 border-red-200 text-red-800'
-  } else if (quantity <= 200) {
-    return 'bg-yellow-100 border-yellow-200 text-yellow-800'
-  } else {
-    return 'bg-green-100 border-green-200 text-green-800'
-  }
-}
-
-// 库存状态显示
-const render_stock_status = (product: any) => {
-  const quantity = Number(product.remaining_quantity) || 0
-  const is_low_stock = Boolean(product.is_low_stock)
   
-  if (quantity <= 0) {
-    return <span className="text-gray-400 text-xs">-</span>
-  }
+  const config = getStatusConfig(status)
   
   return (
-    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-      get_stock_status_color(quantity, is_low_stock)
-    }`}>
-      {quantity} {get_unit_display(product.material_type || product.purchase_type)}
-    </span>
+    <div className="flex items-center space-x-2">
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.label}
+      </span>
+      <span className="text-sm text-gray-600">{quantity}</span>
+    </div>
   )
 }
 ```
 
-## 五、组件错误处理规范
+### 4.3 库存操作组件
 
-### 5.1 TypeScript错误修复模式
-
-**常见错误类型：**
-1. **属性不存在错误**：`Property 'purchase_code' does not exist`
-2. **类型不匹配错误**：类型定义与实际使用不符
-3. **导入错误**：未使用的导入和函数
-4. **字段映射错误**：purchase字段和material字段混用
-
-**修复策略：**
+**补货操作组件：**
 ```typescript
-// 1. 为接口添加可选字段（兼容映射前后）
-interface SomeInterface {
-  existing_field: string
-  purchase_code?: string // 原字段
-  material_code?: string // 映射后字段
-}
-
-// 2. 字段映射兼容处理
-const get_code = (item: any): string => {
-  return item.material_code || item.purchase_code || item.material_id || item.purchase_id || ''
-}
-
-// 3. 条件访问
-const purchaseCode = get_code(item)
-
-// 4. 清理未使用的导入
-// 删除未使用的import语句和函数定义
-```
-
-### 4.2 组件类型安全最佳实践
-
-```typescript
-// 1. 严格的Props类型定义
-interface ComponentProps {
-  data: Purchase[]
-  onSelect?: (item: Purchase) => void
+interface RestockFormProps {
+  material: MaterialItem
+  onSubmit: (data: RestockData) => void
+  onCancel: () => void
   loading?: boolean
 }
 
-// 2. 默认值处理
-const Component: React.FC<ComponentProps> = ({ 
-  data = [], 
-  onSelect, 
-  loading = false 
-}) => {
-  // 组件实现
+interface RestockData {
+  quantity: number
+  unitCost: number
+  totalCost: number
+  supplierId: string
+  notes?: string
+  photos?: string[]
 }
 
-// 3. 条件渲染保护
-const renderItem = (item: Purchase) => {
-  if (!item.purchase_code) {
-    console.warn('缺少采购编号:', item)
-    return null
-  }
+const RestockForm = ({ material, onSubmit, onCancel, loading }: RestockFormProps) => {
+  const [formData, setFormData] = useState<RestockData>({
+    quantity: 0,
+    unitCost: material.unitCost,
+    totalCost: 0,
+    supplierId: '',
+    notes: '',
+    photos: []
+  })
+  
+  // 自动计算总成本
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      totalCost: prev.quantity * prev.unitCost
+    }))
+  }, [formData.quantity, formData.unitCost])
   
   return (
-    <div>{item.purchase_code}</div>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData) }}>
+      {/* 表单字段 */}
+    </form>
   )
 }
 ```
 
-// SKU数据类型定义（更新版）
-interface SkuItem {
-  id: string
-  sku_code: string
-  sku_name: string
-  total_quantity: number
-  available_quantity: number
-  photos?: string[]
-  specification?: string // 规格（直径等）
-  material_cost?: number // 原材料成本价
-  labor_cost?: number // 人工成本
-  craft_cost?: number // 工艺成本
-  total_cost?: number // 总成本价
-  selling_price: number // 售价
-  profit_margin?: number // 利润率
-  created_at: string // 创建日期
-  last_sale_date?: string // 最后销售日期
-  material_traces?: MaterialTrace[] // 溯源信息
+### 4.4 库存调整组件
+
+**库存调整表单：**
+```typescript
+interface AdjustFormProps {
+  material: MaterialItem
+  onSubmit: (data: AdjustData) => void
+  onCancel: () => void
 }
 
-// 原材料溯源信息
-interface MaterialTrace {
-  purchase_id: string
-  product_name: string
-  supplier: string
-  purchase_date: string
-  quantity_used_beads: number
-  quantity_used_pieces: number
-  unit_cost: number
-  total_cost: number
-}
-
-// SKU操作日志
-interface SkuInventoryLog {
-  id: string
-  action: 'CREATE' | 'SELL' | 'ADJUST' | 'DESTROY'
-  quantity_change: number
-  quantity_before: number
-  quantity_after: number
-  reference_type: 'PRODUCT' | 'SALE' | 'MANUAL' | 'DESTROY'
+interface AdjustData {
+  type: 'increase' | 'decrease'
+  quantity: number
+  reason: string
   notes?: string
-  created_at: string
-  user_name: string
 }
 
-const ModeSelection = ({ onModeSelect }) => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* 直接转化模式 */}
-      <div 
-        className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 cursor-pointer transition-colors"
-        onClick={() => onModeSelect('direct')}
-      >
-        <div className="text-center">
-          <Package className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">直接转化模式</h3>
-          <p className="text-gray-600 text-sm">
-            选择库存中的一个原材料成品，直接转化为销售成品
-          </p>
-        </div>
-      </div>
-      
-      {/* 组合制作模式 */}
-      <div 
-        className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 cursor-pointer transition-colors"
-        onClick={() => onModeSelect('combination')}
-      >
-        <div className="text-center">
-          <Layers className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">组合制作模式</h3>
-          <p className="text-gray-600 text-sm">
-            选择多种原材料，组合制作复杂成品
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MaterialSelector = ({ materials, selectedMaterials, onMaterialChange }) => {
-  const handleQuantityChange = (materialId: string, quantity: number, type: 'beads' | 'pieces') => {
-    const material = materials.find(m => m.purchase_id === materialId);
-    if (!material) return;
-    
-    // 库存验证
-    const maxQuantity = type === 'beads' ? material.remaining_beads : material.remaining_pieces;
-    if (quantity > maxQuantity) {
-      toast.error(`库存不足，最大可用：${maxQuantity}${type === 'beads' ? '颗' : '片'}`);
-      return;
-    }
-    
-    onMaterialChange(materialId, quantity, type);
-  };
+const AdjustForm = ({ material, onSubmit, onCancel }: AdjustFormProps) => {
+  const [formData, setFormData] = useState<AdjustData>({
+    type: 'increase',
+    quantity: 0,
+    reason: '',
+    notes: ''
+  })
   
-  return (
-    <div className="space-y-4">
-      {materials.map(material => (
-        <div key={material.purchase_id} className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-3">
-              <img 
-                src={material.photos?.[0]} 
-                alt={material.product_name}
-                className="w-12 h-12 object-cover rounded"
-              />
-              <div>
-                <h4 className="font-medium text-gray-900">{material.product_name}</h4>
-                <p className="text-sm text-gray-500">{material.product_type}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">剩余库存</div>
-              <div className="font-medium">
-                {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' 
-                  ? `${material.remaining_beads}颗` 
-                  : `${material.remaining_pieces}片`
-                }
-              </div>
-            </div>
-          </div>
-          
-          {/* 使用量输入 */}
-          <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-700">使用量：</label>
-            <input
-              type="number"
-              min="0"
-              max={material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' 
-                ? material.remaining_beads 
-                : material.remaining_pieces
-              }
-              className="w-24 px-3 py-2 border border-gray-300 rounded-md"
-              onChange={(e) => handleQuantityChange(
-                material.purchase_id, 
-                parseInt(e.target.value) || 0,
-                material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? 'beads' : 'pieces'
-              )}
-            />
-            <span className="text-sm text-gray-500">
-              {material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET' ? '颗' : '片'}
-            </span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const BatchProductEditor = ({ selectedMaterials, batchFormData, onProductChange, onSubmit }) => {
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  
-  const toggleExpanded = (materialId: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(materialId)) {
-      newExpanded.delete(materialId);
-    } else {
-      newExpanded.add(materialId);
-    }
-    setExpandedItems(newExpanded);
-  };
-  
-  const calculateCosts = (product: BatchProductInfo) => {
-    const materialCost = product.material_cost || 0;
-    const totalCost = materialCost + product.labor_cost + product.craft_cost;
-    const profitMargin = product.selling_price > 0 
-      ? ((product.selling_price - totalCost) / product.selling_price) * 100 
-      : 0;
-    
-    return { totalCost, profitMargin };
-  };
-  
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">批量成品信息填写</h2>
-        <p className="text-gray-600">为每个选中的原材料成品填写销售成品信息</p>
-      </div>
-      
-      <div className="space-y-4">
-        {batchFormData.products.map((product, index) => {
-          const material = selectedMaterials.find(m => m.purchase_id === product.material_id);
-          const { totalCost, profitMargin } = calculateCosts(product);
-          const isExpanded = expandedItems.has(product.material_id);
-          
-          return (
-            <div key={product.material_id} className="border border-gray-200 rounded-lg">
-              {/* 原材料信息头部 */}
-              <div 
-                className="p-4 bg-gray-50 cursor-pointer flex items-center justify-between"
-                onClick={() => toggleExpanded(product.material_id)}
-              >
-                <div className="flex items-center space-x-3">
-                  <img 
-                    src={material?.photos?.[0]} 
-                    alt={material?.product_name}
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                  <div>
-                    <h4 className="font-medium text-gray-900">{material?.product_name}</h4>
-                    <p className="text-sm text-gray-500">
-                      原材料成本: ¥{product.material_cost?.toFixed(2) || '0.00'}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">销售价格</div>
-                    <div className="font-medium text-lg">
-                      ¥{product.selling_price?.toFixed(2) || '0.00'}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">利润率</div>
-                    <div className={`font-medium ${
-                      profitMargin >= 30 ? 'text-green-600' : 
-                      profitMargin >= 10 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {profitMargin.toFixed(1)}%
-                    </div>
-                  </div>
-                  <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${
-                    isExpanded ? 'rotate-180' : ''
-                  }`} />
-                </div>
-              </div>
-              
-              {/* 详细编辑区域 */}
-              {isExpanded && (
-                <div className="p-4 border-t border-gray-200">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 基本信息 */}
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          成品名称 *
-                        </label>
-                        <input
-                          type="text"
-                          value={product.product_name}
-                          onChange={(e) => onProductChange(index, 'product_name', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                          placeholder="请输入成品名称"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          成品描述
-                        </label>
-                        <textarea
-                          value={product.description}
-                          onChange={(e) => onProductChange(index, 'description', e.target.value)}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                          placeholder="请输入成品描述"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          规格说明
-                        </label>
-                        <input
-                          type="text"
-                          value={product.specification}
-                          onChange={(e) => onProductChange(index, 'specification', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                          placeholder="如：平均直径18mm"
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* 成本和价格 */}
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            人工成本
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={product.labor_cost}
-                            onChange={(e) => onProductChange(index, 'labor_cost', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            工艺成本
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={product.craft_cost}
-                            onChange={(e) => onProductChange(index, 'craft_cost', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          销售价格 *
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={product.selling_price}
-                          onChange={(e) => onProductChange(index, 'selling_price', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-crystal-500"
-                        />
-                      </div>
-                      
-                      {/* 成本汇总 */}
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <h5 className="font-medium text-gray-900 mb-2">成本汇总</h5>
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">原材料成本：</span>
-                            <span>¥{product.material_cost?.toFixed(2) || '0.00'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">人工成本：</span>
-                            <span>¥{product.labor_cost?.toFixed(2) || '0.00'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">工艺成本：</span>
-                            <span>¥{product.craft_cost?.toFixed(2) || '0.00'}</span>
-                          </div>
-                          <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
-                            <span>总成本：</span>
-                            <span>¥{totalCost.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between font-medium">
-                            <span>预期利润：</span>
-                            <span className={profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}>
-                              ¥{(product.selling_price - totalCost).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      
-      {/* 提交按钮 */}
-      <div className="flex justify-between">
-        <button
-          onClick={() => window.history.back()}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-        >
-          返回修改
-        </button>
-        
-        <button
-          onClick={onSubmit}
-          className="px-6 py-3 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700"
-        >
-          批量创建成品 ({batchFormData.products.length}个)
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const CostCalculator = ({ selectedMaterials, laborCost, craftCost, onCostChange }) => {
-  const materialCost = useMemo(() => {
-    return selectedMaterials.reduce((total, material) => {
-      const unitCost = material.unit_cost || 0;
-      const quantity = material.quantity_used_beads || material.quantity_used_pieces || 0;
-      return total + (unitCost * quantity);
-    }, 0);
-  }, [selectedMaterials]);
-  
-  const totalCost = materialCost + laborCost + craftCost;
-  
-  return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <h4 className="font-medium text-gray-900 mb-3">成本计算</h4>
-      
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-600">原材料成本：</span>
-          <span className="font-medium">¥{materialCost.toFixed(2)}</span>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">人工成本：</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={laborCost}
-            onChange={(e) => onCostChange('labor', parseFloat(e.target.value) || 0)}
-            className="w-20 px-2 py-1 border border-gray-300 rounded text-right"
-          />
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">工艺成本：</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={craftCost}
-            onChange={(e) => onCostChange('craft', parseFloat(e.target.value) || 0)}
-            className="w-20 px-2 py-1 border border-gray-300 rounded text-right"
-          />
-        </div>
-        
-        <div className="border-t pt-2 mt-2">
-          <div className="flex justify-between font-medium">
-            <span>总成本：</span>
-            <span className="text-red-600">¥{totalCost.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const StockStatusBadge = ({ sku }: { sku: SkuItem }) => {
-  const getStockStatus = () => {
-    if (sku.available_quantity === 0) {
-      return { status: 'OUT_OF_STOCK', label: '缺货', color: 'bg-red-100 text-red-800' }
-    } else if (sku.available_quantity <= 2) {
-      return { status: 'LOW_STOCK', label: '低库存', color: 'bg-yellow-100 text-yellow-800' }
-    } else {
-      return { status: 'IN_STOCK', label: '有库存', color: 'bg-green-100 text-green-800' }
-    }
+  const reasonOptions = {
+    increase: ['盘点发现多余', '退货入库', '其他增加'],
+    decrease: ['损耗', '丢失', '质量问题', '其他减少']
   }
   
-  const { label, color } = getStockStatus()
-  
   return (
-    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
-      {label}
-    </span>
-  )
-}
-
-// 库存数量显示
-const StockQuantityDisplay = ({ sku }: { sku: SkuItem }) => {
-  return (
-    <div className="text-sm">
-      <div className="font-medium">
-        库存: {sku.available_quantity}/{sku.total_quantity} 件
-      </div>
-      <div className="text-gray-500">
-        已售: {sku.total_quantity - sku.available_quantity} 件
-      </div>
-    </div>
-  )
-}
-
-const ErrorDisplay = ({ error, onRetry }: {
-  error: string
-  onRetry: () => void
-}) => {
-  return (
-    <div className="text-center py-12">
-      <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">加载失败</h3>
-      <p className="text-gray-500 mb-4">{error}</p>
-      <button
-        onClick={onRetry}
-        className="px-4 py-2 bg-crystal-600 text-white rounded-lg hover:bg-crystal-700"
-      >
-        重试
-      </button>
-    </div>
-  )
-}
-
-// 加载状态组件
-const LoadingDisplay = () => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 animate-pulse">
-          <div className="p-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            </div>
-          </div>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData) }}>
+      {/* 调整类型选择 */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          调整类型
+        </label>
+        <div className="flex space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="increase"
+              checked={formData.type === 'increase'}
+              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'increase' | 'decrease' }))}
+              className="mr-2"
+            />
+            增加库存
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="decrease"
+              checked={formData.type === 'decrease'}
+              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'increase' | 'decrease' }))}
+              className="mr-2"
+            />
+            减少库存
+          </label>
         </div>
-      ))}
-    </div>
-  )
-}
-
-const PaginationControls = ({ pagination, onPageChange }: {
-  pagination: SalesListState['pagination']
-  onPageChange: (page: number) => void
-}) => {
-  const { page, total_pages, total, limit } = pagination
-  
-  return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
-      <div className="text-sm text-gray-700">
-        显示 {((page - 1) * limit) + 1} 到 {Math.min(page * limit, total)} 条，
-        共 {total} 条记录
       </div>
       
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={() => onPageChange(page - 1)}
-          disabled={page <= 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        
-        <span className="px-3 py-1 bg-crystal-500 text-crystal-700 rounded">
-          {page} / {total_pages}
-        </span>
-        
-        <button
-          onClick={() => onPageChange(page + 1)}
-          disabled={page >= total_pages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
+      {/* 其他表单字段 */}
+    </form>
   )
 }
+```
 
-// 搜索防抖Hook
-const useDebounce = (value: string, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(value)
+## 五、移动端适配规范
+
+### 5.1 响应式设计原则
+
+**断点设置：**
+```css
+/* Tailwind CSS 断点 */
+/* sm: 640px */
+/* md: 768px */
+/* lg: 1024px */
+/* xl: 1280px */
+/* 2xl: 1536px */
+
+/* 移动端优先设计 */
+.container {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+```
+
+**移动端组件适配：**
+```typescript
+const useDeviceDetection = () => {
+  const [isMobile, setIsMobile] = useState(false)
   
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-    
-    return () => {
-      clearTimeout(handler)
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < 768)
     }
-  }, [value, delay])
+    
+    checkDevice()
+    window.addEventListener('resize', checkDevice)
+    
+    return () => window.removeEventListener('resize', checkDevice)
+  }, [])
   
-  return debouncedValue
+  return { isMobile }
 }
 
 // 在组件中使用
-const [searchInput, setSearchInput] = useState('')
-const debouncedSearch = useDebounce(searchInput, 300)
+const PurchaseList = () => {
+  const { isMobile } = useDeviceDetection()
+  
+  return (
+    <div className={isMobile ? 'mobile-layout' : 'desktop-layout'}>
+      {isMobile ? <MobileTable /> : <DesktopTable />}
+    </div>
+  )
+}
+```
 
-useEffect(() => {
-  setState(prev => ({
-    ...prev,
-    filters: { ...prev.filters, search: debouncedSearch },
-    pagination: { ...prev.pagination, page: 1 }
-  }))
-}, [debouncedSearch])
+### 5.2 移动端表格组件
 
-const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+**MobileTable组件：**
+```typescript
+interface MobileTableProps<T> {
+  data: T[]
+  renderCard: (item: T, index: number) => React.ReactNode
+  loading?: boolean
+  emptyMessage?: string
+}
 
-{showDeleteConfirm && (
-  <div className="fixed inset-0 z-60 overflow-y-auto">
-    <div className="flex items-center justify-center min-h-screen px-4">
-      {/* 背景遮罩 */}
-      <div 
-        className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-        onClick={() => setShowDeleteConfirm(false)}
-      />
-      
-      {/* 确认对话框 */}
-      <div className="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-        <div className="flex items-center space-x-3 mb-4">
-          <AlertCircle className="h-6 w-6 text-red-600" />
-          <h3 className="text-lg font-medium text-gray-900">
-            确认删除采购记录
-          </h3>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-sm text-gray-500 mb-3">
-            您确定要删除这条采购记录吗？
-          </p>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-800 font-medium">
-              产品：{purchase?.product_name}
-            </p>
-            <p className="text-sm text-red-600">
-              采购编号：{purchase?.purchase_code}
-            </p>
+const MobileTable = <T,>({ data, renderCard, loading, emptyMessage }: MobileTableProps<T>) => {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="bg-white rounded-lg p-4 shadow animate-pulse">
+            <div className="h-4 bg-gray-200 rounded mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
           </div>
-          <p className="text-sm text-red-600 mt-2 font-medium">
-            ⚠️ 此操作不可恢复，请谨慎操作！
-          </p>
+        ))}
+      </div>
+    )
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        {emptyMessage || '暂无数据'}
+      </div>
+    )
+  }
+  
+  return (
+    <div className="space-y-4">
+      {data.map((item, index) => (
+        <div key={index} className="bg-white rounded-lg shadow">
+          {renderCard(item, index)}
         </div>
-        
+      ))}
+    </div>
+  )
+}
+```
+
+### 5.3 移动端表单组件
+
+**MobileForm组件：**
+```typescript
+interface MobileFormProps {
+  title: string
+  children: React.ReactNode
+  onSubmit: () => void
+  onCancel: () => void
+  submitText?: string
+  loading?: boolean
+}
+
+const MobileForm = ({ 
+  title, 
+  children, 
+  onSubmit, 
+  onCancel, 
+  submitText = '提交', 
+  loading 
+}: MobileFormProps) => {
+  return (
+    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+      {/* 头部 */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <button onClick={onCancel} className="text-gray-600">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <h1 className="text-lg font-semibold">{title}</h1>
+        <div className="w-6"></div>
+      </div>
+      
+      {/* 表单内容 */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {children}
+      </div>
+      
+      {/* 底部按钮 */}
+      <div className="p-4 border-t bg-white">
         <div className="flex space-x-3">
           <button
-            onClick={handleDelete}
-            disabled={loading}
-            className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>删除中...</span>
-              </>
-            ) : (
-              <>
-                <Trash2 className="h-4 w-4" />
-                <span>确认删除</span>
-              </>
-            )}
-          </button>
-          <button
-            onClick={() => setShowDeleteConfirm(false)}
-            disabled={loading}
-            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-400 disabled:opacity-50 transition-colors"
+            onClick={onCancel}
+            className="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium"
           >
             取消
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={loading}
+            className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
+          >
+            {loading ? '提交中...' : submitText}
           </button>
         </div>
       </div>
     </div>
-  </div>
-)}
-
-// 删除采购记录处理函数
-const handleDelete = async () => {
-  if (!purchase || !canEdit) return
-  
-  try {
-    setLoading(true)
-    
-    const response = await purchaseApi.delete(purchase.id)
-    
-    if (response.success) {
-      toast.success(response.message || '采购记录删除成功')
-      setShowDeleteConfirm(false)
-      onClose()
-      // 通知父组件刷新列表
-      if (onDelete) {
-        onDelete()
-      }
-    } else {
-      // 处理业务逻辑错误，如成品使用了珠子的情况
-      if ((response.data as any)?.used_by_products && (response.data as any).used_by_products.length > 0) {
-        const productNames = (response.data as any).used_by_products.map((p: any) => p.product_name).join('、')
-        toast.error(
-          `无法删除该采购记录，因为以下成品正在使用其珠子：${productNames}。请先将这些成品拆散，使珠子回退到库存后再删除。`,
-          {
-            duration: 8000, // 延长显示时间
-            style: {
-              maxWidth: '500px'
-            }
-          }
-        )
-      } else {
-        toast.error(response.message || '删除失败')
-      }
-    }
-  } catch (error: any) {
-    console.error('删除采购记录失败:', error)
-    
-    // 注意：errorHandler已经自动处理了API错误并显示了toast提示
-    // 这里只处理非API错误的情况，避免重复显示错误提示
-    if (!error.response) {
-      // 只有在非HTTP响应错误时才显示额外的错误提示（如网络连接问题）
-      toast.error('网络连接失败，请检查网络后重试')
-    }
-    // 如果是HTTP响应错误，errorHandler已经处理了，不需要再次显示toast
-  } finally {
-    setLoading(false)
-    setShowDeleteConfirm(false)
-  }
+  )
 }
+```
 
-const usePermissionFilter = () => {
-  const { user } = useAuth()
-  
-  const filterProductData = (products: FinishedProduct[]) => {
-    if (user?.role === 'BOSS') {
-      return products; // BOSS可查看所有信息
-    }
-    
-    // EMPLOYEE角色过滤敏感字段
-    return products.map(product => ({
-      ...product,
-      price_per_unit: undefined,
-      total_price: undefined,
-      supplier_name: undefined,
-      unit_cost: undefined
-    }));
-  };
-  
-  return { filterProductData, isBoss: user?.role === 'BOSS' };
-};
+## 六、SKU销售管理组件规范
 
-## 6. SKU系统组件开发规范（更新版）
+### 6.1 SalesList组件架构
 
-### 6.1 SKU列表组件 (SalesList)
-
-**组件结构：**
+**组件状态管理：**
 ```typescript
-interface SalesListProps {
-  // 无需props，内部管理状态
-}
-
 interface SalesListState {
   skus: SkuItem[]
   loading: boolean
   error: string | null
-  filters: {
-    search: string
-    specification: string
-  }
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  
+  // 分页和筛选
+  pagination: PaginationInfo
+  filters: SkuFilters
+  
+  // UI状态
+  selectedSku: SkuItem | null
+  showDetailModal: boolean
+  showSellModal: boolean
+  showDestroyModal: boolean
+  showAdjustModal: boolean
+}
+
+interface SkuItem {
+  id: string
+  skuCode: string
+  skuName: string
+  specification: string
+  totalQuantity: number
+  availableQuantity: number
+  sellingPrice: number
+  unitPrice: number
+  materialCost: number
+  laborCost: number
+  craftCost: number
+  totalCost: number
+  totalValue: number
+  profitMargin: number
+  photos: string[]
+  status: 'ACTIVE' | 'INACTIVE'
+  createdAt: string
+  updatedAt: string
+  lastSaleDate?: string
 }
 ```
 
-**核心功能：**
-- SKU列表展示（卡片式布局）
-- 搜索和筛选功能
-- 分页导航
-- 权限控制显示
-- 销售和销毁操作入口
+### 6.2 SKU详情弹窗组件
 
-### 6.2 SKU详情组件 (SkuDetailModal)
-
-**组件结构：**
+**SkuDetailModal组件：**
 ```typescript
 interface SkuDetailModalProps {
-  skuId: string | null
+  sku: SkuItem
   isOpen: boolean
   onClose: () => void
-  onSell?: (skuId: string, data: SellData) => void
-  onDestroy?: (skuId: string, data: DestroyData) => void
+  onSell: () => void
+  onDestroy: () => void
+  onAdjust: () => void
 }
 
-interface SellData {
-  quantity: number
-  buyer_info?: string
-  sale_channel?: string
-  notes?: string
-}
-
-interface DestroyData {
-  quantity: number
-  reason: string
-  return_to_material: boolean
+const SkuDetailModal = ({ sku, isOpen, onClose, onSell, onDestroy, onAdjust }: SkuDetailModalProps) => {
+  const [activeTab, setActiveTab] = useState<'info' | 'trace' | 'history'>('info')
+  const { canViewPrice, canSell, canDestroy, canAdjust } = useSkuPermissions()
+  
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <div className="p-6">
+        {/* 头部信息 */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold">{sku.skuName}</h2>
+            <p className="text-gray-600">SKU编号: {sku.skuCode}</p>
+          </div>
+          <div className="flex space-x-2">
+            {canSell && (
+              <button onClick={onSell} className="btn-primary">
+                销售
+              </button>
+            )}
+            {canDestroy && (
+              <button onClick={onDestroy} className="btn-danger">
+                销毁
+              </button>
+            )}
+            {canAdjust && (
+              <button onClick={onAdjust} className="btn-secondary">
+                调整
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* 标签页 */}
+        <div className="border-b border-gray-200 mb-4">
+          <nav className="flex space-x-8">
+            {['info', 'trace', 'history'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as any)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab === 'info' ? '基本信息' : tab === 'trace' ? '溯源信息' : '操作历史'}
+              </button>
+            ))}
+          </nav>
+        </div>
+        
+        {/* 标签页内容 */}
+        <div className="min-h-64">
+          {activeTab === 'info' && <SkuInfoTab sku={sku} canViewPrice={canViewPrice} />}
+          {activeTab === 'trace' && <SkuTraceTab skuId={sku.id} />}
+          {activeTab === 'history' && <SkuHistoryTab skuId={sku.id} />}
+        </div>
+      </div>
+    </Modal>
+  )
 }
 ```
 
-**核心功能：**
-- 显示SKU完整信息
-- 展示溯源信息
-- 提供销售确认表单
-- 提供销毁操作表单
-- 显示操作历史
+### 6.3 SKU销售表单组件
 
-### 6.3 SKU销售确认组件 (SkuSellForm)
-
-**组件结构：**
+**SkuSellForm组件：**
 ```typescript
 interface SkuSellFormProps {
   sku: SkuItem
@@ -1864,27 +894,100 @@ interface SkuSellFormProps {
   onCancel: () => void
   loading?: boolean
 }
+
+interface SellData {
+  quantity: number
+  customerName: string
+  customerPhone: string
+  customerAddress?: string
+  saleChannel?: string
+  notes?: string
+  actualTotalPrice?: number
+}
+
+const SkuSellForm = ({ sku, onSubmit, onCancel, loading }: SkuSellFormProps) => {
+  const [formData, setFormData] = useState<SellData>({
+    quantity: 1,
+    customerName: '',
+    customerPhone: '',
+    customerAddress: '',
+    saleChannel: '',
+    notes: '',
+    actualTotalPrice: sku.sellingPrice
+  })
+  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {}
+    
+    if (formData.quantity <= 0 || formData.quantity > sku.availableQuantity) {
+      newErrors.quantity = `数量必须在1-${sku.availableQuantity}之间`
+    }
+    
+    if (!formData.customerName.trim()) {
+      newErrors.customerName = '请输入客户姓名'
+    }
+    
+    if (!formData.customerPhone.trim()) {
+      newErrors.customerPhone = '请输入客户电话'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+  
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onSubmit(formData)
+    }
+  }
+  
+  return (
+    <div className="space-y-4">
+      {/* 表单字段 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          销售数量 *
+        </label>
+        <input
+          type="number"
+          min="1"
+          max={sku.availableQuantity}
+          value={formData.quantity}
+          onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+          className={`w-full px-3 py-2 border rounded-md ${errors.quantity ? 'border-red-500' : 'border-gray-300'}`}
+        />
+        {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
+        <p className="text-gray-500 text-sm mt-1">可售数量: {sku.availableQuantity}</p>
+      </div>
+      
+      {/* 其他表单字段... */}
+      
+      {/* 按钮 */}
+      <div className="flex space-x-3 pt-4">
+        <button
+          onClick={onCancel}
+          className="flex-1 py-2 border border-gray-300 rounded-md text-gray-700"
+        >
+          取消
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="flex-1 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
+        >
+          {loading ? '提交中...' : '确认销售'}
+        </button>
+      </div>
+    </div>
+  )
+}
 ```
 
-**表单字段：**
-- 销售数量（必填，不超过可售数量）
-- 买家信息（可选）
-- 销售渠道（可选）
-- 备注（可选）
+### 6.4 SKU销毁表单组件
 
-**验证规则：**
-```typescript
-const sellFormSchema = z.object({
-  quantity: z.number().min(1).max(sku.available_quantity),
-  buyer_info: z.string().optional(),
-  sale_channel: z.string().optional(),
-  notes: z.string().optional()
-})
-```
-
-### 6.4 SKU销毁操作组件 (SkuDestroyForm)
-
-**组件结构：**
+**SkuDestroyForm组件：**
 ```typescript
 interface SkuDestroyFormProps {
   sku: SkuItem
@@ -1892,70 +995,449 @@ interface SkuDestroyFormProps {
   onCancel: () => void
   loading?: boolean
 }
+
+interface DestroyData {
+  quantity: number
+  reason: string
+  returnToMaterial: boolean
+  selectedMaterials?: string[]
+  customReturnQuantities?: { [materialId: string]: number }
+}
+
+const SkuDestroyForm = ({ sku, onSubmit, onCancel, loading }: SkuDestroyFormProps) => {
+  const [formData, setFormData] = useState<DestroyData>({
+    quantity: 1,
+    reason: '',
+    returnToMaterial: true,
+    selectedMaterials: [],
+    customReturnQuantities: {}
+  })
+  
+  const [materials, setMaterials] = useState<SkuMaterialInfo[]>([])
+  
+  // 获取SKU使用的原材料信息
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      try {
+        const response = await skuApi.getMaterials(sku.id)
+        if (response.success) {
+          setMaterials(response.data)
+        }
+      } catch (error) {
+        console.error('获取原材料信息失败:', error)
+      }
+    }
+    
+    if (formData.returnToMaterial) {
+      fetchMaterials()
+    }
+  }, [sku.id, formData.returnToMaterial])
+  
+  const reasonOptions = [
+    '质量问题',
+    '损坏',
+    '过期',
+    '客户退货',
+    '拆散重做',
+    '其他'
+  ]
+  
+  return (
+    <div className="space-y-4">
+      {/* 销毁数量 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          销毁数量 *
+        </label>
+        <input
+          type="number"
+          min="1"
+          max={sku.availableQuantity}
+          value={formData.quantity}
+          onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        />
+      </div>
+      
+      {/* 销毁原因 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          销毁原因 *
+        </label>
+        <select
+          value={formData.reason}
+          onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="">请选择销毁原因</option>
+          {reasonOptions.map(reason => (
+            <option key={reason} value={reason}>{reason}</option>
+          ))}
+        </select>
+      </div>
+      
+      {/* 是否返还原材料 */}
+      <div>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={formData.returnToMaterial}
+            onChange={(e) => setFormData(prev => ({ ...prev, returnToMaterial: e.target.checked }))}
+            className="rounded"
+          />
+          <span className="text-sm font-medium text-gray-700">返还原材料到库存</span>
+        </label>
+      </div>
+      
+      {/* 原材料选择 */}
+      {formData.returnToMaterial && materials.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            选择返还的原材料
+          </label>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {materials.map(material => (
+              <div key={material.materialId} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.selectedMaterials?.includes(material.materialId) || false}
+                    onChange={(e) => {
+                      const selected = formData.selectedMaterials || []
+                      if (e.target.checked) {
+                        setFormData(prev => ({
+                          ...prev,
+                          selectedMaterials: [...selected, material.materialId]
+                        }))
+                      } else {
+                        setFormData(prev => ({
+                          ...prev,
+                          selectedMaterials: selected.filter(id => id !== material.materialId)
+                        }))
+                      }
+                    }}
+                    className="rounded"
+                  />
+                  <span className="text-sm">{material.materialName}</span>
+                </div>
+                <span className="text-xs text-gray-500">
+                  使用量: {material.quantityUsedBeads + material.quantityUsedPieces}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 按钮 */}
+      <div className="flex space-x-3 pt-4">
+        <button
+          onClick={onCancel}
+          className="flex-1 py-2 border border-gray-300 rounded-md text-gray-700"
+        >
+          取消
+        </button>
+        <button
+          onClick={() => onSubmit(formData)}
+          disabled={loading || !formData.reason}
+          className="flex-1 py-2 bg-red-600 text-white rounded-md disabled:opacity-50"
+        >
+          {loading ? '处理中...' : '确认销毁'}
+        </button>
+      </div>
+    </div>
+  )
+}
 ```
 
-**表单字段：**
-- 销毁数量（必填，不超过可售数量）
-- 销毁原因（必填）
-- 是否退回原材料（默认true）
+### 6.5 SKU溯源信息组件
 
-**验证规则：**
-```typescript
-const destroyFormSchema = z.object({
-  quantity: z.number().min(1).max(sku.available_quantity),
-  reason: z.string().min(1, '请输入销毁原因'),
-  return_to_material: z.boolean().default(true)
-})
-```
-
-### 6.5 SKU溯源组件 (SkuTraceView)
-
-**组件结构：**
+**SkuTraceView组件：**
 ```typescript
 interface SkuTraceViewProps {
   skuId: string
-  traces: MaterialTrace[]
-  purchaseList: PurchaseRecord[]
 }
 
-interface PurchaseRecord {
-  id: string
-  product_name: string
-  supplier: string
-  purchase_date: string
-  total_price: number
-  remaining_quantity: number
+const SkuTraceView = ({ skuId }: SkuTraceViewProps) => {
+  const [traceData, setTraceData] = useState<SkuTraceInfo | null>(null)
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchTraceData = async () => {
+      try {
+        const response = await skuApi.getTraces(skuId)
+        if (response.success) {
+          setTraceData(response.data)
+        }
+      } catch (error) {
+        console.error('获取溯源信息失败:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchTraceData()
+  }, [skuId])
+  
+  if (loading) {
+    return <div className="animate-pulse">加载中...</div>
+  }
+  
+  if (!traceData) {
+    return <div className="text-gray-500">暂无溯源信息</div>
+  }
+  
+  return (
+    <div className="space-y-4">
+      {/* 制作信息 */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h4 className="font-medium text-gray-900 mb-2">制作信息</h4>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-600">制作时间:</span>
+            <span className="ml-2">{formatDate(traceData.createdAt)}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">制作人员:</span>
+            <span className="ml-2">{traceData.creatorName}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">制作模式:</span>
+            <span className="ml-2">{traceData.productionMode === 'DIRECT_TRANSFORM' ? '直接转化' : '组合制作'}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">制作数量:</span>
+            <span className="ml-2">{traceData.productionQuantity}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* 原材料信息 */}
+      <div>
+        <h4 className="font-medium text-gray-900 mb-2">使用原材料</h4>
+        <div className="space-y-2">
+          {traceData.materials.map(material => (
+            <div key={material.materialId} className="flex items-center justify-between p-3 border rounded">
+              <div className="flex items-center space-x-3">
+                {material.photos && material.photos.length > 0 && (
+                  <img
+                    src={material.photos[0]}
+                    alt={material.materialName}
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                )}
+                <div>
+                  <p className="font-medium">{material.materialName}</p>
+                  <p className="text-sm text-gray-600">{material.supplierName}</p>
+                </div>
+              </div>
+              <div className="text-right text-sm">
+                <p>使用量: {material.quantityUsedBeads + material.quantityUsedPieces}</p>
+                <p className="text-gray-600">单价: ¥{material.unitCost}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* 成本分析 */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h4 className="font-medium text-gray-900 mb-2">成本分析</h4>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600">原材料成本:</span>
+            <span>¥{traceData.materialCost.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">人工成本:</span>
+            <span>¥{traceData.laborCost.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">工艺成本:</span>
+            <span>¥{traceData.craftCost.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between font-medium border-t border-gray-200 pt-2">
+            <span>总成本:</span>
+            <span>¥{traceData.totalCost.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 ```
 
-**显示内容：**
-- 原材料使用明细
-- 关联采购记录
-- 供应商信息
-- 成本分解
+### 6.6 SKU操作历史组件
 
-### 6.6 SKU操作历史组件 (SkuHistoryView)
-
-**组件结构：**
+**SkuHistoryView组件：**
 ```typescript
 interface SkuHistoryViewProps {
   skuId: string
-  logs: SkuInventoryLog[]
-  pagination: PaginationInfo
-  onPageChange: (page: number) => void
+}
+
+const SkuHistoryView = ({ skuId }: SkuHistoryViewProps) => {
+  const [logs, setLogs] = useState<SkuInventoryLog[]>([])
+  const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
+  
+  const fetchLogs = async (page: number = 1) => {
+    try {
+      setLoading(true)
+      const response = await skuApi.getHistory(skuId, { page, limit: pagination.limit })
+      if (response.success) {
+        setLogs(response.data.logs)
+        setPagination(response.data.pagination)
+      }
+    } catch (error) {
+      console.error('获取操作历史失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  useEffect(() => {
+    fetchLogs()
+  }, [skuId])
+  
+  const getActionLabel = (action: string) => {
+    const labels = {
+      'CREATE': '创建',
+      'SELL': '销售',
+      'DESTROY': '销毁',
+      'ADJUST_INCREASE': '调增',
+      'ADJUST_DECREASE': '调减',
+      'RESTOCK': '补货'
+    }
+    return labels[action] || action
+  }
+  
+  const getActionColor = (action: string) => {
+    const colors = {
+      'CREATE': 'text-green-600',
+      'SELL': 'text-blue-600',
+      'DESTROY': 'text-red-600',
+      'ADJUST_INCREASE': 'text-green-600',
+      'ADJUST_DECREASE': 'text-orange-600',
+      'RESTOCK': 'text-purple-600'
+    }
+    return colors[action] || 'text-gray-600'
+  }
+  
+  // 解析返还原材料信息
+  const parseReturnedMaterials = (notes: string): string | null => {
+    if (!notes) return null
+    
+    const returnMatch = notes.match(/返还原材料：([^。]+)/)
+    if (returnMatch && returnMatch[1]) {
+      return returnMatch[1].trim()
+    }
+    
+    return null
+  }
+  
+  if (loading) {
+    return <div className="animate-pulse">加载中...</div>
+  }
+  
+  return (
+    <div className="space-y-4">
+      {logs.length === 0 ? (
+        <div className="text-gray-500 text-center py-8">暂无操作历史</div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {logs.map(log => {
+              const returnedMaterials = parseReturnedMaterials(log.notes || '')
+              
+              return (
+                <div key={log.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className={`font-medium ${getActionColor(log.action)}`}>
+                          {getActionLabel(log.action)}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {formatDateTime(log.createdAt)}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">数量变化:</span>
+                          <span className={`ml-2 font-medium ${
+                            log.quantityChange > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {log.quantityChange > 0 ? '+' : ''}{log.quantityChange}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">操作后数量:</span>
+                          <span className="ml-2">{log.quantityAfter}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">操作人员:</span>
+                          <span className="ml-2">{log.userName}</span>
+                        </div>
+                        {log.totalAmount && (
+                          <div>
+                            <span className="text-gray-600">金额:</span>
+                            <span className="ml-2">¥{log.totalAmount.toFixed(2)}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {log.reason && (
+                        <div className="mt-2 text-sm">
+                          <span className="text-gray-600">原因:</span>
+                          <span className="ml-2">{log.reason}</span>
+                        </div>
+                      )}
+                      
+                      {returnedMaterials && (
+                        <div className="mt-2 text-sm">
+                          <span className="text-gray-600">🔄 返还原材料:</span>
+                          <span className="ml-2 text-green-600">{returnedMaterials}</span>
+                        </div>
+                      )}
+                      
+                      {log.notes && !returnedMaterials && (
+                        <div className="mt-2 text-sm text-gray-600">
+                          备注: {log.notes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          
+          {/* 分页 */}
+          {pagination.totalPages > 1 && (
+            <div className="flex justify-center">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={fetchLogs}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
 }
 ```
 
-**显示内容：**
-- 操作时间线
-- 操作类型标签
-- 数量变化
-- 操作用户
-- 备注信息
-
 ### 6.7 SKU权限控制Hook
 
-**Hook定义：**
+**useSkuPermissions Hook：**
 ```typescript
 interface SkuPermissions {
   canViewPrice: boolean
@@ -2078,272 +1560,1278 @@ export function useSkuContext() {
 - 平板端：每行2个SKU卡片
 - 手机端：单列布局，卡片堆叠
 
-### 6.11 SKU组件测试规范
+### 6.11 SKU销售管理组件规范（核心功能扩展）
 
-**单元测试：**
+#### 6.11.1 SKU销售列表组件 (SalesList)
+
+**组件概述：**
+SalesList组件是SKU销售管理的核心页面，提供完整的SKU查看、筛选、销售、销毁、调整等功能。支持移动端和桌面端响应式布局，具备完善的权限控制和操作审计功能。
+
+**组件结构：**
 ```typescript
-// SKU列表组件测试
-describe('SalesList Component', () => {
-  it('should render SKU list correctly', () => {
-    // 测试SKU列表渲染
-  })
+interface SalesListProps {
+  // 基础数据
+  skus: SkuItem[]
+  loading: boolean
+  error: string | null
   
-  it('should handle search and filter', () => {
-    // 测试搜索和筛选功能
-  })
-  
-  it('should respect permission controls', () => {
-    // 测试权限控制
-  })
-})
+  // 分页信息
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    total_pages: number
+   }
+   
+   // 筛选和排序
+   filters: SkuListFilters
+   onFiltersChange: (filters: SkuListFilters) => void
+   
+   // 操作回调
+   onSkuSelect: (sku: SkuItem) => void
+   onSell: (sku: SkuItem) => void
+   onDestroy: (sku: SkuItem) => void
+   onAdjust: (sku: SkuItem) => void
+   onRefresh: () => void
+ }
+ 
+ interface SkuItem {
+   id: string
+   sku_id: string
+   sku_code: string
+   sku_name: string
+   specification: string
+   total_quantity: number
+   available_quantity: number
+   selling_price: number
+   unit_price: number
+   material_cost: number
+   labor_cost: number
+   craft_cost: number
+   total_cost: number
+   total_value: number
+   profit_margin: number
+   photos: string[]
+   status: 'ACTIVE' | 'INACTIVE'
+   created_at: string
+   updated_at: string
+   last_sale_date?: string
+ }
+ 
+ interface SkuListFilters {
+   search: string
+   status: ('ACTIVE' | 'INACTIVE')[]
+   price_min?: number
+   price_max?: number
+   profit_margin_min?: number
+   profit_margin_max?: number
+   sort_by: string
+   sort_order: 'asc' | 'desc'
+ }
+ ```
+ 
+ **核心功能：**
+ - **响应式布局**：桌面端表格视图，移动端卡片视图
+ - **权限控制**：EMPLOYEE角色隐藏价格信息
+ - **筛选排序**：支持多维度筛选和排序
+ - **批量操作**：支持批量选择和操作
+ - **实时更新**：操作后自动刷新列表
+ 
+ #### 6.11.2 SKU详情弹窗组件 (SkuDetailModal)
+ 
+ **组件概述：**
+ SkuDetailModal组件提供SKU的详细信息查看和操作功能，包含基本信息、成本分析、溯源信息、库存变动历史等多个标签页。
+ 
+ **组件结构：**
+ ```typescript
+ interface SkuDetailModalProps {
+   sku: SkuItem
+   mode: 'view' | 'sell' | 'destroy' | 'adjust'
+   is_open: boolean
+   onClose: () => void
+   onSell?: (data: SellData) => void
+   onDestroy?: (data: DestroyData) => void
+   onAdjust?: (data: AdjustData) => void
+   loading?: boolean
+ }
+ 
+ interface SkuDetailTabs {
+   activeTab: 'info' | 'trace' | 'history'
+   onTabChange: (tab: string) => void
+ }
+ ```
+ 
+ **显示内容：**
+ - **基本信息标签页**：SKU编号、名称、规格、库存状态、价格信息、创建时间
+ - **成本分析**：原材料成本、人工成本、工艺成本、总成本、利润率（仅BOSS可见）
+ - **溯源信息标签页**：使用的原材料详情、供应商信息、采购记录关联
+ - **库存变动标签页**：操作历史记录、数量变化、操作员、时间等
+ - **操作按钮**：销售、销毁、调整（根据权限显示）
+ 
+ #### 6.11.3 SKU销售确认组件 (SkuSellForm)
+ 
+ **组件概述：**
+ SkuSellForm组件处理SKU销售操作，支持客户信息录入、销售渠道选择、优惠价格设置等功能。
+ 
+ **组件结构：**
+ ```typescript
+ interface SkuSellFormProps {
+   sku: SkuItem
+   onSubmit: (data: SellData) => void
+   onCancel: () => void
+   loading?: boolean
+ }
+ 
+ interface SellData {
+   quantity: number
+   customer_name: string
+   customer_phone: string
+   customer_address?: string
+   sale_channel?: string
+   sale_source?: 'SKU_PAGE' | 'CUSTOMER_PAGE'
+   notes?: string
+   actual_total_price?: number
+ }
+ ```
+ 
+ **表单字段：**
+ - **销售数量**（必填，不超过可售数量）
+ - **客户姓名**（必填）
+ - **客户电话**（必填）
+ - **客户地址**（可选）
+ - **销售渠道**（可选：线上/线下/微信等）
+ - **实际成交价**（可选，支持优惠价格）
+ - **备注信息**（可选）
+ 
+ **验证规则：**
+ ```typescript
+ const sellFormSchema = z.object({
+   quantity: z.number().min(1).max(sku.available_quantity),
+   customer_name: z.string().min(1, '请输入客户姓名'),
+   customer_phone: z.string().min(1, '请输入客户电话'),
+   customer_address: z.string().optional(),
+   sale_channel: z.string().optional(),
+   notes: z.string().optional(),
+   actual_total_price: z.number().positive().optional()
+ })
+ ```
+ 
+ #### 6.11.4 SKU销毁操作组件 (SkuDestroyForm)
+ 
+ **组件概述：**
+ SkuDestroyForm组件处理SKU销毁操作，支持选择性返还原材料到库存，并详细记录销毁原因和返还信息。
+ 
+ **组件结构：**
+ ```typescript
+ interface SkuDestroyFormProps {
+   sku: SkuItem
+   onSubmit: (data: DestroyData) => void
+   onCancel: () => void
+   loading?: boolean
+ }
+ 
+ interface DestroyData {
+   quantity: number
+   reason: string
+   return_to_material: boolean
+   selected_materials?: string[]
+   custom_return_quantities?: { [material_id: string]: number }
+ }
+ ```
+ 
+ **表单字段：**
+ - **销毁数量**（必填，不超过可售数量）
+ - **销毁原因**（必填，支持预设选项：质量问题、损坏、过期等）
+ - **是否返还原材料**（默认true）
+ - **选择返还的原材料**（当选择返还时显示）
+ - **自定义返还数量**（支持部分返还）
+ 
+ **返还原材料逻辑：**
+ - 自动获取SKU使用的原材料列表
+ - 支持选择部分或全部原材料返还
+ - 支持自定义返还数量（不超过原使用量）
+ - 在库存变动日志中详细记录返还信息
+ 
+ #### 6.11.5 SKU库存变动历史组件 (SkuHistoryView)
+ 
+ **组件概述：**
+ SkuHistoryView组件显示SKU的完整库存变动历史，支持筛选、搜索和分页，特别支持销毁操作时返还原材料信息的解析和显示。
+ 
+ **组件结构：**
+ ```typescript
+ interface SkuHistoryViewProps {
+   sku_id: string
+   logs: SkuInventoryLog[]
+   pagination: PaginationInfo
+   filters: HistoryFilters
+   onPageChange: (page: number) => void
+   onFiltersChange: (filters: HistoryFilters) => void
+ }
+ 
+ interface SkuInventoryLog {
+   id: string
+   sku_id: string
+   action: 'CREATE' | 'SELL' | 'DESTROY' | 'ADJUST_INCREASE' | 'ADJUST_DECREASE' | 'RESTOCK'
+   quantity_change: number
+   quantity_before: number
+   quantity_after: number
+   unit_price?: number
+   total_amount?: number
+   reason?: string
+   notes?: string
+   user_id: string
+   user_name: string
+   created_at: string
+ }
+ ```
+ 
+ **返还原材料信息解析：**
+ ```typescript
+ // 解析notes字段中的返还原材料信息
+ const parseReturnedMaterials = (notes: string): string | null => {
+   if (!notes) return null
+   
+   const returnMatch = notes.match(/返还原材料：([^。]+)/)
+   if (returnMatch && returnMatch[1]) {
+     return returnMatch[1].trim()
+   }
+   
+   return null
+ }
+ 
+ // 显示格式：🔄 返还原材料：[材料名称] [数量][单位]，...
+ ```
+ 
+ ## 八、成品制作页面组件规范（ProductEntry）
+ 
+ ### 8.1 双模式制作系统
+ 
+ **模式概述：**
+ ProductEntry页面支持两种制作模式：直接转化模式和组合制作模式，满足不同的业务需求。
+ 
+ **模式对比：**
+ 
+ | 对比维度 | 直接转化模式 | 组合制作模式 |
+ |----------|-------------|-------------|
+ | **业务场景** | 单一原材料直接转化为销售成品 | 多种原材料组合制作复杂成品 |
+ | **原材料选择** | 单选，每个原材料独立转化 | 多选，多种原材料组合使用 |
+ | **图片处理** | 自动使用原材料图片 | 需要手动上传成品图片 |
+ | **规格处理** | 自动使用原材料规格 | 需要手动输入成品规格 |
+ | **成本计算** | 原材料成本+人工成本+工艺成本 | 多种原材料成本总和+人工成本+工艺成本 |
+ | **制作数量** | 支持批量制作（受库存限制） | 支持批量制作（受库存限制） |
+ | **库存验证** | 实时验证单个原材料库存 | 实时验证所有原材料库存 |
+ | **适用场景** | 简单加工、包装、品质提升 | 复杂工艺、多材料组合 |
+ 
+ ### 8.2 组件状态管理
+ 
+ **核心状态接口：**
+ ```typescript
+ interface ProductionFormData {
+   mode: 'DIRECT_TRANSFORM' | 'COMBINATION_CRAFT'
+   sku_name: string
+   description: string
+   specification: string
+   selected_materials: MaterialUsage[]
+   labor_cost: number
+   craft_cost: number
+   selling_price: number
+   profit_margin: number
+   photos: string[]
+   production_quantity: number
+ }
+ 
+ interface MaterialUsage {
+   material: AvailableMaterial
+   quantity_used_beads: number
+   quantity_used_pieces: number
+ }
+ 
+ interface AvailableMaterial {
+   id: string
+   material_code: string
+   material_name: string
+   material_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
+   quality: string
+   available_quantity: number
+   inventory_unit: string
+   unit_cost: number
+   supplier_name: string
+   photos: string[]
+   specification?: string
+ }
+ ```
+ 
+ ### 8.3 成本计算组件
+ 
+ **实时成本计算：**
+ ```typescript
+ const calculateCost = async () => {
+   if (formData.selected_materials.length === 0) {
+     setCostCalculation(null)
+     return
+   }
+ 
+   try {
+     const productionQuantity = formData.mode === 'COMBINATION_CRAFT' ? formData.production_quantity : 1
+     
+     const materials = formData.selected_materials.map(item => ({
+       material_id: item.material.id,
+       quantity_used_beads: item.quantity_used_beads * productionQuantity,
+       quantity_used_pieces: item.quantity_used_pieces * productionQuantity
+     }))
+ 
+     const response = await finished_product_api.calculate_cost({
+       materials,
+       labor_cost: formData.labor_cost * productionQuantity,
+       craft_cost: formData.craft_cost * productionQuantity,
+       profit_margin: formData.profit_margin
+     })
+ 
+     if (response.success && response.data) {
+       setCostCalculation(response.data)
+     }
+   } catch (error) {
+     console.error('计算成本失败:', error)
+     toast.error('计算成本失败')
+   }
+ }
+ ```
+ 
+ ### 8.4 图片上传组件
+ 
+ **拍照和上传功能：**
+ ```typescript
+ const handleCameraPhoto = async (dataUri: string) => {
+   if (material_photos.length > 0) {
+     toast.error('已有图片，请先删除当前图片再拍照')
+     return
+   }
+   
+   setUploading(true)
+   
+   try {
+     const timestamp = Date.now()
+     const fileName = `product_photo_${timestamp}.jpg`
+     const base64Data = dataUri.split(',')[1]
+     
+     // 转换为Blob并上传
+     const byteCharacters = atob(base64Data)
+     const byteNumbers = new Array(byteCharacters.length)
+     for (let i = 0; i < byteCharacters.length; i++) {
+       byteNumbers[i] = byteCharacters.charCodeAt(i)
+     }
+     const byteArray = new Uint8Array(byteNumbers)
+     const blob = new Blob([byteArray], { type: 'image/jpeg' })
+     
+     const formData = new FormData()
+     formData.append('images', blob, fileName)
+     
+     const response = await upload_api.uploadPurchaseImages(formData)
+     
+     if (response.success && response.data) {
+       const urls = response.data.urls
+       setMaterialPhotos(urls)
+       setFormData(prev => ({ ...prev, photos: urls }))
+       stopCamera()
+       toast.success('拍照上传成功')
+     }
+   } catch (error) {
+     console.error('拍照上传失败:', error)
+     toast.error('拍照上传失败，请重试')
+   } finally {
+     setUploading(false)
+   }
+ }
+ ```
+ 
+ ### 8.5 原材料选择组件
+ 
+ **原材料筛选和搜索：**
+ ```typescript
+ const getFilteredMaterials = () => {
+   let filteredMaterials = available_materials
+   
+   // 组合制作模式：按分类筛选
+   if (formData.mode === 'COMBINATION_CRAFT') {
+     filteredMaterials = filteredMaterials.filter(material => {
+       const material_type = material.material_type
+       return material_type === active_tab
+     })
+   }
+   
+   // 搜索筛选
+   if (material_search.trim()) {
+     const search_term = material_search.toLowerCase().trim()
+     filteredMaterials = filteredMaterials.filter(material => {
+       const material_name = material.material_name
+       const supplier_name = material.supplier_name
+       return material_name.toLowerCase().includes(search_term) ||
+              (material.quality && material.quality.toLowerCase().includes(search_term)) ||
+              (supplier_name && supplier_name.toLowerCase().includes(search_term))
+     })
+   }
+   
+   return filteredMaterials
+ }
+ ```
 
-// SKU销售表单测试
-describe('SkuSellForm Component', () => {
-  it('should validate quantity input', () => {
-    // 测试数量验证
-  })
-  
-  it('should submit sell data correctly', () => {
-    // 测试销售提交
-  })
-})
-```
+## 九、客户管理组件规范（2025年1月修复版）
 
-**集成测试：**
+### 9.1 客户管理页面组件（CustomerManagement）
+
+**组件修复概述：**
+本次修复针对客户管理页面进行了全面的认证状态管理、字段命名统一、数据计算优化等工作。主要解决了页面刷新时的网络连接错误、字段映射不一致、客户分析数据计算错误等核心问题。
+
+**核心状态接口：**
 ```typescript
-// SKU操作流程测试
-describe('SKU Operations Flow', () => {
-  it('should complete sell operation', async () => {
-    // 测试完整销售流程
-  })
+interface CustomerManagementState {
+  // 客户数据
+  customers: Customer[]
+  selectedCustomer: Customer | null
   
-  it('should complete destroy operation', async () => {
-    // 测试完整销毁流程
-  })
-})
-```
-
-## 七、成品制作成本计算规范（重要更新）
-
-### 7.1 成本计算核心函数
-
-**成本计算工具函数：**
-```typescript
-// 成本计算函数
-const calculateCosts = (product: {
-  material_cost: number
-  labor_cost: number
-  craft_cost: number
-  selling_price: number
-}) => {
-  const materialCost = product.material_cost || 0
-  const totalCost = materialCost + product.labor_cost + product.craft_cost
-  const profitMargin = product.selling_price > 0 
-    ? ((product.selling_price - totalCost) / product.selling_price) * 100 
-    : 0
+  // 分析数据
+  analytics: CustomerAnalytics | null
   
-  return { totalCost, profitMargin }
+  // UI状态
+  loading: boolean
+  isModalOpen: boolean
+  
+  // 搜索和筛选
+  searchTerm: string
+  customerTypeFilter: string
+  sortBy: string
+  sortOrder: 'asc' | 'desc'
+  
+  // 分页
+  currentPage: number
+  pageSize: number
+  totalPages: number
+  totalCustomers: number
 }
 
-// 实时成本计算API调用
-const calculateCost = async () => {
-  if (formData.selected_materials.length === 0) {
-    setCostCalculation(null)
-    return
-  }
+interface Customer {
+  id: string
+  customer_name: string
+  customer_phone: string
+  total_spent: number
+  purchase_count: number
+  last_purchase_date: string
+  customer_type: 'NEW' | 'REPEAT' | 'VIP' | 'ACTIVE'
+  notes?: string
+  created_at: string
+}
 
-  try {
-    const productionQuantity = formData.mode === 'COMBINATION_CRAFT' ? formData.production_quantity : 1
-    
-    const materials = formData.selected_materials.map(item => ({
-      purchase_id: item.material.purchase_id,
-      quantity_used_beads: (item.quantity_used_beads || 0) * productionQuantity,
-      quantity_used_pieces: (item.quantity_used_pieces || 0) * productionQuantity
-    }))
+interface CustomerAnalytics {
+  total_customers: number
+  new_customers: number
+  repeat_customers: number
+  vip_customers: number
+  active_customers: number
+  average_order_value: number
+  average_profit_margin: number
+  refund_rate: number
+  total_revenue: number
+  total_orders: number
+}
+```
 
-    const response = await fetch('/api/v1/products/cost', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        materials,
-        labor_cost: (formData.labor_cost || 0) * productionQuantity,
-        craft_cost: (formData.craft_cost || 0) * productionQuantity,
-        profit_margin: formData.profit_margin || 30
-      })
-    })
+### 9.2 认证状态管理修复
 
-    const result = await response.json()
-    if (result.success) {
-      setCostCalculation(result.data)
+**认证状态检查逻辑：**
+```typescript
+const CustomerManagement: React.FC = () => {
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
+  const [state, setState] = useState<CustomerManagementState>(initialState)
+  
+  // 修复：等待认证状态初始化完成
+  useEffect(() => {
+    if (authLoading) {
+      // 认证状态还在加载中，等待
+      return
     }
-  } catch (error) {
-    console.error('成本计算失败:', error)
+    
+    if (!isAuthenticated || !user) {
+      // 认证失败，跳转登录页面
+      router.push('/login')
+      return
+    }
+    
+    // 认证成功，加载客户数据
+    loadCustomerData()
+  }, [isAuthenticated, user, authLoading])
+  
+  const loadCustomerData = async () => {
+    setState(prev => ({ ...prev, loading: true }))
+    
+    try {
+      // 并行加载客户列表和分析数据
+      const [customersResponse, analyticsResponse] = await Promise.all([
+        customer_api.getCustomers({
+          page: state.currentPage,
+          limit: state.pageSize,
+          search: state.searchTerm,
+          customer_type: state.customerTypeFilter,
+          sort_by: state.sortBy,
+          sort_order: state.sortOrder
+        }),
+        customer_api.getAnalytics()
+      ])
+      
+      if (customersResponse.success && analyticsResponse.success) {
+        setState(prev => ({
+          ...prev,
+          customers: customersResponse.data.customers,
+          analytics: analyticsResponse.data,
+          totalCustomers: customersResponse.data.pagination.total,
+          totalPages: customersResponse.data.pagination.total_pages,
+          loading: false
+        }))
+      }
+    } catch (error) {
+      console.error('加载客户数据失败:', error)
+      handleApiError(error, '加载客户数据')
+      setState(prev => ({ ...prev, loading: false }))
+    }
   }
 }
 ```
 
-### 7.2 利润率计算和显示
+### 9.3 客户详情模态框组件（CustomerDetailModal）
 
-**利润率计算公式：**
+**组件导入修复：**
 ```typescript
-// 利润率计算公式
-const calculateProfitMargin = (sellingPrice: number, totalCost: number): number => {
-  if (sellingPrice <= 0) return 0
-  return ((sellingPrice - totalCost) / sellingPrice) * 100
+// 修复前（错误的导入）
+import CustomerDetailModal from '../components/CustomerDetailModal'
+
+// 修复后（正确的导入）
+import { CustomerDetailModal } from '../components/CustomerDetailModal'
+```
+
+**模态框组件实现：**
+```typescript
+interface CustomerDetailModalProps {
+  customer: Customer | null
+  isOpen: boolean
+  onClose: () => void
+  onRefund: (purchaseId: string, refundData: RefundData) => void
+  onSaleCreate: (saleData: SaleData) => void
 }
 
-// 利润率颜色显示
-const getProfitMarginColor = (profitMargin: number): string => {
-  if (profitMargin >= 30) return 'text-green-600'  // 高利润率
-  if (profitMargin >= 10) return 'text-yellow-600' // 中等利润率
-  return 'text-red-600'  // 低利润率
-}
-
-// 利润率显示组件
-const ProfitMarginDisplay = ({ profitMargin }: { profitMargin: number }) => {
+export const CustomerDetailModal: React.FC<CustomerDetailModalProps> = ({
+  customer,
+  isOpen,
+  onClose,
+  onRefund,
+  onSaleCreate
+}) => {
+  const [purchaseHistory, setPurchaseHistory] = useState<CustomerPurchase[]>([])
+  const [loading, setLoading] = useState(false)
+  const { user } = useAuth()
+  
+  // 加载客户销售历史
+  useEffect(() => {
+    if (isOpen && customer) {
+      loadPurchaseHistory()
+    }
+  }, [isOpen, customer])
+  
+  const loadPurchaseHistory = async () => {
+    if (!customer) return
+    
+    setLoading(true)
+    try {
+      const response = await customer_api.getCustomerDetail(customer.id)
+      if (response.success) {
+        setPurchaseHistory(response.data.purchase_history)
+      }
+    } catch (error) {
+      console.error('加载客户销售历史失败:', error)
+      toast.error('加载客户销售历史失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
   return (
-    <span className={`font-medium ${getProfitMarginColor(profitMargin)}`}>
-      {profitMargin.toFixed(1)}%
-    </span>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>客户详情 - {customer?.customer_name}</DialogTitle>
+        </DialogHeader>
+        
+        {/* 客户基本信息 */}
+        <CustomerBasicInfo customer={customer} />
+        
+        {/* 销售历史记录 */}
+        <CustomerPurchaseHistory 
+          purchases={purchaseHistory}
+          loading={loading}
+          onRefund={onRefund}
+          userRole={user?.role}
+        />
+        
+        {/* 反向销售录入 */}
+        <ReverseSaleForm 
+          customer={customer}
+          onSaleCreate={onSaleCreate}
+        />
+      </DialogContent>
+    </Dialog>
   )
 }
 ```
 
-### 7.3 成本汇总组件
+### 9.4 客户销售历史组件
 
-**成本汇总显示：**
+**销售记录数据结构：**
 ```typescript
-const CostSummary = ({ 
-  materialCost, 
-  laborCost, 
-  craftCost, 
-  sellingPrice 
-}: {
-  materialCost: number
-  laborCost: number
-  craftCost: number
-  sellingPrice: number
+interface CustomerPurchase {
+  id: string
+  customer_id: string
+  product_skus: {
+    sku_code: string
+    sku_name: string
+    specification: string
+    total_cost: number  // 仅BOSS角色可见
+  }
+  quantity: number
+  total_price: number
+  purchase_date: string
+  status: 'ACTIVE' | 'REFUNDED'
+  refund_date?: string
+  refund_reason?: string
+  refund_notes?: string
+  notes?: string
+}
+```
+
+**销售历史组件实现：**
+```typescript
+interface CustomerPurchaseHistoryProps {
+  purchases: CustomerPurchase[]
+  loading: boolean
+  onRefund: (purchaseId: string, refundData: RefundData) => void
+  userRole?: string
+}
+
+const CustomerPurchaseHistory: React.FC<CustomerPurchaseHistoryProps> = ({
+  purchases,
+  loading,
+  onRefund,
+  userRole
 }) => {
-  const totalCost = materialCost + laborCost + craftCost
-  const profit = sellingPrice - totalCost
-  const profitMargin = calculateProfitMargin(sellingPrice, totalCost)
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const [selectedPurchase, setSelectedPurchase] = useState<CustomerPurchase | null>(null)
+  
+  const handleRefundClick = (purchase: CustomerPurchase) => {
+    setSelectedPurchase(purchase)
+    setRefundModalOpen(true)
+  }
+  
+  const handleRefundSubmit = async (refundData: RefundData) => {
+    if (selectedPurchase) {
+      await onRefund(selectedPurchase.id, refundData)
+      setRefundModalOpen(false)
+      setSelectedPurchase(null)
+    }
+  }
+  
+  if (loading) {
+    return <div className="flex justify-center py-8"><Spinner /></div>
+  }
   
   return (
-    <div className="bg-gray-50 p-3 rounded-lg">
-      <h5 className="font-medium text-gray-900 mb-2">成本汇总</h5>
-      <div className="space-y-1 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-600">原材料成本：</span>
-          <span>¥{materialCost.toFixed(2)}</span>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">销售历史</h3>
+      
+      {purchases.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">暂无销售记录</p>
+      ) : (
+        <div className="space-y-2">
+          {purchases.map((purchase) => (
+            <div key={purchase.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{purchase.product_skus.sku_name}</span>
+                    <Badge variant={purchase.status === 'ACTIVE' ? 'default' : 'destructive'}>
+                      {purchase.status === 'ACTIVE' ? '正常' : '已退货'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600 mt-1">
+                    <p>SKU编号：{purchase.product_skus.sku_code}</p>
+                    <p>规格：{purchase.product_skus.specification}</p>
+                    <p>数量：{purchase.quantity}</p>
+                    <p>销售价格：¥{purchase.total_price}</p>
+                    {userRole === 'BOSS' && (
+                      <p>成本：¥{purchase.product_skus.total_cost * purchase.quantity}</p>
+                    )}
+                    <p>销售时间：{formatDateTime(purchase.purchase_date)}</p>
+                  </div>
+                  
+                  {purchase.status === 'REFUNDED' && (
+                    <div className="text-sm text-red-600 mt-2">
+                      <p>退货时间：{formatDateTime(purchase.refund_date!)}</p>
+                      <p>退货原因：{purchase.refund_reason}</p>
+                      {purchase.refund_notes && (
+                        <p>退货备注：{purchase.refund_notes}</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {purchase.notes && (
+                    <p className="text-sm text-gray-600 mt-1">备注：{purchase.notes}</p>
+                  )}
+                </div>
+                
+                {purchase.status === 'ACTIVE' && (userRole === 'BOSS' || userRole === 'MANAGER') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRefundClick(purchase)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    退货
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">人工成本：</span>
-          <span>¥{laborCost.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">工艺成本：</span>
-          <span>¥{craftCost.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
-          <span>总成本：</span>
-          <span>¥{totalCost.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between font-medium">
-          <span>预期利润：</span>
-          <span className={profit >= 0 ? 'text-green-600' : 'text-red-600'}>
-            ¥{profit.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex justify-between font-medium">
-          <span>利润率：</span>
-          <ProfitMarginDisplay profitMargin={profitMargin} />
-        </div>
-      </div>
+      )}
+      
+      {/* 退货模态框 */}
+      <RefundModal
+        isOpen={refundModalOpen}
+        onClose={() => setRefundModalOpen(false)}
+        onSubmit={handleRefundSubmit}
+        purchase={selectedPurchase}
+      />
     </div>
   )
 }
 ```
 
-### 7.4 成本计算状态管理
+### 9.5 客户分析数据组件
 
-**ProductEntry组件状态：**
+**分析数据修复逻辑：**
 ```typescript
-interface ProductionFormData {
-  mode: 'DIRECT_TRANSFORM' | 'COMBINATION_CRAFT'
-  selected_materials: MaterialUsage[]
-  production_quantity: number
-  labor_cost: number
-  craft_cost: number
+interface CustomerAnalyticsProps {
+  analytics: CustomerAnalytics | null
+  loading: boolean
+}
+
+const CustomerAnalyticsCards: React.FC<CustomerAnalyticsProps> = ({ analytics, loading }) => {
+  if (loading || !analytics) {
+    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <Card key={index} className="p-4">
+          <Skeleton className="h-4 w-20 mb-2" />
+          <Skeleton className="h-6 w-16" />
+        </Card>
+      ))}
+    </div>
+  }
+  
+  const analyticsCards = [
+    {
+      title: '总客户数',
+      value: analytics.total_customers,
+      icon: Users,
+      color: 'text-blue-600'
+    },
+    {
+      title: '新客户',
+      value: analytics.new_customers,
+      icon: UserPlus,
+      color: 'text-green-600'
+    },
+    {
+      title: '回头客',
+      value: analytics.repeat_customers,
+      icon: UserCheck,
+      color: 'text-purple-600'
+    },
+    {
+      title: 'VIP客户',
+      value: analytics.vip_customers,
+      icon: Crown,
+      color: 'text-yellow-600'
+    },
+    {
+      title: '活跃客户',
+      value: analytics.active_customers,
+      icon: Activity,
+      color: 'text-orange-600'
+    },
+    {
+      title: '平均订单价值',
+      value: `¥${analytics.average_order_value.toFixed(2)}`,
+      icon: DollarSign,
+      color: 'text-green-600'
+    },
+    {
+      title: '平均毛利率',
+      value: `${analytics.average_profit_margin.toFixed(1)}%`,
+      icon: TrendingUp,
+      color: 'text-blue-600'
+    },
+    {
+      title: '退货率',
+      value: `${analytics.refund_rate.toFixed(1)}%`,
+      icon: RefreshCw,
+      color: 'text-red-600'
+    }
+  ]
+  
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {analyticsCards.map((card, index) => {
+        const IconComponent = card.icon
+        return (
+          <Card key={index} className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">{card.title}</p>
+                <p className={`text-lg font-semibold ${card.color}`}>{card.value}</p>
+              </div>
+              <IconComponent className={`h-5 w-5 ${card.color}`} />
+            </div>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+```
+
+### 9.6 反向销售录入组件
+
+**反向销售表单：**
+```typescript
+interface ReverseSaleFormProps {
+  customer: Customer | null
+  onSaleCreate: (saleData: SaleData) => void
+}
+
+interface SaleData {
+  sku_id: string
+  quantity: number
   selling_price: number
-  profit_margin: number
-  product_name: string
-  description?: string
-  specification?: string
-  photos: string[]
+  notes?: string
 }
 
-// 成本计算结果状态
-const [costCalculation, setCostCalculation] = useState<CostCalculationResponse | null>(null)
-
-// 实时成本计算效果
-useEffect(() => {
-  const timer = setTimeout(() => {
-    calculateCost()
-  }, 500) // 防抖500ms
+const ReverseSaleForm: React.FC<ReverseSaleFormProps> = ({ customer, onSaleCreate }) => {
+  const [formData, setFormData] = useState<SaleData>({
+    sku_id: '',
+    quantity: 1,
+    selling_price: 0,
+    notes: ''
+  })
+  const [availableSkus, setAvailableSkus] = useState<ProductSku[]>([])
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   
-  return () => clearTimeout(timer)
-}, [formData.selected_materials, formData.labor_cost, formData.craft_cost, formData.production_quantity])
-```
-
-### 7.5 直接转化模式成本处理
-
-**直接转化模式特点：**
-```typescript
-// 直接转化模式成本计算
-const calculateDirectTransformCost = (material: AvailableMaterial) => {
-  // 根据产品类型选择正确的单价字段
-  let materialCost = 0
+  // 加载可用SKU列表
+  useEffect(() => {
+    loadAvailableSkus()
+  }, [])
   
-  if (material.product_type === 'LOOSE_BEADS' || material.product_type === 'BRACELET') {
-    // 散珠和手串使用每颗价格
-    materialCost = material.price_per_bead || 0
-  } else if (material.product_type === 'ACCESSORIES' || material.product_type === 'FINISHED') {
-    // 配件和成品使用每片/每件价格
-    materialCost = material.price_per_piece || 0
-  }
-  
-  // 如果没有专用价格字段，使用通用单价
-  if (materialCost === 0) {
-    materialCost = material.unit_cost || 0
-  }
-  
-  return materialCost
-}
-
-// 批量产品信息更新
-const updateBatchProduct = (materialId: string, field: string, value: any) => {
-  setBatchFormData(prev => ({
-    selected_materials: prev.selected_materials.map(material => {
-      if (material.purchase_id === materialId) {
-        const updatedProduct = {
-          ...material.product_info,
-          [field]: value
-        }
-        
-        // 如果更新的是价格相关字段，重新计算利润率
-        if (['selling_price', 'labor_cost', 'craft_cost'].includes(field)) {
-          const { totalCost, profitMargin } = calculateCosts(updatedProduct)
-          updatedProduct.total_cost = totalCost
-          updatedProduct.profit_margin = profitMargin
-        }
-        
-        return {
-          ...material,
-          product_info: updatedProduct
-        }
+  const loadAvailableSkus = async () => {
+    setLoading(true)
+    try {
+      const response = await sku_api.getSkuList({ available_only: true })
+      if (response.success) {
+        setAvailableSkus(response.data.skus)
       }
-      return material
-    })
-  }))
+    } catch (error) {
+      console.error('加载SKU列表失败:', error)
+      toast.error('加载SKU列表失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.sku_id) {
+      toast.error('请选择SKU产品')
+      return
+    }
+    
+    if (formData.quantity <= 0) {
+      toast.error('销售数量必须大于0')
+      return
+    }
+    
+    if (formData.selling_price <= 0) {
+      toast.error('销售价格必须大于0')
+      return
+    }
+    
+    const selectedSku = availableSkus.find(sku => sku.id === formData.sku_id)
+    if (selectedSku && formData.quantity > selectedSku.available_quantity) {
+      toast.error(`库存不足，当前可用库存：${selectedSku.available_quantity}`)
+      return
+    }
+    
+    setSubmitting(true)
+    try {
+      await onSaleCreate(formData)
+      // 重置表单
+      setFormData({
+        sku_id: '',
+        quantity: 1,
+        selling_price: 0,
+        notes: ''
+      })
+      toast.success('销售记录创建成功')
+    } catch (error) {
+      console.error('创建销售记录失败:', error)
+      toast.error('创建销售记录失败')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+  
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">反向销售录入</h3>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="customer_name">客户姓名</Label>
+            <Input
+              id="customer_name"
+              value={customer?.customer_name || ''}
+              disabled
+              className="bg-gray-50"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="customer_phone">客户手机</Label>
+            <Input
+              id="customer_phone"
+              value={customer?.customer_phone || ''}
+              disabled
+              className="bg-gray-50"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="sku_id">选择SKU产品</Label>
+          <Select value={formData.sku_id} onValueChange={(value) => {
+            setFormData(prev => ({ ...prev, sku_id: value }))
+            // 自动填充建议价格
+            const selectedSku = availableSkus.find(sku => sku.id === value)
+            if (selectedSku) {
+              setFormData(prev => ({ ...prev, selling_price: selectedSku.selling_price }))
+            }
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="请选择SKU产品" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSkus.map((sku) => (
+                <SelectItem key={sku.id} value={sku.id}>
+                  <div className="flex justify-between items-center w-full">
+                    <span>{sku.sku_name}</span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      库存：{sku.available_quantity} | ¥{sku.selling_price}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="quantity">销售数量</Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              value={formData.quantity}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                quantity: parseInt(e.target.value) || 1 
+              }))}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="selling_price">销售价格</Label>
+            <Input
+              id="selling_price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.selling_price}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                selling_price: parseFloat(e.target.value) || 0 
+              }))}
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="notes">销售备注</Label>
+          <Textarea
+            id="notes"
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="可选，最多200字符"
+            maxLength={200}
+          />
+        </div>
+        
+        <Button type="submit" disabled={submitting} className="w-full">
+          {submitting ? '创建中...' : '创建销售记录'}
+        </Button>
+      </form>
+    </div>
+  )
 }
 ```
+
+### 9.7 退货处理组件
+
+**退货模态框：**
+```typescript
+interface RefundModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (refundData: RefundData) => void
+  purchase: CustomerPurchase | null
+}
+
+interface RefundData {
+  refund_reason: string
+  refund_notes: string
+}
+
+const RefundModal: React.FC<RefundModalProps> = ({ isOpen, onClose, onSubmit, purchase }) => {
+  const [formData, setFormData] = useState<RefundData>({
+    refund_reason: '',
+    refund_notes: ''
+  })
+  const [submitting, setSubmitting] = useState(false)
+  
+  const refundReasons = [
+    '质量问题',
+    '尺寸不合适',
+    '颜色差异',
+    '客户不满意',
+    '其他原因'
+  ]
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.refund_reason) {
+      toast.error('请选择退货原因')
+      return
+    }
+    
+    setSubmitting(true)
+    try {
+      await onSubmit(formData)
+      // 重置表单
+      setFormData({ refund_reason: '', refund_notes: '' })
+      onClose()
+    } catch (error) {
+      console.error('退货处理失败:', error)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>退货处理</DialogTitle>
+        </DialogHeader>
+        
+        {purchase && (
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">退货商品信息</h4>
+              <p>商品名称：{purchase.product_skus.sku_name}</p>
+              <p>SKU编号：{purchase.product_skus.sku_code}</p>
+              <p>销售数量：{purchase.quantity}</p>
+              <p>销售价格：¥{purchase.total_price}</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="refund_reason">退货原因</Label>
+                <Select value={formData.refund_reason} onValueChange={(value) => 
+                  setFormData(prev => ({ ...prev, refund_reason: value }))
+                }>
+                  <SelectTrigger>
+                    <SelectValue placeholder="请选择退货原因" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {refundReasons.map((reason) => (
+                      <SelectItem key={reason} value={reason}>
+                        {reason}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="refund_notes">退货备注</Label>
+                <Textarea
+                  id="refund_notes"
+                  value={formData.refund_notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, refund_notes: e.target.value }))}
+                  placeholder="可选，详细说明退货情况"
+                  maxLength={500}
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  取消
+                </Button>
+                <Button type="submit" disabled={submitting} variant="destructive">
+                  {submitting ? '处理中...' : '确认退货'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+```
+
+### 9.8 错误处理和用户体验优化
+
+**统一错误处理：**
+```typescript
+const handleApiError = (error: any, operation: string) => {
+  console.error(`${operation}失败:`, error)
+  
+  if (error.response?.status === 401) {
+    // 认证错误，跳转登录
+    toast.error('登录已过期，请重新登录')
+    router.push('/login')
+  } else if (error.response?.status === 403) {
+    // 权限错误
+    toast.error('您没有权限执行此操作')
+  } else if (error.response?.status >= 500) {
+    // 服务器错误
+    toast.error('服务器错误，请稍后重试')
+  } else if (error.message) {
+    // 其他错误
+    toast.error(error.message)
+  } else {
+    // 默认错误
+    toast.error(`${operation}失败，请重试`)
+  }
+}
+```
+
+**加载状态管理：**
+```typescript
+const LoadingState: React.FC = () => (
+  <div className="space-y-4">
+    {/* 分析卡片骨架屏 */}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <Card key={index} className="p-4">
+          <Skeleton className="h-4 w-20 mb-2" />
+          <Skeleton className="h-6 w-16" />
+        </Card>
+      ))}
+    </div>
+    
+    {/* 客户列表骨架屏 */}
+    <Card className="p-6">
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-8 w-20" />
+          </div>
+        ))}
+      </div>
+    </Card>
+  </div>
+)
+```
+
+### 9.9 权限控制组件
+
+**权限检查Hook：**
+```typescript
+const usePermission = () => {
+  const { user } = useAuth()
+  
+  const checkPermission = (operation: string): boolean => {
+    if (!user) return false
+    
+    const permissions = {
+      'view_customers': ['BOSS', 'MANAGER', 'EMPLOYEE'],
+      'view_cost_data': ['BOSS'],
+      'process_refund': ['BOSS', 'MANAGER'],
+      'edit_customer': ['BOSS', 'MANAGER'],
+      'delete_customer': ['BOSS'],
+      'create_sale': ['BOSS', 'MANAGER', 'EMPLOYEE']
+    }
+    
+    return permissions[operation]?.includes(user.role) || false
+  }
+  
+  return { checkPermission, userRole: user?.role }
+}
+```
+
+**权限控制组件：**
+```typescript
+interface PermissionGuardProps {
+  operation: string
+  children: React.ReactNode
+  fallback?: React.ReactNode
+}
+
+const PermissionGuard: React.FC<PermissionGuardProps> = ({ 
+  operation, 
+  children, 
+  fallback = null 
+}) => {
+  const { checkPermission } = usePermission()
+  
+  if (!checkPermission(operation)) {
+    return <>{fallback}</>
+  }
+  
+  return <>{children}</>
+}
+
+// 使用示例
+<PermissionGuard operation="view_cost_data">
+  <p>成本：¥{purchase.product_skus.total_cost * purchase.quantity}</p>
+</PermissionGuard>
+
+<PermissionGuard operation="process_refund">
+  <Button onClick={() => handleRefundClick(purchase)}>退货</Button>
+</PermissionGuard>
+ ```

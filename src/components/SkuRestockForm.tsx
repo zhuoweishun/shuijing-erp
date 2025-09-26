@@ -113,7 +113,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
     if (!restockInfo) return 0
     
     const materialCost = restockInfo.required_materials.reduce((sum, material) => {
-      return sum + (material.unitCost * material.quantityNeededPerSku * formData.quantity)
+      return sum + (material.unit_cost * material.quantity_needed_per_sku * formData.quantity)
     }, 0)
     
     return materialCost + (restockInfo.labor_cost * formData.quantity) + (restockInfo.craft_cost * formData.quantity)
@@ -231,17 +231,17 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
                     <tbody>
                       {restockInfo.required_materials.map((material, index) => (
                         <tr key={index} className="border-t">
-                          <td className="px-4 py-2 font-medium">{material.purchase_name}</td>
+                          <td className="px-4 py-2 font-medium">{material.material_name}</td>
                           <td className="px-4 py-2">{material.supplier_name}</td>
-                          <td className="px-4 py-2">{material.purchase_code}</td>
+                          <td className="px-4 py-2">{material.material_code}</td>
                           <td className="px-4 py-2 text-right">
-                            {material.quantityNeededPerSku * formData.quantity} {material.unit}
+                            {material.quantity_needed_per_sku * formData.quantity} {material.unit}
                           </td>
                           <td className="px-4 py-2 text-right">
                             {material.available_quantity} {material.unit}
                           </td>
                           <td className="px-4 py-2 text-center">
-                            {material.isSufficient ? (
+                            {material.is_sufficient ? (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 充足
                               </span>
@@ -284,7 +284,7 @@ export default function SkuRestockForm({ sku, is_open, onClose, onSuccess }: Sku
                         <span className="text-blue-700">原材料成本：</span>
                         <span className="font-medium text-blue-900">
                           ¥{restockInfo.required_materials.reduce((sum, material) => {
-                            return sum + (material.unitCost * material.quantityNeededPerSku * formData.quantity)
+                            return sum + (material.unit_cost * material.quantity_needed_per_sku * formData.quantity)
                           }, 0).toFixed(2)}
                         </span>
                       </div>

@@ -13,16 +13,46 @@ import { prisma } from '../lib/prisma.js';
  */
 export function generateMaterialSignature(materialUsages) {
   return materialUsages
-    .map(usage => ({
-      productName: usage.purchase.productName,
-      productType: usage.purchase.productType,
-      quality: usage.purchase.quality || null,
-      beadDiameter: usage.purchase.beadDiameter || null,
-      specification: usage.purchase.specification || null,
-      quantityUsedBeads: usage.quantityUsedBeads || 0,
-      quantityUsedPieces: usage.quantityUsedPieces || 0
-    }))
-    .sort((a, b) => a.productName.localeCompare(b.productName));
+    .map(usage => {
+      // 处理不同的数据结构：组合制作模式 vs 直接转化模式
+      let materialInfo;
+      
+      if (usage.material) {
+        // 组合制作模式：数据来自materials表
+        materialInfo = {
+          material_name: usage.material.material_name,
+          material_type: usage.material.material_type,
+          quality: usage.material.quality || null,
+          bead_diameter: usage.material.bead_diameter || null,
+          specification: usage.material.specification || usage.material.accessory_specification || usage.material.finished_material_specification || null
+        };
+      } else if (usage.purchase) {
+        // 直接转化模式：数据来自purchase表
+        materialInfo = {
+          material_name: usage.purchase.material_name || usage.purchase.product_name || usage.purchase.productName,
+          material_type: usage.purchase.material_type || usage.purchase.product_type || usage.purchase.productType,
+          quality: usage.purchase.quality || null,
+          bead_diameter: usage.purchase.bead_diameter || usage.purchase.beadDiameter || null,
+          specification: usage.purchase.specification || null
+        };
+      } else {
+        // 兼容性处理：直接从usage对象获取
+        materialInfo = {
+          material_name: usage.material_name || '未知材料',
+          material_type: usage.material_type || 'UNKNOWN',
+          quality: usage.quality || null,
+          bead_diameter: usage.bead_diameter || null,
+          specification: usage.specification || null
+        };
+      }
+      
+      return {
+        ...materialInfo,
+        quantity_used_beads: usage.quantity_used_beads || usage.quantityUsedBeads || 0,
+        quantity_used_pieces: usage.quantity_used_pieces || usage.quantityUsedPieces || 0
+      };
+    })
+    .sort((a, b) => a.material_name.localeCompare(b.material_name));
 }
 
 /**
@@ -48,18 +78,18 @@ export function generateSkuCode(date, sequence) {
 
 /**
  * 生成SKU名称（移除编号后缀）
- * @param {string} productName - 原成品名称
+ * @param {string} skuName - SKU名称
  * @returns {string} SKU名称
  */
-export function generateSkuName(productName) {
-  return productName.replace(/\s*#\d+\s*$/, '').trim();
+export function generateSkuName(skuName) {
+  return skuName.replace(/\s*#\d+\s*$/, '').trim();
 }
 
 /**
  * 查找或创建SKU
  * @param {Object} params - 参数对象
  * @param {Array} params.materialUsages - 原材料使用记录
- * @param {string} params.productName - 成品名称
+ * @param {string} params.skuName - SKU名称
  * @param {number} params.sellingPrice - 销售价格
  * @param {string} params.userId - 用户ID
  * @param {Object} params.tx - 数据库事务对象
@@ -67,93 +97,127 @@ export function generateSkuName(productName) {
  * @returns {Object} SKU信息和是否为新创建
  */
 export async function findOrCreateSku({
-  materialUsages,
-  productName,
-  sellingPrice,
-  userId,
+  material_usages,
+  sku_name,
+  selling_price,
+  user_id,
   tx,
-  additionalData = {}
+  additional_data = {}
 }) {
   // 生成原材料标识
-  const materialSignature = generateMaterialSignature(materialUsages);
-  const materialSignatureHash = generateSkuHash(materialSignature);
+  const material_signature = generateMaterialSignature(material_usages);
+  const material_signature_hash = generateSkuHash(material_signature);
   
   // 查找现有SKU
-  let existingSku = await tx.productSku.findFirst({
+  let existing_sku = await tx.productSku.findFirst({
     where: {
-      materialSignatureHash: materialSignatureHash
+      material_signature_hash: material_signature_hash
     }
   });
   
-  if (existingSku) {
+  if (existing_sku) {
     // 检查价格差异
-    const priceDifference = Math.abs(existingSku.sellingPrice - sellingPrice) / existingSku.sellingPrice;
+    const price_difference = Math.abs(existing_sku.selling_price - selling_price) / existing_sku.selling_price;
     
-    if (priceDifference > 0.05) { // 5%以上差异
-      console.log(`⚠️  价格差异较大: 现有SKU价格 ${existingSku.sellingPrice}, 新价格 ${sellingPrice}`);
+    if (price_difference > 0.05) { // 5%以上差异
+      console.log(`⚠️  价格差异较大: 现有SKU价格 ${existing_sku.selling_price}, 新价格 ${selling_price}`);
       // 这里可以根据业务需求决定是否创建新SKU或更新价格
       // 暂时使用现有SKU价格
     }
     
+    // 记录更新前的数量
+    const quantity_before = existing_sku.total_quantity;
+    const quantity_after = quantity_before + 1;
+    
     // 更新SKU数量
-    const updatedSku = await tx.productSku.update({
-      where: { id: existingSku.id },
+    const updated_sku = await tx.productSku.update({
+      where: { id: existing_sku.id },
       data: {
-        totalQuantity: existingSku.totalQuantity + 1,
-        availableQuantity: existingSku.availableQuantity + 1,
-        totalValue: (existingSku.totalQuantity + 1) * existingSku.unitPrice
+        total_quantity: quantity_after,
+        available_quantity: existing_sku.available_quantity + 1,
+        total_value: (existing_sku.available_quantity + 1) * existing_sku.unit_price
       }
     });
     
+    // 在findOrCreateSku中创建库存变动日志，避免在外部重复创建
+    await createSkuInventoryLog({
+      sku_id: existing_sku.id,
+      action: 'CREATE',
+      quantity_change: 1,
+      quantity_before: quantity_before,
+      quantity_after: quantity_after,
+      reference_type: additional_data.reference_type || 'PRODUCT',
+      reference_id: additional_data.reference_id || null,
+      notes: additional_data.notes || `创建成品，SKU数量增加`,
+      user_id: user_id,
+      tx: tx
+    });
+    
     return {
-      sku: updatedSku,
-      isNewSku: false
+      sku: updated_sku,
+      is_new_sku: false,
+      log_created: true // 标记已创建日志
     };
   }
   
   // 创建新SKU
   const today = new Date();
-  const dateKey = today.toISOString().slice(0, 10);
+  const date_key = today.toISOString().slice(0, 10);
   
   // 获取当日SKU序号
-  const existingSkuCount = await tx.productSku.count({
+  const existing_sku_count = await tx.productSku.count({
     where: {
-      createdAt: {
+      created_at: {
         gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
         lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
       }
     }
   });
   
-  const skuCode = generateSkuCode(today, existingSkuCount + 1);
-  const skuName = generateSkuName(productName);
+  const sku_code = generateSkuCode(today, existing_sku_count + 1);
+  const generated_sku_name = generateSkuName(sku_name);
   
-  const newSku = await tx.productSku.create({
+  const new_sku = await tx.productSku.create({
     data: {
-      skuCode: skuCode,
-      skuName: skuName,
-      materialSignatureHash: materialSignatureHash,
-      materialSignature: JSON.stringify(materialSignature),
-      totalQuantity: 1,
-      availableQuantity: 1,
-      unitPrice: sellingPrice,
-      totalValue: sellingPrice,
-      sellingPrice: sellingPrice,
-      photos: additionalData.photos || null,
-      description: additionalData.description || null,
-      specification: additionalData.specification || null,
-      materialCost: additionalData.materialCost || null,
-      laborCost: additionalData.laborCost || null,
-      craftCost: additionalData.craftCost || null,
-      totalCost: additionalData.totalCost || null,
-      profitMargin: additionalData.profitMargin || null,
-      createdBy: userId
+      sku_code: sku_code,
+      sku_name: generated_sku_name,
+      material_signature_hash: material_signature_hash,
+      material_signature: JSON.stringify(material_signature),
+      total_quantity: 1,
+      available_quantity: 1,
+      unit_price: selling_price,
+      total_value: 1 * selling_price, // available_quantity * selling_price
+      selling_price: selling_price,
+      photos: additional_data.photos || null,
+      description: additional_data.description || null,
+      specification: additional_data.specification || null,
+      material_cost: additional_data.material_cost || null,
+      labor_cost: additional_data.labor_cost || null,
+      craft_cost: additional_data.craft_cost || null,
+      total_cost: additional_data.total_cost || null,
+      profit_margin: additional_data.profit_margin || null,
+      created_by: user_id
     }
   });
   
+  // 为新创建的SKU创建库存变动日志
+  await createSkuInventoryLog({
+    sku_id: new_sku.id,
+    action: 'CREATE',
+    quantity_change: 1,
+    quantity_before: 0,
+    quantity_after: 1,
+    reference_type: additional_data.reference_type || 'PRODUCT',
+    reference_id: additional_data.reference_id || null,
+    notes: additional_data.notes || `创建新SKU: ${generated_sku_name}`,
+    user_id: user_id,
+    tx: tx
+  });
+  
   return {
-    sku: newSku,
-    isNewSku: true
+    sku: new_sku,
+    is_new_sku: true,
+    log_created: true // 标记已创建日志
   };
 }
 
@@ -172,28 +236,28 @@ export async function findOrCreateSku({
  * @param {Object} params.tx - 数据库事务对象
  */
 export async function createSkuInventoryLog({
-  skuId,
+  sku_id,
   action,
-  quantityChange,
-  quantityBefore,
-  quantityAfter,
-  referenceType,
-  referenceId,
+  quantity_change,
+  quantity_before,
+  quantity_after,
+  reference_type,
+  reference_id,
   notes,
-  userId,
+  user_id,
   tx
 }) {
   await tx.skuInventoryLog.create({
     data: {
-      skuId: skuId,
-      action: action,
-      quantityChange: quantityChange,
-      quantityBefore: quantityBefore,
-      quantityAfter: quantityAfter,
-      referenceType: referenceType,
-      referenceId: referenceId,
-      notes: notes,
-      userId: userId
+      sku_id,
+      action,
+      quantity_change,
+      quantity_before,
+      quantity_after,
+      reference_type,
+      reference_id,
+      notes,
+      user_id
     }
   });
 }
@@ -224,33 +288,33 @@ export async function decreaseSkuQuantity({
     throw new Error('SKU不存在');
   }
   
-  if (sku.availableQuantity < quantity) {
-    throw new Error(`SKU ${sku.skuCode} 可售数量不足，可售：${sku.availableQuantity}，需要：${quantity}`);
+  if (sku.available_quantity < quantity) {
+    throw new Error(`SKU ${sku.sku_code} 可售数量不足，可售：${sku.available_quantity}，需要：${quantity}`);
   }
   
-  const quantityBefore = sku.availableQuantity;
+  const quantityBefore = sku.available_quantity;
   const quantityAfter = quantityBefore - quantity;
   
   // 更新SKU数量
   const updatedSku = await tx.productSku.update({
     where: { id: skuId },
     data: {
-      availableQuantity: quantityAfter,
-      totalValue: quantityAfter * sku.unitPrice
+      available_quantity: quantityAfter,
+      total_value: quantityAfter * sku.selling_price
     }
   });
   
   // 创建库存变更日志
   await createSkuInventoryLog({
-    skuId: skuId,
+    sku_id: skuId,
     action: 'SELL',
-    quantityChange: -quantity,
-    quantityBefore: quantityBefore,
-    quantityAfter: quantityAfter,
-    referenceType: 'SALE',
-    referenceId: referenceId,
+    quantity_change: -quantity,
+    quantity_before: quantityBefore,
+    quantity_after: quantityAfter,
+    reference_type: 'SALE',
+    reference_id: referenceId,
     notes: notes,
-    userId: userId,
+    user_id: userId,
     tx: tx
   });
   
@@ -281,29 +345,29 @@ export async function adjustSkuQuantity({
     throw new Error('SKU不存在');
   }
   
-  const quantityBefore = sku.availableQuantity;
+  const quantityBefore = sku.available_quantity;
   const quantityChange = newQuantity - quantityBefore;
   
   // 更新SKU数量
   const updatedSku = await tx.productSku.update({
     where: { id: skuId },
     data: {
-      availableQuantity: newQuantity,
-      totalValue: newQuantity * sku.unitPrice
+      available_quantity: newQuantity,
+      total_value: newQuantity * sku.selling_price
     }
   });
   
   // 创建库存变更日志
   await createSkuInventoryLog({
-    skuId: skuId,
+    sku_id: skuId,
     action: 'ADJUST',
-    quantityChange: quantityChange,
-    quantityBefore: quantityBefore,
-    quantityAfter: newQuantity,
-    referenceType: 'MANUAL',
-    referenceId: null,
+    quantity_change: quantityChange,
+    quantity_before: quantityBefore,
+    quantity_after: newQuantity,
+    reference_type: 'MANUAL',
+    reference_id: null,
     notes: notes,
-    userId: userId,
+    user_id: userId,
     tx: tx
   });
   
@@ -311,7 +375,7 @@ export async function adjustSkuQuantity({
 }
 
 /**
- * 获取SKU详细信息（包括关联的成品）
+ * 获取SKU详细信息（不使用Product模型，直接返回SKU表数据）
  * @param {string} skuId - SKU ID
  * @returns {Object} SKU详细信息
  */
@@ -319,18 +383,36 @@ export async function getSkuDetails(skuId) {
   const sku = await prisma.productSku.findUnique({
     where: { id: skuId },
     include: {
-      products: {
+      material_usages: {
         include: {
-          materialUsages: {
+          material: {
             include: {
-              purchase: true
+              purchase: {
+                include: {
+                  supplier: true,
+                  user: {
+                    select: {
+                      id: true,
+                      user_name: true,
+                      name: true
+                    }
+                  }
+                }
+              }
             }
           }
         }
       },
-      inventoryLogs: {
+      inventory_logs: {
         orderBy: { created_at: 'desc' },
         take: 10
+      },
+      creator: {
+        select: {
+          id: true,
+          user_name: true,
+          name: true
+        }
       }
     }
   });
@@ -367,8 +449,8 @@ export async function getSkuList({
     status: statusCondition,
     ...(search && {
       OR: [
-        { skuCode: { contains: search } },
-        { skuName: { contains: search } }
+        { sku_code: { contains: search } },
+        { sku_name: { contains: search } }
       ]
     })
   };
@@ -388,8 +470,17 @@ export async function getSkuList({
     prisma.productSku.count({ where })
   ]);
   
+  // 转换_count字段为蛇形命名
+  const formattedSkus = skus.map(sku => {
+    const { _count, ...rest } = sku;
+    return {
+      ...rest,
+      products_count: _count.products
+    };
+  });
+  
   return {
-    skus,
+    skus: formattedSkus,
     pagination: {
       page,
       limit,

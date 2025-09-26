@@ -224,8 +224,8 @@ const get_customer_labels = (customer: Customer, allCustomers: Customer[] = []):
     const now = new Date()
     const daysSinceLastPurchases = allCustomers
       .filter(c => c.last_purchase_date)
-      .map(c => {
-        const lastPurchase = new Date(c.last_purchase_date!)
+    .map(c => {
+      const lastPurchase = new Date(c.last_purchase_date!)
         return Math.floor((now.getTime() - lastPurchase.getTime()) / (1000 * 60 * 60 * 24))
       })
       .sort((a, b) => a - b)
@@ -390,7 +390,10 @@ interface CustomerManagementState {
 }
 
 export default function CustomerManagement() {
-  const { is_authenticated } = useAuth()
+  const { is_authenticated, is_loading } = useAuth()
+  
+  // 移除request_in_progress状态，简化逻辑
+  
   const [state, setState] = useState<CustomerManagementState>({
     customers: [],
     analytics: null,
@@ -525,7 +528,7 @@ export default function CustomerManagement() {
       total_all_orders: 'sortAndRange',
       total_purchases: 'sortAndRange',
       first_purchase_date: 'sortAndRange',
-      last_purchase_date: 'sortAndRange',
+    last_purchase_date: 'sortAndRange',
       customer_type: 'multiSelect'
     }
     return type_map[column] || 'search'
@@ -1295,7 +1298,7 @@ export default function CustomerManagement() {
         limit: currentState.pagination.limit,
         sort: currentState.sort_order,
         sort_by: currentState.sort_by,
-        getCityStats: true // 获取城市统计数据
+        get_city_stats: true // 获取城市统计数据
       }
       
       // 保持向后兼容的搜索
@@ -1395,12 +1398,35 @@ export default function CustomerManagement() {
     } catch (error: any) {
       console.error('❌ fetchCustomers 执行失败:', error)
       
+      // 检查是否是认证错误
+      const isAuthError = error.message?.includes('token') || 
+                         error.message?.includes('认证') ||
+                         error.message?.includes('unauthorized') ||
+                         error.response?.status === 401 ||
+                         error.response?.status === 403
+      
       // 检查是否是因为没有客户数据导致的错误
       const isNoDataError = error.message?.includes('客户不存在') || error.message?.includes('404')
       
-      if (!isNoDataError) {
-        console.error('获取客户列表失败:', error)
-        toast.error('获取客户列表失败')
+      // 检查是否是网络连接错误
+      const isNetworkError = error.message?.includes('Failed to fetch') ||
+                            error.message?.includes('网络连接失败') ||
+                            error.name === 'TypeError' ||
+                            error.code === 'NETWORK_ERROR'
+      
+      if (isAuthError) {
+        console.warn('⚠️ [客户管理] 认证错误，静默处理:', error.message)
+        // 认证错误时静默处理，让认证系统处理
+      } else if (isNetworkError) {
+        console.warn('⚠️ [客户管理] 网络连接错误，静默处理:', error.message)
+        // 网络错误时静默处理，避免重复错误提示
+      } else if (isNoDataError) {
+        console.log('ℹ️ [客户管理] 暂无客户数据')
+        // 无数据时静默处理
+      } else {
+        console.error('❌ [客户管理] 获取客户列表失败:', error)
+        // 只在真正的错误时显示toast
+        toast.error('获取客户列表失败，请稍后重试')
       }
       
       setState(prev => ({
@@ -1439,7 +1465,31 @@ export default function CustomerManagement() {
         }))
       }
     } catch (error: any) {
-      // 静默处理错误，不在控制台输出错误日志
+      console.error('❌ fetchAnalytics 执行失败:', error)
+      
+      // 检查是否是认证错误
+      const isAuthError = error.message?.includes('token') || 
+                         error.message?.includes('认证') ||
+                         error.message?.includes('unauthorized') ||
+                         error.response?.status === 401 ||
+                         error.response?.status === 403
+      
+      // 检查是否是网络连接错误
+      const isNetworkError = error.message?.includes('Failed to fetch') ||
+                            error.message?.includes('网络连接失败') ||
+                            error.name === 'TypeError'
+      
+      if (isAuthError) {
+        console.warn('⚠️ [客户管理] 统计数据认证错误，可能需要重新登录:', error.message)
+        // 认证错误时不显示toast，让认证系统处理
+      } else if (isNetworkError) {
+        console.warn('⚠️ [客户管理] 统计数据网络连接错误，静默处理:', error.message)
+        // 网络错误时静默处理，不影响主要功能
+      } else {
+        console.error('获取统计数据失败:', error)
+        // 其他错误也静默处理，不影响主要功能，避免重复错误提示
+      }
+      
       // 设置默认的空统计数据
       setState(prev => ({ 
         ...prev, 
@@ -1459,73 +1509,28 @@ export default function CustomerManagement() {
     }
   }
 
-  // 初始化数据
-  useEffect(() => {
-    if (is_authenticated) {
-      fetchCustomers()
-      fetchAnalytics()
-      
-      // 添加页面可见性监听，当用户返回页面时自动刷新数据
-      const handleVisibilityChange = () => {
-        if (!document.hidden && is_authenticated) {
-          // 页面变为可见时刷新客户数据
-          fetchCustomers()
-          fetchAnalytics()
-        }
-      }
-      
-      document.addEventListener('visibilitychange', handleVisibilityChange)
-      
-      // 清理事件监听器
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-      }
-    }
-  }, [
-    is_authenticated, 
-    state.pagination.page, 
-    state.search_term, 
-    state.selected_type, 
-    state.sort_by, 
-    state.sort_order, 
-    state.time_period
-  ])
+  // 移除页面可见性监听器，简化逻辑
 
-  // 筛选条件变化时重新获取数据
+  // 初始加载（仅在组件首次挂载时加载）- 参考采购列表的简单模式
   useEffect(() => {
     if (is_authenticated) {
-      console.log('🔄 筛选条件变化，准备重新获取数据', {
-        customer_type: state.filters.customer_type,
-        city_filter: state.filters.city_filter,
-        customer_code_search: state.filters.customer_code_search,
-        name_search: state.filters.name_search,
-        phone_search: state.filters.phone_search
-      })
-      
-      const timer = setTimeout(() => {
-        console.log('⏰ 防抖时间到，开始获取数据')
-        fetchCustomers()
-      }, 300) // 防抖处理
-      return () => {
-        console.log('🚫 清除防抖定时器')
-        clearTimeout(timer)
-      }
+      console.log('🔄 [客户管理] 认证成功，开始初始化数据')
+      Promise.all([
+        fetchCustomers(),
+        fetchAnalytics()
+      ])
     }
-  }, [
-    state.filters.customer_code_search,
-    state.filters.name_search,
-    state.filters.phone_search,
-    state.filters.city_filter,
-    state.filters.customer_type,
-    state.filters.total_orders_min,
-    state.filters.total_orders_max,
-    state.filters.total_all_orders_min,
-    state.filters.total_all_orders_max,
-    state.filters.total_purchases_min,
-    state.filters.total_purchases_max,
-    state.filters.last_purchase_start,
-    state.filters.last_purchase_end
-  ])
+  }, [is_authenticated])
+  
+  // 监听分页变化，确保页码变化时重新获取数据
+  useEffect(() => {
+    if (is_authenticated) {
+      console.log('🔄 [客户管理] 分页变化，重新获取数据')
+      fetchCustomers()
+    }
+  }, [state.pagination.page, is_authenticated])
+
+  // 移除页面可见性监听器，采用采购列表的简单模式
   
   // 专门监控客户类型筛选变化
   useEffect(() => {
@@ -1775,6 +1780,20 @@ export default function CustomerManagement() {
     })
   }
 
+  // 认证状态加载中
+  if (is_loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">正在初始化</h2>
+          <p className="text-gray-600">正在验证用户身份，请稍候...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 用户未认证
   if (!is_authenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">

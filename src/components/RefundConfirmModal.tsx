@@ -147,7 +147,7 @@ export default function RefundConfirmModal({
                   {sku ? sku.sku_name : purchase?.sku_name}
                 </p>
                 <p className="text-sm text-gray-600">
-                  编码: {sku ? sku.sku_code : purchase?.sku_code}
+                  编码: {sku ? sku.sku_code : purchase?.sku?.sku_code}
                 </p>
                 {(sku?.specification || purchase?.sku?.specification) && (
                   <p className="text-sm text-gray-600">

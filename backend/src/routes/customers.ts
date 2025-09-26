@@ -119,6 +119,7 @@ router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
       purchaseDateFilter = dateFilter
     }
    // 总客户数（根据时间筛选）
+   // 总客户数（根据时间筛选）
     const [total_customers, currentPurchases, totalRevenue, new_customers, repeat_customers, vip_customers, active_customers, total_refunds, active_purchases] = await Promise.all([
       // 总客户数（根据时间筛选）
       prisma.customers.count({
@@ -181,6 +182,15 @@ router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
         where: {
           ...purchaseDateFilter,
           status: 'ACTIVE' // 只包含正常销售记录
+        },
+        include: {
+          product_skus: {
+            select: {
+              total_cost: true,
+              sku_name: true,
+              sku_code: true
+            }
+          }
         }
       })
     ])
@@ -188,17 +198,33 @@ router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
     // 计算正常销售记录的总成本和总售价
     let total_priceAmount = 0
     let totalActiveSalesAmount = 0
+    let validCostRecords = 0
+    let invalidCostRecords = 0
     
     active_purchases.forEach((purchase: any) => {
+      const salePrice = Number(purchase.total_price)
+      totalActiveSalesAmount += salePrice
+      
       if (purchase.product_skus && purchase.product_skus.total_cost) {
-        const costForThisPurchase = Number(purchase.product_skus.total_cost) * purchase.quantity
+        const unitCost = Number(purchase.product_skus.total_cost)
+        const costForThisPurchase = unitCost * purchase.quantity
         total_priceAmount += costForThisPurchase
+        validCostRecords++
+        
+        console.log(`📊 [成本计算] SKU: ${purchase.product_skus.sku_code}, 单位成本: ${unitCost}, 数量: ${purchase.quantity}, 总成本: ${costForThisPurchase}, 售价: ${salePrice}`)
+      } else {
+        invalidCostRecords++
+        console.warn(`⚠️ [成本缺失] 购买记录ID: ${purchase.id}, SKU: ${purchase.product_skus?.sku_code || '未知'}, 缺少成本数据`)
       }
-      totalActiveSalesAmount += Number(purchase.total_price)
     })
     
+    console.log(`📊 [成本统计] 有效成本记录: ${validCostRecords}, 无效成本记录: ${invalidCostRecords}`)
+    
     const inactive_customers = total_customers - active_customers
-    const average_order_value = currentPurchases > 0 ? Number(totalRevenue._sum?.total_price || 0) / currentPurchases : 0
+    
+    // 平均订单价值：只计算有效订单（排除已退货订单）
+    const average_order_value = active_purchases.length > 0 ? totalActiveSalesAmount / active_purchases.length : 0
+    
     const repeat_purchase_rate = total_customers > 0 ? (repeat_customers / total_customers) * 100 : 0
     
     // 退货率计算逻辑：总订单数就是所有购买记录数（包括正常和已退货的）
@@ -208,6 +234,17 @@ router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
     // 平均毛利率计算：(总实际售价 - 总实际成本) / 总实际售价 * 100%
     // 只计算正常销售记录，不包括已退货的记录
     const average_profit_margin = totalActiveSalesAmount > 0 ? ((totalActiveSalesAmount - total_priceAmount) / totalActiveSalesAmount) * 100 : 0
+    
+    // 调试日志：输出计算过程中的关键数据
+    console.log('📊 [客户分析] 计算数据调试:', {
+      active_purchases_count: active_purchases.length,
+      totalActiveSalesAmount,
+      total_priceAmount,
+      average_order_value,
+      average_profit_margin,
+      currentPurchases,
+      total_refunds
+    })
     
 
     
@@ -571,8 +608,9 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
     const totalActiveOrders = customer.customer_purchases ? 
       customer.customer_purchases.filter((purchase: any) => purchase.status === 'ACTIVE').length : 0
     
-    // 计算退货相关统计
-    const totalRefundedOrders = customer._count?.customer_purchases || 0
+    // 计算退货相关统计 - 修复_count字段命名问题
+    const purchase_count = (customer as any)._count?.customer_purchases || 0
+    const totalRefundedOrders = total_all_orders - totalActiveOrders // 退货订单 = 总订单 - 有效订单
     const refund_rate = total_all_orders > 0 ? (totalRefundedOrders / total_all_orders) * 100 : 0
     
     // 动态生成客户编码（基于创建日期和索引）
@@ -587,8 +625,11 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       refund_rate
     })
     
+    // 创建符合snake_case规范的客户数据对象，移除不符合规范的字段
+    const { _count, customer_purchases, ...customerData } = customer as any
+    
     return {
-      ...customer,
+      ...customerData,
       customer_code: customer_code, // 动态生成的客户编码
       total_purchases: Number(customer.total_purchases) || 0,
       total_orders: totalActiveOrders, // 有效订单（不包含退货）
@@ -599,9 +640,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       first_purchase_date: customer.first_purchase_date,
       created_at: customer.created_at,
       updated_at: customer.updated_at,
-      customer_type: customer_type, // 动态计算客户类型
-      // 移除purchases字段，避免返回过多数据
-      purchases: undefined
+      customer_type: customer_type // 动态计算客户类型
     }
   })
   
@@ -991,23 +1030,14 @@ router.get('/:id/purchases', authenticateToken, asyncHandler(async (req, res) =>
       skip,
       take: Number(limit),
       orderBy: { purchase_date: 'desc' },
-      select: {
-        id: true,
-        customer_id: true,
-        sku_id: true,
-        sku_name: true,
-        quantity: true,
-        unit_price: true,
-        total_price: true,
-        original_price: true,
-        status: true,
-        refund_date: true,
-        refund_reason: true,
-        refund_notes: true,
-        sale_channel: true,
-        notes: true,
-        purchase_date: true,
-        created_at: true
+      include: {
+        product_skus: {
+          select: {
+            sku_code: true,
+            sku_name: true,
+            specification: true
+          }
+        }
       }
     }),
     prisma.customerPurchases.count({
@@ -1082,29 +1112,57 @@ router.post('/:id/purchases', authenticateToken, asyncHandler(async (req, res) =
     })
   }
   
-  // 创建客户购买记录
-  const purchase = await prisma.customerPurchases.create({
-    data: {
-      id: crypto.randomUUID(),
-      customer_id: id,
-      sku_id: validatedData.sku_id,
-      sku_name: sku.sku_name,
-      quantity: validatedData.quantity,
-      unit_price: validatedData.unit_price,
-      total_price: validatedData.total_price,
-      original_price: sku.unit_price || sku.selling_price || validatedData.unit_price,
-      sale_channel: validatedData.sale_channel,
-      notes: validatedData.notes,
-      purchase_date: new Date(),
-      created_at: new Date(),
-      updated_at: new Date()
+  // 使用事务创建购买记录并更新客户统计信息
+  const result = await prisma.$transaction(async (tx) => {
+    // 创建客户购买记录
+    const purchase = await tx.customerPurchases.create({
+      data: {
+        id: crypto.randomUUID(),
+        customer_id: id,
+        sku_id: validatedData.sku_id,
+        sku_name: sku.sku_name,
+        quantity: validatedData.quantity,
+        unit_price: validatedData.unit_price,
+        total_price: validatedData.total_price,
+        original_price: sku.unit_price || sku.selling_price || validatedData.unit_price,
+        sale_channel: validatedData.sale_channel,
+        notes: validatedData.notes,
+        purchase_date: new Date(),
+        created_at: new Date(),
+        updated_at: new Date()
+      }
+    })
+    
+    // 更新客户统计信息
+    const current_date = new Date()
+    const update_data = {
+      total_purchases: {
+        increment: validatedData.total_price
+      },
+      total_orders: {
+        increment: 1
+      },
+      last_purchase_date: current_date,
+      updated_at: current_date
     }
+    
+    // 如果是首次购买，设置首次购买时间
+    if (!customer.first_purchase_date) {
+      update_data.first_purchase_date = current_date
+    }
+    
+    await tx.customers.update({
+      where: { id },
+      data: update_data
+    })
+    
+    return purchase
   })
   
   res.status(201).json({
     success: true,
     message: '客户购买记录创建成功',
-    data: { purchase }
+    data: { purchase: result }
   })
   return
 }))
@@ -1266,13 +1324,11 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticateToken, as
     const sku = purchase.product_skus
     const quantity_before = sku.available_quantity
     const quantity_after = quantity_before + validatedData.quantity
-    const totalQuantityAfter = sku.total_quantity + validatedData.quantity
     
     const updated_sku = await tx.productSku.update({
       where: { id: purchase.sku_id },
       data: {
         available_quantity: quantity_after,
-        total_quantity: totalQuantityAfter,
         total_value: quantity_after * Number(sku.selling_price)
       }
     })
@@ -1281,7 +1337,7 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticateToken, as
     const translated_reason = translate_refund_reason(validatedData.reason)
     await tx.skuInventoryLog.create({
       data: { sku_id: purchase.sku_id,
-        action: 'ADJUST',
+        action: 'REFUND',
         quantity_change: validatedData.quantity,
         quantity_before: quantity_before,
         quantity_after: quantity_after,
@@ -1390,8 +1446,8 @@ router.post('/:customer_id/purchases/:purchase_id/refund', authenticateToken, as
       sku_name: result.purchase.sku_name,
       refunded_quantity: validatedData.quantity,
       refund_amount: result.refund_amount,
-      isFullRefund: result.isFullRefund,
-      newSkuQuantity: result.sku.available_quantity,
+      is_full_refund: result.isFullRefund,
+      new_sku_quantity: result.sku.available_quantity,
       reason: validatedData.reason,
       notes: validatedData.notes
     }

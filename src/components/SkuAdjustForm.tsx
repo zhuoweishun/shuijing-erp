@@ -93,7 +93,7 @@ export default function SkuAdjustForm({ sku, on_submit, onCancel, loading = fals
       type: formData.type,
       quantity: formData.quantity,
       reason: formData.reason.trim(),
-      costAdjustment: formData.costAdjustment
+      cost_adjustment: formData.costAdjustment
     }
 
     on_submit(adjustData)
@@ -124,7 +124,7 @@ export default function SkuAdjustForm({ sku, on_submit, onCancel, loading = fals
   }
 
   // 计算单位成本
-  const unitCost = sku.materialCost || sku.selling_price || 0
+  const unitCost = sku.material_cost || sku.selling_price || 0
   
   // 计算调整后的总成本
   const calculateNewTotalCost = () => {

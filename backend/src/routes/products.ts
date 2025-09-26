@@ -36,7 +36,7 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
   
   const { 
     search, 
-    purchase_types,
+    material_types,
     available_only = 'true', 
     min_quantity = 1 
   } = req.query
@@ -47,81 +47,55 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
     const params: any[] = []
     
     if (search) {
-      whereClause += ' AND p.purchase_name LIKE ?'
+      whereClause += ' AND m.material_name LIKE ?'
       params.push(`%${search}%`)
     }
     
-    // 产品类型筛选 - 处理字符串或数组格式
-    let purchaseTypesArray: string[] = []
-    if (purchase_types) {
-      if (typeof purchase_types === 'string') {
+    // 材料类型筛选 - 处理字符串或数组格式
+    let materialTypesArray: string[] = []
+    if (material_types) {
+      if (typeof material_types === 'string') {
         // 如果是逗号分隔的字符串，分割成数组
-        purchaseTypesArray = (purchase_types as string).split(',').map(type => type.trim()).filter(Boolean)
-      } else if (Array.isArray(purchase_types)) {
-        purchaseTypesArray = purchase_types as string[]
+        materialTypesArray = (material_types as string).split(',').map(type => type.trim()).filter(Boolean)
+      } else if (Array.isArray(material_types)) {
+        materialTypesArray = material_types as string[]
       }
     }
     
-    if (purchaseTypesArray.length > 0) {
-      const placeholders = purchaseTypesArray.map(() => '?').join(',')
-      whereClause += ` AND p.purchase_type IN (${placeholders})`
-      params.push(...purchaseTypesArray)
+    if (materialTypesArray.length > 0) {
+      const placeholders = materialTypesArray.map(() => '?').join(',')
+      whereClause += ` AND m.material_type IN (${placeholders})`
+      params.push(...materialTypesArray)
     }
     
-    // 使用通用的库存计算逻辑，支持所有产品类型
+    // 直接查询materials表，这是独立的库存数据表
     const materialsQuery = `
       SELECT 
-        p.id,
-        p.purchase_code as purchase_code,
-        p.purchase_name as purchase_name,
-        p.purchase_type as purchase_type,
-        p.bead_diameter as bead_diameter,
-        p.specification as specification,
-        p.quality,
-        p.total_beads,
-        p.piece_count,
-        p.quantity,
-        p.beads_per_string,
-        COALESCE(SUM(mu.quantity_used), 0) as used_beads,
-        COALESCE(SUM(mu.quantity_used), 0) as used_pieces,
-        -- 根据产品类型计算可用数量
-        CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' THEN 
-            GREATEST(0, COALESCE(p.piece_count, 0) - COALESCE(SUM(mu.quantity_used), 0))
-          WHEN p.purchase_type = 'BRACELET' THEN 
-            GREATEST(0, COALESCE(p.total_beads, 0) - COALESCE(SUM(mu.quantity_used), 0))
-          WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') THEN 
-            GREATEST(0, COALESCE(p.piece_count, 0) - COALESCE(SUM(mu.quantity_used), 0))
-          ELSE 0
-        END as available_quantity,
-        -- 计算单位成本
-        CASE 
-          WHEN p.purchase_type = 'LOOSE_BEADS' AND p.piece_count > 0 THEN 
-            p.total_price / p.piece_count
-          WHEN p.purchase_type = 'BRACELET' AND p.total_beads > 0 THEN 
-            p.price_per_bead
-          WHEN p.purchase_type IN ('ACCESSORIES', 'FINISHED_MATERIAL') AND p.piece_count > 0 THEN 
-            p.total_price / p.piece_count
-          ELSE p.unit_price
-        END as unit_cost,
-        p.price_per_bead as price_per_bead,
-        p.price_per_gram as price_per_gram,
-        p.total_price as total_price,
-        p.unit_price as unit_price,
-        p.weight,
-        p.photos,
+        m.id,
+        m.material_code,
+        m.material_name,
+        m.material_type,
+        m.bead_diameter,
+        m.accessory_specification,
+        m.finished_material_specification,
+        m.quality,
+        m.original_quantity,
+        m.used_quantity,
+        m.remaining_quantity as available_quantity,
+        m.inventory_unit,
+        m.unit_cost,
+        m.total_cost,
+        m.photos,
         s.name as supplier_name,
-        p.created_at as created_at,
-        p.updated_at as updated_at
-      FROM purchases p
-      LEFT JOIN material_usage mu ON p.id = mu.purchase_id
-      LEFT JOIN suppliers s ON p.supplier_id = s.id
+        m.material_date,
+        m.notes,
+        m.created_at,
+        m.updated_at
+      FROM materials m
+      LEFT JOIN suppliers s ON m.supplier_id = s.id
       ${whereClause}
-      GROUP BY p.id, p.purchase_code, p.purchase_name, p.purchase_type, p.bead_diameter, p.specification, p.quality, 
-               p.total_beads, p.piece_count, p.quantity, p.beads_per_string, p.price_per_bead, p.price_per_gram, 
-               p.total_price, p.unit_price, p.weight, p.photos, s.name, p.created_at, p.updated_at
-      ${available_only === 'true' ? 'HAVING available_quantity >= ?' : ''}
-      ORDER BY p.created_at DESC
+      ${available_only === 'true' ? 'AND m.remaining_quantity >= ?' : ''}
+      ORDER BY m.created_at DESC
     `
     
     if (available_only === 'true') {
@@ -138,42 +112,52 @@ router.get('/materials', authenticateToken, asyncHandler(async (req, res) => {
     
     console.log('🔍 [Materials API] SQL查询结果:', {
       resultCount: materialsResult.length,
-      firstResult: materialsResult[0] || null
+      firstResult: materialsResult[0] || null,
+      allIds: materialsResult.slice(0, 3).map(m => ({ id: m.id, name: m.material_name }))
     })
     
-    // 直接使用蛇形命名格式，无需转换
+    // 格式化materials表数据
     const formattedMaterials = materialsResult.map(material => {
-      // 构建响应对象，所有字段已经是蛇形命名
+      // 构建响应对象，使用materials表的字段结构
       const converted = {
-        ...material,
-        purchase_id: material.id,
-        available_quantity: Number(material.available_quantity),
-        unit_cost: Number(material.unit_cost) || 0,
+        id: material.id,
+        material_id: material.id, // 兼容前端
+        material_code: material.material_code,
+        material_name: material.material_name,
+        material_type: material.material_type,
+        quality: material.quality,
         
-        // 添加手串相关的重要字段映射
-        quantity: material.quantity, // 串数
-        beads_per_string: material.beads_per_string, // 每串颗数
-        total_beads: material.total_beads, // 总颗数
-        piece_count: material.piece_count, // 片数/件数
-        used_beads: Number(material.used_beads), // 已用颗数
-        used_pieces: Number(material.used_pieces) // 已用片数/件数
-      }
-      
-      // 计算剩余数量（用于验证）
-      if (material.purchase_type === 'LOOSE_BEADS' || material.purchase_type === 'LOOSE_BEADS') {
-        converted.remaining_beads = (material.total_beads || 0) - Number(material.used_beads)
-      } else {
-        converted.remaining_pieces = (material.piece_count || 0) - Number(material.used_pieces)
+        // 规格信息
+        bead_diameter: material.bead_diameter,
+        accessory_specification: material.accessory_specification,
+        finished_material_specification: material.finished_material_specification,
+        specification: material.accessory_specification || material.finished_material_specification, // 兼容前端
+        
+        // 库存信息
+        original_quantity: Number(material.original_quantity),
+        used_quantity: Number(material.used_quantity),
+        available_quantity: Number(material.available_quantity),
+        remaining_quantity: Number(material.available_quantity), // 兼容前端
+        inventory_unit: material.inventory_unit,
+        
+        // 成本信息
+        unit_cost: Number(material.unit_cost) || 0,
+        total_cost: Number(material.total_cost) || 0,
+        
+        // 其他信息
+        photos: material.photos,
+        supplier_name: material.supplier_name,
+        material_date: material.material_date,
+        notes: material.notes,
+        created_at: material.created_at,
+        updated_at: material.updated_at
       }
       
       // 根据用户权限过滤敏感信息
       if ((req.user?.role || "USER") === 'EMPLOYEE') {
-        delete converted.price_per_bead
-        delete converted.price_per_gram
-        delete converted.total_price
-        converted.unit_price = new Decimal(0)
-        converted.unit_cost = null
+        // 注意：unit_cost保留给SKU制作功能使用，不过滤
         converted.supplier_name = null
+        converted.total_cost = 0
       }
       
       return converted
@@ -497,36 +481,36 @@ router.post('/cost', authenticateToken, asyncHandler(async (req, res) => {
   
   // 计算原材料成本
   for (const material of materials) {
-    const purchase = await prisma.purchase.findUnique({
-      where: { id: material.purchase_id }
+    const materialRecord = await prisma.material.findUnique({
+      where: { id: material.material_id }
     })
     
 
-    if (!purchase) {
+    if (!materialRecord) {
       return res.status(400).json({
         success: false,
-        message: `采购记录 ${material.purchase_id} 不存在`
+        message: `原材料记录 ${material.material_id} 不存在`
       })
     }
     
-    const usedBeads = material.quantity_used || 0
-    const usedPieces = material.quantity_used || 0
+    const usedBeads = material.quantity_used_beads || 0
+    const usedPieces = material.quantity_used_pieces || 0
     
     let materialCost = 0
-    if (usedBeads > 0 && purchase.price_per_bead) {
-      materialCost += usedBeads * Number(purchase.price_per_bead)
+    if (usedBeads > 0 && materialRecord.unit_cost) {
+      materialCost += usedBeads * Number(materialRecord.unit_cost)
     }
-    if (usedPieces > 0 && purchase.price_per_piece) {
-      materialCost += usedPieces * Number(purchase.price_per_piece)
+    if (usedPieces > 0 && materialRecord.unit_cost) {
+      materialCost += usedPieces * Number(materialRecord.unit_cost)
     }
     
     totalMaterialCost += materialCost
     materialDetails.push({
-      purchase_id: material.purchase_id,
-      purchase_name: purchase.purchase_name,
+      material_id: material.material_id,
+      material_name: materialRecord.material_name,
       used_beads: usedBeads,
       used_pieces: usedPieces,
-      unit_cost: purchase.price_per_bead || purchase.price_per_piece || 0,
+      unit_cost: materialRecord.unit_cost || 0,
       material_cost: materialCost
     })
   }
@@ -567,8 +551,9 @@ router.post('/cost', authenticateToken, asyncHandler(async (req, res) => {
   //   return res.status(500).json({ success: false, message: "操作失败" })  // 移除函数体外的return语句
 router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   const {
-    purchase_name,
+    sku_name,
     description,
+    specification,
     materials,
     labor_cost = 0,
     craft_cost = 0,
@@ -577,10 +562,10 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
   } = req.body
   
   // 验证必填字段
-  if (!product_name || !materials || !Array.isArray(materials) || materials.length === 0) {
+  if (!sku_name || !materials || !Array.isArray(materials) || materials.length === 0) {
     return res.status(400).json({
       success: false,
-      message: '请提供成品名称和原材料列表'
+      message: '请提供SKU名称和原材料列表'
     })
   }
   
@@ -597,66 +582,30 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     let totalMaterialCost = 0
     
     for (const material of materials) {
-      const purchase = await tx.purchase.findUnique({
-        where: { id: material.purchase_id },
-        include: { material_usages: true }
+      const materialRecord = await tx.material.findUnique({
+        where: { id: material.material_id }
       })
       
 
-      if (!purchase) {
-        throw new Error(`采购记录 ${material.purchase_id} 不存在`)
+      if (!materialRecord) {
+        throw new Error(`原材料记录 ${material.material_id} 不存在`)
       }
       
-      // 根据产品类型计算已使用数量和可用库存
-      let used_quantity = 0
-      let available_quantity = 0
-      let requiredQuantity = 0
+      // 根据材料类型计算库存和需求量
+      const available_quantity = materialRecord.remaining_quantity || 0
+      const requiredQuantityBeads = material.quantity_used_beads || 0
+      const requiredQuantityPieces = material.quantity_used_pieces || 0
+      const totalRequired = requiredQuantityBeads + requiredQuantityPieces
       
-      if (purchase.purchase_type === 'BRACELET') {
-        // 散珠和手串按颗计算
-        used_quantity = purchase.material_usages.reduce(
-          (sum, usage) => sum + usage.quantity_used, 0
-        )
-        available_quantity = (purchase.total_beads || 0) - used_quantity
-        requiredQuantity = material.quantity_used || 0
-      } else if ((purchase.purchase_type as string) === 'ACCESSORIES' || (purchase.purchase_type as string) === 'FINISHED_MATERIAL') {
-        // 饰品配件和成品按片/件计算
-        used_quantity = purchase.material_usages.reduce(
-          (sum, usage) => sum + usage.quantity_used, 0
-        )
-        available_quantity = (purchase?.piece_count || 0) - used_quantity
-        requiredQuantity = material.quantity_used || 0
+      if (available_quantity < totalRequired) {
+        const unit = materialRecord.material_type === 'LOOSE_BEADS' || materialRecord.material_type === 'BRACELET' ? '颗' :
+                    materialRecord.material_type === 'ACCESSORIES' ? '片' : '件'
+        throw new Error(`原材料库存不足，可用：${available_quantity}${unit}，需要：${totalRequired}${unit}`)
       }
       
-      if (available_quantity < requiredQuantity) {
-        const unit = purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET' ? '颗' :
-                    purchase.purchase_type === 'ACCESSORIES' ? '片' : '件'
-        const available_quantity = (purchase?.piece_count || 0) - (purchase.material_usages?.reduce((sum, usage) => sum + usage.quantity_used, 0) || 0) || 0;
-        throw new Error(`原材料 ${purchase.purchase_name} 库存不足，可用：${ available_quantity }${unit}，需要：${requiredQuantity}${unit}`)
-      }
-      
-      // 计算原材料成本（根据产品类型和使用数量）
-      let materialUnitCost = 0;
-      let materialUsedQuantity = 0;
-      
-      if (purchase.purchase_type === 'LOOSE_BEADS' || purchase.purchase_type === 'BRACELET') {
-        // 散珠和手串使用每颗价格和颗数
-        materialUnitCost = Number(purchase.price_per_bead) || 0;
-        materialUsedQuantity = material.quantity_used || 0;
-      } else if (purchase.purchase_type === 'ACCESSORIES' || purchase.purchase_type === 'FINISHED_MATERIAL') {
-        // 饰品配件和成品使用每片/每件价格和片数/件数
-        materialUnitCost = Number(purchase.price_per_piece) || 0;
-        materialUsedQuantity = material.quantity_used || 0;
-      }
-      
-      // 如果单价为0，尝试使用其他价格字段作为备选
-      if (materialUnitCost === 0) {
-        materialUnitCost = Number(purchase.unit_price) || Number(purchase.total_price) || 0;
-        // 如果使用总价，需要根据总数量计算单价
-        if (materialUnitCost === Number(purchase.total_price) && (purchase?.piece_count || 0) > 0) {
-          materialUnitCost = materialUnitCost / (purchase?.piece_count || 1);
-        }
-      }
+      // 计算原材料成本
+      const materialUnitCost = Number(materialRecord.unit_cost) || 0;
+      const materialUsedQuantity = requiredQuantityBeads + requiredQuantityPieces;
       
       // 累加材料成本：使用数量 × 单价
       if (materialUsedQuantity > 0 && materialUnitCost > 0) {
@@ -670,32 +619,59 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     // 准备原材料使用记录（用于SKU标识生成）
     const materialUsagesForSku = []
     for (const material of materials) {
-      const purchase = await tx.purchase.findUnique({
-        where: { id: material.purchase_id }
+      // 获取完整的材料信息
+      const materialRecord = await tx.material.findUnique({
+        where: { id: material.material_id }
       })
       
-      if (purchase) {
-        materialUsagesForSku.push({
-          quantity_used: material.quantity_used || 0, })
+      if (!materialRecord) {
+        throw new Error(`原材料记录不存在，material_id: ${material.material_id}`)
       }
+      
+      const usedQuantity = (material.quantity_used_beads || 0) + (material.quantity_used_pieces || 0)
+      materialUsagesForSku.push({
+        material: {
+          material_name: materialRecord.material_name,
+          material_type: materialRecord.material_type,
+          quality: materialRecord.quality,
+          bead_diameter: materialRecord.bead_diameter,
+          accessory_specification: materialRecord.accessory_specification,
+          finished_material_specification: materialRecord.finished_material_specification
+        },
+        quantity_used_beads: material.quantity_used_beads || 0,
+        quantity_used_pieces: material.quantity_used_pieces || 0,
+        quantity_used: usedQuantity
+      })
     }
     
     // 查找或创建SKU
-
-    const { sku, isNewSku } = await findOrCreateSku({
-
+    const { sku, is_new_sku, log_created } = await findOrCreateSku({
+      material_usages: materialUsagesForSku,
+      sku_name: sku_name,
+      selling_price: Number(selling_price),
+      user_id: req.user!.id,
       tx: tx,
-      productName: purchase_name,
-      specification: '',
-      unitPrice: Number(selling_price),
-      images: photos.length > 0 ? photos : []
+      additional_data: {
+        photos: photos.length > 0 ? photos : null,
+        description: description || null,
+        specification: specification || null,
+        material_cost: totalMaterialCost,
+        labor_cost: Number(labor_cost || 0),
+        craft_cost: Number(craft_cost || 0),
+        total_cost: totalCost,
+        profit_margin: Number(selling_price) > 0 
+          ? ((Number(selling_price) - totalCost) / Number(selling_price) * 100)
+          : 0,
+        reference_type: 'PRODUCT',
+        notes: `组合制作模式创建成品: ${sku_name}`
+      }
     })
     
     // 创建成品记录并关联到SKU
     const product = await tx.product.create({
       data: {
         product_code: null, // 不再使用单独的成品编号
-        name: purchase_name,
+        name: sku_name,
         description: description || null,
         unit_price: Number(selling_price),
         total_value: totalCost,
@@ -710,36 +686,60 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
     
     // 创建原材料使用记录
     for (const material of materials) {
-      const usedBeads = material.quantity_used || 0
-      const usedPieces = material.quantity_used || 0
+      const usedBeads = material.quantity_used_beads || 0
+      const usedPieces = material.quantity_used_pieces || 0
+      const totalUsed = usedBeads + usedPieces
       
-      if (usedBeads > 0 || usedPieces > 0) {
+      if (totalUsed > 0) {
+        // 获取材料记录
+        const materialRecord = await tx.material.findUnique({
+          where: { id: material.material_id }
+        })
+        
+        if (!materialRecord) {
+          throw new Error(`原材料记录不存在，material_id: ${material.material_id}`)
+        }
+        
+        const unitCost = materialRecord.unit_cost || 0
+        
         await tx.materialUsage.create({
           data: {
-            purchase_id: material.purchase_id,
-            product_id: product.id,
-            quantity_used: usedBeads,
-            material_id: req.body.material_id
+            material_id: material.material_id,
+            sku_id: sku.id,
+            quantity_used: totalUsed,
+            unit_cost: unitCost,
+            total_cost: unitCost * totalUsed,
+            action: 'CREATE'
           }
         })
+        
+        // 注意：不需要手动更新材料库存，数据库触发器会自动处理
+        // 触发器会在MaterialUsage记录插入后自动更新used_quantity和remaining_quantity
       }
     }
     
-    // 创建SKU库存变更日志
-    await createSkuInventoryLog({
-      tx: tx,
-      skuId: sku.id!,
-      action: 'CREATE',
-      newQuantity: 1,
-      changeReason: `组合制作模式创建成品: ${purchase_name}`
-    })
+    // 只在创建新SKU时创建库存变更日志，避免重复记录
+    if (is_new_sku && !log_created) {
+      await createSkuInventoryLog({
+        sku_id: sku.id!,
+        action: 'CREATE',
+        quantity_change: 1,
+        quantity_before: 0,
+        quantity_after: 1,
+        reference_type: 'PRODUCT',
+        reference_id: product.id,
+        notes: `组合制作模式创建新SKU: ${sku_name}`,
+        user_id: req.user!.id,
+        tx: tx
+      })
+    }
     
     return {
       id: product.id,
-      purchase_name,
+      sku_name,
       sku_code: sku.sku_code,
       sku_id: sku.id,
-      is_new_sku: isNewSku,
+      is_new_sku: is_new_sku,
       total_price: totalCost,
       selling_price: Number(selling_price),
       profit: Number(selling_price) - totalCost,
@@ -775,10 +775,10 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
   // 验证每个成品的必填字段
   for (let i = 0; i < products.length; i++) {
     const product = products[i]
-    if (!product.material_id || !product.purchase_name || !product.selling_price || product.selling_price <= 0) {
+    if (!product.material_id || !product.sku_name || !product.selling_price || product.selling_price <= 0) {
       return res.status(400).json({
         success: false,
-        message: `第${i + 1}个成品信息不完整：需要原材料ID、成品名称和有效的销售价格`
+        message: `第${i + 1}个成品信息不完整：需要原材料ID、SKU名称和有效的销售价格`
       })
     }
   }
@@ -793,48 +793,49 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
     try {
       // 开启单个成品的事务
       const result = await prisma.$transaction(async (tx) => {
-        // 验证原材料存在性和库存
-        const purchase = await tx.purchase.findUnique({
-          where: { id: req.body.material_id },
-          include: { material_usages: true }
+        // 添加调试日志
+        console.log('🔍 [后端调试] 查询原材料:', {
+          material_id: productData.material_id,
+          material_id_type: typeof productData.material_id
         })
         
+        // 验证原材料存在性和库存
+        console.log('🔍 [后端调试] 开始查询原材料:', {
+          material_id: productData.material_id,
+          material_id_type: typeof productData.material_id,
+          material_id_length: productData.material_id?.length
+        })
+        
+        const materialRecord = await tx.material.findUnique({
+          where: { id: productData.material_id }
+        })
+        
+        console.log('🔍 [后端调试] 查询结果:', {
+          found: !!materialRecord,
+          material_id: materialRecord?.id,
+          material_name: materialRecord?.material_name,
+          material_type: materialRecord?.material_type,
+          query_id: productData.material_id
+        })
 
-        if (!purchase) {
-          throw new Error(`原材料记录不存在`)
+        if (!materialRecord) {
+          throw new Error(`原材料记录不存在，material_id: ${productData.material_id}`)
         }
         
         // 检查是否为成品类型的原材料
-        if (purchase.purchase_type !== 'FINISHED_MATERIAL') {
+        if (materialRecord.material_type !== 'FINISHED_MATERIAL') {
           throw new Error(`只能使用成品类型的原材料进行直接转化`)
         }
         
-        // 计算已使用数量和可用库存（成品按件计算）
-        const used_quantity = purchase.material_usages.reduce(
-          (sum, usage) => sum + usage.quantity_used, 0
-        )
-        const available_quantity = (purchase?.piece_count || 0) - used_quantity
+        // 检查库存
+        const available_quantity = materialRecord.remaining_quantity || 0
         
         if (available_quantity < 1) {
-          const available_quantity = (purchase?.piece_count || 0) - (purchase.material_usages?.reduce((sum, usage) => sum + usage.quantity_used, 0) || 0) || 0;
-        throw new Error(`原材料库存不足，可用：${ available_quantity }件，需要：1件`)
+          throw new Error(`原材料库存不足，可用：${available_quantity}件，需要：1件`)
         }
         
-        // 计算材料成本（根据产品类型选择正确的价格字段）
-        let materialCost = 0;
-        const productType = purchase.purchase_type as string;
-        if (productType === 'LOOSE_BEADS' || productType === 'BRACELET') {
-          // 散珠和手串使用每颗价格
-          materialCost = Number(purchase.price_per_bead) || 0;
-        } else if (productType === 'ACCESSORIES' || productType === 'FINISHED_MATERIAL') {
-          // 饰品配件和成品使用每片/每件价格
-          materialCost = Number(purchase.price_per_piece) || 0;
-        }
-        
-        // 如果上述字段都为空，尝试使用其他价格字段作为备选
-        if (materialCost === 0) {
-          materialCost = Number(purchase.unit_price) || Number(purchase.total_price) || 0;
-        }
+        // 计算材料成本
+        const materialCost = Number(materialRecord.unit_cost) || 0;
         
         const laborCost = productData.labor_cost || 0;
         const craftCost = productData.craft_cost || 0;
@@ -845,10 +846,9 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         if (productData.photos && productData.photos.length > 0) {
           // 如果前端传递了图片，使用前端图片
           productImages = JSON.stringify(productData.photos);
-        } else if (purchase.photos) {
+        } else if (materialRecord.photos) {
           // 如果前端没有图片，从原材料继承图片
-          // purchase.photos从数据库查询出来已经是数组对象，直接使用
-          let photosArray = purchase.photos;
+          let photosArray = materialRecord.photos;
           
           // 确保是数组格式
           if (!Array.isArray(photosArray)) {
@@ -868,20 +868,52 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         
         // 移除未使用的变量
 
+        // 准备原材料使用记录（用于SKU标识生成）
+        // 添加额外的安全检查
+        if (!materialRecord || !materialRecord.material_name) {
+          throw new Error(`原材料记录数据不完整，material_id: ${productData.material_id}`);
+        }
+        
+        const materialUsages = [{
+          material: {
+            material_name: materialRecord.material_name,
+            material_type: materialRecord.material_type,
+            quality: materialRecord.quality || null,
+            bead_diameter: materialRecord.bead_diameter || null,
+            specification: materialRecord.specification || null
+          },
+          quantity_used_beads: 0,
+          quantity_used_pieces: 1
+        }];
+
         // 查找或创建SKU
-        const { sku, isNewSku } = await findOrCreateSku({
+        const { sku, is_new_sku, log_created } = await findOrCreateSku({
+          material_usages: materialUsages,
+          sku_name: productData.sku_name,
+          selling_price: Number(productData.selling_price),
+          user_id: req.user!.id,
           tx: tx,
-          productName: productData.purchase_name,
-          specification: productData.specification || '',
-          unitPrice: Number(productData.selling_price),
-          images: productImages ? JSON.parse(productImages) : []
+          additional_data: {
+            photos: productImages ? JSON.parse(productImages) : null,
+            description: productData.description || null,
+            specification: productData.specification || null,
+            materialCost: materialCost,
+            laborCost: laborCost,
+            craftCost: craftCost,
+            totalCost: totalCost,
+            profitMargin: Number(productData.selling_price) > 0 
+              ? ((Number(productData.selling_price) - totalCost) / Number(productData.selling_price) * 100).toFixed(1)
+              : '0.0',
+            reference_type: 'PRODUCT',
+            notes: `直接转化模式创建SKU: ${productData.sku_name}`
+          }
         })
         
-        // 创建成品记录并关联到SKU
+        // 创建SKU记录并关联到SKU
         const product = await tx.product.create({
           data: {
             product_code: null, // 不再使用单独的成品编号
-            name: productData.purchase_name,
+            name: productData.sku_name,
             description: productData.description || null,
             unit_price: Number(productData.selling_price),
             total_value: totalCost,
@@ -894,31 +926,46 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
           }
         })
         
+        // 直接使用已验证的materialRecord
+        const material = materialRecord;
+
         // 创建原材料使用记录
         await tx.materialUsage.create({
           data: {
-            purchase_id: req.body.material_id,
-            product_id: product.id,
-            quantity_used: 0,
-            material_id: req.body.material_id
+            material_id: material.id,
+            sku_id: sku.id,
+            quantity_used: 1,
+            unit_cost: material.unit_cost,
+            total_cost: material.unit_cost * 1,
+            action: 'CREATE'
           }
         })
         
-        // 创建SKU库存变更日志
-        await createSkuInventoryLog({
-          tx: tx,
-          skuId: sku.id!,
-          action: 'CREATE',
-          newQuantity: 1,
-          changeReason: `直接转化模式创建成品: ${productData.purchase_name}`
-        })
+        // 注意：不需要手动更新材料库存，数据库触发器会自动处理
+        // 触发器会在MaterialUsage记录插入后自动更新used_quantity和remaining_quantity
+        
+        // 只在创建新SKU时创建库存变更日志，避免重复记录
+        if (is_new_sku && !log_created) {
+          await createSkuInventoryLog({
+            sku_id: sku.id,
+            action: 'CREATE',
+            quantity_change: 1,
+            quantity_before: 0,
+            quantity_after: 1,
+            reference_type: 'PRODUCT',
+            reference_id: product.id,
+            notes: `直接转化模式创建新SKU: ${productData.sku_name}`,
+            user_id: req.user!.id,
+            tx: tx
+          })
+        }
         
         return {
           id: product.id,
           sku_code: sku.sku_code,
           sku_id: sku.id,
-          is_new_sku: isNewSku,
-          purchase_name: productData.purchase_name,
+          is_new_sku: is_new_sku,
+          sku_name: productData.sku_name,
           material_cost: Number(materialCost),
           total_price: totalCost,
           selling_price: Number(productData.selling_price),
@@ -936,7 +983,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
     } catch (error) {
       console.error(`批量创建第${i + 1}个成品失败:`, error)
       failedProducts.push({
-        material_id: req.body.material_id,
+        material_id: productData.material_id,
         error: (error as Error).message,
         error_code: 'CREATION_FAILED'
       })

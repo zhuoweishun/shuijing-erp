@@ -138,7 +138,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
         record_type: 'EXPENSE',
         amount: total_price,
         description: `制作成本 - ${sku.sku_name}`,
-        reference_type: 'PRODUCTION',
+        reference_type: 'MANUAL',
         reference_id: sku.id,
         category: '制作成本',
         transaction_date: sku.created_at.toISOString().split('T')[0],
@@ -170,7 +170,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
         record_type: 'EXPENSE',
         amount: total_price,
         description: `补货制作成本 - ${log.sku.sku_name}`,
-        reference_type: 'RESTOCK',
+        reference_type: 'MANUAL',
         reference_id: log.id,
         category: '制作成本',
         transaction_date: log.created_at.toISOString().split('T')[0],
@@ -191,7 +191,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
       record_type: 'INCOME',
       amount: Number(purchase.total_price),
       description: `销售收入 - ${purchase.product_skus.sku_name}`,
-      reference_type: 'CUSTOMER_SALE',
+      reference_type: 'SALE',
       reference_id: purchase.id,
       category: '销售收入',
       transaction_date: purchase.purchase_date.toISOString().split('T')[0],
@@ -206,7 +206,7 @@ router.get('/records', authenticateToken, asyncHandler(async (req, res) => {
       record_type: 'REFUND',
       amount: Number(purchase.total_price),
       description: `客户退货退款 - ${purchase.product_skus.sku_name}`,
-      reference_type: 'CUSTOMER_REFUND',
+      reference_type: 'REFUND',
       reference_id: purchase.id,
       category: '客户退货',
       transaction_date: purchase.refund_date ? purchase.refund_date.toISOString().split('T')[0] : purchase.purchase_date.toISOString().split('T')[0],
@@ -427,7 +427,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
         description: `制作成本 - ${sku.sku_name}`,
         details: `SKU编码: ${sku.sku_code}, 人工成本: ¥${labor_cost.toFixed(2)}, 工艺成本: ¥${craft_cost.toFixed(2)}, 数量: ${quantity}件`,
         reference_id: sku.id,
-        reference_type: 'PRODUCTION' as const,
+        reference_type: 'MANUAL' as const,
         transaction_date: sku.created_at.toISOString().split('T')[0],
         created_at: sku.created_at.toISOString()
       }
@@ -453,7 +453,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
         description: `补货制作成本 - ${log.sku.sku_name}`,
         details: `SKU编码: ${log.sku.sku_code}, 补货数量: ${log.quantity_change}件, 人工成本: ¥${labor_cost.toFixed(2)}, 工艺成本: ¥${craft_cost.toFixed(2)}`,
         reference_id: log.id,
-        reference_type: 'RESTOCK' as const,
+        reference_type: 'MANUAL' as const,
         transaction_date: log.created_at.toISOString().split('T')[0],
         created_at: log.created_at.toISOString()
       }
@@ -468,7 +468,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
       description: `销售收入 - ${purchase.product_skus.sku_name}`,
       details: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 数量: ${purchase.quantity}件, 单价: ¥${Number(purchase.unit_price).toFixed(2)}`,
       reference_id: purchase.id,
-      reference_type: 'CUSTOMER_SALE' as const,
+      reference_type: 'SALE' as const,
       transaction_date: purchase.purchase_date.toISOString().split('T')[0],
       created_at: purchase.created_at.toISOString()
     })),
@@ -481,7 +481,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
       description: `客户退货退款 - ${purchase.product_skus.sku_name}`,
       details: `客户: ${purchase.customers.name}, SKU编码: ${purchase.product_skus.sku_code}, 退货数量: ${purchase.quantity}件, 退款金额: ¥${Number(purchase.total_price).toFixed(2)}${purchase.refund_reason ? `, 退货原因: ${purchase.refund_reason}` : ''}`,
       reference_id: purchase.id,
-      reference_type: 'CUSTOMER_REFUND' as const,
+      reference_type: 'REFUND' as const,
       transaction_date: purchase.refund_date ? purchase.refund_date.toISOString().split('T')[0] : purchase.purchase_date.toISOString().split('T')[0],
       created_at: purchase.refund_date ? purchase.refund_date.toISOString() : purchase.created_at.toISOString()
     })),

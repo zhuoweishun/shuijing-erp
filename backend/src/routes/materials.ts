@@ -8,14 +8,14 @@ const prisma = new PrismaClient();
 
 // 验证schemas
 const createMaterialSchema = z.object({
-  purchase_name: z.string().min(1, '原材料名称不能为空'),
-  purchase_type: z.enum(['BRACELET', 'FINISHED_MATERIAL']),
+  material_name: z.string().min(1, '原材料名称不能为空'),
+  material_type: z.enum(['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL']),
   specification: z.string().optional(),
   unit: z.string().min(1, '计量单位不能为空'),
   total_quantity: z.number().int().min(0, '总数量不能为负数'),
-  available_quantity: z.number().int().min(0, '可用数量不能为负数'),
+  remaining_quantity: z.number().int().min(0, '剩余数量不能为负数'),
   unit_cost: z.number().min(0, '单位成本不能为负数'),
-  total_price: z.number().min(0, '总成本不能为负数'),
+  total_cost: z.number().min(0, '总成本不能为负数'),
   quality: z.enum(['AA', 'A', 'AB', 'B', 'C']).optional(),
   photos: z.array(z.string()).optional(),
   notes: z.string().optional(),
@@ -23,24 +23,30 @@ const createMaterialSchema = z.object({
 });
 
 const updateMaterialSchema = z.object({
-  purchase_name: z.string().min(1, '原材料名称不能为空').optional(),
+  material_name: z.string().min(1, '原材料名称不能为空').optional(),
   specification: z.string().optional(),
   unit: z.string().min(1, '计量单位不能为空').optional(),
-  available_quantity: z.number().int().min(0, '可用数量不能为负数').optional(),
+  remaining_quantity: z.number().int().min(0, '剩余数量不能为负数').optional(),
   unit_cost: z.number().min(0, '单位成本不能为负数').optional(),
-  total_price: z.number().min(0, '总成本不能为负数').optional(),
+  total_cost: z.number().min(0, '总成本不能为负数').optional(),
   quality: z.enum(['AA', 'A', 'AB', 'B', 'C']).optional(),
   photos: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  status: z.enum(['ACTIVE', 'USED']).optional()
+  stock_status: z.enum(['SUFFICIENT', 'LOW', 'OUT_OF_STOCK']).optional()
 });
 
 const querySchema = z.object({
   page: z.string().optional().transform(val => val ? parseInt(val) : 1),
   limit: z.string().optional().transform(val => val ? parseInt(val) : 20),
   search: z.string().optional(),
-  purchase_type: z.enum(['BRACELET', 'FINISHED_MATERIAL']).optional(),
-  status: z.enum(['ACTIVE', 'USED']).optional(),
+  material_type: z.union([
+    z.enum(['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL']),
+    z.array(z.enum(['LOOSE_BEADS', 'BRACELET', 'ACCESSORIES', 'FINISHED_MATERIAL']))
+  ]).optional(),
+  stock_status: z.union([
+    z.enum(['SUFFICIENT', 'LOW', 'OUT_OF_STOCK']),
+    z.array(z.enum(['SUFFICIENT', 'LOW', 'OUT_OF_STOCK']))
+  ]).optional(),
   purchase_id: z.string().optional()
 });
 
@@ -56,7 +62,7 @@ const generateMaterialCode = (): string => {
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const query = querySchema.parse(req.query);
-    const { page, limit, search, product_type, status, purchase_id } = query;
+    const { page, limit, search, material_type, stock_status, purchase_id } = query;
     const skip = (page - 1) * limit;
 
     // 构建查询条件
@@ -64,19 +70,27 @@ router.get('/', authenticateToken, async (req, res) => {
     
     if (search) {
       where.OR = [
-        { purchase_name: { contains: search } },
+        { material_name: { contains: search } },
         { id: { contains: search } },
         { specification: { contains: search } },
         { notes: { contains: search } }
       ];
     }
     
-    if (product_type) {
-      where.purchase_type = product_type;
+    if (material_type) {
+      if (Array.isArray(material_type)) {
+        where.material_type = { in: material_type };
+      } else {
+        where.material_type = material_type;
+      }
     }
     
-    if (status) {
-      where.status = status;
+    if (stock_status) {
+      if (Array.isArray(stock_status)) {
+        where.stock_status = { in: stock_status };
+      } else {
+        where.stock_status = stock_status;
+      }
     }
     
     if (purchase_id) {
@@ -85,15 +99,25 @@ router.get('/', authenticateToken, async (req, res) => {
 
     // 查询数据
 
-    const [materials, total] = await Promise.all([
-      prisma.purchase.findMany({
+    const [materialsRaw, total] = await Promise.all([
+      prisma.material.findMany({
         where,
         include: {
-          user: {
+          creator: {
             select: {
               id: true,
               name: true,
               user_name: true
+            }
+          },
+          purchase: {
+            include: {
+              supplier: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
             }
           },
           _count: {
@@ -106,8 +130,22 @@ router.get('/', authenticateToken, async (req, res) => {
         skip,
         take: limit
       }),
-      prisma.purchase.count({ where })
+      prisma.material.count({ where })
     ]);
+
+
+
+    // 转换字段名称为蛇形命名
+    const materials = materialsRaw.map(material => {
+      const { _count, purchase, ...rest } = material;
+      return {
+        ...rest,
+        material_usage_count: _count.material_usages,
+        supplier: purchase?.supplier || null,
+        supplier_name: purchase?.supplier?.name || null,
+        supplier_id: purchase?.supplier?.id || null
+      };
+    });
 
     res.json({
       success: true,
@@ -136,14 +174,24 @@ router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const material = await prisma.purchase.findUnique({
+    const material = await prisma.material.findUnique({
       where: { id },
       include: {
-        user: {
+        creator: {
           select: {
             id: true,
             name: true,
             user_name: true
+          }
+        },
+        purchase: {
+          include: {
+            supplier: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
         },
         material_usages: {
@@ -159,9 +207,18 @@ router.get('/:id', authenticateToken, async (req, res) => {
       });
     }
 
+    // 添加supplier信息到返回数据
+    const { purchase, ...materialData } = material;
+    const materialWithSupplier = {
+      ...materialData,
+      supplier: purchase?.supplier || null,
+      supplier_name: purchase?.supplier?.name || null,
+      supplier_id: purchase?.supplier?.id || null
+    };
+
     return res.json({
       success: true,
-      data: material
+      data: materialWithSupplier
     });
   } catch (error) {
     console.error('获取原材料详情失败:', error);
@@ -199,8 +256,8 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     // 检查是否已经转换过
-    const existingMaterial = await prisma.purchase.findFirst({
-      where: { id: data.purchase_id }
+    const existingMaterial = await prisma.material.findFirst({
+      where: { purchase_id: data.purchase_id }
     });
 
     if (existingMaterial) {
@@ -217,7 +274,7 @@ router.post('/', authenticateToken, async (req, res) => {
     
     while (!isUnique && attempts < 10) {
       material_code = generateMaterialCode();
-      const existing = await prisma.purchase.findUnique({
+      const existing = await prisma.material.findUnique({
         where: { id: material_code }
       });
       if (!existing) {
@@ -234,24 +291,24 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     // 创建原材料记录
-    const material = await prisma.purchase.create({
+    const material = await prisma.material.create({
       data: {
         id: material_code!,
-        purchase_code: material_code!,
-        purchase_name: data.purchase_name,
-        purchase_type: data.purchase_type,
+        material_code: material_code!,
+        material_name: data.material_name,
+        material_type: data.material_type,
         specification: data.specification,
-        quantity: data.total_quantity,
-        unit_price: data.unit_cost,
-        total_price: data.total_price,
+        remaining_quantity: data.remaining_quantity,
+        unit_cost: data.unit_cost,
+        total_cost: data.total_cost,
         quality: data.quality,
         photos: data.photos || [],
         notes: data.notes,
-        purchase_date: new Date(),
-        user_id: user_id
+        created_at: new Date(),
+        created_by: user_id
       },
       include: {
-        user: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -266,8 +323,8 @@ router.post('/', authenticateToken, async (req, res) => {
       data: {
         material_id: material.id,
         purchase_id: data.purchase_id,
-        product_id: material.id,
         quantity_used: data.total_quantity,
+        action: 'CREATE',
         notes: `从采购记录 ${purchase.purchase_code} 转换创建`
       }
     });
@@ -301,7 +358,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const data = updateMaterialSchema.parse(req.body);
 
     // 检查原材料是否存在
-    const existingMaterial = await prisma.purchase.findUnique({
+    const existingMaterial = await prisma.material.findUnique({
       where: { id }
     });
 
@@ -313,11 +370,11 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     // 更新原材料
-    const material = await prisma.purchase.update({
+    const material = await prisma.material.update({
       where: { id },
       data,
       include: {
-        user: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -355,7 +412,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     // 检查原材料是否存在
-    const material = await prisma.purchase.findUnique({
+    const material = await prisma.material.findUnique({
       where: { id },
       include: {
         material_usages: {
@@ -389,7 +446,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       });
       
       // 删除原材料
-      await tx.purchase.delete({
+      await tx.material.delete({
         where: { id }
       });
     });
@@ -412,19 +469,19 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 router.get('/stats/overview', authenticateToken, async (_req, res) => {
   try {
     const [total_count, active_count, used_count, semi_finished_count, finished_count] = await Promise.all([
-      prisma.purchase.count(),
-      prisma.purchase.count({ where: { status: 'ACTIVE' } }),
-      prisma.purchase.count({ where: { status: 'USED' } }),
-      prisma.purchase.count({ where: { purchase_type: 'BRACELET' } }),
-      prisma.purchase.count({ where: { purchase_type: 'FINISHED_MATERIAL' } })
+      prisma.material.count(),
+      prisma.material.count({ where: { stock_status: 'IN_STOCK' } }),
+      prisma.material.count({ where: { stock_status: 'OUT_OF_STOCK' } }),
+      prisma.material.count({ where: { material_type: 'BRACELET' } }),
+      prisma.material.count({ where: { material_type: 'FINISHED_MATERIAL' } })
     ]);
 
-    const total_value = await prisma.purchase.aggregate({
+    const total_value = await prisma.material.aggregate({
       _sum: {
-        total_price: true
+        total_cost: true
       },
       where: {
-        status: 'ACTIVE'
+        stock_status: 'IN_STOCK'
       }
     });
 
@@ -436,7 +493,7 @@ router.get('/stats/overview', authenticateToken, async (_req, res) => {
           used_count,
           semi_finished_count,
           finished_count,
-          total_value: total_value._sum.total_price || 0
+          total_value: total_value._sum.total_cost || 0
         }
       });
   } catch (error) {

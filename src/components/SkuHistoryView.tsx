@@ -67,6 +67,7 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
               return log.action === 'SELL' || 
                      log.action === 'DESTROY' || 
                      log.action === 'CREATE' || 
+                     log.action === 'REFUND' || 
                      (log.action === 'ADJUST' && log.quantity_change !== 0)
             })
             .map((log: any) => {
@@ -78,6 +79,9 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
                 break
               case 'DESTROY':
                 operationType = 'destroy'
+                break
+              case 'REFUND':
+                operationType = 'refund'
                 break
               case 'ADJUST':
                 if (log.quantity_change > 0) {
@@ -185,6 +189,8 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
         return { icon: <ShoppingCart className="h-4 w-4" />, name: '销售', color: 'text-green-600 bg-green-100' }
       case 'destroy':
         return { icon: <Trash2 className="h-4 w-4" />, name: '销毁', color: 'text-red-600 bg-red-100' }
+      case 'refund':
+        return { icon: <TrendingUp className="h-4 w-4" />, name: '退货', color: 'text-cyan-600 bg-cyan-100' }
       case 'adjust_increase':
         return { icon: <TrendingUp className="h-4 w-4" />, name: '库存增加', color: 'text-blue-600 bg-blue-100' }
       case 'adjust_decrease':
@@ -371,9 +377,32 @@ export default function SkuHistoryView({ sku, loading = false }: SkuHistoryViewP
                       <p className="text-sm text-gray-600 mb-2">{log.reason}</p>
                       
                       {log.notes && (
-                        <p className="text-xs text-gray-500 mb-2">
-                          {log.notes.includes('退货原因') ? extract_and_translate_refund_reason(log.notes) : log.notes}
-                        </p>
+                        <div className="mb-2">
+                          {/* 基本备注信息 - 对于销毁操作，只显示销毁原因部分 */}
+                          <p className="text-xs text-gray-500">
+                            {log.notes.includes('退货原因') 
+                              ? extract_and_translate_refund_reason(log.notes)
+                              : log.operationType === 'destroy' && log.notes.includes('返还原材料：')
+                                ? log.notes.split('。返还原材料：')[0] // 只显示销毁原因部分
+                                : log.notes
+                            }
+                          </p>
+                          
+                          {/* 如果是销毁操作且包含返还原材料信息，单独显示 */}
+                          {log.operationType === 'destroy' && log.notes.includes('返还原材料：') && (
+                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                              <div className="flex items-start space-x-2">
+                                <span className="text-blue-600 text-sm">🔄</span>
+                                <div className="flex-1">
+                                  <p className="text-xs font-medium text-blue-800 mb-1">返还原材料</p>
+                                  <p className="text-xs text-blue-700">
+                                    {log.notes.split('返还原材料：')[1] || '详细信息解析失败'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-gray-500">

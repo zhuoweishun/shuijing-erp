@@ -119,15 +119,19 @@ export default function SalesList() {
   const permissions = use_sku_permissions()
   
   // 格式化价格
-  const format_price = (price?: number) => {
+  const format_price = (price?: number | string) => {
     if (!price) return '-'
-    return `¥${price.toFixed(2)}`
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price
+    if (isNaN(numPrice)) return '-'
+    return `¥${numPrice.toFixed(2)}`
   }
   
   // 格式化利润率
-  const formatProfitMargin = (margin?: number) => {
+  const formatProfitMargin = (margin?: number | string) => {
     if (!margin) return '-'
-    return `${margin.toFixed(1)}%`
+    const numMargin = typeof margin === 'string' ? parseFloat(margin) : margin
+    if (isNaN(numMargin)) return '-'
+    return `${numMargin.toFixed(1)}%`
   }
   
   // 格式化库存状态
@@ -1292,7 +1296,10 @@ export default function SalesList() {
           is_open={state.detail_modal.is_open}
           onClose={close_detail_modal}
           onSuccess={() => {
-            fetchSkuList()
+            // 延迟刷新确保后端数据已更新
+            setTimeout(() => {
+              fetchSkuList()
+            }, 500)
             close_detail_modal()
           }}
         />

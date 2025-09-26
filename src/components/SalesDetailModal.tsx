@@ -67,7 +67,7 @@ export default function SalesDetailModal({
         
         // 初始化编辑表单
         setEditForm({
-          purchase_name: productData.purchase_name || '',
+          purchase_name: productData.sku_name || '',
           description: productData.description || '',
           specification: productData.specification || '',
           selling_price: productData.selling_price?.toString() || '',
@@ -342,7 +342,7 @@ export default function SalesDetailModal({
                               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
                             />
                           ) : (
-                            <p className="text-sm text-gray-900 mt-1">{product.purchase_name}</p>
+                            <p className="text-sm text-gray-900 mt-1">{product.sku_name}</p>
                           )}
                         </div>
                       </div>
@@ -443,7 +443,7 @@ export default function SalesDetailModal({
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">原材料成本:</span>
-                            <span className="text-sm text-gray-900">{format_price(product.materialCost)}</span>
+                            <span className="text-sm text-gray-900">{format_price(product.material_cost)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">人工成本:</span>
@@ -505,9 +505,9 @@ export default function SalesDetailModal({
                             <div key={index} className="relative">
                               <img
                                 src={image_url}
-                                alt={`${product.purchase_name} - 图片 ${index + 1}`}
+                                alt={`${product.sku_name} - 图片 ${index + 1}`}
                                 className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => open_image_preview(image_url, `${product.purchase_name} - 图片 ${index + 1}`)}
+                                onClick={() => open_image_preview(image_url, `${product.sku_name} - 图片 ${index + 1}`)}
                               />
                             </div>
                           )

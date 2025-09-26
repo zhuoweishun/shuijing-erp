@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试客户API修复</title>
+</head>
+<body>
+    <h1>测试客户API修复</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testCustomerAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // 测试不需要认证的健康检查端点
+                console.log('测试健康检查端点...');
+                const healthResponse = await fetch('http://localhost:3001/health');
+                
+                if (healthResponse.ok) {
+                    resultDiv.innerHTML += '<p>✅ 后端服务连接成功</p>';
+                } else {
+                    resultDiv.innerHTML += '<p>❌ 后端服务连接失败</p>';
+                }
+                
+                // 测试客户API（预期会返回认证错误，但说明API正常）
+                console.log('测试客户API端点...');
+                const customerResponse = await fetch('http://localhost:3001/api/v1/customers?page=1&limit=5');
+                const customerData = await customerResponse.json();
+                
+                if (customerData.message === '访问令牌缺失') {
+                    resultDiv.innerHTML += '<p>✅ 客户API端点正常（需要认证）</p>';
+                } else {
+                    resultDiv.innerHTML += '<p>❌ 客户API端点异常</p>';
+                }
+                
+                // 检查响应格式是否符合snake_case规范
+                console.log('客户API响应:', customerData);
+                resultDiv.innerHTML += '<p>📋 API响应格式检查完成，请查看控制台</p>';
+                
+            } catch (error) {
+                console.error('测试失败:', error);
+                resultDiv.innerHTML += `<p>❌ 测试失败: ${error.message}</p>`;
+            }
+        }
+        
+        // 页面加载后自动运行测试
+        window.onload = testCustomerAPI;
+    </script>
+</body>
+</html>

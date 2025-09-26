@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复认证问题</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section { 
+            margin-bottom: 20px; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+        }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 3px; 
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 认证问题修复工具</h1>
+        
+        <div class="section">
+            <h2>📊 系统状态检查</h2>
+            <div id="system-status">
+                <p><span class="status-indicator status-warning"></span>正在检查...</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔑 认证状态</h2>
+            <div id="auth-status">
+                <p>正在检查认证状态...</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🛠️ 修复操作</h2>
+            <button class="btn-warning" onclick="clearAuthData()">清除认证数据</button>
+            <button class="btn-primary" onclick="testApiConnection()">测试API连接</button>
+            <button class="btn-success" onclick="goToLogin()">前往登录页面</button>
+            <button class="btn-danger" onclick="forceRefresh()">强制刷新页面</button>
+        </div>
+        
+        <div class="section">
+            <h2>📝 操作日志</h2>
+            <div id="operation-log">
+                <p class="info">等待操作...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logContainer;
+        
+        function log(message, type = 'info') {
+            if (!logContainer) {
+                logContainer = document.getElementById('operation-log');
+            }
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('p');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 检查系统状态
+        async function checkSystemStatus() {
+            const statusDiv = document.getElementById('system-status');
+            
+            try {
+                // 检查API连接
+                const response = await fetch('http://localhost:3001/api/v1/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = `
+                        <p><span class="status-indicator status-ok"></span><strong>API服务:</strong> <span class="success">正常运行</span></p>
+                        <p><strong>版本:</strong> ${data.version || 'unknown'}</p>
+                        <p><strong>环境:</strong> ${data.environment || 'unknown'}</p>
+                        <p><strong>运行时间:</strong> ${Math.round(data.uptime || 0)}秒</p>
+                    `;
+                    log('API服务连接正常', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <p><span class="status-indicator status-error"></span><strong>API服务:</strong> <span class="error">连接失败</span></p>
+                    <p><strong>错误:</strong> ${error.message}</p>
+                `;
+                log(`API服务连接失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 检查认证状态
+        function checkAuthStatus() {
+            const authDiv = document.getElementById('auth-status');
+            const token = localStorage.getItem('auth_token');
+            const userData = localStorage.getItem('user_data');
+            
+            if (token && userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    authDiv.innerHTML = `
+                        <p><span class="status-indicator status-ok"></span><strong>认证状态:</strong> <span class="success">已登录</span></p>
+                        <p><strong>用户:</strong> ${user.username || 'unknown'}</p>
+                        <p><strong>Token:</strong> ${token.substring(0, 20)}...</p>
+                    `;
+                    log('用户已登录', 'success');
+                } catch (error) {
+                    authDiv.innerHTML = `
+                        <p><span class="status-indicator status-warning"></span><strong>认证状态:</strong> <span class="warning">数据异常</span></p>
+                        <p><strong>问题:</strong> 用户数据解析失败</p>
+                    `;
+                    log('用户数据解析失败', 'warning');
+                }
+            } else {
+                authDiv.innerHTML = `
+                    <p><span class="status-indicator status-error"></span><strong>认证状态:</strong> <span class="error">未登录</span></p>
+                    <p><strong>Token:</strong> ${token ? '存在但可能无效' : '不存在'}</p>
+                    <p><strong>用户数据:</strong> ${userData ? '存在' : '不存在'}</p>
+                `;
+                log('用户未登录或认证数据缺失', 'warning');
+            }
+        }
+        
+        // 清除认证数据
+        function clearAuthData() {
+            const keysToRemove = [
+                'auth_token',
+                'user_data',
+                'cached_local_ip',
+                'api_base_url'
+            ];
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            log('已清除所有认证数据和缓存', 'success');
+            checkAuthStatus();
+        }
+        
+        // 测试API连接
+        async function testApiConnection() {
+            log('开始测试API连接...', 'info');
+            
+            const endpoints = [
+                { path: '/health', name: '健康检查' },
+                { path: '/auth/verify', name: '认证验证', needAuth: true },
+                { path: '/customers', name: '客户列表', needAuth: true }
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const headers = { 'Content-Type': 'application/json' };
+                    const token = localStorage.getItem('auth_token');
+                    
+                    if (endpoint.needAuth && token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+                    
+                    const response = await fetch(`http://localhost:3001/api/v1${endpoint.path}`, {
+                        method: 'GET',
+                        headers
+                    });
+                    
+                    if (response.ok) {
+                        log(`✅ ${endpoint.name}: 连接成功 (${response.status})`, 'success');
+                    } else {
+                        log(`❌ ${endpoint.name}: 连接失败 (${response.status})`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ ${endpoint.name}: 网络错误 - ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // 前往登录页面
+        function goToLogin() {
+            log('正在跳转到登录页面...', 'info');
+            window.location.href = '/login';
+        }
+        
+        // 强制刷新页面
+        function forceRefresh() {
+            log('正在强制刷新页面...', 'info');
+            window.location.reload(true);
+        }
+        
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', function() {
+            log('认证修复工具已加载', 'info');
+            checkSystemStatus();
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>

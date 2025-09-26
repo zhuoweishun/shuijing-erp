@@ -2,11 +2,13 @@ import { useMemo } from 'react'
 import { useAuth } from './useAuth'
 
 // SKU权限类型定义
-export interface SkuPermissions { can_view_price: boolean
+export interface SkuPermissions {
+  can_view_price: boolean
   can_sell: boolean
   can_destroy: boolean
   can_adjust: boolean
   can_refund: boolean
+  can_view_trace: boolean
   canViewTrace: boolean
   canViewHistory: boolean
   canBatchOperate: boolean
@@ -16,44 +18,52 @@ export interface SkuPermissions { can_view_price: boolean
 
 // 角色权限配置
 const ROLE_PERMISSIONS: Record<string, SkuPermissions> = {
-  BOSS: { can_view_price: true,
+  BOSS: {
+    can_view_price: true,
     can_sell: true,
     can_destroy: true,
     can_adjust: true,
     can_refund: true,
+    can_view_trace: true,
     canViewTrace: true,
     canViewHistory: true,
     canBatchOperate: true,
     canExport: true,
     can_manage: true,
   },
-  MANAGER: { can_view_price: true,
+  MANAGER: {
+    can_view_price: true,
     can_sell: true,
     can_destroy: true,
     can_adjust: true,
     can_refund: true,
+    can_view_trace: true,
     canViewTrace: true,
     canViewHistory: true,
     canBatchOperate: true,
     canExport: true,
     can_manage: false,
   },
-  EMPLOYEE: { can_view_price: false,
+  EMPLOYEE: {
+    can_view_price: false,
     can_sell: true,
     can_destroy: false,
     can_adjust: false,
     can_refund: false,
+    can_view_trace: true,
     canViewTrace: true,
     canViewHistory: false,
     canBatchOperate: false,
     canExport: false,
     can_manage: false,
   },
-  VIEWER: { can_view_price: false,
+  VIEWER: {
+    can_view_price: false,
     can_sell: false,
     can_destroy: false,
     can_adjust: false,
     can_refund: false,
+    can_view_trace: false,
     canViewTrace: false,
     canViewHistory: false,
     canBatchOperate: false,
@@ -63,11 +73,13 @@ const ROLE_PERMISSIONS: Record<string, SkuPermissions> = {
 }
 
 // 默认权限（未登录或角色未知）
-const DEFAULT_PERMISSIONS: SkuPermissions = { can_view_price: false,
+const DEFAULT_PERMISSIONS: SkuPermissions = {
+  can_view_price: false,
   can_sell: false,
   can_destroy: false,
   can_adjust: false,
   can_refund: false,
+  can_view_trace: false,
   canViewTrace: false,
   canViewHistory: false,
   canBatchOperate: false,

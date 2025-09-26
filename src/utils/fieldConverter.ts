@@ -254,7 +254,7 @@ export const COMPLETE_FIELD_MAPPINGS = {// 基础字段
   labor_cost: 'labor_cost',
   craft_cost: 'craft_cost',
   selling_price: 'selling_price',
-  last_sale_date: 'last_sale_date',
+  last_purchase_date: 'last_purchase_date',
   created_by: 'created_by',
   material_traces: 'material_traces',
   
@@ -279,7 +279,6 @@ export const COMPLETE_FIELD_MAPPINGS = {// 基础字段
   customer_labels: 'customer_labels',
   primary_label: 'primaryLabel',
   first_purchase_date: 'first_purchase_date',
-  last_purchase_date: 'last_purchase_date',
   actual_total_price: 'actual_total_price',
   return_to_material: 'returnToMaterial',
   selected_materials: 'selected_materials',

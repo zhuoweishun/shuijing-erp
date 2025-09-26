@@ -448,6 +448,7 @@ enum sku_inventory_logs_action {
   SELL
   ADJUST
   DESTROY
+  REFUND
 }
 
 enum financial_records_referenceType {

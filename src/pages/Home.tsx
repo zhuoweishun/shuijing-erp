@@ -236,7 +236,7 @@ export default function Home() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">库存价值</p>
-                <p className="text-2xl font-semibold text-gray-900">¥{stats.total_inventory_value?.toFixed(2) || '0.00'}</p>
+                <p className="text-2xl font-semibold text-gray-900">¥{Number(stats.total_inventory_value || 0).toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -292,7 +292,7 @@ export default function Home() {
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{product.product_name}</div>
                     <div className="text-sm text-gray-500">
-                      状态: {product.status === 'in_stock' ? '库存中' : '已售出'} | 成本: ¥{product.total_cost}
+                      状态: {product.status === 'in_stock' ? '库存中' : '已售出'} | 成本: ¥{Number(product.total_cost || 0).toFixed(2)}
                     </div>
                   </div>
                   <div className="text-sm text-gray-400">

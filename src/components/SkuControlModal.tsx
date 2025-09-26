@@ -70,14 +70,12 @@ export default function SkuControlModal({
     try {
       const response = await sku_api.get_history(sku.sku_id || sku.id, { page: 1, limit: 50 })
       if (response.success) {
-        // 过滤出调价和状态管理相关的日志
+        // 过滤出调价和状态管理相关的日志，排除补货记录
         const filteredLogs = (response.data as { logs: OperationLog[] }).logs.filter((log: OperationLog) => 
           log.notes && (
-            log.notes.includes('调整售价') || 
-            log.notes.includes('状态变更') ||
-            log.notes.includes('价格') ||
+            log.notes.includes('售价') ||
             log.notes.includes('状态')
-          )
+          ) && log.action === 'ADJUST' && !log.notes.includes('补货')
         )
         setOperationLogs(filteredLogs)
       } else {
@@ -131,7 +129,7 @@ export default function SkuControlModal({
       newErrors.status_reason = '请输入状态变更原因'
     }
     
-    setErrors(newErrors)
+    setStatusErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -195,10 +193,12 @@ export default function SkuControlModal({
   const currentPrice = parseFloat(sku.selling_price?.toString() || sku.unit_price?.toString() || '0')
   const newPrice = parseFloat(priceForm.newPrice) || 0
   // 使用SKU配方成本：materialCost + labor_cost + craft_cost
-  const recipeCost = (parseFloat(sku.materialCost?.toString() || '0') + 
+  const recipeCost = (parseFloat(sku.material_cost?.toString() || '0') + 
                       parseFloat(sku.labor_cost?.toString() || '0') + 
                       parseFloat(sku.craft_cost?.toString() || '0'))
-  const currentProfitMargin = calculateProfitMargin(currentPrice, recipeCost)
+  // 当前利润率使用SKU原始的profit_margin字段，不动态计算
+  const currentProfitMargin = parseFloat(sku.profit_margin?.toString() || '0')
+  // 调整后利润率根据用户输入的新价格动态计算
   const newProfitMargin = calculateProfitMargin(newPrice, recipeCost)
 
   if (!is_boss) {
@@ -334,12 +334,13 @@ export default function SkuControlModal({
                     min="0"
                     value={priceForm.newPrice}
                     onChange={(e) => setPriceForm({ ...priceForm, newPrice: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full px-3 py-2 pr-12 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.newPrice ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="请输入新的售价"
+                    style={{ paddingRight: '3rem' }}
                   />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span className="text-sm text-gray-500">元</span>
                   </div>
                 </div>
@@ -465,13 +466,13 @@ export default function SkuControlModal({
                   value={statusForm.reason}
                   onChange={(e) => setStatusForm({ ...statusForm, reason: e.target.value })}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    statusErrors.reason ? 'border-red-300' : 'border-gray-300'
+                    statusErrors.status_reason ? 'border-red-300' : 'border-gray-300'
                   }`}
                   rows={3}
                   placeholder="请输入状态变更原因，如：库存不足、产品下架、质量问题等"
                 />
-                {statusErrors.reason && (
-                  <p className="mt-1 text-sm text-red-600">{statusErrors.reason}</p>
+                {statusErrors.status_reason && (
+                  <p className="mt-1 text-sm text-red-600">{statusErrors.status_reason}</p>
                 )}
               </div>
 
@@ -538,11 +539,11 @@ export default function SkuControlModal({
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                log.notes.includes('调整售价') || log.notes.includes('价格') 
+                                log.notes.includes('售价') || log.notes.includes('价格') 
                                   ? 'bg-blue-100 text-blue-800'
                                   : 'bg-green-100 text-green-800'
                               }`}>
-                                {log.notes.includes('调整售价') || log.notes.includes('价格') ? '调价' : '状态变更'}
+                                {log.notes.includes('售价') || log.notes.includes('价格') ? '调价' : '状态变更'}
                               </span>
                               <span className="text-xs text-gray-500">
                                 {new Date(log.created_at).toLocaleString('zh-CN', {

@@ -244,7 +244,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
       // 计算按品相分别的平均价格
       Object.values(matrix).forEach(productRow => {
         Object.values(productRow).forEach(cell => {
-          const qualityPriceData: { [quality: string]: { total_price: number, total_quantity: number } } = {}
+          // const qualityPriceData: { [quality: string]: { total_price: number, total_quantity: number } } = {}
           
           // 简化价格计算：直接使用批次的price_per_unit字段
           let total_price = 0
@@ -259,7 +259,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               total_quantity += remainingQty
               
               // 为每个品相设置价格（简化逻辑）
-              const batchQuality = format_quality(batch.quality)
+              const batchQuality = format_quality((batch as any).quality)
               cell.qualityPrices[batchQuality] = price
             }
           })
@@ -351,7 +351,7 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
         Object.values(productRow).forEach(cell => {
           let total_price = 0
           let total_quantity = 0
-          const sizePriceData: { [sizeKey: string]: { total_price: number, total_quantity: number } } = {}
+          // const sizePriceData: { [sizeKey: string]: { total_price: number, total_quantity: number } } = {}
           
           // 简化价格计算：直接使用批次的price_per_unit字段
           cell.batches.forEach(batch => {
@@ -363,14 +363,14 @@ export default function SemiFinishedMatrixView({ data, loading, on_cell_click }:
               total_quantity += remainingQty
               
               // 根据视图模式设置价格
-              if (viewMode === 'size') {
+              if (viewMode === 'quality') {
                 // 尺寸视图：为每个尺寸设置价格
                 const batchSize = batch.bead_diameter || batch.specification || 12 // 默认12mm
                 const sizeKey = `${batchSize}mm`
                 cell.qualityPrices[sizeKey] = price
               } else {
                 // 品相视图：为每个品相设置价格
-                const quality = batch.quality || '未知'
+                const quality = (batch as any).quality || '未知'
                 cell.qualityPrices[quality] = price
               }
             }

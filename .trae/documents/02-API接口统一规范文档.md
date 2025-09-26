@@ -63,9 +63,592 @@ Authorization: Bearer <token>
 }
 ```
 
-## 三、采购管理接口
+## 三、SKU成品制作接口
 
-### 3.1 采购列表查询（完整修复版）
+### 3.1 获取可用原材料列表
+
+**接口地址：** `GET /finished-products/materials`
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| search | string | 否 | 原材料名称搜索 |
+| available_only | boolean | 否 | 仅显示有库存的原材料，默认true |
+| min_quantity | number | 否 | 最小库存数量，默认1 |
+| material_types | array | 否 | 原材料类型筛选 |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "原材料列表获取成功",
+  "data": {
+    "materials": [
+      {
+        "id": "material_001",
+        "material_code": "CG20250116001",
+        "material_name": "紫水晶散珠",
+        "material_type": "LOOSE_BEADS",
+        "quality": "AA",
+        "bead_diameter": 8.0,
+        "specification": "8.0",
+        "available_quantity": 1500,
+        "inventory_unit": "PIECES",
+        "unit_cost": 1.25,
+        "supplier_name": "水晶供应商A",
+        "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"],
+        "created_at": "2025-01-16T10:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+### 3.2 成本计算接口
+
+**接口地址：** `POST /finished-products/cost`
+
+**请求参数：**
+```json
+{
+  "materials": [
+    {
+      "material_id": "material_001",
+      "quantity_used_beads": 20,
+      "quantity_used_pieces": 0
+    }
+  ],
+  "labor_cost": 20.0,
+  "craft_cost": 100.0,
+  "profit_margin": 50.0
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "成本计算成功",
+  "data": {
+    "material_cost": 25.0,
+    "labor_cost": 20.0,
+    "craft_cost": 100.0,
+    "total_cost": 145.0,
+    "suggested_price": 290.0,
+    "profit_margin": 50.0
+  }
+}
+```
+
+### 3.3 组合制作模式创建SKU
+
+**接口地址：** `POST /finished-products`
+
+**请求参数：**
+```json
+{
+  "sku_name": "紫水晶组合手串",
+  "description": "精选紫水晶散珠组合制作",
+  "specification": "8.0",
+  "materials": [
+    {
+      "material_id": "material_001",
+      "quantity_used_beads": 20,
+      "quantity_used_pieces": 0
+    }
+  ],
+  "labor_cost": 20.0,
+  "craft_cost": 100.0,
+  "selling_price": 280.0,
+  "profit_margin": 48.21,
+  "photos": ["http://localhost:3001/uploads/products/sku_001.jpg"]
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU成品制作成功",
+  "data": {
+    "id": "sku_001",
+    "sku_code": "SKU20250116001",
+    "sku_name": "紫水晶组合手串",
+    "material_cost": 25.0,
+    "total_cost": 145.0,
+    "selling_price": 280.0,
+    "profit_margin": 48.21,
+    "total_quantity": 1,
+    "available_quantity": 1
+  }
+}
+```
+
+### 3.4 直接转化模式批量创建SKU
+
+**接口地址：** `POST /finished-products/batch`
+
+**请求参数：**
+```json
+{
+  "products": [
+    {
+      "material_id": "material_001",
+      "sku_name": "8mm紫水晶手串（销售成品）",
+      "description": "",
+      "specification": "8.0",
+      "labor_cost": 20.0,
+      "craft_cost": 100.0,
+      "selling_price": 280.0,
+      "photos": ["http://localhost:3001/uploads/purchases/image1.jpg"]
+    }
+  ]
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "批量创建成功",
+  "data": {
+    "success_count": 1,
+    "failed_count": 0,
+    "created_products": [
+      {
+        "id": "sku_002",
+        "material_code": "CG20250116001",
+        "sku_name": "8mm紫水晶手串（销售成品）",
+        "material_cost": 25.0,
+        "total_cost": 145.0,
+        "selling_price": 280.0,
+        "profit_margin": 48.21,
+        "status": "ACTIVE"
+      }
+    ],
+    "failed_products": []
+  }
+}
+```
+
+## 四、SKU管理接口
+
+### 4.1 SKU列表查询
+
+**接口地址：** `GET /skus`
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认12（移动端）/20（桌面端） |
+| search | string | 否 | SKU名称或编号搜索 |
+| status | array | 否 | SKU状态筛选（ACTIVE/INACTIVE） |
+| price_min | number | 否 | 最低价格 |
+| price_max | number | 否 | 最高价格 |
+| profit_margin_min | number | 否 | 最低利润率 |
+| profit_margin_max | number | 否 | 最高利润率 |
+| sort_by | string | 否 | 排序字段（created_at/sku_code/sku_name/selling_price/available_quantity） |
+| sort_order | string | 否 | 排序方式（asc/desc），默认desc |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU列表获取成功",
+  "data": {
+    "skus": [
+      {
+        "id": "sku_001",
+        "sku_id": "sku_001",
+        "sku_code": "SKU20250116001",
+        "sku_name": "紫水晶组合手串",
+        "specification": "8",
+        "total_quantity": 5,
+        "available_quantity": 3,
+        "selling_price": 280.0,
+        "unit_price": 280.0,
+        "material_cost": 25.0,
+        "labor_cost": 20.0,
+        "craft_cost": 100.0,
+        "total_cost": 145.0,
+        "profit_margin": 48.21,
+        "total_value": 840.0,
+        "photos": ["http://localhost:3001/uploads/products/sku_001.jpg"],
+        "status": "ACTIVE",
+        "created_at": "2025-01-16T10:30:00.000Z",
+        "updated_at": "2025-01-16T10:30:00.000Z",
+        "last_sale_date": "2025-01-16T10:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 12,
+      "total": 50,
+      "total_pages": 5
+    }
+  }
+}
+```
+
+### 4.2 SKU详情查询
+
+**接口地址：** `GET /skus/:id`
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU详情获取成功",
+  "data": {
+    "id": "sku_001",
+    "sku_code": "SKU20250116001",
+    "sku_name": "紫水晶组合手串",
+    "specification": "8",
+    "description": "精选紫水晶散珠组合制作",
+    "total_quantity": 5,
+    "available_quantity": 3,
+    "selling_price": 280.0,
+    "unit_price": 280.0,
+    "material_cost": 25.0,
+    "labor_cost": 20.0,
+    "craft_cost": 100.0,
+    "total_cost": 145.0,
+    "total_value": 840.0,
+    "profit_margin": 48.21,
+    "photos": ["http://localhost:3001/uploads/products/sku_001.jpg"],
+    "status": "ACTIVE",
+    "material_traces": [
+      {
+        "material_id": "material_001",
+        "material_name": "紫水晶散珠",
+        "quantity_used": 20,
+        "unit": "颗",
+        "cost_per_unit": 1.25,
+        "supplier": "水晶供应商A",
+        "batch_number": "CG20250116001"
+      }
+    ],
+    "created_at": "2025-01-16T10:30:00.000Z",
+    "updated_at": "2025-01-16T10:30:00.000Z",
+    "last_sale_date": "2025-01-16T10:30:00.000Z"
+  }
+}
+```
+
+### 4.3 SKU销售接口
+
+**接口地址：** `POST /skus/:id/sell`
+
+**功能说明：** 销售指定数量的SKU，减少库存并记录销售信息
+
+**请求参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| quantity | number | 是 | 销售数量 |
+| customer_name | string | 是 | 客户姓名 |
+| customer_phone | string | 是 | 客户电话 |
+| customer_address | string | 否 | 客户地址 |
+| sale_channel | string | 否 | 销售渠道 |
+| notes | string | 否 | 备注信息 |
+| actual_total_price | number | 否 | 实际销售总价（支持优惠价格） |
+
+**请求示例：**
+```json
+{
+  "quantity": 2,
+  "customer_name": "张三",
+  "customer_phone": "13800138000",
+  "customer_address": "北京市朝阳区",
+  "sale_channel": "线下门店",
+  "notes": "客户要求包装精美",
+  "actual_total_price": 560.0
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销售成功",
+  "data": {
+    "sale_id": "sale_001",
+    "sku_id": "sku_001",
+    "quantity_sold": 2,
+    "unit_price": 280.0,
+    "total_price": 560.0,
+    "actual_total_price": 560.0,
+    "remaining_quantity": 1,
+    "sale_date": "2025-01-16T10:30:00.000Z"
+  }
+}
+```
+
+### 4.4 SKU销毁接口
+
+**接口地址：** `DELETE /skus/:id/destroy`
+
+**功能说明：** 销毁指定数量的SKU，可选择是否返还原材料到库存
+
+**请求参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| quantity | number | 是 | 销毁数量 |
+| reason | string | 是 | 销毁原因 |
+| return_to_material | boolean | 是 | 是否返还原材料到库存 |
+| selected_materials | array | 否 | 选择返还的原材料ID列表 |
+| custom_return_quantities | object | 否 | 自定义返还数量 |
+
+**请求示例：**
+```json
+{
+  "quantity": 1,
+  "reason": "质量问题",
+  "return_to_material": true,
+  "selected_materials": ["material_001"],
+  "custom_return_quantities": {
+    "material_001": 20
+  }
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销毁成功",
+  "data": {
+    "destroy_id": "destroy_001",
+    "sku_id": "sku_001",
+    "quantity_destroyed": 1,
+    "remaining_quantity": 2,
+    "returned_materials": [
+      {
+        "material_id": "material_001",
+        "material_name": "紫水晶散珠",
+        "returned_quantity": 20,
+        "unit": "颗"
+      }
+    ],
+    "destroy_date": "2025-01-16T10:30:00.000Z"
+  }
+}
+```
+
+### 4.5 SKU库存调整接口
+
+**接口路径：** `POST /api/v1/skus/{id}/adjust`
+
+**功能说明：** 调整SKU库存数量（增加或减少）
+
+**路径参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | string | 是 | SKU ID |
+
+**请求参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| type | string | 是 | 调整类型（increase/decrease） |
+| quantity | number | 是 | 调整数量 |
+| reason | string | 是 | 调整原因 |
+| cost_adjustment | number | 否 | 成本调整 |
+
+**请求示例：**
+```json
+{
+  "type": "increase",
+  "quantity": 2,
+  "reason": "补货",
+  "cost_adjustment": 0
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "库存调整成功",
+  "data": {
+    "sku_id": "sku_123",
+    "old_quantity": 8,
+    "new_quantity": 10,
+    "adjustment": 2,
+    "reason": "补货",
+    "adjusted_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### 4.6 SKU库存变更历史接口
+
+**接口路径：** `GET /api/v1/skus/{id}/history`
+
+**功能说明：** 获取SKU的库存变更历史记录
+
+**路径参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | string | 是 | SKU ID |
+
+**请求参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页条数，默认20 |
+| operation_type | string | 否 | 操作类型筛选（create/sell/destroy/adjust_increase/adjust_decrease） |
+| start_date | string | 否 | 开始日期（YYYY-MM-DD） |
+| end_date | string | 否 | 结束日期（YYYY-MM-DD） |
+| operator | string | 否 | 操作员筛选 |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "获取库存变更历史成功",
+  "data": {
+    "history": [
+      {
+        "log_id": "log_001",
+        "sku_id": "sku_123",
+        "operation_type": "sell",
+        "quantity_change": -2,
+        "quantity_before": 10,
+        "quantity_after": 8,
+        "unit_price": 299.00,
+        "total_amount": 598.00,
+        "operator_id": "user_001",
+        "operator_name": "张三",
+        "reason": "客户购买",
+        "notes": "客户要求包装精美",
+        "created_at": "2024-01-01T00:00:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 50,
+      "total_pages": 3
+    }
+  }
+}
+```
+
+### 4.4 SKU销售记录
+
+**接口地址：** `POST /skus/:id/sell`
+
+**请求参数：**
+```json
+{
+  "quantity": 1,
+  "reference_id": "sale_001",
+  "notes": "销售给客户张三"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销售记录成功",
+  "data": {
+    "sku_id": "sku_001",
+    "sku_code": "SKU20250116001",
+    "sold_quantity": 1,
+    "remaining_quantity": 2,
+    "total_quantity": 5
+  }
+}
+```
+
+### 4.5 SKU销毁操作
+
+**接口地址：** `DELETE /skus/:id/destroy`
+
+**请求参数：**
+```json
+{
+  "quantity": 1,
+  "reason": "质量问题",
+  "return_to_material": true,
+  "selected_materials": ["material_001"],
+  "custom_return_quantities": {
+    "material_001": 20
+  }
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销毁成功",
+  "data": {
+    "sku_id": "sku_001",
+    "destroyed_quantity": 1,
+    "remaining_quantity": 1,
+    "returned_materials": [
+      {
+        "material_id": "material_001",
+        "material_name": "紫水晶散珠",
+        "returned_quantity": 20,
+        "new_quantity": 1520
+      }
+    ]
+  }
+}
+```
+
+### 4.6 SKU库存变更历史
+
+**接口地址：** `GET /skus/:id/history`
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认20 |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU历史记录获取成功",
+  "data": {
+    "logs": [
+      {
+        "log_id": "log_001",
+        "sku_id": "sku_001",
+        "action": "CREATE",
+        "quantity_change": 1,
+        "quantity_before": 0,
+        "quantity_after": 1,
+        "reason": "制作完成",
+        "notes": "销毁原因：质量问题。返还原材料：紫水晶散珠 20颗",
+        "operator_name": "管理员",
+        "created_at": "2025-01-16T10:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 10,
+      "total_pages": 1
+    }
+  }
+}
+```
+
+## 五、采购管理接口
+
+### 5.1 采购列表查询（完整修复版）
 
 **接口地址：** `GET /purchases`
 
@@ -195,71 +778,96 @@ const filter_sensitive_fields = (purchases: Purchase[], user_role: string) => {
 }
 ```
 
-### 3.2 采购记录创建（已修复）
+### 3.2 采购记录创建（2025年1月修复版）
 
 **接口地址：** `POST /purchases`
 
 **修复内容：**
-- 统一字段名称：purchase_name替代product_name
-- 修复产品类型：FINISHED_MATERIAL替代FINISHED
-- 增强表单验证：按类型差异化验证规则
-- 优化图片处理：支持多文件上传和格式验证
-- 完善错误处理：用户友好的错误提示
+- **采购同步修复**：修复了采购录入没有同步到materials表的问题
+- **字段名称统一**：purchase_name替代product_name，确保前后端字段完全一致
+- **产品类型修复**：FINISHED_MATERIAL替代FINISHED，修复成品库存查询问题
+- **数据类型处理**：修复了字符串拼接变数字相加的问题（"16"+"1"="161"变为16+1=17）
+- **表单验证增强**：按类型差异化验证规则，提升数据质量
+- **图片处理优化**：支持多文件上传、格式验证、大小限制和错误处理
+- **materials表同步**：采购数据自动同步到materials表，确保库存数据一致性
+- **错误处理完善**：用户友好的错误提示和重试机制
 
-**请求参数：**
+**请求参数（已修复）：**
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| purchase_name | string | 是 | 采购名称（修复：统一字段名） |
+| purchase_name | string | 是 | 采购名称（修复：统一字段名，替代product_name） |
 | purchase_type | string | 是 | 采购类型（LOOSE_BEADS/BRACELET/ACCESSORIES/FINISHED_MATERIAL） |
 | supplier_id | string | 是 | 供应商ID |
-| total_price | number | 是 | 总价格 |
+| total_price | number | 是 | 总价格（修复：强制数字类型转换） |
 | quality | string | 是 | 品质等级（AA/A/AB/B/C） |
-| photos | array | 否 | 图片URL数组（JSON格式） |
+| photos | array | 否 | 图片URL数组（JSON格式，修复：支持多文件上传） |
 | notes | string | 否 | 备注 |
-| price_per_gram | number | 否 | 克价（散珠/手串必填） |
-| weight | number | 否 | 重量（散珠/手串必填） |
-| bead_diameter | number | 否 | 珠子直径（散珠/手串必填） |
+| price_per_gram | number | 否 | 克价（散珠/手串必填，修复：数字类型验证） |
+| weight | number | 否 | 重量（散珠/手串必填，修复：数字类型验证） |
+| bead_diameter | number | 否 | 珠子直径（散珠/手串必填，修复：数字类型验证） |
 | beads_per_string | number | 否 | 每串颗数（手串必填） |
-| piece_count | number | 否 | 片数/件数（配件/成品必填） |
+| piece_count | number | 否 | 片数/件数（配件/成品必填，修复：数字类型验证） |
 | min_stock_alert | number | 否 | 最低预警颗数 |
 | natural_language_input | string | 否 | 自然语言录入信息 |
 | ai_recognition_result | object | 否 | AI识别结果 |
 
-**表单验证规则：**
+**表单验证规则（已修复）：**
 ```typescript
-// 基础验证
+// 基础验证（修复：字段名称统一）
 if (!data.purchase_name.trim()) errors.push('采购名称不能为空')
 if (!data.supplier_id) errors.push('请选择供应商')
-if (data.total_price <= 0) errors.push('总价格必须大于0')
-if (data.photos.length === 0) errors.push('请至少上传一张图片')
+if (Number(data.total_price) <= 0) errors.push('总价格必须大于0') // 修复：强制数字转换
+if (!data.photos || data.photos.length === 0) errors.push('请至少上传一张图片')
 
-// 按类型差异化验证
+// 按类型差异化验证（修复：数据类型安全处理）
 if (['LOOSE_BEADS', 'BRACELET'].includes(data.purchase_type)) {
-  if (data.price_per_gram <= 0) errors.push('克价必须大于0')
-  if (data.weight <= 0) errors.push('重量必须大于0')
-  if (data.bead_diameter <= 0) errors.push('珠子直径必须大于0')
+  if (Number(data.price_per_gram) <= 0) errors.push('克价必须大于0')
+  if (Number(data.weight) <= 0) errors.push('重量必须大于0')
+  if (Number(data.bead_diameter) <= 0) errors.push('珠子直径必须大于0')
   
-  if (data.purchase_type === 'BRACELET' && data.beads_per_string <= 0) {
+  if (data.purchase_type === 'BRACELET' && Number(data.beads_per_string) <= 0) {
     errors.push('每串颗数必须大于0')
   }
 }
 
+// 修复：FINISHED_MATERIAL替代FINISHED
 if (['ACCESSORIES', 'FINISHED_MATERIAL'].includes(data.purchase_type)) {
-  if (data.piece_count <= 0) errors.push('片数/件数必须大于0')
+  if (Number(data.piece_count) <= 0) errors.push('片数/件数必须大于0')
 }
+
+// 修复：materials表同步验证
+if (!data.purchase_name) errors.push('采购名称是materials表同步的必要字段')
 ```
 
-**自动计算逻辑：**
+**自动计算逻辑（已修复）：**
 ```sql
--- 散珠总颗数计算
+-- 散珠总颗数计算（修复：数据类型安全处理）
 total_beads = CASE 
-  WHEN bead_diameter = 4.0 THEN weight * 25
-  WHEN bead_diameter = 6.0 THEN weight * 11
-  WHEN bead_diameter = 8.0 THEN weight * 6
-  WHEN bead_diameter = 10.0 THEN weight * 4
-  WHEN bead_diameter = 12.0 THEN weight * 3
-  ELSE weight * 5
+  WHEN CAST(bead_diameter AS DECIMAL) = 4.0 THEN CAST(weight AS DECIMAL) * 25
+  WHEN CAST(bead_diameter AS DECIMAL) = 6.0 THEN CAST(weight AS DECIMAL) * 11
+  WHEN CAST(bead_diameter AS DECIMAL) = 8.0 THEN CAST(weight AS DECIMAL) * 6
+  WHEN CAST(bead_diameter AS DECIMAL) = 10.0 THEN CAST(weight AS DECIMAL) * 4
+  WHEN CAST(bead_diameter AS DECIMAL) = 12.0 THEN CAST(weight AS DECIMAL) * 3
+  ELSE CAST(weight AS DECIMAL) * 5
 END
+
+-- materials表同步逻辑（修复：字段映射）
+INSERT INTO materials (
+  material_code, material_name, material_type, 
+  remaining_quantity, unit_cost, inventory_unit,
+  supplier_name, photos, created_at
+) VALUES (
+  purchase_code, purchase_name, purchase_type,  -- 修复：purchase_name映射到material_name
+  COALESCE(total_beads, piece_count), 
+  COALESCE(price_per_bead, price_per_piece),
+  CASE purchase_type 
+    WHEN 'LOOSE_BEADS' THEN 'PIECES'
+    WHEN 'BRACELET' THEN 'STRINGS' 
+    WHEN 'ACCESSORIES' THEN 'SLICES'
+    WHEN 'FINISHED_MATERIAL' THEN 'ITEMS'  -- 修复：FINISHED_MATERIAL替代FINISHED
+  END,
+  supplier_name, photos, NOW()
+)
 ```
 
 **请求示例：**
@@ -985,7 +1593,293 @@ CAST(p.total_price AS DECIMAL(12,2)) as total_price
 
 **重要说明：** 已修复数据类型混合导致的显示错误（"161"→17），后端和前端双重类型安全保护。
 
-## 六、图片上传接口（新增）
+## 六、SKU销售管理接口（2025年1月修复版）
+
+### 6.1 SKU列表查询（已修复）
+
+**接口地址：** `GET /skus`
+
+**修复内容：**
+- **字段名称统一**：统一使用蛇形命名规则（customer_name、customer_phone等）
+- **权限控制修复**：根据用户角色过滤敏感信息（成本、利润率等）
+- **筛选功能优化**：支持多维度筛选和排序
+- **库存状态修复**：实时显示准确的库存状态
+- **API响应优化**：优化响应数据结构和错误处理
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认20 |
+| search | string | 否 | SKU名称或编号搜索 |
+| status | array | 否 | 状态筛选（ACTIVE/INACTIVE） |
+| price_min | number | 否 | 最低价格（BOSS角色可用） |
+| price_max | number | 否 | 最高价格（BOSS角色可用） |
+| profit_margin_min | number | 否 | 最低利润率（BOSS角色可用） |
+| profit_margin_max | number | 否 | 最高利润率（BOSS角色可用） |
+| sort_by | string | 否 | 排序字段（created_at/selling_price/available_quantity） |
+| sort_order | string | 否 | 排序方向（asc/desc） |
+
+**权限控制逻辑：**
+```typescript
+// 根据用户角色过滤敏感字段
+const filterSensitiveFields = (skus: SKU[], userRole: string) => {
+  if (userRole === 'EMPLOYEE') {
+    return skus.map(sku => ({
+      ...sku,
+      material_cost: undefined,  // 隐藏材料成本
+      total_cost: undefined,     // 隐藏总成本
+      profit_margin: undefined   // 隐藏利润率
+    }))
+  }
+  return skus
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU列表获取成功",
+  "data": {
+    "skus": [
+      {
+        "id": "sku_001",
+        "sku_code": "SKU20250116001",
+        "sku_name": "紫水晶组合手串",
+        "description": "精选紫水晶散珠组合制作",
+        "specification": "8.0",
+        "selling_price": 280.00,
+        "material_cost": 25.00,  // EMPLOYEE角色不可见
+        "total_cost": 145.00,    // EMPLOYEE角色不可见
+        "profit_margin": 48.21,  // EMPLOYEE角色不可见
+        "total_quantity": 5,
+        "available_quantity": 3,
+        "status": "ACTIVE",
+        "photos": ["http://localhost:3001/uploads/skus/sku_001.jpg"],
+        "created_at": "2025-01-16T10:30:00.000Z",
+        "last_sale_at": "2025-01-16T15:20:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 50,
+      "total_pages": 3
+    }
+  }
+}
+```
+
+### 6.2 SKU销售操作（已修复）
+
+**接口地址：** `POST /skus/:id/sell`
+
+**修复内容：**
+- **字段映射修复**：修复了customer_name、customer_phone等字段映射问题
+- **库存更新优化**：确保销售后库存正确更新
+- **销售记录创建**：自动创建详细的销售记录
+- **库存变动日志**：记录详细的库存变更历史
+- **错误处理增强**：优化错误提示和验证逻辑
+
+**请求参数（已修复）：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| quantity | number | 是 | 销售数量 |
+| customer_name | string | 是 | 客户姓名（修复：统一字段名） |
+| customer_phone | string | 是 | 客户电话（修复：统一字段名） |
+| customer_address | string | 否 | 客户地址（修复：蛇形命名） |
+| sale_channel | string | 否 | 销售渠道（DIRECT/ONLINE/WHOLESALE） |
+| notes | string | 否 | 备注信息 |
+| actual_total_price | number | 否 | 实际成交价格（支持优惠价） |
+
+**业务验证规则：**
+```typescript
+// 销售前验证
+if (quantity <= 0) throw new Error('销售数量必须大于0')
+if (quantity > sku.available_quantity) throw new Error('销售数量不能超过可用库存')
+if (sku.status !== 'ACTIVE') throw new Error('SKU状态异常，无法销售')
+if (!customer_name.trim()) throw new Error('客户姓名不能为空')
+if (!customer_phone.trim()) throw new Error('客户电话不能为空')
+```
+
+**请求示例：**
+```json
+{
+  "quantity": 1,
+  "customer_name": "张三",
+  "customer_phone": "13800138000",
+  "customer_address": "北京市朝阳区",
+  "sale_channel": "DIRECT",
+  "notes": "客户要求包装精美",
+  "actual_total_price": 260.00
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销售成功",
+  "data": {
+    "sale_record_id": "sale_001",
+    "sku_id": "sku_001",
+    "quantity_sold": 1,
+    "total_price": 260.00,
+    "remaining_quantity": 2,
+    "sale_time": "2025-01-16T16:30:00.000Z"
+  }
+}
+```
+
+### 6.3 SKU销毁操作（已修复）
+
+**接口地址：** `DELETE /skus/:id/destroy`
+
+**修复内容：**
+- **返还原材料功能**：支持销毁时返还原材料到库存
+- **权限验证增强**：确保只有BOSS或MANAGER角色可执行
+- **库存回滚机制**：支持选择性返还原材料
+- **详细日志记录**：记录销毁原因和返还原材料信息
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| quantity | number | 是 | 销毁数量 |
+| reason | string | 是 | 销毁原因 |
+| return_to_material | boolean | 是 | 是否返还原材料到库存 |
+| selected_materials | array | 否 | 选择返还的原材料ID列表 |
+| custom_return_quantities | object | 否 | 自定义返还数量 |
+
+**请求示例：**
+```json
+{
+  "quantity": 1,
+  "reason": "质量问题",
+  "return_to_material": true,
+  "selected_materials": ["material_001", "material_002"],
+  "custom_return_quantities": {
+    "material_001": 15,
+    "material_002": 2
+  }
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "SKU销毁成功",
+  "data": {
+    "destroyed_quantity": 1,
+    "remaining_quantity": 1,
+    "returned_materials": [
+      {
+        "material_id": "material_001",
+        "material_name": "紫水晶散珠",
+        "returned_quantity": 15,
+        "unit": "颗"
+      }
+    ]
+  }
+}
+```
+
+### 6.4 SKU库存调整（已修复）
+
+**接口地址：** `POST /skus/:id/adjust`
+
+**修复内容：**
+- **调整类型支持**：支持增加和减少两种调整类型
+- **成本调整功能**：支持同时调整库存和成本
+- **权限控制**：确保只有BOSS角色可执行
+- **详细日志记录**：记录调整原因和操作详情
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| type | string | 是 | 调整类型（increase/decrease） |
+| quantity | number | 是 | 调整数量 |
+| reason | string | 是 | 调整原因 |
+| cost_adjustment | number | 否 | 成本调整金额 |
+
+**请求示例：**
+```json
+{
+  "type": "increase",
+  "quantity": 2,
+  "reason": "盘点发现多余库存",
+  "cost_adjustment": 50.00
+}
+```
+
+### 6.5 SKU库存变更历史（已修复）
+
+**接口地址：** `GET /skus/:id/inventory-logs`
+
+**修复内容：**
+- **筛选功能完善**：支持按操作类型、时间范围筛选
+- **分页优化**：支持大量历史记录的分页显示
+- **详情展示**：显示详细的操作信息和返还原材料信息
+- **权限控制**：根据角色显示不同级别的详情
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认20 |
+| operation_type | string | 否 | 操作类型筛选（SALE/DESTROY/ADJUST/RETURN） |
+| start_date | string | 否 | 开始日期 |
+| end_date | string | 否 | 结束日期 |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "库存变更历史获取成功",
+  "data": {
+    "logs": [
+      {
+        "id": "log_001",
+        "operation_type": "SALE",
+        "quantity_change": -1,
+        "quantity_after": 2,
+        "notes": "销售给客户张三",
+        "operator_name": "admin",
+        "created_at": "2025-01-16T16:30:00.000Z",
+        "customer_info": {
+          "customer_name": "张三",
+          "customer_phone": "13800138000"
+        }
+      },
+      {
+        "id": "log_002",
+        "operation_type": "DESTROY",
+        "quantity_change": -1,
+        "quantity_after": 3,
+        "notes": "销毁原因：质量问题。返还原材料：紫水晶散珠 15颗",
+        "operator_name": "admin",
+        "created_at": "2025-01-16T14:20:00.000Z",
+        "returned_materials": [
+          {
+            "material_name": "紫水晶散珠",
+            "returned_quantity": 15,
+            "unit": "颗"
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 25,
+      "total_pages": 2
+    }
+  }
+}
+```
+
+## 七、图片上传接口（新增）
 
 ### 6.1 采购图片上传
 
@@ -1075,7 +1969,340 @@ const processImageUrl = (url: string): string => {
 | address | string | 否 | 地址 |
 | notes | string | 否 | 备注 |
 
-## 七、错误码表
+## 七、客户管理接口（2025年1月修复版）
+
+### 7.1 客户列表
+
+**接口地址：** `GET /customers`
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| limit | number | 否 | 每页数量，默认20 |
+| search | string | 否 | 客户姓名或手机号搜索 |
+| customer_type | string | 否 | 客户类型筛选（NEW/REPEAT/VIP/ACTIVE） |
+| sort_by | string | 否 | 排序字段（name/total_spent/last_purchase_date） |
+| sort_order | string | 否 | 排序方向（asc/desc），默认desc |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户列表获取成功",
+  "data": {
+    "customers": [
+      {
+        "id": "customer_001",
+        "customer_name": "张三",
+        "customer_phone": "13800138000",
+        "total_spent": 1580.0,
+        "purchase_count": 3,
+        "last_purchase_date": "2025-01-15T10:30:00.000Z",
+        "customer_type": "REPEAT",
+        "notes": "VIP客户，喜欢紫水晶",
+        "created_at": "2024-12-01T09:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 156,
+      "total_pages": 8
+    }
+  }
+}
+```
+
+### 7.2 客户分析数据
+
+**接口地址：** `GET /customers/analytics`
+
+**请求参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| start_date | string | 否 | 开始日期（YYYY-MM-DD） |
+| end_date | string | 否 | 结束日期（YYYY-MM-DD） |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户分析数据获取成功",
+  "data": {
+    "total_customers": 156,
+    "new_customers": 23,
+    "repeat_customers": 89,
+    "vip_customers": 12,
+    "active_customers": 45,
+    "average_order_value": 285.50,
+    "average_profit_margin": 42.8,
+    "refund_rate": 3.2,
+    "total_revenue": 45680.0,
+    "total_orders": 160,
+    "period": {
+      "start_date": "2024-12-01",
+      "end_date": "2025-01-16"
+    }
+  }
+}
+```
+
+### 7.3 客户详情
+
+**接口地址：** `GET /customers/{customer_id}`
+
+**路径参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| customer_id | string | 是 | 客户ID |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户详情获取成功",
+  "data": {
+    "customer": {
+      "id": "customer_001",
+      "customer_name": "张三",
+      "customer_phone": "13800138000",
+      "total_spent": 1580.0,
+      "purchase_count": 3,
+      "last_purchase_date": "2025-01-15T10:30:00.000Z",
+      "customer_type": "REPEAT",
+      "notes": "VIP客户，喜欢紫水晶",
+      "created_at": "2024-12-01T09:00:00.000Z"
+    },
+    "purchase_history": [
+      {
+        "id": "purchase_001",
+        "product_skus": {
+          "sku_code": "SKU20250115001",
+          "sku_name": "紫水晶手串",
+          "specification": "8.0mm",
+          "total_cost": 145.0
+        },
+        "quantity": 1,
+        "total_price": 280.0,
+        "purchase_date": "2025-01-15T10:30:00.000Z",
+        "status": "ACTIVE",
+        "notes": "客户很满意"
+      },
+      {
+        "id": "purchase_002",
+        "product_skus": {
+          "sku_code": "SKU20250110002",
+          "sku_name": "玛瑙手串",
+          "specification": "10.0mm",
+          "total_cost": 120.0
+        },
+        "quantity": 1,
+        "total_price": 250.0,
+        "purchase_date": "2025-01-10T14:20:00.000Z",
+        "status": "REFUNDED",
+        "refund_date": "2025-01-12T09:15:00.000Z",
+        "refund_reason": "尺寸不合适",
+        "refund_notes": "客户要求退货"
+      }
+    ]
+  }
+}
+```
+
+### 7.4 客户销售记录（反向销售录入）
+
+**接口地址：** `POST /customers/{customer_id}/sales`
+
+**路径参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| customer_id | string | 是 | 客户ID |
+
+**请求参数：**
+```json
+{
+  "sku_id": "sku_001",
+  "quantity": 1,
+  "selling_price": 280.0,
+  "notes": "客户指定购买"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "销售记录创建成功",
+  "data": {
+    "purchase_id": "purchase_003",
+    "customer_name": "张三",
+    "sku_name": "紫水晶手串",
+    "quantity": 1,
+    "total_price": 280.0,
+    "purchase_date": "2025-01-16T16:45:00.000Z",
+    "remaining_stock": 2
+  }
+}
+```
+
+### 7.5 客户退货处理
+
+**接口地址：** `POST /customers/refund`
+
+**请求参数：**
+```json
+{
+  "purchase_id": "purchase_001",
+  "refund_reason": "质量问题",
+  "refund_notes": "客户反馈产品有瑕疵"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "退货处理成功",
+  "data": {
+    "purchase_id": "purchase_001",
+    "refund_date": "2025-01-16T17:00:00.000Z",
+    "refunded_amount": 280.0,
+    "restored_quantity": 1,
+    "customer_updated": true
+  }
+}
+```
+
+### 7.6 客户信息更新
+
+**接口地址：** `PUT /customers/{customer_id}`
+
+**路径参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| customer_id | string | 是 | 客户ID |
+
+**请求参数：**
+```json
+{
+  "customer_name": "张三",
+  "customer_phone": "13800138000",
+  "notes": "VIP客户，喜欢紫水晶和玛瑙"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户信息更新成功",
+  "data": {
+    "customer": {
+      "id": "customer_001",
+      "customer_name": "张三",
+      "customer_phone": "13800138000",
+      "notes": "VIP客户，喜欢紫水晶和玛瑙",
+      "updated_at": "2025-01-16T17:15:00.000Z"
+    }
+  }
+}
+```
+
+### 7.7 客户创建
+
+**接口地址：** `POST /customers`
+
+**请求参数：**
+```json
+{
+  "customer_name": "李四",
+  "customer_phone": "13900139000",
+  "notes": "新客户，通过朋友介绍"
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户创建成功",
+  "data": {
+    "customer": {
+      "id": "customer_157",
+      "customer_name": "李四",
+      "customer_phone": "13900139000",
+      "total_spent": 0.0,
+      "purchase_count": 0,
+      "customer_type": "NEW",
+      "notes": "新客户，通过朋友介绍",
+      "created_at": "2025-01-16T17:30:00.000Z"
+    }
+  }
+}
+```
+
+### 7.8 客户删除
+
+**接口地址：** `DELETE /customers/{customer_id}`
+
+**路径参数：**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| customer_id | string | 是 | 客户ID |
+
+**权限要求：** BOSS角色
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "客户删除成功",
+  "data": {
+    "deleted_customer_id": "customer_001",
+    "deleted_at": "2025-01-16T17:45:00.000Z"
+  }
+}
+```
+
+### 7.9 客户管理权限控制
+
+**权限级别说明：**
+
+| 操作 | BOSS | MANAGER | EMPLOYEE |
+|------|------|---------|----------|
+| 查看客户列表 | ✅ | ✅ | ✅ |
+| 查看客户详情 | ✅ | ✅ | ✅ |
+| 查看成本数据 | ✅ | ❌ | ❌ |
+| 创建客户 | ✅ | ✅ | ✅ |
+| 更新客户信息 | ✅ | ✅ | ❌ |
+| 删除客户 | ✅ | ❌ | ❌ |
+| 处理退货 | ✅ | ✅ | ❌ |
+| 反向销售录入 | ✅ | ✅ | ✅ |
+| 查看分析数据 | ✅ | ✅ | ✅ |
+
+**权限验证：**
+- 所有客户管理接口都需要认证
+- 成本相关数据仅BOSS角色可见
+- 删除操作仅BOSS角色可执行
+- 退货处理需要BOSS或MANAGER权限
+
+### 7.10 客户管理错误码
+
+| 错误码 | 说明 |
+|--------|------|
+| CUSTOMER_NOT_FOUND | 客户不存在 |
+| CUSTOMER_PHONE_EXISTS | 客户手机号已存在 |
+| PURCHASE_NOT_FOUND | 销售记录不存在 |
+| PURCHASE_ALREADY_REFUNDED | 销售记录已退货 |
+| INSUFFICIENT_PERMISSION | 权限不足 |
+| INVALID_CUSTOMER_DATA | 客户数据无效 |
+| REFUND_FAILED | 退货处理失败 |
+| CUSTOMER_HAS_PURCHASES | 客户有销售记录，无法删除 |
+| SKU_OUT_OF_STOCK | SKU库存不足 |
+| INVALID_REFUND_REASON | 无效的退货原因 |
+
+## 八、错误码表
 
 ### 7.1 通用错误码
 | 错误码 | 说明 |

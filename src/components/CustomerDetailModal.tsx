@@ -6,6 +6,7 @@ import {
   MapPin,
   Calendar,
   ShoppingBag,
+  ShoppingCart,
   MessageSquare,
   Plus,
   Save,
@@ -244,8 +245,8 @@ const get_customer_labels = (customer: Customer, allCustomers: Customer[] = []):
     const now = new Date()
     const daysSinceLastPurchases = allCustomers
       .filter(c => c.last_purchase_date)
-      .map(c => {
-        const lastPurchase = new Date(c.last_purchase_date!)
+    .map(c => {
+      const lastPurchase = new Date(c.last_purchase_date!)
         return Math.floor((now.getTime() - lastPurchase.getTime()) / (1000 * 60 * 60 * 24))
       })
       .sort((a, b) => a - b)
@@ -893,9 +894,9 @@ export default function CustomerDetailModal({ customer, is_open, onClose, onCust
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                  <ShoppingBag className="h-5 w-5 mr-2 text-gray-500" />
-                  购买历史
-                </h3>
+                    <ShoppingCart className="h-5 w-5 mr-2 text-gray-500" />
+                    订单历史
+                  </h3>
               </div>
               
               {loading ? (
@@ -921,12 +922,12 @@ export default function CustomerDetailModal({ customer, is_open, onClose, onCust
                                   ? 'text-red-700 line-through' 
                                   : 'text-gray-900'
                               }`}>
-                                {purchase.sku?.sku_name || '未知商品'}
+                                {purchase.sku_name || purchase.product_skus?.sku_name || '未知商品'}
                               </h4>
                               <span className={`text-sm ${
                                 isRefunded ? 'text-red-500' : 'text-gray-500'
                               }`}>
-                                #{purchase.sku?.sku_code}
+                                #{purchase.product_skus?.sku_code || '暂无'}
                               </span>
                               {isRefunded && (
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -937,12 +938,12 @@ export default function CustomerDetailModal({ customer, is_open, onClose, onCust
                             <div className={`mt-1 text-sm ${
                               isRefunded ? 'text-red-600' : 'text-gray-600'
                             }`}>
-                              规格: {purchase.sku?.specification || '无'}
+                              规格: {purchase.product_skus?.specification || '无'}
                             </div>
                             <div className={`mt-1 text-xs space-y-1 ${
                               isRefunded ? 'text-red-500' : 'text-gray-500'
                             }`}>
-                              <div>购买时间: {format_date(purchase.purchase_date)}</div>
+                              <div>销售时间: {purchase.purchase_date ? format_date(purchase.purchase_date) : '暂无'}</div>
                               <div>销售渠道: {purchase.sale_channel || '未知'}</div>
                               {purchase.original_price && (
                                 <div>原价: {format_currency(purchase.original_price)}</div>
@@ -1005,7 +1006,7 @@ export default function CustomerDetailModal({ customer, is_open, onClose, onCust
               ) : (
                 <div className="text-center py-8">
                   <ShoppingBag className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">暂无购买记录</p>
+                  <p className="text-gray-500">暂无订单记录</p>
                 </div>
               )}
             </div>

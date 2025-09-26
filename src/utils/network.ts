@@ -22,17 +22,43 @@ export function get_network_config(): networkConfig {
     }
   }
   
-  // 开发环境动态获取IP
-  const local_ip = get_local_ip()
-  const public_ip = '139.224.189.1'
+  // 开发环境根据当前hostname动态构建API地址
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    
+    // 如果是公网域名，使用公网API
+    if (hostname.includes('dorblecapital.com')) {
+      return {
+        api_base_url: 'https://api.dorblecapital.com'
+      }
+    }
+    
+    // 如果是局域网IP，动态构建局域网API地址
+    if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || 
+        (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31)) {
+      return {
+        api_base_url: `http://${hostname}:3001`,
+        local_ip: hostname
+      }
+    }
+    
+    // localhost情况
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return {
+        api_base_url: 'http://localhost:3001'
+      }
+    }
+    
+    // 其他情况，使用当前hostname
+    return {
+      api_base_url: `http://${hostname}:3001`,
+      local_ip: hostname
+    }
+  }
   
-  // 优先使用本地IP，如果获取失败则使用公网IP
-  const base_ip = local_ip || public_ip
-  
+  // 服务端渲染时的默认值
   return {
-    api_base_url: `http://${base_ip}:3001`,
-    public_ip,
-    local_ip
+    api_base_url: 'http://localhost:3001'
   }
 }
 
@@ -40,20 +66,39 @@ export function get_network_config(): networkConfig {
  * 获取本地IP地址
  * @returns {string | null} 本地IP地址或null
  */
-function get_local_ip(): string | null {
-  try {
-    // 尝试从window对象获取预设的IP
-    if (typeof window !== 'undefined' && window.__LOCAL_IP__) {
-      return window.__LOCAL_IP__
-    }
-    
-    // 如果没有预设IP，返回null，将使用公网IP
-    return null
-  } catch (error) {
-    console.warn('获取本地IP失败:', error)
-    return null
-  }
-}
+// function get_local_ip(): string | null {
+//   try {
+//     // 尝试从window对象获取预设的IP
+//     if (typeof window !== 'undefined' && window.__LOCAL_IP__) {
+//       return window.__LOCAL_IP__
+//     }
+//     
+//     // 尝试从当前页面URL获取IP
+//     if (typeof window !== 'undefined') {
+//       const hostname = window.location.hostname
+//       // 如果hostname是IP地址格式，直接使用
+//       if (is_valid_ip(hostname)) {
+//         return hostname
+//       }
+//     }
+//     
+//     // 如果没有预设IP，返回null，将使用公网IP
+//     return null
+//   } catch (error) {
+//     console.warn('获取本地IP失败:', error)
+//     return null
+//   }
+// }
+
+/**
+ * 检查是否为有效的IP地址
+ * @param {string} ip - 要检查的IP地址
+ * @returns {boolean} 是否为有效IP
+ */
+// function is_valid_ip(ip: string): boolean {
+//   const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+//   return ipRegex.test(ip)
+// }
 
 /**
  * 设置本地IP地址

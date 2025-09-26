@@ -23,7 +23,7 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
         
         if (response.success) {
           const data = response.data as any
-          setRecipeData(data.recipe || [])
+          setRecipeData(data.traces || [])
           setSkuInfo(data.sku_info || null)
           setSummary(data.summary || null)
         } else {
@@ -114,23 +114,23 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 text-sm">
                           <span className="font-medium text-gray-900 truncate">
-                            {recipe.purchase_name}
+                            {recipe.materials?.[0]?.material_name || '未知材料'}
                           </span>
                           <span className="text-gray-500">•</span>
                           <span className="text-blue-600 font-medium">
-                            {recipe.quality_grade}
+                            {recipe.details?.quality_grade || '未设置'}
                           </span>
                           <span className="text-gray-500">•</span>
                           <span className="text-green-600 font-medium">
-                            ¥{recipe.unitCost?.toFixed(2) || '0.00'}/{recipe.unit}
+                            ¥{recipe.materials?.[0]?.cost_per_unit?.toFixed(2) || '0.00'}/{recipe.materials?.[0]?.unit || '件'}
                           </span>
                           <span className="text-gray-500">•</span>
                           <span className="text-orange-600 font-medium">
-                            需要{recipe.quantity_per_sku}{recipe.unit}
+                            需要{recipe.materials?.[0]?.quantity_used || 0}{recipe.materials?.[0]?.unit || '件'}
                           </span>
                         </div>
                         <div className="mt-1 text-xs text-gray-500">
-                          供应商：{recipe.supplier} | 规格：{recipe.specification} | CG编号：{recipe.cg_number}
+                          供应商：{recipe.details?.supplier || '未知'} | 规格：{recipe.details?.diameter || '未设置'} | CG编号：{recipe.details?.batch_number || '无'}
                         </div>
                       </div>
                     </div>
@@ -159,23 +159,23 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
                       <div className="space-y-2">
                         <div className="text-sm">
                           <span className="text-gray-500">原材料名称：</span>
-                          <span className="text-gray-900">{recipe.purchase_name}</span>
+                          <span className="text-gray-900">{recipe.materials?.[0]?.material_name || '未知材料'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">规格：</span>
-                          <span className="text-gray-900">{recipe.specification}</span>
+                          <span className="text-gray-900">{recipe.details?.diameter || '未设置'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">供应商：</span>
-                          <span className="text-gray-900">{recipe.supplier}</span>
+                          <span className="text-gray-900">{recipe.details?.supplier || '未知供应商'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">CG编号：</span>
-                          <span className="text-gray-900">{recipe.cg_number}</span>
+                          <span className="text-gray-900">{recipe.details?.batch_number || '无批次号'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">品质等级：</span>
-                          <span className="text-gray-900">{recipe.quality_grade}</span>
+                          <span className="text-gray-900">{recipe.details?.quality_grade || '未设置'}</span>
                         </div>
                       </div>
                       
@@ -183,19 +183,19 @@ export default function SkuTraceView({ sku }: SkuTraceViewProps) {
                       <div className="space-y-2">
                         <div className="text-sm">
                           <span className="text-gray-500">单个SKU需要：</span>
-                          <span className="text-gray-900 font-medium">{recipe.quantity_per_sku}{recipe.unit}</span>
+                          <span className="text-gray-900 font-medium">{recipe.materials?.[0]?.quantity_used || 0}{recipe.materials?.[0]?.unit || '件'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">单位成本：</span>
-                          <span className="text-gray-900 font-medium">¥{recipe.unitCost?.toFixed(2) || '0.00'}</span>
+                          <span className="text-gray-900 font-medium">¥{recipe.materials?.[0]?.cost_per_unit?.toFixed(2) || '0.00'}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">单个SKU成本：</span>
-                          <span className="text-green-600 font-medium">¥{recipe.total_cost_per_sku?.toFixed(2) || '0.00'}</span>
+                          <span className="text-green-600 font-medium">¥{((recipe.materials?.[0]?.cost_per_unit || 0) * (recipe.materials?.[0]?.quantity_used || 0)).toFixed(2)}</span>
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">采购日期：</span>
-                          <span className="text-gray-900">{formatTime(recipe.purchase_date)}</span>
+                          <span className="text-gray-900">{formatTime(recipe.timestamp)}</span>
                         </div>
                       </div>
                     </div>

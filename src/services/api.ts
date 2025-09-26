@@ -292,38 +292,16 @@ const get_api_url = (): string => {
       return apiUrl
     }
     
-    // localhost情况 - 强制使用局域网IP
+    // localhost情况 - 强制使用localhost修复连接问题
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      // 如果有缓存的局域网IP且不是localhost，优先使用
-      if (cachedIP && cachedIP !== 'localhost' && cachedIP !== '127.0.0.1' && 
-          (cachedIP.startsWith('192.168.') || cachedIP.startsWith('10.') || 
-           (cachedIP.startsWith('172.') && parseInt(cachedIP.split('.')[1]) >= 16 && parseInt(cachedIP.split('.')[1]) <= 31))) {
-        const apiUrl = `http://${cachedIP}:3001/api/v1`
-        if (import.meta.env.MODE === 'development') {
-          console.log('🔧 [API_URL] localhost使用缓存的局域网IP:', apiUrl)
-        }
-        return apiUrl
-      }
-      
-      // 如果没有缓存IP，尝试立即检测
-      console.warn('⚠️ [API_URL] localhost环境下没有缓存的局域网IP，将使用localhost（可能导致手机无法访问）')
-      
-      // 异步检测IP但不等待结果
-      ;(async () => {
-        try {
-          const detectedIP = await detectAndCacheLocalIP()
-          if (detectedIP && detectedIP !== cachedIP) {
-            console.log('🔄 [API_URL] 检测到新的局域网IP，建议刷新页面:', detectedIP)
-          }
-        } catch (error: any) {
-          console.error('❌ [API_URL] IP检测失败:', error)
-        }
-      })()
-      
-      // 暂时使用localhost
+      // 在开发环境中，强制使用localhost，忽略缓存的IP
       const apiUrl = `http://localhost:3001/api/v1`
       if (import.meta.env.MODE === 'development') {
-        console.log('🔧 [API_URL] 使用localhost（临时）:', apiUrl)
+        console.log('🔧 [API_URL] 强制使用localhost修复连接问题:', apiUrl)
+        // 强制清除所有可能导致问题的缓存IP
+        localStorage.removeItem('cached_local_ip')
+        localStorage.removeItem('api_base_url')
+        console.log('🧹 [API_URL] 已清除所有缓存的IP和URL')
       }
       return apiUrl
     }
@@ -1134,15 +1112,36 @@ export const finished_product_api = {
   // 获取可用原材料列表
   get_materials: (params?: {
     search?: string
-    purchase_types?: string[] // 原材料类型筛选
+    material_types?: string[] // 修复：使用material_types参数名
+    stock_status?: string[] // 库存状态筛选
+    supplier_id?: string[]
     available_only?: boolean
     min_quantity?: number
-  }) => apiClient.get(`/finished-products/materials${buildQueryString(params)}`),
+    sort_by?: string
+    sort_order?: 'asc' | 'desc'
+  }) => {
+    // 转换参数以匹配materials接口
+    const materialParams: any = {}
+    if (params?.search) materialParams.search = params.search
+    if (params?.material_types) materialParams.material_types = params.material_types // 修复：使用正确的参数名
+    if (params?.stock_status) materialParams.stock_status = params.stock_status
+    if (params?.supplier_id) materialParams.supplier_id = params.supplier_id
+    if (params?.sort_by) materialParams.sort_by = params.sort_by
+    if (params?.sort_order) materialParams.sort_order = params.sort_order
+    
+    // 如果只要有库存的，添加库存状态筛选
+    if (params?.available_only) {
+      materialParams.available_only = 'true'
+    }
+    
+    // 调用正确的API路径（后端路由在products.ts中的/materials）
+    return apiClient.get(`/finished-products/materials${buildQueryString(materialParams)}`);
+  },
   
   // 计算制作成本预估
   calculate_cost: (data: {
     materials: {
-      purchase_id: string
+      material_id: string
       quantity_used_beads?: number
       quantity_used_pieces?: number
     }[]
@@ -1153,11 +1152,11 @@ export const finished_product_api = {
   
   // 创建成品原材料（注意：这里创建的仍然是原材料material，不是最终产品）
   create: (data: {
-    purchase_name: string // 成品原材料名称
+    sku_name: string // SKU成品名称
     description?: string
     specification?: string
     materials: {
-      purchase_id: string
+      material_id: string
       quantity_used_beads?: number
       quantity_used_pieces?: number
     }[]
@@ -1186,7 +1185,7 @@ export const finished_product_api = {
   
   // 更新成品原材料信息
   update: (id: string, data: {
-    purchase_name?: string // 成品原材料名称
+    sku_name?: string // SKU成品名称
     description?: string
     specification?: string
     selling_price?: number
@@ -1208,7 +1207,7 @@ export const finished_product_api = {
   batchCreate: (data: {
     products: {
       material_id: string
-      purchase_name: string // 成品原材料名称
+      sku_name: string // SKU成品名称
       description?: string
       specification?: string | number
       labor_cost: number
@@ -1256,7 +1255,10 @@ export const sku_api = {
     return_to_material: boolean
     selected_materials?: string[]
     custom_return_quantities?: Record<string, number>
-  }) => apiClient.post(`/skus/${id}/destroy`, data),
+  }) => apiClient.delete(`/skus/${id}/destroy`, { 
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  }),
   
   // 调整SKU库存
   adjust: (id: string, data: {
@@ -1276,7 +1278,7 @@ export const sku_api = {
   }) => apiClient.get(`/skus/${id}/history${buildQueryString(params)}`),
   
   // 获取SKU溯源信息（制作配方）
-  get_traces: (id: string) => apiClient.get(`/skus/${id}/trace`),
+  get_traces: (id: string) => apiClient.get(`/skus/${id}/traces`),
   
   // 获取SKU原材料信息
   get_materials: (id: string) => apiClient.get(`/skus/${id}/materials`),
@@ -1298,13 +1300,19 @@ export const sku_api = {
     reason: string
   }) => {
     // 将前端参数格式转换为后端期望的格式
-    const backendData = {
-      action: data.type,
-      newPrice: data.newPrice,
-      newStatus: data.newStatus,
-      reason: data.reason
-    };
+    const backendData: any = {};
     
+    if (data.type === 'price' && data.newPrice !== undefined) {
+      backendData.selling_price = data.newPrice;
+      backendData.reason = data.reason; // 调价原因
+    }
+    
+    if (data.type === 'status' && data.newStatus !== undefined) {
+      backendData.status = data.newStatus;
+      backendData.status_reason = data.reason; // 状态变更原因
+    }
+    
+    console.log('🔍 [SKU控制] 发送到后端的数据:', backendData);
     return apiClient.put(`/skus/${id}/control`, backendData);
   },
   
@@ -1401,9 +1409,26 @@ export const customer_api = {
     page?: number
     limit?: number
     search?: string
-    customer_type?: 'NEW' | 'REPEAT' | 'VIP' | 'ACTIVE' | 'INACTIVE'
+    customer_type?: string
+    customer_type_filter?: string
     sort?: 'asc' | 'desc'
-    sort_by?: 'name' | 'total_purchases' | 'total_orders' | 'last_purchase_date' | 'created_at'
+    sort_by?: string
+    // 新增筛选参数
+    customer_code_search?: string
+    name_search?: string
+    phone_search?: string
+    city_filter?: string
+    total_orders_min?: string
+    total_orders_max?: string
+    total_all_orders_min?: string
+    total_all_orders_max?: string
+    total_purchases_min?: string
+    total_purchases_max?: string
+    first_purchase_start?: string
+    first_purchase_end?: string
+    last_purchase_start?: string
+    last_purchase_end?: string
+    getCityStats?: boolean
   }) => apiClient.get(`/customers${buildQueryString(params)}`),
   
   // 获取客户详情

@@ -77,15 +77,19 @@ export default function SkuDetailModal({
   })
 
   // 格式化价格
-  const format_price = (price?: number) => {
+  const format_price = (price?: number | string) => {
     if (!price) return '-'
-    return `¥${price.toFixed(2)}`
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price
+    if (isNaN(numPrice)) return '-'
+    return `¥${numPrice.toFixed(2)}`
   }
   
   // 格式化利润率
-  const formatProfitMargin = (margin?: number) => {
+  const formatProfitMargin = (margin?: number | string) => {
     if (!margin) return '-'
-    return `${margin.toFixed(1)}%`
+    const numMargin = typeof margin === 'string' ? parseFloat(margin) : margin
+    if (isNaN(numMargin)) return '-'
+    return `${numMargin.toFixed(1)}%`
   }
 
   // 格式化日期
@@ -374,7 +378,7 @@ export default function SkuDetailModal({
                         详细信息
                       </button>
                       
-                      {permissions.canViewTrace && (
+                      {permissions.can_view_trace && (
                         <button
                           onClick={() => handleTabChange('trace')}
                           className={`py-2 px-1 border-b-2 font-medium text-sm ${
@@ -415,7 +419,7 @@ export default function SkuDetailModal({
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
                               <span className="text-gray-600">材料成本:</span>
-                              <div className="font-medium">{format_price(state.sku.materialCost || 0)}</div>
+                              <div className="font-medium">{format_price(state.sku.material_cost || 0)}</div>
                             </div>
                             <div>
                               <span className="text-gray-600">人工成本:</span>
@@ -445,7 +449,7 @@ export default function SkuDetailModal({
                     </div>
                   )}
 
-                  {state.active_tab === 'trace' && permissions.canViewTrace && state.sku && (
+                  {state.active_tab === 'trace' && permissions.can_view_trace && state.sku && (
                     <SkuTraceView
                       sku={state.sku}
 
@@ -474,6 +478,7 @@ export default function SkuDetailModal({
                   sku={state.sku}
                   on_submit={(data) => onDestroy(state.sku!.id, data)}
                   onCancel={onClose}
+                  loading={false}
                 />
               )}
 

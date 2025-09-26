@@ -29,7 +29,7 @@ export function AuthProvider({ children }: auth_provider_props) {
       console.log('🔄 [认证初始化] 开始初始化认证状态')
       try {
         const storedToken = localStorage.getItem('auth_token')
-    const storedUser = localStorage.getItem('auth_user')
+        const storedUser = localStorage.getItem('auth_user')
         
         console.log('🔍 [认证初始化] 检查本地存储:', {
           hasToken: !!storedToken,
@@ -42,52 +42,56 @@ export function AuthProvider({ children }: auth_provider_props) {
             const userData = JSON.parse(storedUser)
             console.log('✅ [认证初始化] 从本地存储恢复用户数据:', userData.user_name)
             
-            // 先设置本地存储的数据
-            set_token(storedToken)
-            set_user(userData)
-            
-            // 验证token是否仍然有效
+            // 验证token是否仍然有效 - 先验证再设置状态
             console.log('🔍 [认证初始化] 验证token有效性...')
             try {
               const response = await auth_api.verify()
               if (response.success && response.data) {
-                console.log('✅ [认证初始化] Token验证成功，更新用户数据')
+                console.log('✅ [认证初始化] Token验证成功，设置认证状态')
+                // 只有验证成功后才设置认证状态
+                set_token(storedToken)
                 set_user(response.data as User)
               } else {
-                // 只有在明确的认证错误时才清除认证信息
-                if (response.message && (response.message.includes('token') || response.message.includes('认证') || response.message.includes('unauthorized'))) {
-                  console.warn('⚠️ [认证初始化] Token无效，清除认证信息')
-                  set_user(null)
-                  set_token(null)
-                  localStorage.removeItem('auth_token')
-                  localStorage.removeItem('auth_user')
-                } else {
-                  console.warn('⚠️ [认证初始化] Token验证失败，但保持本地认证状态:', response.message)
-                  // 保持本地认证状态，可能是网络问题
-                }
+                console.warn('⚠️ [认证初始化] Token验证失败，清除认证信息:', response.message)
+                // Token验证失败，清除认证信息
+                set_user(null)
+                set_token(null)
+                localStorage.removeItem('auth_token')
+                localStorage.removeItem('auth_user')
               }
             } catch (verifyError: any) {
               console.warn('❌ [认证初始化] Token验证异常:', verifyError)
-              // 只有在明确的认证错误时才清除认证信息
-              if (verifyError.response?.status === 401 || verifyError.response?.status === 403) {
-                console.warn('❌ [认证初始化] 认证失效，清除认证信息')
+              // 检查是否是token过期错误或认证错误
+              const isAuthError = verifyError.message?.includes('jwt expired') || 
+                                 verifyError.message?.includes('token') ||
+                                 verifyError.response?.status === 401 || 
+                                 verifyError.response?.status === 403
+              
+              if (isAuthError) {
+                console.warn('❌ [认证初始化] Token已过期或无效，清除认证信息')
                 set_user(null)
                 set_token(null)
                 localStorage.removeItem('auth_token')
                 localStorage.removeItem('auth_user')
               } else {
-                console.warn('❌ [认证初始化] 网络错误，保持本地认证状态')
-                // 网络错误，保持本地认证状态
+                console.warn('❌ [认证初始化] 网络错误，暂时保持未认证状态')
+                // 网络错误时不设置认证状态，避免API请求失败
+                set_user(null)
+                set_token(null)
               }
             }
           } catch (parse_error) {
             console.error('❌ [认证初始化] 解析用户数据失败:', parse_error)
             // 清除损坏的数据
+            set_user(null)
+            set_token(null)
             localStorage.removeItem('auth_token')
             localStorage.removeItem('auth_user')
           }
         } else {
           console.log('ℹ️ [认证初始化] 本地存储中无认证信息')
+          set_user(null)
+          set_token(null)
         }
       } catch (error) {
         console.error('❌ [认证初始化] 初始化认证状态失败:', error)

@@ -25,7 +25,7 @@ export default function CustomerRefundModal({
   const [show_refund_modal, setShowRefundModal] = useState(false)
   const [refund_loading, setRefundLoading] = useState(false)
 
-  // 获取客户购买记录
+  // 获取客户订单记录
   const fetch_purchases = async () => {
     if (!customer?.id) return
     
@@ -35,17 +35,17 @@ export default function CustomerRefundModal({
       const response = await customer_api.get_purchases(customer.id)
       
       if (response.success) {
-        // 根据API响应结构，购买记录在 response.data.purchases 中
+        // 根据API响应结构，订单记录在 response.data.purchases 中
         const purchasesData = (response.data as any)?.purchases || response.data
         console.log('🔍 [CustomerRefundModal] API响应数据:', response.data)
-        console.log('🔍 [CustomerRefundModal] 提取的购买记录:', purchasesData)
+        console.log('🔍 [CustomerRefundModal] 提取的订单记录:', purchasesData)
         setPurchases(Array.isArray(purchasesData) ? purchasesData : [])
       } else {
-        setError(response.message || '获取购买记录失败')
+        setError(response.message || '获取订单记录失败')
       }
     } catch (error) {
-      console.error('获取购买记录失败:', error)
-      setError('获取购买记录失败')
+      console.error('获取订单记录失败:', error)
+    setError('获取订单记录失败')
     } finally {set_loading(false)
     }
   }
@@ -69,7 +69,7 @@ export default function CustomerRefundModal({
       )
       
       if (response.success) {
-        // 重新获取购买记录
+        // 重新获取订单记录
         await fetch_purchases()
         // 通知父组件刷新
         onSuccess()
@@ -93,7 +93,7 @@ export default function CustomerRefundModal({
     setSelectedPurchase(null)
   }
 
-  // 当弹窗打开时获取购买记录
+  // 当弹窗打开时获取订单记录
   useEffect(() => {
     if (is_open && customer?.id) {
       fetch_purchases()
@@ -141,7 +141,7 @@ export default function CustomerRefundModal({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center space-y-2">
                   <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-                  <p className="text-sm text-gray-600">加载购买记录中...</p>
+                  <p className="text-sm text-gray-600">加载订单记录中...</p>
                 </div>
               </div>
             ) : error ? (
@@ -161,14 +161,14 @@ export default function CustomerRefundModal({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center space-y-2">
                   <ShoppingBag className="h-12 w-12 text-gray-300" />
-                  <p className="text-gray-500">该客户暂无购买记录</p>
+                  <p className="text-gray-500">该客户暂无订单记录</p>
                   <p className="text-sm text-gray-400">无法进行退货操作</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">购买记录</h3>
+                  <h3 className="text-lg font-medium text-gray-900">订单记录</h3>
                   <p className="text-sm text-gray-500">共 {Array.isArray(purchases) ? purchases.length : 0} 条记录</p>
                 </div>
                 
@@ -205,7 +205,7 @@ export default function CustomerRefundModal({
                                     ? 'bg-red-100 text-red-800' 
                                     : 'bg-blue-100 text-blue-800'
                                 }`}>
-                                  {purchase.sku?.sku_code || purchase.sku_code}
+                                  {purchase.product_skus?.sku_code || purchase.sku_code}
                                 </span>
                                 {isRefunded && (
                                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -217,7 +217,7 @@ export default function CustomerRefundModal({
                                 isRefunded ? 'text-red-600' : 'text-gray-600'
                               }`}>
                                 <div className="flex items-center space-x-4">
-                                  <span>购买时间: {format_date(purchase.purchase_date || purchase.purchase_date)}</span>
+                                  <span>下单时间: {format_date(purchase.sale_date)}</span>
                                   <span>数量: {purchase.quantity}</span>
                                   <span>单价: {format_currency(purchase.unit_price)}</span>
                                 </div>
