@@ -248,19 +248,6 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
             name: true,
             user_name: true
           }
-        },
-        material_usages: {
-          include: {
-            purchase: {
-              select: {
-                id: true,
-                purchase_name: true,
-                bead_diameter: true,
-                specification: true,
-                quality: true
-              }
-            }
-          }
         }
       },
       orderBy: {
@@ -323,20 +310,6 @@ router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
           name: true,
           user_name: true
         }
-      },
-      material_usages: {
-        include: {
-          purchase: {
-            select: {
-              id: true,
-              purchase_name: true,
-              bead_diameter: true,
-              specification: true,
-              quality: true,
-              price_per_bead: true
-            }
-          }
-        }
       }
     }
   })
@@ -349,12 +322,29 @@ router.get('/:id', authenticateToken, asyncHandler(async (req, res) => {
     })
   }
   
+  // 查询相关的原材料使用记录
+  const materialUsages = product.sku_id ? await prisma.materialUsage.findMany({
+    where: { sku_id: product.sku_id },
+    include: {
+      purchase: {
+        select: {
+          id: true,
+          purchase_name: true,
+          bead_diameter: true,
+          specification: true,
+          quality: true,
+          price_per_bead: true
+        }
+      }
+    }
+  }) : []
+  
   // 直接使用蛇形命名，过滤敏感信息
   const converted = {
     ...product,
     created_at: product.created_at,
     updated_at: product.updated_at,
-    material_usages: product.material_usages?.map((usage: any) => ({
+    material_usages: materialUsages.map((usage: any) => ({
       ...usage,
       created_at: usage.created_at,
       updated_at: usage.updated_at,
@@ -393,32 +383,33 @@ router.delete('/:id/destroy', authenticateToken, asyncHandler(async (req, res) =
   
   // 开启事务进行销毁操作
   const result = await prisma.$transaction(async (tx) => {
-    // 查询成品及其原材料使用记录
+    // 查询成品记录
     const product = await tx.product.findUnique({
-      where: { id },
+      where: { id }
+    })
+    
+    if (!product) {
+      throw new Error('成品记录不存在')
+    }
+    
+    // 查询相关的原材料使用记录
+    const materialUsages = await tx.materialUsage.findMany({
+      where: { sku_id: product.sku_id },
       include: {
-        material_usages: {
-          include: {
-            purchase: {
-              select: {
-                id: true,
-                purchase_name: true,
-                bead_diameter: true,
-                quality: true
-              }
-            }
+        purchase: {
+          select: {
+            id: true,
+            purchase_name: true,
+            bead_diameter: true,
+            quality: true
           }
         }
       }
     })
     
 
-    if (!product) {
-      throw new Error('成品记录不存在')
-    }
-    
     // 记录要回滚的原材料信息
-    const restoredMaterials = product.material_usages.map((usage: any) => ({
+    const restoredMaterials = materialUsages.map((usage: any) => ({
       purchase_id: usage.purchase_id,
       purchase_name: usage.purchase?.purchase_name,
       bead_diameter: usage.purchase?.bead_diameter,
@@ -428,7 +419,7 @@ router.delete('/:id/destroy', authenticateToken, asyncHandler(async (req, res) =
     
     // 删除原材料使用记录（自动回滚库存）
     await tx.materialUsage.deleteMany({
-      where: { product_id: id }
+      where: { sku_id: product.sku_id }
     })
     
     // 删除成品记录
@@ -708,7 +699,7 @@ router.post('/', authenticateToken, asyncHandler(async (req, res) => {
             sku_id: sku.id,
             quantity_used: totalUsed,
             unit_cost: unitCost,
-            total_cost: unitCost * totalUsed,
+            total_cost: Number(unitCost) * totalUsed,
             action: 'CREATE'
           }
         })
@@ -880,7 +871,16 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
             material_type: materialRecord.material_type,
             quality: materialRecord.quality || null,
             bead_diameter: materialRecord.bead_diameter || null,
-            specification: materialRecord.specification || null
+            specification: (() => {
+              const materialType = materialRecord.material_type as string
+              if (materialType === 'ACCESSORIES') {
+                return materialRecord.accessory_specification
+              } else if (materialType === 'FINISHED_MATERIAL') {
+                return materialRecord.finished_material_specification
+              } else {
+                return null
+              }
+            })()
           },
           quantity_used_beads: 0,
           quantity_used_pieces: 1
@@ -936,7 +936,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
             sku_id: sku.id,
             quantity_used: 1,
             unit_cost: material.unit_cost,
-            total_cost: material.unit_cost * 1,
+            total_cost: Number(material.unit_cost) * 1,
             action: 'CREATE'
           }
         })
@@ -945,7 +945,7 @@ router.post('/batch', authenticateToken, asyncHandler(async (req, res) => {
         // 触发器会在MaterialUsage记录插入后自动更新used_quantity和remaining_quantity
         
         // 只在创建新SKU时创建库存变更日志，避免重复记录
-        if (is_new_sku && !log_created) {
+        if (is_new_sku && !log_created && sku.id) {
           await createSkuInventoryLog({
             sku_id: sku.id,
             action: 'CREATE',

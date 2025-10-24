@@ -23,18 +23,18 @@ export interface login_response {
 
 // 供应商相关类型
 export interface Supplier {
-  id: number
-  supplier_code: string
-  supplier_name: string
-  name: string // 添加name属性作为supplier_name的别名
-  contact_person?: string
+  id: string // 修改为string类型以匹配数据库
+  name: string
+  supplier_code?: string // 供应商编号，格式：GYS + YYYY + 4位序号
+  contact?: string
   phone?: string
   email?: string
   address?: string
-  status: 'active' | 'inactive'
-  notes?: string
+  description?: string
+  is_active: boolean
   created_at: string
   updated_at: string
+  last_purchase_date?: string | null // 添加最后采购时间字段
 }
 
 // 供应商调试统计响应类型
@@ -48,6 +48,64 @@ export interface SupplierDebugStats {
 // 供应商列表API响应类型
 export interface SupplierListResponse {
   suppliers: Supplier[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+}
+
+// 供应商采购记录中的采购项目类型
+export interface SupplierPurchaseItem {
+  id: string
+  purchase_name: string
+  purchase_type: string
+  quantity?: number
+  total_price?: number
+  unit_price?: number
+  supplier_name: string
+  created_at: string
+  notes?: string
+}
+
+// 供应商采购记录中的原材料项目类型
+export interface SupplierMaterialItem {
+  id: string
+  name: string
+  item_category?: string
+  quantity?: number
+  unit?: string
+  unit_price?: number
+  location?: string
+  created_at: string
+  notes?: string
+}
+
+// 供应商采购统计类型
+export interface SupplierPurchaseStatistics {
+  total_purchases: number
+  total_materials: number
+  total_purchase_amount: number
+  total_material_amount: number
+  first_purchase_date?: string
+  last_purchase_date?: string
+  first_material_date?: string
+  last_material_date?: string
+}
+
+// 供应商采购记录API响应类型
+export interface SupplierPurchaseResponse {
+  supplier: Supplier
+  purchases: SupplierPurchaseItem[]
+  materials: SupplierMaterialItem[]
+  statistics: SupplierPurchaseStatistics
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
 }
 
 // 修改日志相关类型

@@ -3,7 +3,7 @@ import { asyncHandler } from '../middleware/errorHandler.js'
 import { authenticateToken } from '../middleware/auth.js'
 import { prisma } from '../lib/prisma.js'
 import { z } from 'zod'
-import crypto from 'crypto'
+
 import { 
   getSkuList, 
   getSkuDetails, 
@@ -605,7 +605,7 @@ router.delete('/:id/destroy', authenticateToken, asyncHandler(async (req, res) =
         reference_type: 'DESTROY',
         reference_id: id,
         notes: destroy_notes,
-        user_id: req.user?.id
+        user_id: req.user?.id || 'unknown'
       }
     })
     
@@ -702,7 +702,7 @@ router.get('/:id/traces', authenticateToken, asyncHandler(async (req, res) => {
   }
   
   // 遍历合并后的原材料使用记录
-  for (const [materialId, materialUsage] of materialUsageMap) {
+  for (const [_materialId, materialUsage] of materialUsageMap) {
     const purchase = materialUsage.material?.purchase
       
       // 计算使用的总数量和单位
@@ -860,7 +860,7 @@ router.get('/:id/restock-info', authenticateToken, asyncHandler(async (req, res)
   let can_restock = true
   
   // 遍历合并后的原材料使用记录，计算每个原材料的需求量
-  for (const [materialId, usage] of materialUsageMap) {
+  for (const [_materialId, usage] of materialUsageMap) {
     const material = usage.material
     if (!material) continue
     

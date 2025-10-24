@@ -979,6 +979,45 @@ export const supplier_api = {
     })
   },
   
+  // 获取供应商采购记录
+  get_purchases: (id: string, params?: {
+    page?: number
+    limit?: number
+    type?: 'all' | 'purchases' | 'materials'
+  }): Promise<ApiResponse<import('../types').SupplierPurchaseResponse>> => {
+    if (import.meta.env.MODE === 'development') {
+      console.log('🔍 [供应商采购记录API] 发送请求:', {
+        supplier_id: id,
+        params,
+        url: `/suppliers/${id}/purchases`,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    return apiClient.get(`/suppliers/${id}/purchases${buildQueryString(params)}`).then(response => {
+      if (import.meta.env.MODE === 'development') {
+        console.log('📥 [供应商采购记录API] 收到响应:', {
+          success: response.success,
+          supplier_name: response.data?.supplier?.name,
+          purchases_count: response.data?.purchases?.length || 0,
+          materials_count: response.data?.materials?.length || 0,
+          statistics: response.data?.statistics,
+          timestamp: new Date().toISOString()
+        })
+      }
+      return response
+    }).catch(error => {
+      if (import.meta.env.MODE === 'development') {
+        console.error('❌ [供应商采购记录API] 请求失败:', {
+          supplier_id: id,
+          error,
+          timestamp: new Date().toISOString()
+        })
+      }
+      throw error
+    })
+  },
+  
   // 获取供应商统计
   stats: () => apiClient.get('/suppliers/stats'),
   
@@ -994,6 +1033,9 @@ export const supplier_api = {
   
   // 更新供应商
   update: (id: string, data: any) => apiClient.put(`/suppliers/${id}`, data),
+  
+  // 删除供应商（软删除）
+  delete: (id: string) => apiClient.delete(`/suppliers/${id}`),
   
   // 调试端点：获取数据库供应商统计
   debug_count: (): Promise<ApiResponse<import('../types').SupplierDebugStats>> => apiClient.get('/suppliers/debug/count'),

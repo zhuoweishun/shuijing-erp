@@ -1538,14 +1538,14 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
 
   // 检查是否有成品使用了该采购记录的珠子
   if (existingPurchase.material_usages && existingPurchase.material_usages.length > 0) {
-    const usedByProducts = existingPurchase.material_usages.map(usage => usage.product?.name || "未知产品").join('、')
+    const usedByProducts = existingPurchase.material_usages.map(usage => usage.sku?.sku_name || "未知SKU").join('、')
     return res.status(400).json({
       success: false,
       message: `无法编辑该采购记录，因为以下成品正在使用其珠子：${usedByProducts}。请先将这些成品销毁，使珠子回退到库存后再编辑。`,
       data: {
         usedByProducts: existingPurchase.material_usages.map(usage => ({
-          product_id: usage.product?.id || "",
-          purchase_name: usage.product?.name || "未知产品",
+          sku_id: usage.sku?.id || "",
+          sku_name: usage.sku?.sku_name || "未知SKU",
           quantityUsed: usage.quantity_used || usage.quantity_used
         }))
       }
@@ -1689,8 +1689,8 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     if (newValue !== oldValue) {
       fieldChanges.push({
         field: key,
-        old_value: oldValue,
-        new_value: newValue,
+        oldValue: oldValue,
+        newValue: newValue,
         displayName: fieldDisplayNames[key] || key
       })
     }
@@ -1703,8 +1703,8 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     if (oldSupplierName !== newSupplierName) {
       fieldChanges.push({
         field: 'supplier_name',
-        old_value: oldSupplierName,
-        new_value: newSupplierName,
+        oldValue: oldSupplierName,
+        newValue: newSupplierName,
         displayName: '供应商'
       })
     }
@@ -1757,8 +1757,8 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
     
     // 生成人性化的修改描述 - 合并格式
     const changes = fieldChanges.map(change => {
-      const oldValueStr = change.old_value === null || change.old_value === undefined ? '空' : String(change.old_value)
-      const newValueStr = change.new_value === null || change.new_value === undefined ? '空' : String(change.new_value)
+      const oldValueStr = change.oldValue === null || change.oldValue === undefined ? '空' : String(change.oldValue)
+      const newValueStr = change.newValue === null || change.newValue === undefined ? '空' : String(change.newValue)
       return `${change.displayName}从 ${oldValueStr} 改为 ${newValueStr}`
     })
     
@@ -1773,8 +1773,8 @@ router.put('/:id', authenticateToken, asyncHandler(async (req, res) => {
         changed_fields: fieldChanges.map(change => ({
           field: change.field,
           displayName: change.displayName,
-          old_value: change.old_value,
-          new_value: change.new_value,
+          old_value: change.oldValue,
+          new_value: change.newValue,
           timestamp: currentTime.toISOString()
         }))
       }

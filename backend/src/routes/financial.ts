@@ -292,7 +292,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
   })
 
   // 获取财务记录（销售收入和退货记录）
-  const financial_records = await prisma.FinancialRecords.findMany({
+  const financial_records = await prisma.financialRecords.findMany({
     where: {
       ...(Object.keys(timeWhere).length > 0 ? { transaction_date: timeWhere } : {})
     }
@@ -316,7 +316,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
       // 格式化规格显示（根据产品类型使用正确的字段）
       let specificationDisplay = '无';
       
-      switch (purchase.product_type) {
+      switch (purchase.purchase_type) {
         case 'LOOSE_BEADS':
         case 'BRACELET':
           // 散珠和手串使用bead_diameter字段
@@ -351,7 +351,7 @@ router.get('/transactions', authenticateToken, asyncHandler(async (req, res) => 
       
       // 根据产品类型使用不同的数量字段
       let qty = null;
-      switch (purchase.product_type) {
+      switch (purchase.purchase_type) {
         case 'BRACELET':
           // 手串使用quantity字段
           qty = purchase.quantity;
@@ -715,7 +715,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   const yearlyTotalExpense = yearlyPurchaseAmount + yearlyProductionExpense
 
   // 获取本月销售收入（从财务记录中）
-  const monthlyIncomeRecords = await prisma.FinancialRecords.aggregate({
+  const monthlyIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -728,7 +728,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取年度销售收入（从财务记录中）
-  const yearlyIncomeRecords = await prisma.FinancialRecords.aggregate({
+  const yearlyIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -741,7 +741,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取本月退款金额（从财务记录中）
-  const monthlyRefundRecords = await prisma.FinancialRecords.aggregate({
+  const monthlyRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -754,7 +754,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   })
 
   // 获取年度退款金额（从财务记录中）
-  const yearlyRefundRecords = await prisma.FinancialRecords.aggregate({
+  const yearlyRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -777,7 +777,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
   // 获取今日数据
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
-  const todayIncomeRecords = await prisma.FinancialRecords.aggregate({
+  const todayIncomeRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'INCOME',
       transaction_date: {
@@ -789,7 +789,7 @@ router.get('/overview/summary', authenticateToken, asyncHandler(async (_req, res
     }
   })
 
-  const todayRefundRecords = await prisma.FinancialRecords.aggregate({
+  const todayRefundRecords = await prisma.financialRecords.aggregate({
     where: {
       record_type: 'REFUND',
       transaction_date: {
@@ -1201,7 +1201,7 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
 
   // 按产品类型统计采购支出
   const expenseByCategory = await prisma.purchase.groupBy({
-    by: ['product_type'],
+    by: ['purchase_type'],
     where: {
       purchase_date: {
         gte: start_date,
@@ -1238,7 +1238,7 @@ router.get('/statistics/data', authenticateToken, asyncHandler(async (req, res) 
       net_profit: total_income - total_expense - total_refund - total_loss,
       income_by_category: [], // 目前没有收入分类
       expense_by_category: expenseByCategory.map(item => ({
-        category: item.product_type || '未分类',
+        category: item.purchase_type || '未分类',
         amount: item._sum?.total_price || 0
       }))
     }

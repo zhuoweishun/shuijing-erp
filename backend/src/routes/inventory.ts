@@ -953,7 +953,7 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     // 数据已经是material表格式，无需映射
     const mappedData = paginatedData
     
-    res.json({
+    return res.json({
       success: true,
       message: '获取层级式库存列表成功',
       data: {
@@ -968,14 +968,12 @@ router.get('/hierarchical', authenticateToken, asyncHandler(async (req, res) => 
     })
   } catch (error) {
     console.error('❌ [层级式库存查询] 发生错误:', error)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '获取层级式库存列表失败',
       error: (error as Error).message
     })
   }
-  // 函数结束
-  // 函数结束
 }))
 
 // 获取分组库存列表（按产品名称分组）
@@ -1594,7 +1592,7 @@ router.get('/finished-products-cards', authenticateToken, asyncHandler(async (re
         CASE 
           WHEN ${(req.user?.role || "USER") === 'BOSS' ? 'TRUE' : 'FALSE'} THEN 
             CASE 
-              WHEN p.purchase_type = 'FINISHED' AND p.piece_count > 0 AND p.total_price IS NOT NULL 
+              WHEN p.purchase_type = 'FINISHED_MATERIAL' AND p.piece_count > 0 AND p.total_price IS NOT NULL 
               THEN ROUND(p.total_price / p.piece_count, 2)
               ELSE p.unit_price
             END
@@ -1868,7 +1866,7 @@ router.get('/product-distribution', authenticateToken, asyncHandler(async (req, 
           WHEN p.purchase_type = 'LOOSE_BEADS' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
           WHEN p.purchase_type = 'BRACELET' THEN (COALESCE(p.total_beads, p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
           WHEN p.purchase_type = 'ACCESSORIES' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
-          WHEN p.purchase_type = 'FINISHED' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
+          WHEN p.purchase_type = 'FINISHED_MATERIAL' THEN (COALESCE(p.piece_count, 0) - COALESCE(mu.used_quantity, 0))
           ELSE 0
         END) as total_remaining_quantity
       FROM purchases p

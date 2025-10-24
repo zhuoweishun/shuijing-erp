@@ -34,18 +34,19 @@ model User {
 }
 
 model Supplier {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  contact     String?
-  phone       String?
-  email       String?
-  address     String?
-  description String?    @db.Text
-  created_at  DateTime   @default(now())
-  is_active   Boolean    @default(true)
-  updated_at  DateTime   @updatedAt
-  materials   Material[]
-  purchases   Purchase[]
+  id            String     @id @default(cuid())
+  supplier_code String?    @unique
+  name          String     @unique
+  contact       String?
+  phone         String?
+  email         String?
+  address       String?
+  description   String?    @db.Text
+  created_at    DateTime   @default(now())
+  is_active     Boolean    @default(true)
+  updated_at    DateTime   @updatedAt
+  materials     Material[]
+  purchases     Purchase[]
 
   @@map("suppliers")
 }

@@ -17,8 +17,9 @@ declare global {
   }
 }
 
-// JWT密钥
+// JWT密钥和过期时间
 const JWT_SECRET = process.env.JWT_SECRET || 'crystal-erp-secret-key'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h'
 
 // 认证中间件
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
@@ -36,9 +37,9 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     // 验证JWT token
     const decoded = jwt.verify(token, JWT_SECRET) as any
     
-    // 从数据库获取用户信息
+    // 从数据库获取用户信息 - 统一使用user_id字段
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId || decoded.user_id },
+      where: { id: decoded.user_id },
       select: {
         id: true,
         user_name: true,
@@ -121,7 +122,7 @@ export const generateToken = (user_id: string): string => {
   return jwt.sign(
     { user_id },
     JWT_SECRET,
-    { expiresIn: '24h' }
+    { expiresIn: JWT_EXPIRES_IN }
   )
 }
 

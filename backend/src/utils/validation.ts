@@ -104,7 +104,7 @@ export const photosSchema = z.array(
 
 // 产品类型相关字段验证函数
 export const validateProductTypeFields = (data: {
-  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+  product_type: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
   bead_diameter?: number
   specification?: number
 }) => {

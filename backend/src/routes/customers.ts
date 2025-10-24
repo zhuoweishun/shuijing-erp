@@ -120,7 +120,7 @@ router.get('/analytics', authenticateToken, asyncHandler(async (req, res) => {
     }
    // 总客户数（根据时间筛选）
    // 总客户数（根据时间筛选）
-    const [total_customers, currentPurchases, totalRevenue, new_customers, repeat_customers, vip_customers, active_customers, total_refunds, active_purchases] = await Promise.all([
+    const [total_customers, currentPurchases, _totalRevenue, new_customers, repeat_customers, vip_customers, active_customers, total_refunds, active_purchases] = await Promise.all([
       // 总客户数（根据时间筛选）
       prisma.customers.count({
         where: dateFilter
@@ -609,7 +609,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
       customer.customer_purchases.filter((purchase: any) => purchase.status === 'ACTIVE').length : 0
     
     // 计算退货相关统计 - 修复_count字段命名问题
-    const purchase_count = (customer as any)._count?.customer_purchases || 0
+    // const purchase_count = (customer as any)._count?.customer_purchases || 0
     const totalRefundedOrders = total_all_orders - totalActiveOrders // 退货订单 = 总订单 - 有效订单
     const refund_rate = total_all_orders > 0 ? (totalRefundedOrders / total_all_orders) * 100 : 0
     
@@ -1135,7 +1135,7 @@ router.post('/:id/purchases', authenticateToken, asyncHandler(async (req, res) =
     
     // 更新客户统计信息
     const current_date = new Date()
-    const update_data = {
+    const update_data: any = {
       total_purchases: {
         increment: validatedData.total_price
       },

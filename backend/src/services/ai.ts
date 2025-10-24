@@ -1,6 +1,15 @@
 import { logger } from '../utils/logger'
 import fetch from 'node-fetch'
 
+// AI API 响应接口
+interface AIResponse {
+  choices?: Array<{
+    message?: {
+      content?: string
+    }
+  }>
+}
+
 // 豆包AI配置 - 从环境变量读取
 const DOUBAO_CONFIG = {
   apiKey: process.env.DOUBAO_API_KEY || '',
@@ -63,7 +72,7 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
   success: boolean
   data?: {
     product_name?: string
-    product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED'
+    product_type?: 'LOOSE_BEADS' | 'BRACELET' | 'ACCESSORIES' | 'FINISHED_MATERIAL'
     unit_type?: 'PIECES' | 'STRINGS' | 'SLICES' | 'ITEMS'
     bead_diameter?: number
     quantity?: number
@@ -221,7 +230,7 @@ export const parseCrystalPurchaseDescription = async (description: string): Prom
       throw new Error(`AI API请求失败: ${response.status} ${response.statusText}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as AIResponse
     const content = result.choices?.[0]?.message?.content
 
     if (!content) {
@@ -328,7 +337,7 @@ export const parsePurchaseDescription = async (description: string): Promise<{
       throw new Error(`AI API请求失败: ${response.status} ${response.statusText}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as AIResponse
     const content = result.choices?.[0]?.message?.content
 
     if (!content) {
@@ -426,7 +435,7 @@ export const chatWithAssistant = async (message: string, _context?: any): Promis
       throw new Error(`AI API请求失败: ${response.status} ${response.statusText}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as AIResponse
     const content = result.choices?.[0]?.message?.content
 
     if (!content) {
@@ -537,7 +546,7 @@ ${includeFinancial ? '包含财务数据分析' : '不包含财务敏感数据'}
       throw new Error(`AI API请求失败: ${response.status} ${response.statusText}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as AIResponse
     const content = result.choices?.[0]?.message?.content
 
     if (!content) {

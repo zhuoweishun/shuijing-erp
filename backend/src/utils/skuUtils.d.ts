@@ -28,26 +28,32 @@ export interface SkuData {
 
 export interface FindOrCreateSkuResult {
   sku: SkuData;
-  isNewSku: boolean;
+  is_new_sku: boolean;
+  log_created: boolean;
 }
 
 // 查找或创建SKU
 export declare function findOrCreateSku(params: {
+  material_usages: any[];
+  sku_name: string;
+  selling_price: number;
+  user_id: string;
   tx: any;
-  productName: string;
-  specification: string;
-  unitPrice: number;
-  images?: string[];
+  additional_data?: any;
 }): Promise<FindOrCreateSkuResult>;
 
 // 创建SKU库存变更日志
 export declare function createSkuInventoryLog(params: {
-  tx: any;
-  skuId: string;
+  sku_id: string;
   action: 'CREATE' | 'UPDATE' | 'DELETE';
-  newQuantity: number;
-  oldQuantity?: number;
-  changeReason?: string;
+  quantity_change: number;
+  quantity_before: number;
+  quantity_after: number;
+  reference_type?: string;
+  reference_id?: string;
+  notes?: string;
+  user_id: string;
+  tx: any;
 }): Promise<SkuInventoryLog>;
 
 // 获取SKU列表
@@ -67,5 +73,8 @@ export declare function adjustSkuQuantity(params: {
 export declare function decreaseSkuQuantity(params: {
   skuId: string;
   quantity: number;
-  reason: string;
+  referenceId?: string;
+  notes?: string;
+  userId?: string;
+  tx: any;
 }): Promise<any>;

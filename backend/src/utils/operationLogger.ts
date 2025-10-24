@@ -197,6 +197,68 @@ export class OperationLogger {
       }
     })
   }
+
+  /**
+   * 记录供应商更新
+   */
+  static async logSupplierUpdate(
+    user_id: string,
+    supplier_id: string,
+    oldSupplierData: any,
+    newSupplierData: any,
+    ipAddress?: string
+  ): Promise<void> {
+    // 计算变更字段
+    const changed_fields: Record<string, { from: any; to: any }> = {}
+    
+    const fieldsToCheck = ['name', 'contact', 'phone', 'email', 'address', 'description']
+    fieldsToCheck.forEach(field => {
+      if (oldSupplierData[field] !== newSupplierData[field]) {
+        changed_fields[field] = {
+          from: oldSupplierData[field],
+          to: newSupplierData[field]
+        }
+      }
+    })
+
+    await this.log({
+      user_id,
+      operation: OperationType.SUPPLIER_UPDATE,
+      resource_type: 'supplier',
+      resource_id: supplier_id,
+      changed_fields,
+      ipAddress,
+      details: {
+        supplier_name: newSupplierData.name,
+        fields_changed: Object.keys(changed_fields),
+        change_count: Object.keys(changed_fields).length
+      }
+    })
+  }
+
+  /**
+   * 记录供应商删除
+   */
+  static async logSupplierDelete(
+    user_id: string,
+    supplier_id: string,
+    supplierData: any,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      user_id,
+      operation: OperationType.SUPPLIER_DELETE,
+      resource_type: 'supplier',
+      resource_id: supplier_id,
+      ipAddress,
+      details: {
+        supplier_name: supplierData.name,
+        contact: supplierData.contact,
+        phone: supplierData.phone,
+        deleted_at: new Date().toISOString()
+      }
+    })
+  }
   
   /**
    * 记录库存查看
